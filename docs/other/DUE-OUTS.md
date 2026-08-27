@@ -9,7 +9,7 @@ terminal — if something appears to, it is specced wrong (§3).
 | # | Due-out | Needed by | State |
 |---|---|---|---|
 | D-02 | D1 database created, name and id | 00 | done — `globetrotters-prod` |
-| D-06 | Worker created and git-connected to this repo; name and route decided | 00 | outstanding |
+| D-06 | Worker created and git-connected to this repo; name and route decided | 00 | done — `globetrotters`, `workers.dev` |
 | D-07 | `ADMIN_TOKEN` value chosen | 01 | outstanding |
 | D-08 | Worker secrets set: `FAMILY_PASSCODE`, `ADMIN_TOKEN`, `FAMILY_TZ` | 00 | outstanding |
 | D-09 | Three ink colors for the three people | 02 | outstanding |
@@ -23,23 +23,43 @@ terminal — if something appears to, it is specced wrong (§3).
 
 ## Detail
 
-**D-02, D-06. Cloudflare.** Two things, both in the Cloudflare dashboard, and
-slice 00 cannot be built before both exist — `wrangler.toml` without a database
-id does not deploy, and a Worker with no git connection never builds. There is
-no partial version.
+**D-02, D-06. Cloudflare.** Both are done. The database is `globetrotters-prod`
+and the Worker is `globetrotters`, git-connected to this repo and building on
+push to `main`.
 
-The database exists. Its id goes straight into `wrangler.toml`:
+The database id goes straight into `wrangler.toml`:
 
 | Binding | Name | `database_id` |
 |---|---|---|
 | `DB` | `globetrotters-prod` | `5f351cd1-d7e7-4ddc-af41-c2e1b0a68e02` |
 
-D-06 is the deploy path itself: **Workers** → **Create** → **Import a
-repository**, pointed at this repo, building on push to `main`. That one action
-replaces an API token, an account id and two GitHub repo secrets, which is how
-the other three projects on this account already deploy. Pick the Worker's name
-there; it decides the `workers.dev` subdomain, and it must match `name` in
-`wrangler.toml`.
+**There is no dashboard step that binds D1 to this Worker, and looking for one
+is a dead end.** A git-connected Worker takes *all* of its configuration — what
+script to run, what to serve as static assets, and every binding — from
+`wrangler.toml` in the repo. The dashboard's Bindings editor is locked for such
+a Worker: a binding added there does not persist, because Cloudflare will not
+let the two sources drift. The binding is a commit, not a click.
+
+Two symptoms of the same missing file, both worth recognizing before slice 00
+lands `wrangler.toml`:
+
+- The Worker deploys the repo as **static assets with no script**. That is what
+  is deployed right now, and it is expected — there is no `src/` yet.
+- Settings then reports **"Variables cannot be added to a Worker that only has
+  static assets."** Nothing is broken; the file that gives the Worker a script
+  and its bindings simply does not exist yet.
+
+The name in `wrangler.toml` must read `globetrotters`. A mismatch does not fail
+— it deploys a second Worker under the other name and leaves this one serving
+the old build, which is a confusing half-hour.
+
+Both fields of the D1 pair must match the dashboard. Wrangler validates
+`database_name` against `database_id` and fails the build on a mismatch rather
+than writing somewhere unexpected.
+
+**Secrets are the exception** (D-07, D-08). They are set in the dashboard, never
+in `wrangler.toml`, which is correct — a secret value must not be committed to
+git.
 
 **D-07, D-08. Secrets.** Three Worker secrets, set once in the dashboard:
 

@@ -168,6 +168,13 @@ this repo — and nothing else: no API token to scope, no account id to find, no
 secrets pasted into GitHub. Wrangler runs inside Cloudflare's builder, which is
 not a terminal the owner has to touch.
 
+**Bindings come from `wrangler.toml` at the repo root, never from the
+dashboard.** A git-connected Worker takes its script, its static assets and
+every binding from that file, and the dashboard's Bindings editor is locked for
+one — a binding added there does not persist. Committing the file *is* the
+binding step. Worker secrets are the one exception: they are set in the
+dashboard, because a secret value must not be committed to git.
+
 ---
 
 ## 4. The task model

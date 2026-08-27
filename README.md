@@ -24,9 +24,12 @@ seeding, or deploy requires a terminal.
 
 ## Where things stand
 
-Design complete. No code yet. Slice 00 is blocked on D-06 — creating the Worker
-in the Cloudflare dashboard and pointing it at this repo. The D1 database (D-02)
-already exists; the three Worker secrets (D-08) are set in the same visit.
+Design complete. No code yet. Slice 00 is unblocked: the D1 database (D-02) and
+the git-connected Worker (D-06) both exist. The three Worker secrets (D-08) are
+one dashboard visit, needed before slice 01. The Worker serves the repo as
+static assets until slice 00 commits `wrangler.toml`, which is also what binds
+D1 — a git-connected Worker takes every binding from that file, not from the
+dashboard.
 
 Eleven open questions outstanding. Four of them (Q-01 through Q-04) change the
 schema or a secret and are the expensive ones to answer late.

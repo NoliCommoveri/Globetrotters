@@ -15,16 +15,22 @@ None of this can be built around. See `../other/DUE-OUTS.md` for the full list
 and the current state of each.
 
 - **D-02** D1 database created, name and id known — done, `globetrotters-prod`
-- **D-06** Worker created in the Cloudflare dashboard and git-connected to this
-  repo; name and route decided (`workers.dev` subdomain or custom domain)
+- **D-06** Worker created and git-connected to this repo — done, `globetrotters`
 - **D-08** Worker secrets set: `FAMILY_PASSCODE`, `ADMIN_TOKEN`, `FAMILY_TZ`
 
 `ADMIN_TOKEN` and `FAMILY_TZ` are not used until slices 01 and 02, but all three
 are set in one visit to the dashboard rather than three.
 
-**Nothing in this slice can be built before D-06.** There is no partial version:
-a Worker with no git connection never builds, and `wrangler.toml` without the
-database id does not deploy.
+D-02 and D-06 are both done, so this slice is unblocked. D-08 can be set at any
+point before slice 01 needs it.
+
+**The D1 binding is this slice's job, not a dashboard action.** A git-connected
+Worker takes every binding from `wrangler.toml`; the dashboard's Bindings editor
+is locked for one and a binding added there does not persist. Until the file
+below is committed, the Worker deploys the repo as static assets with no script
+and Settings reports "Variables cannot be added to a Worker that only has static
+assets" — the expected state today, not a fault. See `../other/DUE-OUTS.md`,
+D-02/D-06.
 
 ## Open questions
 
@@ -36,10 +42,13 @@ None. Q-03 is answered: the session cookie is signed with `ADMIN_TOKEN`
 - `wrangler.toml` **at the repo root** — a git-connected build looks for it at
   the build root, and when it is missing the Worker deploys as static assets
   with no script and the dashboard then refuses to add variables to it
-  - `name` matching the Worker created for D-06
+  - `name = "globetrotters"`, matching the Worker. A mismatch does not fail the
+    build — it deploys a second Worker under the other name
   - Worker with static assets
   - D1 binding `DB` — `globetrotters-prod`
-    `5f351cd1-d7e7-4ddc-af41-c2e1b0a68e02`. One database, no
+    `5f351cd1-d7e7-4ddc-af41-c2e1b0a68e02`. Both fields must match the
+    dashboard; Wrangler validates the pair and fails the build on a mismatch
+    rather than writing somewhere unexpected. One database, no
     `preview_database_id` (§2)
   - No R2 binding. The bucket does not exist, and a binding to a missing bucket
     fails the deploy (§1, §2)
