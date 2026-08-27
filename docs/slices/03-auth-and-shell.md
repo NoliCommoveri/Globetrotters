@@ -29,7 +29,7 @@ None outstanding for this slice.
 ## Build
 
 - `POST /api/auth` — passcode → signed cookie, `HttpOnly; Secure;
-  SameSite=Lax`, max-age one year, HMAC over `SESSION_SECRET`
+  SameSite=Lax`, max-age one year, HMAC-SHA-256 over `ADMIN_TOKEN`
 - The cookie is **re-issued on every authenticated request**, so the year
   slides forward and never expires mid-project
 - Person selection writes `person_id` into that same signed cookie, server-side

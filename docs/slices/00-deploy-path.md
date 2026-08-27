@@ -22,27 +22,26 @@ and the current state of each.
   `CLOUDFLARE_ACCOUNT_ID`
 - **D-06** Worker name and route decided (`workers.dev` subdomain or custom
   domain)
-- **D-08** Worker secrets set: `FAMILY_PASSCODE`, `ADMIN_TOKEN`,
-  `SESSION_SECRET`, `FAMILY_TZ`
+- **D-08** Worker secrets set: `FAMILY_PASSCODE`, `ADMIN_TOKEN`, `FAMILY_TZ`
 
-`FAMILY_TZ` and `SESSION_SECRET` are not used until slices 02 and 03, but all
-four are set in one visit to the dashboard rather than three.
+`ADMIN_TOKEN` and `FAMILY_TZ` are not used until slices 01 and 02, but all three
+are set in one visit to the dashboard rather than three.
 
 **Nothing in this slice can be built before D-01 through D-06.** There is no
 partial version — `wrangler.toml` without database ids does not deploy.
 
 ## Open questions
 
-- **Q-03** — the HMAC signing secret. `DESIGN.md` §2 signs the session cookie
-  and §3 names `ADMIN_TOKEN` and `FAMILY_TZ` as secrets; nothing names the
-  signing key. It must exist before D-08 is done, because rotating it later
-  logs the whole family out. Proposed: `SESSION_SECRET`.
+None. Q-03 is answered: the session cookie is signed with `ADMIN_TOKEN`
+(`DESIGN.md` §2, §15).
 
 ## Build
 
 - `wrangler.toml`
   - Worker with static assets
-  - D1 binding, production and `--preview`
+  - D1 binding, production and `--preview` — `globetrotters-prod`
+    `5f351cd1-d7e7-4ddc-af41-c2e1b0a68e02`, `globetrotters-preview`
+    `3304a4c4-ae23-4900-b7f9-4904bac01e99`
   - R2 bucket bound and unused
   - `[[rules]] type = "Text" globs = ["**/*.sql"]`
 - If the text rule fails, fall back to a generated `src/migrations/index.js`
