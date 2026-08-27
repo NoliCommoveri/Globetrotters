@@ -16,13 +16,13 @@ and the current state of each.
 
 - **D-02** D1 database created, name and id known — done, `globetrotters-prod`
 - **D-06** Worker created and git-connected to this repo — done, `globetrotters`
-- **D-08** Worker secrets set: `FAMILY_PASSCODE`, `ADMIN_TOKEN`, `FAMILY_TZ`
+- **D-08** Worker secrets set: `FAMILY_PASSCODE`, `ADMIN_TOKEN`, `FAMILY_TZ` —
+  done
 
-`ADMIN_TOKEN` and `FAMILY_TZ` are not used until slices 01 and 02, but all three
-are set in one visit to the dashboard rather than three.
+All three are set. `ADMIN_TOKEN` and `FAMILY_TZ` are not read until slices 01
+and 02; this slice reads none of them.
 
-D-02 and D-06 are both done, so this slice is unblocked. D-08 can be set at any
-point before slice 01 needs it.
+Every due-out this slice has is done. It is unblocked.
 
 **The D1 binding is this slice's job, not a dashboard action.** A git-connected
 Worker takes every binding from `wrangler.toml`; the dashboard's Bindings editor

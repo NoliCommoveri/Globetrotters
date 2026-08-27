@@ -950,8 +950,8 @@ nine-month job for one person on one phone.
 
 Resolved:
 
-- **Timezone.** One `FAMILY_TZ` Worker secret. `local_date` computed at insert via
-  `Intl.DateTimeFormat`. Weeks start Monday.
+- **Timezone.** One `FAMILY_TZ` Worker secret, `America/Chicago`. `local_date`
+  computed at insert via `Intl.DateTimeFormat`. Weeks start Monday.
 - **What the session cookie is signed with.** `ADMIN_TOKEN`, HMAC-SHA-256. No
   fourth secret. It buys one less field in the dashboard at the cost of tying
   the family's login lifetime to the admin credential — rotating `ADMIN_TOKEN`

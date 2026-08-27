@@ -12,7 +12,7 @@ traps already handled.
 
 ## Due-outs
 
-- **D-07** `ADMIN_TOKEN` value chosen and set (part of D-08, needed here first)
+- **D-07** `ADMIN_TOKEN` value chosen and set (part of D-08) — done
 
 Everything else this slice needs was satisfied by slice 00.
 
