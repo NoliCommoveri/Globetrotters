@@ -1067,6 +1067,14 @@ Resolved:
   the family's login lifetime to the admin credential — rotating `ADMIN_TOKEN`
   logs everyone out. Three Worker secrets total: `FAMILY_PASSCODE`,
   `ADMIN_TOKEN`, `FAMILY_TZ`.
+- **Week 1 carries four core tasks, not six.** Week 1 is five slots and the
+  20-tasks/20-weekdays mapping is what keeps "3 left this week" meaningful, so
+  six always-drawn tasks do not fit. Flag, map, location/borders and language &
+  writing system are fixed; basic stats and national symbols compete for the
+  fifth slot with the rest of the week-1 pool. The cost is accepted: a month can
+  end with no population figure and no national symbol on its page. Making
+  either one core would spend the fifth slot entirely, and with it week 1's only
+  variation and its only swap.
 - **What breaks a streak.** Nothing, because there is no streak. See §10.
 - **Can a past week's tasks still be checked off?** Yes. No lockout, ever. A lockout
   converts a missed day into a permanently dead card, which is the exact opposite of
