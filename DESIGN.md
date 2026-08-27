@@ -45,10 +45,23 @@ Everyone has their own device. There is also a tablet on the kitchen wall.
 
 **Auth:** one shared family passcode held as a Worker secret, checked once,
 stored in a signed cookie (`HttpOnly; Secure; SameSite=Lax`, max-age one year).
-After that you pick which of the three people you are — **once, on that device**.
-Everyone has their own phone, so this is a setup step, not a recurring choice.
-The person switcher lives in settings as an escape hatch for a day-one mis-tap,
-not as a header control.
+The cookie is **re-issued on every authenticated request**, so the year slides
+forward and never expires mid-project.
+
+After the passcode you pick which of the three people you are. **`person_id`
+lives in that same signed cookie**, set by the server — not in `localStorage`,
+where Safari's seven-day cap on script-writable storage would quietly forget who
+someone is over spring break while leaving them logged in.
+
+**One person, several devices.** Identity is per-device, and nothing server-side
+is device-bound: the same person picks themselves on a phone and again on a
+laptop, and both are equally real. Two consequences the API has to honor —
+`PATCH /api/tasks/:id` sets an explicit target state rather than toggling, so a
+stale second device can't flip a finished task back open; and every screen
+re-fetches its plan on launch and on `visibilitychange`. The person switcher
+lives in settings rather than the header, because it is not a daily control.
+
+The wall tablet gets its **own cookie type**, not this one — see §8.
 
 Nine months should pass without anyone seeing a login screen.
 
@@ -100,6 +113,9 @@ command. Everything runs from a browser.
   **the deployed git SHA and build time**. In a browser-only workflow the standing
   failure mode is pressing Apply pending against a Worker that hasn't finished
   deploying. Five lines, saves an hour of confusion.
+- **People** — the three names and ink colors, editable here. They are not seeded
+  from SQL: naming your own kids must not require editing a migration in a web
+  editor, which is the same terminal problem wearing a browser.
 - **Reset month** *(guarded)* — delete a `month_plan` and its tasks, typed
   confirmation required. This is the one destructive control. D1 enforces foreign
   keys, so it must delete in dependency order: `sessions`, `media`, `stamps`,
@@ -107,10 +123,19 @@ command. Everything runs from a browser.
 
 **Access:** a separate `ADMIN_TOKEN` Worker secret, not the family passcode.
 `GET /admin` serves the token form unauthenticated; the token is then held in a
-short-lived cookie scoped `Path=/admin`. Kids must never stumble into this page.
+short-lived cookie scoped `Path=/admin`.
 
-**Prefix split:** `/admin/*` serves pages. `/api/admin/*` serves JSON. The auth
-middleware then splits cleanly by prefix with no content negotiation.
+**Kids must never stumble into this page**, and the threat model is a curious
+12-year-old on a shared laptop, not an attacker. So the defense is not
+cryptographic: **nothing in the app ever renders a link to `/admin`** — not in a
+nav, not in a footer, not in an error page.
+
+**Prefix split:** `/admin/*` serves pages. **`/admin/api/*` serves JSON.** Both
+sit under the one path the admin cookie is scoped to, so the auth middleware
+splits by prefix with no content negotiation. JSON must not live at
+`/api/admin/*`: cookie paths match on whole segments, so a cookie scoped
+`Path=/admin` is never sent to `/api/admin/...` and every admin write would
+arrive unauthenticated.
 
 **Deploy is also browser-only:** GitHub Actions on push to `main`, plus
 `workflow_dispatch` so it can be re-run from the Actions tab by button. Any new
@@ -200,8 +225,19 @@ is country-specific.** "Find out which animal is on their money and draw it" is 
 completely different task in Peru than in Japan. Week 1 already treats repetition as
 a feature. Weeks 2–3 should treat it as a mild preference, not a prohibition.
 
-**Swap** redraws from the same week and focus, excluding every template already in
-this plan. `UNIQUE (plan_id, task_template_id)` enforces that at the database level.
+**Swap** redraws a single task from the same week and focus, excluding every
+template already in this plan. `UNIQUE (plan_id, task_template_id)` enforces that
+at the database level.
+
+**Where swap is offered.** Week 1's fifth slot, and weeks 2 and 3. It is disabled
+on the four week-1 `core` tasks, which anchor workbook pages and are meant to
+repeat — swapping one leaves a physical page with nothing feeding it. It is
+disabled on all of week 4, which is an ordered sequence rather than a draw. And it
+is refused on a task already marked `done`.
+
+**Three swaps a month.** Enough to fix a genuine mismatch, not enough to reroll a
+month into whatever looks easiest. Swaps used is `COUNT(plan_tasks WHERE
+swapped_from IS NOT NULL)` — no counter column needed.
 
 ---
 
@@ -353,7 +389,9 @@ CREATE INDEX idx_hooks_country        ON country_hooks(country_id);
   `Intl.DateTimeFormat` — Workers support IANA zones. Don't compute from UTC later.
 - `start_date` is what makes `week_no` mean anything on the calendar. Current week
   is `floor((today - start_date) / 7) + 1`, clamped to 4 so any remainder days fold
-  into Make & Present.
+  into Make & Present. **It is always a Monday** — see §15 — which is what keeps
+  plan weeks and the calendar week ring in agreement, and what makes five tasks map
+  to five weekdays.
 - `stamps` carries `person_id`, `country_id`, and `focus_id` denormalized from the
   plan on purpose: a stamp is a frozen record of what was earned, not a live view.
 - Duplicate countries across people are allowed and are not deduped in the UI. Two
@@ -374,44 +412,58 @@ GET    /api/catalog                   countries + hooks + affinities + focuses
                                       + project types. ~60KB, cache client-side.
 
 POST   /api/plans                     {person, month, country, focus, project}
-                                      -> draws 20 tasks. 409 on UNIQUE(person, month).
+                                      -> draws 20 tasks. 409 on UNIQUE(person, month),
+                                      which the client treats as "go to that plan".
 GET    /api/plans/:id                 plan + tasks grouped by week
 POST   /api/plans/:id/redraw          one free redraw, until the first check-off
-PATCH  /api/plans/:id                 {country?, project_type?} — see below
-POST   /api/plans/:id/complete        {headline} — gated on 20/20, writes stamp
-DELETE /api/plans/:id/complete        un-complete, removes the stamp
+PATCH  /api/plans/:id                 {country?, focus?, project_type?} — see below
+POST   /api/plans/:id/complete        {headline?} — gated on 20/20, writes stamp
+DELETE /api/plans/:id/complete        un-complete, removes the stamp. Confirmed.
 
-PATCH  /api/tasks/:id                 {status} toggle done/open; done also writes a session
-POST   /api/tasks/:id/swap            redraw same week + focus, excluding this plan's tasks
+PATCH  /api/tasks/:id                 {status} sets the target state, idempotent —
+                                      never a toggle. done also writes a session.
+POST   /api/tasks/:id/swap            redraw same week + focus, excluding this plan's
+                                      tasks. Week 1 slot 5 and weeks 2-3 only, open
+                                      tasks only, three per month.
 POST   /api/sessions                  {plan_id, plan_task_id?, minutes?, note?}
 
 GET    /api/passport                  all stamps, all people, plus the empty grid shape
-GET    /api/stats                     all three people; ?person= narrows to one
+PATCH  /api/stamps/:id                {headline} — the stamp's one line, editable later
+GET    /api/stats                     the cookie's own person; ?all=1 for all three
 
-GET    /wall                          read-only ambient view (own long-lived cookie)
+GET    /wall                          read-only ambient view (own cookie type)
+GET    /api/wall                      the wall payload
+GET    /api/wall/version              MAX(stamps.earned_at) and
+                                      MAX(plan_tasks.completed_at). Two rows, no
+                                      payload — the wall's heartbeat. See §8.
 
 GET    /admin                         migration + health page (ADMIN_TOKEN)
-POST   /api/admin/migrate             apply all pending, in order
-POST   /api/admin/seed                idempotent seed run
-POST   /api/admin/reset-month         guarded, typed confirmation
+POST   /admin/api/migrate             apply all pending, in order
+POST   /admin/api/seed                idempotent seed run
+POST   /admin/api/reset-month         guarded, typed confirmation
+GET    /admin/api/people              the three people
+PATCH  /admin/api/people/:id          name, ink color, sort order
 
 GET    /admin/library                 library editor page
-GET    /api/admin/library             tasks, focuses, project types, weights
-POST   /api/admin/tasks               create custom task
-PATCH  /api/admin/tasks/:id           edit, or set archived
-POST   /api/admin/focuses             create
-PATCH  /api/admin/focuses/:id         edit name, blurb, archived
-PUT    /api/admin/focuses/:id/weights bulk weight update (sparse — deletes weight-1 rows)
-POST   /api/admin/project-types       create
-PATCH  /api/admin/project-types/:id   edit, reorder week-4 sequence
-GET    /api/admin/library.json        full export / backup
+GET    /admin/api/library             tasks, focuses, project types, weights
+POST   /admin/api/tasks               create custom task
+PATCH  /admin/api/tasks/:id           edit, or set archived
+POST   /admin/api/focuses             create
+PATCH  /admin/api/focuses/:id         edit name, blurb, archived
+PUT    /admin/api/focuses/:id/weights bulk weight update (sparse — deletes weight-1 rows)
+POST   /admin/api/project-types       create
+PATCH  /admin/api/project-types/:id   edit, reorder week-4 sequence
+GET    /admin/api/library.json        full export / backup
 ```
 
-**Why `PATCH /api/plans/:id` is narrow.** Country doesn't affect the draw at all —
-tasks are country-agnostic — so it can change any time, freely. Project type isn't
-used until week 4, so it can change until then; changing it regenerates the five
-week-4 rows if none are done. Focus locks once any task is checked off, because it
-shaped the draw.
+**What `PATCH /api/plans/:id` allows, and when.** Country doesn't affect the draw at
+all — tasks are country-agnostic — so it can change any time, freely. Project type
+isn't used until week 4, so it can change until then; changing it regenerates the
+five week-4 rows, and is refused with a 409 if any of them is already done. Focus
+locks once any task is checked off, because it shaped the draw — but until that
+first check-off it is editable, and changing it redraws weeks 2 and 3. That is the
+lever the reveal screen needs: when twenty tasks look wrong, the cause is usually
+the focus, not the roll.
 
 ---
 
@@ -419,13 +471,22 @@ shaped the draw.
 
 Mobile first. The kids will use this on a phone standing at a table. 360px wide.
 
+**First run, in full:** family passcode → pick which of the three people you are →
+land on the empty state, which reads "Pick a country to start September." Three
+steps, once per device, and it is the only path every user takes.
+
 ### This week — the default view
 
 Used ~180 times per person. Everything else in the app is occasional.
 
-- **One card up, not five.** Today's task, full-bleed. The rest of the week is a row
+- **One card up, not five.** One task, full-bleed. The rest of the week is a row
   of five pips underneath; tap a pip to bring that card up. Order stays free — you
   just stop asking the question every single day.
+- **Which card comes up.** The **lowest-`position` `open` task in the current week**.
+  Not "today's task": `plan_tasks` has no date, and a missed Tuesday must not leave a
+  dead card behind. Misses simply shift forward. When the current week is clear, the
+  default card is the first item on the carry-forward strip, and failing that the
+  first task of the next week.
 - **The prompt is the screen.** `title` is a label ("Draw and color the flag");
   `prompt` is the actual instruction. The prompt gets the largest type on the phone,
   readable at arm's length by someone standing over a workbook.
@@ -435,13 +496,24 @@ Used ~180 times per person. Everything else in the app is occasional.
   **Worked on it** — writes a session, leaves the task open. That second one is the
   two-sittings case the schema was designed for, and it needs a control or the
   design intent never surfaces.
+- **Three card states, not two: open, in progress, done.** "Worked on it" has to
+  leave a visible mark or it reads as a dead button — tapped once, nothing changes,
+  never tapped again, and the two-sittings design never surfaces after all. In
+  progress is any `open` task with at least one session against it; it needs no new
+  column. The pips carry the same three states.
 - **One optional line after Done.** "What surprised you?" — skippable, one tap. By
-  month's end there are twenty of them and the stamp headline writes itself.
-- **Undo.** One tap to check off is one tap to mis-check.
+  month's end there are twenty of them and the stamp headline writes itself. They
+  accumulate visibly on **Plan**, so writing one feels like adding to something
+  rather than paying a toll.
+- **Undo.** One tap to check off is one tap to mis-check. Undo reopens the task and
+  **leaves the session row alone** — days-worked is the number specced never to go
+  down (§10), and deleting a day's only session is exactly how it would.
 - **Carry-forward strip.** Unfinished tasks from earlier weeks appear as a thin strip
   below the current cards. Never blocking, never a lockout. The finish line is the
   month, not the week.
-- **Progress, quietly:** the week ring (0–5) in your ink, and "12 of 20" for the month.
+- **Progress, quietly:** the week ring in your ink, labelled with what's left rather
+  than what's banked — **"3 left this week"**, not "2" — and "12 of 20" for the month.
+  Same data, but one of them is an instruction.
 
 ### Month setup
 
@@ -451,22 +523,37 @@ not a form.
 
 - **Country: browse by continent, plus search.** 195 in a flat list is unusable for
   an 11-year-old. Each country card carries **one hook line** (§9) — the hook *is*
-  the card. Countries the family has already stamped show an ink dot.
-- **"Deal me three."** A shuffle that puts three random countries on screen with
-  their hooks. Kids choose from three far better than from 195, and this is the best
-  interaction on the screen.
-- **Tap through** to all hooks, the recommended focuses with their reason lines, and
-  the adventure level.
+  the card — and its **adventure level**, which belongs on the card rather than one
+  level down. §9 calls research depth the thing that prevents the worst month of the
+  year; that only works if it's visible where the choice is actually made. Countries
+  the family has already stamped show an ink dot.
+- **"Deal me three."** A shuffle that puts three countries on screen with their hooks.
+  Kids choose from three far better than from 195, and this is the best interaction on
+  the screen — so it must never deal a blank. Hook coverage is 75–100 countries, not
+  195, so the shuffle draws only from countries with **at least two hooks**, and skips
+  ones the family has already stamped. Search and browse still reach all 195.
+- **Tap through** to all hooks and the recommended focuses with their reason lines.
 - **Focus: show the consequence, not the description.** "people-and-power" means
   nothing to a kid. Highlighting a focus shows three sample task titles it would pull
-  in — one query against the weights table, and it converts an abstract weighting into
-  "oh, *that's* what I'd be doing." Recommended focuses arrive pre-highlighted, never
-  pre-selected.
+  in — drawn from its **`weight = 3` rows only**. Weights are sparse and a missing row
+  means 1, so sampling everything a focus "would pull in" returns mostly neutral tasks
+  and every focus previews identically. Recommended focuses arrive pre-highlighted,
+  never pre-selected.
 - **Project type shows its `materials`.** Picking "model-or-diorama" on September 1st
-  is exactly when a parent needs to know they'll want foam board — not on day 22.
+  is exactly when a parent needs to know they'll want foam board — not on day 22. It
+  stays visible on **Plan** all month, because nobody reopens setup.
 - **The draw gets a reveal.** Land on a screen showing all twenty tasks. This is the
-  moment you find out what your September looks like. Then offer **one redraw**,
-  available until the first check-off.
+  moment you find out what your September looks like. Then offer **one redraw** and
+  **change focus**, both available until the first check-off. Redraw alone is the
+  wrong lever: it re-rolls with the same weighting, and when twenty tasks look wrong
+  the focus is usually why.
+- **Starting late is normal, and must not skip weeks.** `start_date` is the later of
+  the month's first Monday and today's week (§15). Backdating a September 20th setup
+  to the 1st would land the kid in week 3 with all ten Foundations and Deep Dive tasks
+  dumped onto a strip built for stragglers, having never seen the flag task. Plans are
+  keyed on `month`, not dates, so a plan running into October collides with nothing.
+- **Setting up a month that already has a plan opens that plan.** Two devices, or a
+  double-tap on a slow connection. The `409` is a route, not an error screen.
 
 Nothing triggers setup — there are no notifications in v1. The empty state is the
 prompt ("Pick a country to start September"), and the wall view shows who hasn't
@@ -481,22 +568,58 @@ September — so it has to work empty.
   stamp slots. An unfilled passport is a far stronger invitation than an absent one:
   it shows the shape of the goal in September and makes the full page something you
   can see coming for nine months.
-- **The stamp carries the focus.** "Peru · October · Wild Places" records *how* they
-  studied it — the whole premise of the focus system, and a free join.
+- **The current month's slot is not blank.** In October, September's slot is stamped
+  and October's would otherwise look identical to May's — throwing away the one piece
+  of live state the family screen could carry. An in-progress slot shows the country
+  name without a stamp, and an unstarted one says so. That puts "who hasn't started
+  yet" on every phone instead of only on the wall.
+- **The stamp carries the person and the focus.** "Ana · Peru · October · Wild
+  Places". The focus records *how* they studied it, which is the whole premise of the
+  focus system and a free join. The name is there because ink is not a reliable
+  ownership signal: column position carries it on the grid, but the wall's full-screen
+  stamp has no column, and a home printer renders all three inks as the same grey.
 - **Completion is a consequence, not a button.** Gate it on 20 of 20 and let the last
   check-off offer it: "That's twenty. Ready to stamp Peru?" A completion button
   sitting in a corner all month gets tapped in week two and burns the stamp.
+- **Accepting routes to `/passport`, and the stamp lands there.** The offer appears on
+  a task card; the stamp lives on the passport. Unstated, the app's signature moment
+  either plays on the wrong canvas or is missed entirely by a kid who taps through
+  later to an already-stamped grid.
 - **The headline is chosen, not composed.** At completion, show the month's session
   notes and pick one. A kid asked to summarize a month cold, at the moment they most
-  want to be done, writes "it was fun."
+  want to be done, writes "it was fun." If no notes were written all month — the
+  prompt is skippable twenty times — fall back to picking from the twenty completed
+  task titles. `headline` may also stay null, and it is **editable afterwards from the
+  passport**: it is the permanent text on the year's artifact, and it is chosen at the
+  single moment of least care, the tap that ends the month.
+- **Un-completing is confirmed.** `DELETE /api/plans/:id/complete` destroys an earned
+  stamp, there are no roles, and it is the only destructive control outside `/admin`.
+  Typed confirmation is overkill; a confirm step is not.
 - **Printable.** A print stylesheet on `/passport`. In June there are 27 stamps and
   the year is over — this is the page that goes in the front of the binder.
 
 ### Plan
 
-Full four-week view for the current month. Swap buttons, notes, materials for the
-chosen project type. This is where you look when you want the shape of the month
-rather than the shape of today.
+Full four-week view for the current month — all twenty tasks grouped by week. This
+is where you look when you want the shape of the month rather than the shape of
+today, and it is the only screen that can hold month-scale state, so it holds all
+of it:
+
+- **Swap**, on the cards that allow it (§4): week 1's fifth slot and weeks 2–3, open
+  tasks only, three a month, with the remaining budget shown. A swap replaces a card
+  in place, and two prompts from the same week and focus often read alike — so the
+  new card names what it replaced, out of `plan_tasks.swapped_from`. Otherwise a swap
+  is indistinguishable from a bug.
+- **The month's notes**, accumulating down the page. This is what makes "What
+  surprised you?" worth answering, and it is the pool the stamp headline is picked
+  from.
+- **Materials** for the chosen project type, from week 1 — not tucked inside week 4,
+  which is the week it's too late to be useful.
+- **Days worked**, the cumulative number from §10. It replaces the streak and it has
+  no other home in the app.
+- **Plan-level edits**: change country (free, any time), change project type (until
+  week 4). Changing project type rewrites the five week-4 cards, so it confirms and
+  names what it is replacing, and it is refused once any of them is done.
 
 ---
 
@@ -505,15 +628,35 @@ rather than the shape of today.
 A `/wall` route for the kitchen tablet. Read-only, no person identity, all three
 people at once, meant to be read from six feet away.
 
-- **Read-only.** No checkboxes anywhere. A wall tablet gets bumped, and nothing on
-  it should be able to complete a task.
+- **Read-only, enforced at the middleware.** "No checkboxes anywhere" is a layout
+  decision, not a security property. The wall's cookie is **its own type**, and
+  requests carrying it are rejected on every write route. Otherwise the tablet in the
+  room guests stand in is holding a full-write family cookie for nine months.
 - **Its own long-lived cookie.** It should survive a reboot and come back to the wall
-  view without anyone typing a passcode.
-- **Polls every 30–60s**, holds a screen wake lock, so it's genuinely ambient.
+  view without anyone typing a passcode. Issued once, by entering the family passcode
+  at `/wall`.
+- **A heartbeat, not a poll.** Every five minutes the wall calls
+  `GET /api/wall/version` — `MAX(stamps.earned_at)`, `MAX(plan_tasks.completed_at)`,
+  two rows read, no payload — and fetches the full view only when that value moves.
+  Roughly 290 requests a day. A 30-second poll of the whole payload is three orders
+  of magnitude more D1 reads for a screen that changes about three times a day, and
+  the account's row budget is shared with every other database on it.
+- **A refresh control anyway**, sized to be hit from standing, plus a quiet "updated
+  Nm ago" line. Every other screen refreshes on launch and on `visibilitychange`; the
+  wall never launches and never changes visibility, which is exactly why it needs
+  both the heartbeat and the manual control.
+- **Holds a screen wake lock**, re-acquiring it on `visibilitychange` — the lock drops
+  every time and does not exist at all on older iPad Safari, a fair description of a
+  wall tablet. The fallback is the tablet's own display-sleep and Guided Access
+  settings, not a workaround in the app.
 - **Its own type scale.** This is the one place the condensed grotesque gets to be
   huge.
-- Shows: three columns — country, focus, week ring, month count — over the passport
-  grid below.
+- Shows: three columns — **country, focus, week ring** — over the passport grid
+  below, with the family stamp count as the headline.
+- **An empty state, because September 1st has one.** Three blank columns is what the
+  wall looks like on the first day of the year, and §7 delegates all of the app's
+  "nobody has started yet" pressure to this screen. It is an invitation and it gets
+  written.
 
 **The payoff.** The stamp is the app's signature moment, and on a phone exactly one
 person sees it. On the wall, someone finishes Peru in their bedroom and the stamp
@@ -522,10 +665,18 @@ before settling into the grid. That's a family event delivered with no notificat
 system, using state the app already has. The other two also see a marker on next
 open: "Ana finished Peru."
 
-**Guard against replay.** Because the wall polls, a naive implementation re-runs the
-stamp animation on every refresh. Compare `earned_at` against a client-side
-last-seen watermark and animate only genuinely new stamps. This is the trap that
-turns one moment of motion into a twitching wall.
+**Guard against replay.** Because the wall re-fetches, a naive implementation re-runs
+the stamp animation every time. Compare `earned_at` against a last-seen watermark and
+animate only genuinely new stamps. The watermark is **persisted in `localStorage` and
+seeded to the current time on a fresh wall session** — held in memory it would be lost
+on the reboot the long-lived cookie exists to survive, and seeded to zero a rebooted
+tablet replays all 27 stamps of the year in sequence. If two people cross 20/20 inside
+one heartbeat window, which is what the last day of the month looks like, the stamps
+**queue and land in turn** rather than stacking.
+
+`prefers-reduced-motion` is respected here as everywhere (§11), but on the wall it
+means a cross-fade, not nothing: one OS toggle on a kitchen tablet should not silently
+delete the family's only shared moment for the year.
 
 **Show state, never rank.** Three people doing an identical twenty-task structure,
 side by side, is implicitly a leaderboard — and the 11-year-old will sometimes be
@@ -533,6 +684,13 @@ behind, broadcast on the kitchen wall, daily. So: fixed display order by
 `people.sort_order`, never sorted by progress. No percentages. No ahead/behind
 language anywhere. The **family** number is the headline ("14 stamps this year")
 with the individual rings quiet underneath. This is a rule, not a preference.
+
+**Which is why the month count is not on the wall.** A 0–5 week ring survives the
+rule by §10's own logic: it resets Monday, so being behind is at most a few days old
+and it repairs itself. "9 of 20" beside a sibling's "17 of 20" accumulates for a
+month and cannot be recovered from quickly — it is the leaderboard, and fixed sort
+order does not undo it. The month count stays on the phone, where one person sees
+their own.
 
 ---
 
@@ -589,12 +747,19 @@ are completion mechanics. A streak is the only one that can punish.
 
 - **This week: a 0–5 ring.** Resets Monday. No history, no memory. Missing Tuesday
   means the ring isn't full — it doesn't destroy anything. And it doubles as a pace
-  indicator, since one task maps to one weekday.
+  indicator, since one task maps to one weekday. That mapping is only true because
+  `start_date` is always a Monday (§15): anchored to the first weekday of the month
+  instead, plan weeks and calendar weeks would disagree in four years out of five and
+  the ring would reset mid-week. Label it with what's left — "3 left this week" — not
+  with what's banked.
 - **Days worked: cumulative, only ever goes up.** "47 days" in January feels genuinely
-  good and has no downside.
+  good and has no downside. It only goes up if undo leaves session rows alone (§7):
+  deleting the session behind a mis-tap takes the whole day with it when it was that
+  day's only one. Over-counting by one is harmless here; decrementing breaks the one
+  promise this number makes. It lives on **Plan**.
 
-If a streak is wanted anyway, the safe version is **weeks with ≥3 sessions**, not 5.
-Requiring a perfect week means it dies the first time someone has a cold.
+There is no safe streak variant to fall back on, and none is specced. An escape hatch
+left in a design document is a feature someone builds.
 
 **Never show a percentage.** "12 of 20" and "3 left this week" are better numbers and
 they're the language the project already speaks. Tabular numerals are specced for
@@ -619,9 +784,11 @@ as generic AI output.
   against a plain humanist sans for body and prompts. Numerals tabular — this app
   counts things constantly. Both self-hosted.
 - **Signature:** the passport wall. Completing a country prints a stamp with a slight
-  random rotation and offset, in that person's ink, over the country name, month, and
-  focus. It's the only place motion is allowed: the stamp lands once, on completion,
-  and never replays.
+  random rotation and offset, in that person's ink, over the person's name, the
+  country, the month, and the focus. It's the only place motion is allowed. It lands
+  **once per viewer** — a watermark against `earned_at`, per §8 — rather than once
+  ever: the phone that earned it, the wall in the kitchen, and the other two people on
+  next open each get the moment exactly one time.
 - Everything else stays quiet. Task cards are plain rectangles with generous hit
   targets. Respect `prefers-reduced-motion`, visible focus rings, works at 360px.
 
@@ -650,6 +817,9 @@ focus is immediately valid with zero rows and can be tuned afterward. Warn if a 
 has fewer than ~15 tasks at weight ≥1 across weeks 2 and 3, since the draw needs
 headroom.
 
+**People editor** — the three names, ink colors, and display order. This is where the
+family names itself; nothing about it belongs in a seed migration.
+
 **Country editor** — hooks and focus affinities per country, same shape as the task
 list. Generated content needs a spot check, and a wrong hook should be one tap to fix
 or delete.
@@ -666,7 +836,7 @@ mid-month — for that, archive the old one and create a new task.
 `INSERT ... ON CONFLICT (slug) DO NOTHING`. Once a row exists, the seed leaves it alone
 forever.
 
-**Export** — `GET /api/admin/library.json` dumps tasks, focuses, project types, weights,
+**Export** — `GET /admin/api/library.json` dumps tasks, focuses, project types, weights,
 hooks, and affinities as JSON. This is the backup, and it's how a tuned library gets
 carried into next school year without a terminal.
 
@@ -680,7 +850,8 @@ carried into next school year without a terminal.
 
 Contents of `002_seed.sql`:
 
-- 3 people (names TBD by user), 6 focuses, 6 project types
+- 3 placeholder people, renamed on `/admin` rather than by editing SQL; 6 focuses,
+  6 project types
 - ~195 countries with continent and region
 - **~90 task templates**, distributed:
   - Week 1 — 10 templates, 4 marked `core` and always drawn (flag, map,
@@ -729,13 +900,20 @@ Resolved:
 - **Does the parent need an override to edit a kid's plan?** No mechanism needed —
   there are no roles, so everyone can already edit everything. The parent's real
   override is the library editor and Reset month, both behind `ADMIN_TOKEN`.
-- **Where the month boundary sits.** `month_plans.start_date`, set at setup, defaulting
-  to the first weekday of the month. Weeks are 7-day windows from there, week 4
-  absorbing the remainder.
+- **Where the month boundary sits.** `month_plans.start_date`, set at setup, is
+  **always a Monday**: the later of the month's first Monday and the Monday of the
+  week setup happens in. Weeks are 7-day windows from there, week 4 absorbing the
+  remainder. A Monday anchor is what keeps `week_no` and the calendar week ring in
+  agreement and makes five tasks map to five weekdays; taking the later of the two
+  keeps a late start from dumping ten unseen tasks onto the carry-forward strip. Plans
+  are keyed on `month`, so one running past the end of its month collides with
+  nothing.
+- **How many devices a person gets.** As many as they like. Identity is per-device and
+  nothing server-side is device-bound. See §2.
+- **Names and ink colors for the three people.** Set on `/admin`, not in the seed.
 
 Still open:
 
-- Names and ink colors for the three people.
 - Whether week 4's "present" task should require an audience — i.e. whether the family
   schedules a presentation night, which is a household decision the app can only
   reflect.
