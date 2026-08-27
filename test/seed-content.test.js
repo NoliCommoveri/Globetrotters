@@ -20,10 +20,19 @@ const SEEDS = [{ id: '002', name: '002_seed.sql', sql: read('002_seed.sql') }];
 
 const CONTINENTS = ['Africa', 'Asia', 'Europe', 'North America', 'South America', 'Oceania'];
 
-// Week 1 draws 4 core + 1 from the rest. Weeks 2 and 3 draw 5 from 8, so three
-// are spare and Swap has somewhere to go. Week 4 is trifold-board's five, in
-// order. Twenty-seven is the smallest seed that makes all of that true.
-const WEEK_SIZES = { 1: 6, 2: 8, 3: 8, 4: 5 };
+// Week 1 draws 4 core + 1 from the rest. Weeks 2 and 3 draw 5 from 13. Week 4
+// is trifold-board's five, in order.
+//
+// Twenty-seven templates is the floor that makes the draw work at all. The
+// weeks are wider than the floor because the floor sizes the pool for the draw
+// and nothing else: five tasks are drawn a week however big it is, so depth
+// costs the kid nothing and buys every focus a real week. Thirteen is what it
+// takes for all six focuses to hold three on-theme tasks in both weeks.
+const WEEK_SIZES = { 1: 6, 2: 13, 3: 13, 4: 5 };
+
+// Three on-theme tasks per focus per week. Two would both be drawn every month
+// that focus is chosen, which over nine months is the same week twice.
+const MIN_ON_THEME = 3;
 
 let db;
 test.before(async () => {
@@ -61,7 +70,7 @@ test('195 countries, each with a real continent and an adventure level', () => {
   assert.equal(new Set(countries.map((c) => c.iso3)).size, countries.length, 'duplicate iso3');
 });
 
-test('27 task templates, distributed 6 / 8 / 8 / 5', () => {
+test('37 task templates, distributed 6 / 13 / 13 / 5', () => {
   const counts = Object.fromEntries(
     rows('SELECT week_theme, COUNT(*) AS n FROM task_templates GROUP BY week_theme')
       .map((r) => [r.week_theme, r.n]),
@@ -106,12 +115,15 @@ test('every prompt is written to be read, not skimmed', () => {
   }
 });
 
-test('every focus reshapes week 2 and week 3, not just one of them', () => {
+test('every focus holds three on-theme tasks in week 2 and in week 3', () => {
   // §7's focus highlight samples that focus's weight-3 rows, so a focus with
   // none renders an empty panel at the moment a kid is choosing it. Per week,
-  // because a focus with a 3 in week 2 and nothing in week 3 leaves week 3
-  // identical to picking no focus at all — the draw is per week, so the
-  // coverage has to be too.
+  // because the draw is per week: a focus with a 3 in week 2 and nothing in
+  // week 3 leaves week 3 identical to picking no focus at all.
+  //
+  // Three rather than one, because one or two on-theme tasks in a 13-task pool
+  // are drawn every month that focus is chosen. The focus a kid picks nine
+  // times has to have nine months in it.
   const covered = rows(`
     SELECT f.slug AS focus, t.week_theme AS week, COUNT(*) AS n
     FROM focuses f
@@ -120,20 +132,23 @@ test('every focus reshapes week 2 and week 3, not just one of them', () => {
     WHERE f.archived = 0 AND t.week_theme IN (2, 3)
     GROUP BY f.id, t.week_theme
   `);
-  const seen = new Set(covered.map((r) => `${r.focus}/${r.week}`));
+  const n = new Map(covered.map((r) => [`${r.focus}/${r.week}`, r.n]));
   const focuses = rows('SELECT slug FROM focuses WHERE archived = 0').map((r) => r.slug);
   assert.equal(focuses.length, 6);
   for (const focus of focuses) {
     for (const week of [2, 3]) {
-      assert.ok(seen.has(`${focus}/${week}`),
-        `${focus} has no weight-3 task in week ${week} — picking it changes that week by nothing`);
+      const got = n.get(`${focus}/${week}`) ?? 0;
+      assert.ok(got >= MIN_ON_THEME,
+        `${focus} has ${got} weight-3 tasks in week ${week}, needs ${MIN_ON_THEME} — ` +
+        'below three it draws the same week every month it is chosen');
     }
   }
 });
 
 test('no focus excludes so much of a week that swap runs out of candidates', () => {
-  // 8 in the pool, 5 drawn. One exclusion leaves two spare; two exclusions
-  // leave one; three leave none and Swap is dead for that focus.
+  // 13 in the pool, 5 drawn. Exclusions eat the spare that Swap draws from, and
+  // the rule stays at one per focus per week: it held when the pool was 8 and
+  // the headroom the wider pool bought is for content, not for exclusions.
   const excluded = rows(`
     SELECT f.slug AS focus, t.week_theme AS week, COUNT(*) AS n
     FROM task_focus_weights w
@@ -144,7 +159,7 @@ test('no focus excludes so much of a week that swap runs out of candidates', () 
   `);
   for (const row of excluded) {
     assert.ok(row.n <= 1,
-      `${row.focus} excludes ${row.n} of week ${row.week}'s 8 — at most one`);
+      `${row.focus} excludes ${row.n} of week ${row.week}'s 13 — at most one`);
   }
 });
 
@@ -178,8 +193,8 @@ test('no seeded task is left with no focus that reaches for it', () => {
         SELECT 1 FROM task_focus_weights w WHERE w.task_template_id = t.id AND w.weight = 3
       )
   `).map((r) => r.slug);
-  // Seed v0 has 16 templates across weeks 2-3 and six focuses with two
-  // opinions each, so some are neutral by design. The pool must not be mostly
-  // neutral, or the focus stops shaping the month at all.
-  assert.ok(orphans.length <= 8, `${orphans.length} of 16 week 2-3 tasks are neutral to every focus`);
+  // 26 templates across weeks 2-3, and some are neutral by design — a wow fact
+  // belongs to no focus in particular. The pool must not be mostly neutral, or
+  // the focus stops shaping the month at all.
+  assert.ok(orphans.length <= 8, `${orphans.length} of 26 week 2-3 tasks are neutral to every focus`);
 });

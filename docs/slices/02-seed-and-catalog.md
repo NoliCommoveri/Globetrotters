@@ -37,7 +37,7 @@ Both answered, and written into `DESIGN.md`.
     `museum-box`, `illustrated-zine`
   - ~195 countries with continent, region, and `research_depth`
   - 3 placeholder people
-  - **27 task templates** — see the sizing note
+  - **37 task templates** — see the sizing note
   - `task_focus_weights` rows only where a focus has an opinion (3 on-theme,
     0 to exclude). Neutral tasks get no row.
 - `POST /admin/api/seed` — idempotent, reports counts inserted
@@ -58,13 +58,22 @@ list:
   which leaves swap with no candidates — `UNIQUE (plan_id, task_template_id)`
   excludes everything already drawn. Swap would be untestable until slice 09.
 
-Seed v0 is therefore **27**:
+Twenty-seven is the floor, and it is the floor for the **draw** — the point
+below which a week draws all of itself and Swap has nothing left. Seed v0 is
+**37**, because the draw is not the thing that runs out.
+
+Five tasks come out of a week however many are in it, so a deeper pool costs
+the kid nothing. What a shallow pool costs is the **focus**: with two on-theme
+tasks in a week, both are drawn every month that focus is chosen, and a focus
+gets chosen up to nine times. Every focus therefore holds three on-theme tasks
+in week 2 and three in week 3 — eighteen focus-weeks, covered by thirteen tasks
+a week because a task can be on theme for two focuses at once.
 
 | Week | Templates | Note |
 |---|---|---|
 | 1 | 6 | 4 `core` (flag, map, location/borders, language & writing system) + 2 for the fifth slot |
-| 2 | 8 | three spare beyond the five drawn, so swap has candidates |
-| 3 | 8 | same |
+| 2 | 13 | eight spare beyond the five drawn, so swap has candidates |
+| 3 | 13 | same |
 | 4 | 5 | `trifold-board` only |
 
 The other five project types seed as rows with no week-4 templates and are
@@ -74,7 +83,7 @@ hidden in setup until slice 09 fills them.
 
 `src/migrations/index.js` exports two lists. `MIGRATIONS` is checksummed,
 append-only and applied once by Apply pending; `SEEDS` is re-executed in full by
-Run seed on every press. A seed file must not be checksummed: slice 09 adds ~63
+Run seed on every press. A seed file must not be checksummed: slice 09 adds ~53
 task templates and all of `003_country_data.sql` to a database that is already
 seeded and already carries real work, and under the checksum rule that edit
 reads as permanent drift with Apply pending refusing to run it. `ON CONFLICT DO
@@ -89,9 +98,9 @@ a library-editor correction survive.
 | Editing a seeded task's title, then re-running the seed, leaves the edit | met |
 | Renaming a person on `/admin` sticks and does not require touching SQL | met |
 | `/api/catalog` returns and is under ~60KB | met — 22.7KB with all 195 countries |
-| Every focus has a `weight = 3` row in week 2 and in week 3 | met — 22 weight rows |
+| Every focus has three `weight = 3` rows in week 2 and in week 3 | met — 42 weight rows |
 | 195 countries | met |
-| 27 task templates in a 6 / 8 / 8 / 5 split | met |
+| 37 task templates in a 6 / 13 / 13 / 5 split | met |
 
 All of it is asserted in `test/seed-content.test.js`, which is green. Each
 assertion names what is missing rather than reporting a count, because the draw
@@ -100,19 +109,22 @@ month.
 
 ## Where v0 is thin on purpose
 
-Two gaps are real and are slice 09's to close, not this slice's:
+One gap is left, and it is slice 09's to close:
 
-- **Weeks 2 and 3 hold no nature or geography task.** `landmark-to-see` is
-  therefore the only week-3 task `ancient-world`, `wild-places` and
-  `land-and-sky` can reach for, and those three focuses are separated by week 2
-  and by their exclusions rather than by week 3.
 - **Week 1's fifth slot has two candidates**, so basic stats, time zones and
   size comparison have no template yet. `national-symbol` and `currency-animal`
-  split that slot between them until slice 09 widens the pool to six.
+  split that slot between them until slice 09 widens the pool to six. Unlike
+  the focus gaps, this one costs nothing to leave: the fifth slot is one task a
+  month and both candidates are worth drawing.
+
+Weeks 2 and 3 no longer have a thin focus. They did — three focuses had a
+single week-3 task between them — and it was closed here rather than deferred,
+because a focus that hands back the same week every month is the failure this
+whole mechanism exists to prevent, and the rows cost nothing to write now.
 
 ## Do not build
 
 - Hooks or focus affinities. `003_country_data.sql` is slice 09; countries seed
   here unadorned.
-- The remaining ~63 task templates. Slice 09.
+- The remaining ~53 task templates. Slice 09.
 - Any kid-facing screen.

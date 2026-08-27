@@ -3,7 +3,7 @@
 // nothing (DESIGN.md §3).
 //
 // Not part of the migration list, and the difference matters. A migration is
-// checksummed and refuses to re-run; a seed grows — slice 09 adds ~63 task
+// checksummed and refuses to re-run; a seed grows — slice 09 adds ~53 task
 // templates and 003_country_data.sql to a database that is already seeded and
 // already carries a month of real work. Under the checksum rule that edit would
 // read as drift forever. Under this one it is a file edit in the GitHub web

@@ -131,7 +131,7 @@ imported.
   seed** re-executes the whole list on every press: a row that exists is left
   exactly as it is, a row that is new is inserted.
 
-A seed is not a migration and must not be checksummed. Slice 09 adds ~63 task
+A seed is not a migration and must not be checksummed. Slice 09 adds ~53 task
 templates and all of `003_country_data.sql` to a database that is already
 seeded and already carries a month of real work. Under the checksum rule that
 edit reads as permanent drift and Apply pending refuses to run it; under the
@@ -969,8 +969,8 @@ carried into next school year without a terminal.
 ## 13. Seed data
 
 **Status:** partial · seed v0 is built (slice 02): the runner, 3 people, 6
-focuses, 6 project types, 195 countries, 27 task templates and 17 focus weights.
-The remaining ~63 templates and `003_country_data.sql` are slice 09.
+focuses, 6 project types, 195 countries, 37 task templates and 42 focus weights.
+The remaining ~53 templates and `003_country_data.sql` are slice 09.
 
 Seed files are not migrations (§3). They live beside them in `/src/migrations/`
 and are exported from the same index as `SEEDS`, but they are re-run by **Run
@@ -1001,13 +1001,17 @@ Contents of `002_seed.sql`:
 - **195 countries** with continent, region and `research_depth`, unadorned —
   hooks and affinities are `003`. The conflict key is `iso3`, so a name can be
   corrected without minting a second row for the same country.
-- **27 task templates** and **17 focus weights**. Seed v0 is 27, not the 20 of
-  §14: a 5-template week draws all of itself, which leaves Swap with no
-  candidate, and one project type's week 4 is 5 rows on its own.
+- **37 task templates** and **42 focus weights**. Not the 20 of §14: a
+  5-template week draws all of itself, which leaves Swap with no candidate, and
+  one project type's week 4 is 5 rows on its own. That floor is 27, and it
+  sizes the pool for the draw alone. Thirteen a week is what the **focuses**
+  need: five tasks are drawn however deep the pool is, so depth costs the kid
+  nothing, and every focus holds three on-theme tasks in each of weeks 2 and 3.
+  Two would both be drawn every month that focus is chosen.
 
 | Week | Templates | Note |
 |---|---|---|
-| 1 | 6 | 4 `core` — flag, map, location/borders, language — plus 2 competing for the 5th slot |
+| 1 | 6 | 4 `core` — flag, map, location/borders, language & writing system — plus 2 competing for the 5th slot |
 | 2 | 8 | five drawn, three spare, so Swap has somewhere to go |
 | 3 | 8 | same |
 | 4 | 5 | `trifold-board` only |

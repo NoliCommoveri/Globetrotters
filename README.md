@@ -34,8 +34,9 @@ row counts on `/admin/health`. `001_schema.sql` carries every table in §5.
 
 **Slice 02 is built.** `/admin` now also has **Run seed** and the people editor:
 three names and three inks, changed in a browser. `002_seed.sql` carries the
-three people, six focuses, six project types, 195 countries, 27 task templates
-and 17 focus weights — enough library to draw a real month. `GET /api/catalog`
+three people, six focuses, six project types, 195 countries, 37 task templates
+and 42 focus weights — enough library to draw a real month, and enough that the
+focus a kid picks every month does not hand back the same week every month. `GET /api/catalog`
 serves the picker's one fetch with an ETag, so a row corrected in the editor
 reaches a device that already cached it.
 
