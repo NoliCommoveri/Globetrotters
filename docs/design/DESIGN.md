@@ -52,6 +52,12 @@ stored in a signed cookie (`HttpOnly; Secure; SameSite=Lax`, max-age one year).
 The cookie is **re-issued on every authenticated request**, so the year slides
 forward and never expires mid-project.
 
+The signature is HMAC-SHA-256 keyed on `ADMIN_TOKEN` — the same secret §3's
+admin page checks. There is no separate signing key. The consequence is a
+coupling to hold onto: **changing `ADMIN_TOKEN` invalidates every session
+cookie and logs all three people out.** The two rotations are one event, and
+`ADMIN_TOKEN` is therefore set once and left alone.
+
 After the passcode you pick which of the three people you are. **`person_id`
 lives in that same signed cookie**, set by the server — not in `localStorage`,
 where Safari's seven-day cap on script-writable storage would quietly forget who
@@ -129,7 +135,8 @@ command. Everything runs from a browser.
 
 **Access:** a separate `ADMIN_TOKEN` Worker secret, not the family passcode.
 `GET /admin` serves the token form unauthenticated; the token is then held in a
-short-lived cookie scoped `Path=/admin`.
+short-lived cookie scoped `Path=/admin`. `ADMIN_TOKEN` is also the key the
+family session cookie is signed with (§2), so it is never rotated casually.
 
 **Kids must never stumble into this page**, and the threat model is a curious
 12-year-old on a shared laptop, not an attacker. So the defense is not
@@ -925,6 +932,11 @@ Resolved:
 
 - **Timezone.** One `FAMILY_TZ` Worker secret. `local_date` computed at insert via
   `Intl.DateTimeFormat`. Weeks start Monday.
+- **What the session cookie is signed with.** `ADMIN_TOKEN`, HMAC-SHA-256. No
+  fourth secret. It buys one less field in the dashboard at the cost of tying
+  the family's login lifetime to the admin credential — rotating `ADMIN_TOKEN`
+  logs everyone out. Three Worker secrets total: `FAMILY_PASSCODE`,
+  `ADMIN_TOKEN`, `FAMILY_TZ`.
 - **What breaks a streak.** Nothing, because there is no streak. See §10.
 - **Can a past week's tasks still be checked off?** Yes. No lockout, ever. A lockout
   converts a missed day into a permanently dead card, which is the exact opposite of

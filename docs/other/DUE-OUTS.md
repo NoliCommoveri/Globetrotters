@@ -9,13 +9,13 @@ terminal — if something appears to, it is specced wrong (§3).
 | # | Due-out | Needed by | State |
 |---|---|---|---|
 | D-01 | Cloudflare account, account ID known | 00 | outstanding |
-| D-02 | D1 database created (production), name and id | 00 | outstanding |
-| D-03 | D1 database created (preview), name and id | 00 | outstanding |
+| D-02 | D1 database created (production), name and id | 00 | done — `globetrotters-prod` |
+| D-03 | D1 database created (preview), name and id | 00 | done — `globetrotters-preview` |
 | D-04 | R2 bucket created, name known | 00 | outstanding |
 | D-05 | GitHub repo secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` | 00 | outstanding |
 | D-06 | Worker name and route decided | 00 | outstanding |
 | D-07 | `ADMIN_TOKEN` value chosen | 01 | outstanding |
-| D-08 | Worker secrets set: `FAMILY_PASSCODE`, `ADMIN_TOKEN`, `SESSION_SECRET`, `FAMILY_TZ` | 00 | outstanding |
+| D-08 | Worker secrets set: `FAMILY_PASSCODE`, `ADMIN_TOKEN`, `FAMILY_TZ` | 00 | outstanding |
 | D-09 | Three ink colors for the three people | 02 | outstanding |
 | D-10 | Two font files, licensed for self-hosting | 03 | outstanding |
 | D-11 | `FAMILY_TZ` value confirmed | 02 | outstanding |
@@ -34,20 +34,27 @@ GitHub repo settings page.
 
 The API token needs permission to edit Workers, D1, and R2 on the account.
 
-**D-07, D-08. Secrets.** Four Worker secrets, set once in the dashboard:
+The two D1 databases exist. Their ids go straight into `wrangler.toml`:
+
+| Binding | Name | `database_id` |
+|---|---|---|
+| production | `globetrotters-prod` | `5f351cd1-d7e7-4ddc-af41-c2e1b0a68e02` |
+| preview | `globetrotters-preview` | `3304a4c4-ae23-4900-b7f9-4904bac01e99` |
+
+**D-07, D-08. Secrets.** Three Worker secrets, set once in the dashboard:
 
 - `FAMILY_PASSCODE` — one shared passcode for the family. Typed once per
   device, then not again for a year.
 - `ADMIN_TOKEN` — separate from the passcode, and it must be. It is what keeps
-  a curious 12-year-old out of the library editor and Reset month.
-- `SESSION_SECRET` — the HMAC key the session cookie is signed with. Rotating
-  it later logs the whole family out, so it is set once and left alone.
+  a curious 12-year-old out of the library editor and Reset month. It is also
+  the key the family session cookie is signed with, so changing it logs all
+  three people out. Set once and left alone.
 - `FAMILY_TZ` — an IANA zone name, e.g. `America/Denver`. Every `local_date` is
   computed from it at insert. Getting it wrong shifts which calendar day a
   session lands on.
 
-`SESSION_SECRET` and `FAMILY_TZ` aren't read until slices 03 and 02, but all
-four are set in one visit rather than three.
+`FAMILY_TZ` isn't read until slice 02 and `ADMIN_TOKEN` not until 01, but all
+three are set in one visit rather than three.
 
 **D-09. Ink colors.** Three saturated colors against a deep ink navy ground and
 chart-paper off-white (§11). They are used only for ownership and completion —
