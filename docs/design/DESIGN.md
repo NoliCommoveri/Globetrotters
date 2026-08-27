@@ -12,6 +12,8 @@ Everyone has their own device. There is also a tablet on the kitchen wall.
 
 ## 1. Scope
 
+**Status:** n/a — scope statement, nothing to build
+
 **V1 builds:**
 - Month setup: pick country, focus, and final-project type per person
 - Task board: the month's drawn tasks, grouped by week, checked off in any order
@@ -29,6 +31,8 @@ Everyone has their own device. There is also a tablet on the kitchen wall.
 ---
 
 ## 2. Stack
+
+**Status:** not started · slices 00, 03
 
 - Cloudflare Worker serving both the API (`/api/*`) and static assets
 - **D1** for all relational data
@@ -68,6 +72,8 @@ Nine months should pass without anyone seeing a login screen.
 ---
 
 ## 3. Migrations — hard requirement
+
+**Status:** not started · slices 00, 01
 
 **The owner cannot use a terminal.** No step in setup, migration, or seeding may
 require `wrangler d1 execute`, `wrangler d1 migrations apply`, or any other CLI
@@ -145,6 +151,8 @@ the Action deploy, confirming the SHA on `/admin`, then pressing Apply pending.
 ---
 
 ## 4. The task model
+
+**Status:** not started · slice 04
 
 This is the core idea. Three layers:
 
@@ -242,6 +250,8 @@ swapped_from IS NOT NULL)` — no counter column needed.
 ---
 
 ## 5. Schema (D1 / SQLite)
+
+**Status:** not started · slice 01
 
 ```sql
 CREATE TABLE people (
@@ -405,6 +415,8 @@ CREATE INDEX idx_hooks_country        ON country_hooks(country_id);
 
 ## 6. API
 
+**Status:** not started · slices 02–07
+
 ```
 POST   /api/auth                      passcode -> cookie
 GET    /api/me                        people list + active plans
@@ -469,6 +481,8 @@ the focus, not the roll.
 
 ## 7. Screens
 
+**Status:** not started · see each screen below
+
 Mobile first. The kids will use this on a phone standing at a table. 360px wide.
 
 **First run, in full:** family passcode → pick which of the three people you are →
@@ -476,6 +490,8 @@ land on the empty state, which reads "Pick a country to start September." Three
 steps, once per device, and it is the only path every user takes.
 
 ### This week — the default view
+
+**Status:** not started · slice 05
 
 Used ~180 times per person. Everything else in the app is occasional.
 
@@ -516,6 +532,8 @@ Used ~180 times per person. Everything else in the app is occasional.
   Same data, but one of them is an instruction.
 
 ### Month setup
+
+**Status:** not started · slice 04
 
 Runs 27 times total across the school year — the least-used screen and by far the
 highest-stakes, since it silently determines four weeks of work. It's a ceremony,
@@ -561,6 +579,8 @@ started yet. Family pressure instead of push.
 
 ### Passport
 
+**Status:** not started · slice 06
+
 The shared family wall. 27 stamps for the year, and empty until the last day of
 September — so it has to work empty.
 
@@ -600,6 +620,8 @@ September — so it has to work empty.
 
 ### Plan
 
+**Status:** not started · slice 05
+
 Full four-week view for the current month — all twenty tasks grouped by week. This
 is where you look when you want the shape of the month rather than the shape of
 today, and it is the only screen that can hold month-scale state, so it holds all
@@ -624,6 +646,8 @@ of it:
 ---
 
 ## 8. The wall tablet
+
+**Status:** not started · slice 07
 
 A `/wall` route for the kitchen tablet. Read-only, no person identity, all three
 people at once, meant to be read from six feet away.
@@ -696,6 +720,8 @@ their own.
 
 ## 9. Country data
 
+**Status:** not started · slice 09
+
 The picker is only as good as what it can tell you about a country. This does not
 require a recommendation engine — it requires a column. All of it is generated once,
 at build time, into a seed migration: no runtime API, no service dependency, works
@@ -735,6 +761,8 @@ rest selectable but unadorned.
 
 ## 10. Progress
 
+**Status:** not started · slice 05
+
 **No streak.** A streak is a loss-aversion device built for adults who opted into a
 daily habit. This is two kids doing parent-assigned work from September to May — a
 span containing Thanksgiving, winter break, spring break, a flu, and a trip to see
@@ -773,6 +801,8 @@ makes both meaningless.
 
 ## 11. Design direction
 
+**Status:** not started · slices 03, 06
+
 Subject vernacular is the field notebook and the border stamp, not the SaaS dashboard.
 Avoid cream + serif + terracotta, and avoid dark-mode-with-one-acid-accent; both read
 as generic AI output.
@@ -799,6 +829,8 @@ carries the first four weeks of the year.
 ---
 
 ## 12. Library editor
+
+**Status:** not started · slice 08
 
 Tasks, focuses, and project types are all editable in the app. Parent-facing, behind
 `ADMIN_TOKEN`, not part of the kid experience.
@@ -844,6 +876,8 @@ carried into next school year without a terminal.
 
 ## 13. Seed data
 
+**Status:** not started · slices 02, 09
+
 - `001_schema.sql` — tables and indexes
 - `002_seed.sql` — people, focuses, project types, countries, task templates, weights
 - `003_country_data.sql` — hooks, focus affinities, research depth
@@ -873,17 +907,15 @@ national symbolism."
 
 ## 14. Build order
 
-The library is what determines whether the app is *good*, and it's also the part
-you'll want to tune after watching two kids actually use it — which can't happen until
-the loop runs. So don't write 90 prompts before anything is testable.
+**Status:** n/a — the build order lives in `../slices/INDEX.md`
 
-1. Schema, migration runner, `/admin` health page. Nothing works without browser-run
-   migrations, and this is where a mistake is most expensive.
-2. A **20-template seed** covering all four weeks. Enough to draw a real month.
-3. Month setup → draw → This week → check off → complete → stamp, end to end.
-4. `/wall`.
-5. Library editor.
-6. Fill the library to ~90 templates and add `003_country_data.sql`.
+Ten slices, ordered so the deploy-and-migrate path is built before anything
+that needs migrating, and so the end-to-end loop runs on a thin library before
+the library is written. Each slice file holds the detailed instructions for
+what it builds, its due-outs, its open questions, and its exit criteria.
+
+Ship point is the end of slice 06: at that point the app does the whole
+nine-month job for one person on one phone.
 
 ---
 
@@ -912,8 +944,6 @@ Resolved:
   nothing server-side is device-bound. See §2.
 - **Names and ink colors for the three people.** Set on `/admin`, not in the seed.
 
-Still open:
-
-- Whether week 4's "present" task should require an audience — i.e. whether the family
-  schedules a presentation night, which is a household decision the app can only
-  reflect.
+**Still open.** Open questions are tracked in `../other/OPEN-QUESTIONS.md`, each
+assigned to the slice it blocks. Eleven are outstanding. They are answered before
+the code that depends on them is written, never guessed.
