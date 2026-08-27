@@ -62,62 +62,45 @@ export async function migrationStatus(db, migrations) {
   return rows;
 }
 
-// Applies every pending migration in order and halts on the first failure.
+// Runs a list of statements in chunks, halting on the first that D1 rejects.
 //
 // Each chunk goes through db.batch(), which is atomic: a chunk that fails
 // applies nothing. That is what makes the failure path exact — the chunk is
 // replayed one statement at a time, which commits the statements before the bad
 // one and names the bad one. Without the replay the page could only say "this
-// migration failed", which is not something you can act on from a phone.
+// file failed", which is not something you can act on from a phone.
 //
-// A migration that halts part-way is not recorded, so it stays pending. Its
-// committed statements are real: fixing it means adding a new file, not editing
-// this one. That is the cost of D1 having no cross-batch transaction, and it is
-// why 001 is written once and left alone.
-export async function applyPending(db, migrations) {
-  const status = await migrationStatus(db, migrations);
-  const pending = status.filter((r) => r.state === 'pending');
-  const applied = [];
+// Shared by Apply pending and Run seed. They differ in what a halt costs, not
+// in how a statement is run: a halted migration leaves committed DDL that only
+// a new file can fix, while a halted seed is simply pressed again.
+export async function runChunked(db, statements) {
+  let done = 0;
 
-  for (const row of pending) {
-    const m = migrations.find((x) => x.id === row.id);
-    const statements = splitStatements(m.sql);
-    let done = 0;
-
-    for (let i = 0; i < statements.length; i += CHUNK) {
-      const chunk = statements.slice(i, i + CHUNK);
-      try {
-        await db.batch(chunk.map((s) => db.prepare(s)));
-        done += chunk.length;
-      } catch (err) {
-        const failure = await locate(db, chunk, err);
-        done += failure.committed;
-        // The batch was rejected but every statement in it passed on its own.
-        // The chunk is applied; the batch call was the problem, not the SQL.
-        if (failure.statement === null && failure.committed === chunk.length) continue;
-        return {
-          ok: false,
-          applied,
-          failure: {
-            id: m.id,
-            name: m.name,
-            statement: failure.statement,
-            error: failure.error,
-            statementNumber: done + 1,
-            of: statements.length,
-          },
-        };
-      }
+  for (let i = 0; i < statements.length; i += CHUNK) {
+    const chunk = statements.slice(i, i + CHUNK);
+    try {
+      await db.batch(chunk.map((s) => db.prepare(s)));
+      done += chunk.length;
+    } catch (err) {
+      const failure = await locate(db, chunk, err);
+      done += failure.committed;
+      // The batch was rejected but every statement in it passed on its own.
+      // The chunk is applied; the batch call was the problem, not the SQL.
+      if (failure.statement === null && failure.committed === chunk.length) continue;
+      return {
+        ok: false,
+        done,
+        failure: {
+          statement: failure.statement,
+          error: failure.error,
+          statementNumber: done + 1,
+          of: statements.length,
+        },
+      };
     }
-
-    await db.prepare(
-      'INSERT INTO _migrations (id, name, applied_at, checksum) VALUES (?, ?, ?, ?)'
-    ).bind(m.id, m.name, new Date().toISOString(), await checksum(m.sql)).run();
-
-    applied.push({ id: m.id, name: m.name, statements: statements.length });
   }
 
-  return { ok: true, applied, failure: null };
+  return { ok: true, done, failure: null };
 }
 
 // The failed chunk applied nothing, so replaying it statement by statement is
@@ -134,8 +117,42 @@ async function locate(db, chunk, batchErr) {
   }
   // The batch failed but every statement passed on its own — a limit or a shape
   // db.batch() will not take rather than bad SQL. The caller carries on: the
-  // statements are committed, which is what the migration was for.
+  // statements are committed, which is what the run was for.
   return { committed, statement: null, error: `batch of ${chunk.length} failed: ${batchErr.message}` };
+}
+
+// Applies every pending migration in order and halts on the first failure.
+//
+// A migration that halts part-way is not recorded, so it stays pending. Its
+// committed statements are real: fixing it means adding a new file, not editing
+// this one. That is the cost of D1 having no cross-batch transaction, and it is
+// why 001 is written once and left alone.
+export async function applyPending(db, migrations) {
+  const status = await migrationStatus(db, migrations);
+  const pending = status.filter((r) => r.state === 'pending');
+  const applied = [];
+
+  for (const row of pending) {
+    const m = migrations.find((x) => x.id === row.id);
+    const statements = splitStatements(m.sql);
+    const result = await runChunked(db, statements);
+
+    if (!result.ok) {
+      return {
+        ok: false,
+        applied,
+        failure: { id: m.id, name: m.name, ...result.failure },
+      };
+    }
+
+    await db.prepare(
+      'INSERT INTO _migrations (id, name, applied_at, checksum) VALUES (?, ?, ?, ?)'
+    ).bind(m.id, m.name, new Date().toISOString(), await checksum(m.sql)).run();
+
+    applied.push({ id: m.id, name: m.name, statements: statements.length });
+  }
+
+  return { ok: true, applied, failure: null };
 }
 
 // Delete order is dependency order, and it is not negotiable: D1 enforces

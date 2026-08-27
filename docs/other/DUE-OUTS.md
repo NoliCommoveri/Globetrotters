@@ -12,7 +12,7 @@ terminal — if something appears to, it is specced wrong (§3).
 | D-06 | Worker created and git-connected to this repo; name and route decided | 00 | done — `globetrotters` on `globetrotters.immotus.app` |
 | D-07 | `ADMIN_TOKEN` value chosen | 01 | done |
 | D-08 | Worker secrets set: `FAMILY_PASSCODE`, `ADMIN_TOKEN`, `FAMILY_TZ` | 00 | done |
-| D-09 | Three ink colors for the three people | 02 | outstanding |
+| D-09 | Three ink colors for the three people | 02 | done — deep purple, lilac, blue |
 | D-10 | Two font files, licensed for self-hosting | 03 | outstanding |
 | D-11 | `FAMILY_TZ` value confirmed | 02 | done — `America/Chicago` |
 | D-12 | The month the school year starts | 04 | outstanding |
@@ -101,14 +101,22 @@ repo — not here, not in `wrangler.toml`, not in a slice. Keep a copy in a
 password manager; `ADMIN_TOKEN` in particular cannot be rotated casually,
 because every family session cookie is signed with it (§2).
 
-**D-09. Ink colors.** Three saturated colors against a deep ink navy ground and
-chart-paper off-white (§11). They are used only for ownership and completion —
-nothing else in the app gets to be colorful — and they have to stay distinct
-when a home printer renders all three as grey, which is why the stamp also
-carries the person's name.
+**D-09. Ink colors.** Settled. Two purples and a blue, one per person:
 
-Names can be typed on `/admin` after slice 02 ships. The colors are a palette
-decision and placeholder colors that ship are placeholder colors that stay.
+| Ink | Hex | Greyscale |
+|---|---|---|
+| Deep purple | `#5B2A86` | ~26% |
+| Lilac | `#D07AC0` | ~61% |
+| Blue | `#2E6FD9` | ~41% |
+
+They sit against a deep ink navy ground and chart-paper off-white (§11) and are
+used only for ownership and completion — nothing else in the app gets to be
+colorful. The three greyscale values are 15 and 20 points apart, which is what
+keeps three stamps separable when the passport is photocopied; the stamp also
+carries the person's name, so the color never has to carry it alone.
+
+Seeded in `002_seed.sql` and editable on `/admin`, where the names are typed
+too. Changing one later is a color picker and a Save.
 
 **D-10. Fonts.** A condensed grotesque for display — headings, country names,
 the stamp face — against a plain humanist sans for body and prompts. Both with

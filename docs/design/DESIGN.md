@@ -86,9 +86,8 @@ Nine months should pass without anyone seeing a login screen.
 
 ## 3. Migrations — hard requirement
 
-**Status:** partial · the deploy half (slice 00), the migration runner, `/admin`
-and its token gate (slice 01) are built. Run seed and the people editor are
-slice 02.
+**Status:** built · the deploy half (slice 00), the migration runner, `/admin`
+and its token gate (slice 01), Run seed and the people editor (slice 02).
 
 **The owner cannot use a terminal.** No step in setup, migration, or seeding may
 require `wrangler d1 execute`, `wrangler d1 migrations apply`, or any other CLI
@@ -122,6 +121,25 @@ command. Everything runs from a browser.
 - Migration files are append-only. To change something already applied, add a new
   file. The runner refuses to re-run an applied id.
 
+**Schema and seed are two lists, protected by opposite rules.**
+`src/migrations/index.js` exports both, and it stays the only place `.sql` is
+imported.
+
+- **`MIGRATIONS`** is schema. Checksummed, append-only, applied once by **Apply
+  pending**, and an edit afterwards shows as drift.
+- **`SEEDS`** is data. Every insert is `ON CONFLICT ... DO NOTHING`, and **Run
+  seed** re-executes the whole list on every press: a row that exists is left
+  exactly as it is, a row that is new is inserted.
+
+A seed is not a migration and must not be checksummed. Slice 09 adds ~63 task
+templates and all of `003_country_data.sql` to a database that is already
+seeded and already carries a month of real work. Under the checksum rule that
+edit reads as permanent drift and Apply pending refuses to run it; under the
+seed rule it is a file edit in the GitHub web editor and one button press,
+which is the only shape the browser-only constraint leaves. The same property
+is what makes a title corrected in the library editor survive every future
+press.
+
 **Two implementation traps**
 
 - **The splitter.** `sql.split(';')` breaks on semicolons inside string literals,
@@ -138,9 +156,13 @@ command. Everything runs from a browser.
   **the deployed git SHA and build time**. In a browser-only workflow the standing
   failure mode is pressing Apply pending against a Worker that hasn't finished
   deploying. Five lines, saves an hour of confusion.
-- **People** — the three names and ink colors, editable here. They are not seeded
-  from SQL: naming your own kids must not require editing a migration in a web
-  editor, which is the same terminal problem wearing a browser.
+- **People** — the three names and ink colors, editable here. The seed writes
+  three placeholder rows, because a person row has to exist before anyone can
+  pick themselves at first run; every change after that is made here. Naming
+  your own kids must not require editing SQL in a web editor, which is the same
+  terminal problem wearing a browser. A name is 1–24 characters — long enough to
+  be a name, short enough for the stamp face — and an ink is a six-digit hex,
+  stored uppercase, because it is rendered into both CSS and SVG later.
 - **Reset month** *(guarded)* — delete a `month_plan` and its tasks. This is the
   one destructive control. The typed confirmation is **the plan's own month**,
   `2026-09`, not a fixed word: a word you type every time stops being a
@@ -463,13 +485,14 @@ CREATE INDEX idx_hooks_country        ON country_hooks(country_id);
 
 ## 6. API
 
-**Status:** not started · slices 02–07
+**Status:** partial · `/api/catalog`, `POST /admin/api/seed` and the two people
+routes are built (slice 02). The rest is slices 03–07.
 
 ```
 POST   /api/auth                      passcode -> cookie
 GET    /api/me                        people list + active plans
 GET    /api/catalog                   countries + hooks + affinities + focuses
-                                      + project types. ~60KB, cache client-side.
+                                      + project types. ~60KB, ETag + 304.
 
 POST   /api/plans                     {person, month, country, focus, project}
                                       -> draws 20 tasks. 409 on UNIQUE(person, month),
@@ -516,6 +539,20 @@ POST   /admin/api/project-types       create
 PATCH  /admin/api/project-types/:id   edit, reorder week-4 sequence
 GET    /admin/api/library.json        full export / backup
 ```
+
+**How `/api/catalog` invalidates.** An **ETag over the response body**, with
+`Cache-Control: no-cache` so the browser keeps the payload but asks before
+reusing it. A device that already has the catalog sends `If-None-Match` and gets
+a 304 with no body; a hook corrected in the library editor changes the hash and
+the next revalidation takes the new one. The cost is one ~200-byte round trip
+per load. The alternative — a version field the client compares itself — needs a
+second endpoint and a hand-rolled cache to do what the browser already does, and
+neither can be retrofitted into caches already in the wild.
+
+Each `project_type` in the payload carries **`week4_templates`**, the count of
+its week-4 sequence. Setup hides a project type with zero rather than offering a
+month that ends in five blank cards: in seed v0 only `trifold-board` is filled,
+and slice 09 fills the other five by adding rows, with no client change.
 
 **What `PATCH /api/plans/:id` allows, and when.** Country doesn't affect the draw at
 all — tasks are country-agnostic — so it can change any time, freely. Project type
@@ -931,32 +968,76 @@ carried into next school year without a terminal.
 
 ## 13. Seed data
 
-**Status:** not started · slices 02, 09
+**Status:** partial · the seed runner, the fixed rows and all 195 countries are
+built (slice 02). The 27 task templates and `003_country_data.sql` are
+outstanding.
 
-- `001_schema.sql` — tables and indexes
-- `002_seed.sql` — people, focuses, project types, countries, task templates, weights
-- `003_country_data.sql` — hooks, focus affinities, research depth
+Seed files are not migrations (§3). They live beside them in `/src/migrations/`
+and are exported from the same index as `SEEDS`, but they are re-run by **Run
+seed** on every press rather than applied once, and every insert is
+`ON CONFLICT ... DO NOTHING` on the row's stable key — `slug`, or `iso3` for a
+country. Two consequences, and both are load-bearing: a row that exists is never
+touched again, so an edit made in the library editor survives every future
+press; and the file itself can grow, which is how slice 09 reaches a database
+that is already seeded.
+
+- `001_schema.sql` — tables and indexes. A migration.
+- `002_seed.sql` — people, focuses, project types, countries, task templates,
+  weights. A seed.
+- `003_country_data.sql` — hooks, focus affinities, revised research depth.
+  A seed, slice 09.
 
 Contents of `002_seed.sql`:
 
-- 3 placeholder people, renamed on `/admin` rather than by editing SQL; 6 focuses,
-  6 project types
-- ~195 countries with continent and region
-- **~90 task templates**, distributed:
-  - Week 1 — 10 templates, 4 marked `core` and always drawn (flag, map,
-    location/borders, language & writing system); the rest — basic stats, national
-    symbols, currency, neighbors, time zones, size comparison — fill the 5th slot
-  - Week 2 — 25 across history, government, law, land, climate, ecology, prehistory
-  - Week 3 — 25 across people, religion, daily life for kids and women, food, art,
-    music, sport, wow facts, landmarks
-  - Week 4 — 5 per project type (30 total), as ordered sequences: choose the artifact,
-    gather materials, build, build, rehearse & present
-- `task_focus_weights` rows only where a focus has an opinion: 3 for on-theme, 0 to
-  exclude. Neutral tasks get no row.
+- **3 placeholder people**, renamed on `/admin` rather than by editing SQL. Ids
+  are explicit here and only here: `people` has no natural key to conflict on,
+  so the id is the key and a second press must not mint a fourth Person 1. The
+  three inks are one deep purple, one lilac and one blue — `#5B2A86`, `#D07AC0`,
+  `#2E6FD9` — distinct in hue on screen and ~26% / ~61% / ~41% grey on a home
+  printer, which is what keeps three stamps apart on a photocopied passport.
+- **6 focuses and 6 project types.** Each focus carries a blurb written to a 5th
+  grader; each project type a freeform "what you'll need" the week-4 gather task
+  points at.
+- **195 countries** with continent, region and `research_depth`, unadorned —
+  hooks and affinities are `003`. The conflict key is `iso3`, so a name can be
+  corrected without minting a second row for the same country.
+- **27 task templates.** Seed v0 is 27, not the 20 of §14: a 5-template week
+  draws all of itself, which leaves Swap with no candidate, and one project
+  type's week 4 is 5 rows on its own.
 
-Every `prompt` written in second person to a 5th grader, one clear action, finishable
-in ten minutes. "Find out which animal is on their money and draw it" — not "Research
-national symbolism."
+| Week | Templates | Note |
+|---|---|---|
+| 1 | 6 | 4 `core` — flag, map, location/borders, language — plus 2 competing for the 5th slot |
+| 2 | 8 | five drawn, three spare, so Swap has somewhere to go |
+| 3 | 8 | same |
+| 4 | 5 | `trifold-board` only |
+
+The other five project types seed as rows with an empty week-4 sequence and are
+hidden in setup until slice 09 fills them.
+
+**Tier means what is drawn, not how hard it is.** `core` is fixed and always
+included — week 1's four, and all five week-4 rows. `focus` is the
+focus-weighted pool, weeks 2 and 3. `wild` is eligible but off the main line:
+week 1's fifth-slot candidates.
+
+`task_focus_weights` stores only an opinion: 3 for on-theme, 0 to exclude,
+nothing in between, and no row at all for neutral. Two constraints the draw
+cannot report on its own, so they are asserted in the tests instead: every focus
+needs at least one weight-3 task in weeks 2–3 or the setup preview has nothing
+to sample, and no focus may exclude more than one of a week's 8 or a 5-task draw
+leaves Swap with no candidate.
+
+Full grown, the library is **~90 task templates** — 10 in week 1, 25 in week 2,
+25 in week 3, and 5 per project type in week 4. Slice 09.
+
+Every `prompt` is written in second person to a 5th grader, one clear action,
+finishable in ten minutes. "Find out which animal is on their money and draw it"
+— not "Research national symbolism." And **no task is country-specific**: the
+same prompt has to work in Peru and in Japan, which is what lets a kid change
+countries at any point in the month.
+
+The column rules and the paste-ready row forms for the hand-written lists are in
+`../other/SEED-CONTENT.md`.
 
 ---
 
@@ -1008,8 +1089,15 @@ Resolved:
   resettable, after it the plan is fixed. See §4, §6.
 - **How many devices a person gets.** As many as they like. Identity is per-device and
   nothing server-side is device-bound. See §2.
-- **Names and ink colors for the three people.** Set on `/admin`, not in the seed.
+- **Names and ink colors for the three people.** Three placeholder rows are
+  seeded, because a person row has to exist before anyone can pick themselves at
+  first run, and every change after that is made on `/admin`. The three inks —
+  `#5B2A86` deep purple, `#D07AC0` lilac, `#2E6FD9` blue — are chosen to stay
+  separable as greys on a home printer. See §3, §13.
+- **How `/api/catalog` invalidates.** An ETag over the body plus
+  `Cache-Control: no-cache`. The browser does the caching; a corrected hook
+  reaches a device that already loaded the old one. See §6.
 
 **Still open.** Open questions are tracked in `../other/OPEN-QUESTIONS.md`, each
-assigned to the slice it blocks. Nine are outstanding. They are answered before
+assigned to the slice it blocks. Six are outstanding. They are answered before
 the code that depends on them is written, never guessed.

@@ -12,8 +12,6 @@ moved to the answered list at the bottom of this file.
 
 | # | Question | Blocks | Kind |
 |---|---|---|---|
-| Q-04 | Are people seeded as placeholders, or created on `/admin`? | 02 | spec conflict |
-| Q-05 | How does `/api/catalog` invalidate? | 02 | api |
 | Q-06 | Where do the focus preview's sample titles come from? | 04 | api |
 | Q-07 | How does setup learn the family's stamped countries? | 04 | api |
 | Q-08 | Does a repeated `done` write a second session? | 05 | api |
@@ -21,27 +19,13 @@ moved to the answered list at the bottom of this file.
 | Q-10 | Is `POST /api/auth` exempt from the wall's write ban? | 07 | auth |
 | Q-11 | Does week 4's "present" task require an audience? | 09 | content |
 
-Q-04 is the one that gates slice 02 entirely — nothing can be seeded until it
-is settled. It does not touch the schema: `001_schema.sql` is applied, and its
-`people` table serves either answer unchanged.
+Q-06 and Q-07 both gate slice 04's setup screen, and both are the same shape:
+what the client needs in one fetch versus what it has to ask for separately.
+Answering them together is cheaper than answering them apart.
 
 ---
 
 ## Detail
-
-**Q-04 — Are people seeded as placeholders, or created on `/admin`?**
-§3 says people "are not seeded from SQL." §13 seeds "3 placeholder people,
-renamed on `/admin`." These contradict. A person row must exist before anyone
-can pick themselves at first run, so placeholders plus an editor is the
-workable reading — but §3's sentence needs to say that instead. The `people`
-table is the same either way; what changes is whether slice 02's seed writes
-three rows.
-
-**Q-05 — How does `/api/catalog` invalidate?**
-It is ~60KB, cached client-side, and the slice 08 country editor edits exactly
-what it contains. Without an ETag or a version field, a corrected hook stays
-wrong on every device that already loaded it. Cheap to add in slice 02;
-impossible to retrofit into caches already in the wild.
 
 **Q-06 — Where do the focus preview's sample titles come from?**
 §7's focus highlight shows three task titles from that focus's `weight = 3`
@@ -81,6 +65,8 @@ week-4 template per project type, so it blocks slice 09 and nothing earlier.
 
 | # | Question | Answer |
 |---|---|---|
+| Q-05 | How does `/api/catalog` invalidate? | An ETag over the body, with `Cache-Control: no-cache`. The browser revalidates and takes a 304 when nothing changed. A version field would need a second endpoint and a hand-rolled cache to do what the browser already does. `DESIGN.md` §6, §15. |
+| Q-04 | Are people seeded as placeholders, or created on `/admin`? | Placeholders. The seed writes three rows with explicit ids — `people` has no natural key to conflict on — and `/admin` renames them. §3's "not seeded from SQL" sentence was the half that was wrong. `DESIGN.md` §3, §13, §15. |
 | Q-03 | What is the session cookie signed with? | `ADMIN_TOKEN`, HMAC-SHA-256. No fourth secret; rotating it logs the family out. `DESIGN.md` §2, §3, §15. |
 | Q-01 | Does `month_plans` need `redraws_used`? | No column. Redraw is unlimited until the first check-off and refused after it — the same gate change-focus sits behind, which made a limit of one unenforceable anyway. `DESIGN.md` §6, §7, §15. |
 | Q-02 | Does the swap budget survive a redraw? | No. The count stays derived and a redraw resets it, deliberately: the redraw destroys the tasks those swaps bought. Before the first check-off everything is free and resettable; after it the plan is fixed. `DESIGN.md` §4, §15. |
