@@ -9,7 +9,7 @@ Slices are strictly ordered — the dependency column is why, not a suggestion.
 | # | Slice | Status | Band | Depends on | Design sections |
 |---|---|---|---|---|---|
 | 00 | [Deploy path](00-deploy-path.md) | built | M | — | §2, §3 (deploy half) |
-| 01 | [Migration runner](01-migration-runner.md) | not started | M | 00 | §3, §5 |
+| 01 | [Migration runner](01-migration-runner.md) | built | M | 00 | §3, §5 |
 | 02 | [Seed v0 and catalog](02-seed-and-catalog.md) | not started | M | 01 | §13 (partial), §6 (catalog) |
 | 03 | [Auth and shell](03-auth-and-shell.md) | not started | M | 02 | §2 (auth), §11 |
 | 04 | [Setup, draw, reveal](04-setup-draw-reveal.md) | not started | L | 03 | §4, §7 Month setup |
@@ -52,7 +52,7 @@ Every section of `DESIGN.md` and the slice that finishes it.
 |---|---|
 | §1 Scope | — (scope statement, nothing to build) |
 | §2 Stack | 03 |
-| §3 Migrations | 01 |
+| §3 Migrations | 02 (Run seed and the people editor land there) |
 | §4 The task model | 04 |
 | §5 Schema | 01 |
 | §6 API | 07 (last endpoint lands there) |

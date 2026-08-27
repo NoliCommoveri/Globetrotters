@@ -63,9 +63,10 @@ and changes nothing else.
 npx wrangler deploy --var COMMIT_SHA:"${WORKERS_CI_COMMIT_SHA:-unknown}"
 ```
 
-The build command is empty — there is no build step. The flag is what puts the
-commit on `/admin/health`; the version tag is empty on a Workers Build, so
-without it that row reads `(not set)`. Nothing breaks if it is missing.
+It belongs in the **Deploy command** field, and the **Build command** field is
+empty — there is no build step. The flag is what puts the commit on
+`/admin/health`; the version tag is empty on a Workers Build, so without it that
+row reads `(not set)`. Nothing breaks if it is missing.
 
 The name in `wrangler.toml` must read `globetrotters`. A mismatch does not fail
 — it deploys a second Worker under the other name and leaves this one serving

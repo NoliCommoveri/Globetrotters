@@ -86,8 +86,9 @@ Nine months should pass without anyone seeing a login screen.
 
 ## 3. Migrations — hard requirement
 
-**Status:** partial · the deploy half is built (slice 00). The migration runner,
-`/admin` and its token gate are slice 01.
+**Status:** partial · the deploy half (slice 00), the migration runner, `/admin`
+and its token gate (slice 01) are built. Run seed and the people editor are
+slice 02.
 
 **The owner cannot use a terminal.** No step in setup, migration, or seeding may
 require `wrangler d1 execute`, `wrangler d1 migrations apply`, or any other CLI
@@ -113,7 +114,11 @@ command. Everything runs from a browser.
   show it, never auto-fix it).
 - **Apply pending** runs each pending migration in order, statement by statement
   via `db.batch()`, recording the row on success and halting on the first failure
-  with the failing statement and error printed on the page.
+  with the failing statement and error printed on the page. A `db.batch()` is
+  atomic, so a chunk that fails has applied nothing; the runner replays that
+  chunk one statement at a time to name the offender, which commits the
+  statements before it. A migration that halts is not recorded and stays pending,
+  so fixing it means adding a new file — D1 has no transaction spanning batches.
 - Migration files are append-only. To change something already applied, add a new
   file. The runner refuses to re-run an applied id.
 
@@ -136,15 +141,22 @@ command. Everything runs from a browser.
 - **People** — the three names and ink colors, editable here. They are not seeded
   from SQL: naming your own kids must not require editing a migration in a web
   editor, which is the same terminal problem wearing a browser.
-- **Reset month** *(guarded)* — delete a `month_plan` and its tasks, typed
-  confirmation required. This is the one destructive control. D1 enforces foreign
+- **Reset month** *(guarded)* — delete a `month_plan` and its tasks. This is the
+  one destructive control. The typed confirmation is **the plan's own month**,
+  `2026-09`, not a fixed word: a word you type every time stops being a
+  confirmation, and this one names the thing being destroyed. D1 enforces foreign
   keys, so it must delete in dependency order: `sessions`, `media`, `stamps`,
   `plan_tasks`, then `month_plans`.
 
 **Access:** a separate `ADMIN_TOKEN` Worker secret, not the family passcode.
-`GET /admin` serves the token form unauthenticated; the token is then held in a
-short-lived cookie scoped `Path=/admin`. `ADMIN_TOKEN` is also the key the
-family session cookie is signed with (§2), so it is never rotated casually.
+`GET /admin` serves the token form unauthenticated, and `POST /admin` is the only
+write in the app that may arrive without a cookie, because it is what issues one.
+The cookie holds its own expiry and an HMAC-SHA-256 signature over it keyed on
+`ADMIN_TOKEN`, scoped `HttpOnly; Secure; SameSite=Lax; Path=/admin`, and lasts
+**eight hours** — long enough to deploy, apply pending and come back after
+dinner; short enough that a shared laptop left open is not a standing door.
+`ADMIN_TOKEN` is also the key the family session cookie is signed with (§2), so
+it is never rotated casually.
 
 **Kids must never stumble into this page**, and the threat model is a curious
 12-year-old on a shared laptop, not an attacker. So the defense is not
@@ -287,7 +299,7 @@ nothing to protect: no work has been done yet.
 
 ## 5. Schema (D1 / SQLite)
 
-**Status:** not started · slice 01
+**Status:** built · slice 01, as `src/migrations/001_schema.sql`
 
 ```sql
 CREATE TABLE people (

@@ -21,19 +21,24 @@ seeding, or deploy requires a terminal.
 | `docs/slices/NN-name.md` | One slice: instructions, due-outs, questions, exit criteria |
 | `docs/other/DUE-OUTS.md` | What the owner must provide, by slice |
 | `docs/other/OPEN-QUESTIONS.md` | Questions blocking build, and answered ones |
+| `src/` | The Worker: entry and routing, `/admin`, `lib/`, `migrations/` |
+| `test/` | `node --test test/*.test.js` — no dependencies, no install |
 
 ## Where things stand
 
-**Slice 00 is built and deployed.** A commit on `main` becomes a running Worker
-with no terminal step, and `/admin/health` on `globetrotters.immotus.app`
-reports D1 reachable and the `.sql` text rule working — which is what slice 01's
-migration runner rests on.
+**Slices 00 and 01 are built.** A commit on `main` becomes a running Worker with
+no terminal step, and `/admin` — behind `ADMIN_TOKEN`, linked from nowhere —
+lists the migrations, applies the pending ones, and shows schema version and
+row counts on `/admin/health`. `001_schema.sql` carries every table in §5.
 
 Every Cloudflare due-out is closed: the D1 database, the git-connected Worker
 `globetrotters`, all three Worker secrets, and the custom domain.
 
-**Slice 01 is next** and has no open questions: the migration runner, the
-`ADMIN_TOKEN` gate on `/admin`, and `001_schema.sql`.
+**Slice 02 is next.** It has one open question that has to be answered first —
+Q-04, whether people are seeded as placeholders or created on `/admin`.
 
-Nine open questions outstanding. One of them, Q-04, changes the schema and is
-the expensive one to answer late.
+Eight open questions outstanding.
+
+The Worker's own tests run with `node --test test/*.test.js` and need nothing
+installed. They are a build-session tool, not something the owner ever runs —
+nothing about operating this app requires a terminal.

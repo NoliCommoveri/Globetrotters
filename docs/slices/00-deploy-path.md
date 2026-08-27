@@ -64,7 +64,8 @@ None. Q-03 is answered: the session cookie is signed with `ADMIN_TOKEN`
   from the builder's commit environment variable. Decide it here and prove it on
   the health page — the exit criterion is that the line changes, not which
   mechanism produced it.
-- `GET /admin/health` — no auth yet — printing SHA, build time, and D1 reachable
+- `GET /admin/health` — printing SHA, build time, and D1 reachable. The
+  `ADMIN_TOKEN` gate in front of it arrives in slice 01 with the rest of `/admin`
 
 ## Exit criteria
 
