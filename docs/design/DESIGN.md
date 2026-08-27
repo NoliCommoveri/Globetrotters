@@ -237,7 +237,7 @@ dashboard, because a secret value must not be committed to git.
 
 ## 4. The task model
 
-**Status:** not started · slice 04
+**Status:** built · slice 04
 
 This is the core idea. Three layers:
 
@@ -509,15 +509,21 @@ CREATE INDEX idx_hooks_country        ON country_hooks(country_id);
 
 **Status:** partial · `/api/catalog`, `POST /admin/api/seed` and the two people
 routes are built (slice 02); `POST /api/auth` and both `/api/me` routes are
-built (slice 03). The rest is slices 04–07.
+built (slice 03); `POST /api/plans`, `GET`/`PATCH /api/plans/:id`,
+`POST /api/plans/:id/redraw`, `GET /api/focuses/:id/samples` and
+`GET /api/passport` are built (slice 04). The rest is slices 05–08.
 
 ```
 POST   /api/auth                      passcode -> cookie. The one family route that
                                       answers without one.
 GET    /api/me                        people list + active plans + this device's person
+                                      + the family's own today and the month
+                                      setup would open
 PATCH  /api/me                        {person_id} -> re-issued cookie carrying it
 GET    /api/catalog                   countries + hooks + affinities + focuses
                                       + project types. ~60KB, ETag + 304.
+GET    /api/focuses/:id/samples       three weight-3 titles, one week at a time,
+                                      for the setup screen's focus preview
 
 POST   /api/plans                     {person, month, country, focus, project}
                                       -> draws 20 tasks. 409 on UNIQUE(person, month),
@@ -536,7 +542,8 @@ POST   /api/tasks/:id/swap            redraw same week + focus, excluding this p
                                       tasks only, three per month.
 POST   /api/sessions                  {plan_id, plan_task_id?, minutes?, note?}
 
-GET    /api/passport                  all stamps, all people, plus the empty grid shape
+GET    /api/passport                  all stamps, all people, every month running,
+                                      plus the nine-slot grid
 PATCH  /api/stamps/:id                {headline} — the stamp's one line, editable later
 GET    /api/stats                     the cookie's own person; ?all=1 for all three
 
@@ -661,7 +668,7 @@ Used ~180 times per person. Everything else in the app is occasional.
 
 ### Month setup
 
-**Status:** not started · slice 04
+**Status:** built · slice 04
 
 Runs 27 times total across the school year — the least-used screen and by far the
 highest-stakes, since it silently determines four weeks of work. It's a ceremony,
@@ -672,19 +679,27 @@ not a form.
   the card — and its **adventure level**, which belongs on the card rather than one
   level down. §9 calls research depth the thing that prevents the worst month of the
   year; that only works if it's visible where the choice is actually made. Countries
-  the family has already stamped show an ink dot.
+  the family has already stamped show a dot in the ink of whoever stamped them —
+  setup reads the set from **`GET /api/passport`** alongside the catalog (Q-07). A
+  dot, not a lockout: browse still reaches a stamped country and setup still
+  accepts it. What it prevents is picking one by accident.
 - **"Deal me three."** A shuffle that puts three countries on screen with their hooks.
   Kids choose from three far better than from 195, and this is the best interaction on
   the screen — so it must never deal a blank. Hook coverage is 75–100 countries, not
   195, so the shuffle draws only from countries with **at least two hooks**, and skips
-  ones the family has already stamped. Search and browse still reach all 195.
+  ones the family has already stamped. When that pool cannot fill three cards the
+  control is not offered at all, which is its state until `003_country_data.sql`
+  lands in slice 09. Search and browse still reach all 195.
 - **Tap through** to all hooks and the recommended focuses with their reason lines.
 - **Focus: show the consequence, not the description.** "people-and-power" means
   nothing to a kid. Highlighting a focus shows three sample task titles it would pull
-  in — drawn from its **`weight = 3` rows only**. Weights are sparse and a missing row
-  means 1, so sampling everything a focus "would pull in" returns mostly neutral tasks
-  and every focus previews identically. Recommended focuses arrive pre-highlighted,
-  never pre-selected.
+  in — drawn from its **`weight = 3` rows only**, and alternating between weeks 2 and
+  3 so the preview shows the whole month rather than half of it. Weights are sparse
+  and a missing row means 1, so sampling everything a focus "would pull in" returns
+  mostly neutral tasks and every focus previews identically. The titles come from
+  **`GET /api/focuses/:id/samples`**, one request per focus tapped, memoized for the
+  life of the page (Q-06). Recommended focuses arrive pre-highlighted — the preview
+  open — but **never pre-selected**: choosing is always a tap.
 - **Project type shows its `materials`.** Picking "model-or-diorama" on September 1st
   is exactly when a parent needs to know they'll want foam board — not on day 22. It
   stays visible on **Plan** all month, because nobody reopens setup.
@@ -699,7 +714,16 @@ not a form.
   dumped onto a strip built for stragglers, having never seen the flag task. Plans are
   keyed on `month`, not dates, so a plan running into October collides with nothing.
 - **Setting up a month that already has a plan opens that plan.** Two devices, or a
-  double-tap on a slow connection. The `409` is a route, not an error screen.
+  double-tap on a slow connection. The `409` carries the existing plan's id, so it is
+  a route rather than an error screen.
+- **The year is September through May** (D-12), and setup refuses a month outside it.
+  Inside the year the month is simply this one; over the summer the empty state points
+  at the September ahead. Which month it is comes from `FAMILY_TZ` by way of
+  `GET /api/me`, not from the device — a phone on a trip is in the wrong timezone.
+- **A plan is readable by the family and rerollable only by its owner.** There are no
+  roles in this app and the passport is shared, so seeing someone's month is the
+  point; rerolling it is not. `POST /api/plans/:id/redraw` and `PATCH /api/plans/:id`
+  answer `403` to anyone but the plan's person.
 
 Nothing triggers setup — there are no notifications in v1. The empty state is the
 prompt ("Pick a country to start September"), and the wall view shows who hasn't
@@ -1161,7 +1185,30 @@ Resolved:
 - **How `/api/catalog` invalidates.** An ETag over the body plus
   `Cache-Control: no-cache`. The browser does the caching; a corrected hook
   reaches a device that already loaded the old one. See §6.
+- **The school year is September through May**, nine months and 27 stamps. The
+  empty state names the month it would open and the passport grid is nine rows.
+  Setup refuses a month outside the year rather than making one that the passport
+  has no slot for. See §7.
+- **Where the focus preview's titles come from.** `GET /api/focuses/:id/samples`,
+  one request per focus tapped, rather than three more strings on every
+  `/api/catalog`. The catalog is fetched on every launch by every screen and
+  reaches 195 countries; the preview is read on one screen 27 times a year. The
+  cost is a request on first tap, paid once per focus per page. See §6, §7.
+- **How setup learns the family's stamped countries.** `GET /api/passport`,
+  loaded alongside the catalog. `/api/me` is fetched on every launch and every
+  return to the tab, and the stamped set is read by one screen — putting it there
+  would carry it 180 times a month for the 27 times it is used. The passport
+  endpoint has to exist for §7's passport screen regardless, so this builds it
+  rather than duplicating it. See §6, §7.
+- **What decides which day it is.** `FAMILY_TZ`, read server-side and returned by
+  `GET /api/me` as `today` and as the month setup would open. The client never
+  computes it: the device's clock is wrong on a trip and the Worker answers from
+  wherever it runs. See §5, §7.
+- **Who can reroll a plan.** Its owner only. This is the one exception to "there
+  are no roles" and it is not one: reading a plan is open to the family, and what
+  is refused is a sibling on a shared phone redrawing someone else's month. See
+  §6.
 
 **Still open.** Open questions are tracked in `../other/OPEN-QUESTIONS.md`, each
-assigned to the slice it blocks. Six are outstanding. They are answered before
+assigned to the slice it blocks. Four are outstanding. They are answered before
 the code that depends on them is written, never guessed.

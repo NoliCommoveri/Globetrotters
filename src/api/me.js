@@ -9,6 +9,7 @@
 
 import { json } from '../lib/html.js';
 import { issueSessionCookie } from '../lib/auth.js';
+import { todayIn, setupMonthFor } from '../lib/dates.js';
 
 // The whole family, not just the cookie's person. The picker needs three, and
 // so does every screen from slice 06 on — the passport is shared and the point
@@ -44,11 +45,20 @@ export async function apiMe(request, env, session) {
   // the seed was reset — sends the device back to the picker rather than to a
   // screen with no owner.
   const known = list.some((p) => p.id === session.personId);
+
+  // The family's own today, from FAMILY_TZ. The client cannot know it — a phone
+  // on a trip is in the wrong timezone and a Worker answers from wherever it
+  // runs — and every screen from here on needs it: which month setup opens, and
+  // from slice 05 which week the ring is counting.
+  const today = todayIn(env.FAMILY_TZ);
+
   return json({
     ok: true,
     person_id: known ? session.personId : null,
     people: list,
     plans,
+    today,
+    month: setupMonthFor(today),
   });
 }
 

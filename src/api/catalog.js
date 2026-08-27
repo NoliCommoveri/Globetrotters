@@ -55,6 +55,10 @@ export async function apiCatalog(request, env) {
   // country: the client indexes them once, and 195 countries with two empty
   // arrays each is several KB of nothing.
   const body = JSON.stringify({
+    // `ok` on every family payload, this one included. The client's one fetch
+    // wrapper reads it as the success flag, and a route that omits it is a route
+    // that reads as a failure with a 200 on it.
+    ok: true,
     countries: countries.results,
     focuses: focuses.results,
     project_types: projectTypes.results,

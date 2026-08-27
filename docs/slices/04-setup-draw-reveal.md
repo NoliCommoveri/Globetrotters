@@ -1,6 +1,6 @@
 # Slice 04 — Setup, draw, reveal
 
-**Status:** not started
+**Status:** built
 **Band:** L
 **Implements:** §4, §7 Month setup
 **Depends on:** 03
@@ -12,22 +12,22 @@ runs 27 times all year and silently determines four weeks of work each time.
 
 ## Due-outs
 
-- **D-12** The month the year starts. §7's empty state says "Pick a country to
-  start September" and §7's passport grid is Sep–May. Confirm the school year.
+- **D-12** — answered: **September through May**, nine months and 27 stamps.
+  Hardcoded in `src/lib/dates.js` and read from there by setup, by the empty
+  state and by the passport grid.
 
 ## Open questions
 
 - **Q-01, Q-02** — answered: no redraw counter, no swap counter. Redraw is
   unlimited until the first check-off; a redraw resets the derived swap count.
   This slice builds that behavior.
-- **Q-06** — where do the focus preview's sample titles come from? §7 shows
-  three task titles per focus drawn from its `weight = 3` rows, and
-  `/api/catalog` carries no templates or weights. Either the catalog gains
-  three sample titles per focus, or setup gets `GET /api/focuses/:id/samples`.
-  The first keeps setup on a single fetch.
-- **Q-07** — how does setup know which countries the family has already
-  stamped? "Deal me three" skips them and browse shows them with an ink dot.
-  Either `/api/me` carries the stamped set or setup also loads `/api/passport`.
+- **Q-06** — answered: `GET /api/focuses/:id/samples`, one request per focus
+  tapped, memoized client-side. The catalog is fetched by every screen and
+  already carries 195 countries; the preview is read on one screen 27 times a
+  year.
+- **Q-07** — answered: `GET /api/passport`, loaded alongside the catalog. That
+  endpoint has to exist for §7's passport screen regardless, so this slice built
+  it rather than duplicating the stamped set onto `/api/me`.
 
 ## Build
 
@@ -113,6 +113,37 @@ money and draw it" is a different task in Peru than in Japan.
   draw); project type until week 4, regenerating the five week-4 rows, refused
   409 if any is done; focus until the first check-off, redrawing weeks 2 and 3
 
+## What it built
+
+**Server.**
+
+- `src/lib/draw.js` — the engine, pure and injectable-random. Nothing in it
+  touches D1, which is what makes weight-0 exclusion and the recency curve
+  assertions rather than comments.
+- `src/lib/dates.js` — every date in the app, computed in UTC from
+  `FAMILY_TZ`. The school year lives here.
+- `POST /api/plans`, `GET`/`PATCH /api/plans/:id`, `POST /api/plans/:id/redraw`.
+- `GET /api/focuses/:id/samples` (Q-06) and `GET /api/passport` (Q-07). The
+  passport endpoint is complete; its screen is slice 06.
+- `GET /api/me` gained `today` and `month` — the family's own clock, which the
+  client cannot compute.
+- `GET /api/catalog` gained `ok: true`. Every other family payload carries it
+  and the client's one fetch wrapper reads it as the success flag; without it
+  the catalog read as a failure with a 200 on it.
+
+**Client.** `public/js/setup.js`, `public/js/plan.js`, `public/js/deal.js` (the
+shuffle rule, pure so "never deals a blank" is a test), `public/js/dom.js`.
+Routes `/setup` and `/plan/:id`. The empty state's button works and names the
+month from `FAMILY_TZ`.
+
+**Not exercised against real content.** `002_seed.sql` carries no
+`country_hooks` and no `country_focus_affinity` rows — both are
+`003_country_data.sql`, slice 09. So against the current seed every country card
+is a name and an adventure level, no focus arrives recommended, and the shuffle's
+eligible pool is empty, which means the control is not offered at all. All three
+were built and verified against injected hook data; they go live when slice 09
+lands, with no client change.
+
 ## Exit criteria
 
 - Two people, same country, different focuses, visibly different weeks 2–3
@@ -125,7 +156,8 @@ money and draw it" is a different task in Peru than in Japan.
 - Changing focus before any check-off redraws weeks 2 and 3; after, it's
   refused
 - Changing project type rewrites week 4; refused once any week-4 task is done
-- Deal me three never deals a blank against the slice 02 seed
+- Deal me three never deals a blank — against the slice 02 seed, which has no
+  hooks at all, that means the control is not offered
 - The draw engine has unit tests: weight 0 excludes, never-drawn scores 1.0,
   drawn last month scores 0.5
 

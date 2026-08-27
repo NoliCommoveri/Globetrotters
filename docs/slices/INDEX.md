@@ -12,7 +12,7 @@ Slices are strictly ordered — the dependency column is why, not a suggestion.
 | 01 | [Migration runner](01-migration-runner.md) | built | M | 00 | §3, §5 |
 | 02 | [Seed v0 and catalog](02-seed-and-catalog.md) | built | M | 01 | §13 (partial), §6 (catalog) |
 | 03 | [Auth and shell](03-auth-and-shell.md) | built | M | 02 | §2 (auth), §11 |
-| 04 | [Setup, draw, reveal](04-setup-draw-reveal.md) | not started | L | 03 | §4, §7 Month setup |
+| 04 | [Setup, draw, reveal](04-setup-draw-reveal.md) | built | L | 03 | §4, §7 Month setup |
 | 05 | [This week](05-this-week.md) | not started | L | 04 | §7 This week, §7 Plan, §10 |
 | 06 | [Completion and passport](06-completion-and-passport.md) | not started | M | 05 | §7 Passport |
 | 07 | [The wall](07-wall.md) | not started | M | 06 | §8 |
@@ -21,9 +21,17 @@ Slices are strictly ordered — the dependency column is why, not a suggestion.
 
 Statuses: `not started` · `in progress` · `built`.
 
-Slice 04 is next. Its due-out D-12 — the month the school year starts — is
-outstanding, and slice 04 is where it gets hardcoded. Its two open questions,
-Q-06 and Q-07, both gate the setup screen and are answered together.
+Slice 05 is next. Its one open question, Q-08 — whether a repeated `done` writes
+a second session — gates the check-off route, which is the first thing it builds.
+
+Slice 04 built `GET /api/passport` whole (Q-07), so slice 06 inherits the
+endpoint and builds only the screen. It also put `today` and `month` on
+`/api/me`, which is where slice 05's week ring reads the calendar from.
+
+Setup's three content-dependent features — the hook line on a country card, the
+recommended focuses with their reason lines, and "Deal me three" — are built and
+inert: `002_seed.sql` carries no hooks and no affinities. They come alive when
+slice 09 lands `003_country_data.sql`, with no client change.
 
 Slice 03 is built except for its fonts. D-10 is still outstanding, so the shell
 runs on a system stack; swapping in the real faces is an `@font-face` pair and
@@ -61,11 +69,11 @@ Every section of `DESIGN.md` and the slice that finishes it.
 | §1 Scope | — (scope statement, nothing to build) |
 | §2 Stack | 03 — built but for the fonts (D-10) |
 | §3 Migrations | 02 — built |
-| §4 The task model | 04 |
+| §4 The task model | 04 — built |
 | §5 Schema | 01 |
 | §6 API | 07 (last endpoint lands there) |
 | §7 This week | 05 |
-| §7 Month setup | 04 |
+| §7 Month setup | 04 — built |
 | §7 Passport | 06 |
 | §7 Plan | 05 |
 | §8 The wall tablet | 07 |
