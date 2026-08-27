@@ -18,19 +18,11 @@ Everything else this slice needs was satisfied by slice 00.
 
 ## Open questions
 
-- **Q-01** — does `month_plans` need `redraws_used`? §6 offers "one free
-  redraw, until the first check-off" and the schema has nowhere to record that
-  it was used. This is a schema question, so it is answered here or it becomes
-  a second migration later.
-- **Q-02** — does the swap budget survive a redraw? Swaps used is derived from
-  `COUNT(plan_tasks WHERE swapped_from IS NOT NULL)`, so regenerating rows
-  resets it. If the answer is "swaps only apply after the first check-off, so
-  it can't happen," nothing changes here. If not, the count needs storage, and
-  that is also a schema question.
-
-Both must be answered before `001_schema.sql` is written. Migration files are
-append-only; a column missed here costs a second migration and a second deploy
-cycle through the browser.
+None. Q-01 and Q-02 are answered and `001_schema.sql` is unaffected by both:
+there is no `redraws_used` column and no `swaps_used` column. Redraw is
+unlimited until the first check-off and refused after it; a redraw resets the
+derived swap count, deliberately, because it destroys the tasks those swaps
+bought (`DESIGN.md` §4, §6, §15).
 
 ## Build
 

@@ -17,8 +17,9 @@ runs 27 times all year and silently determines four weeks of work each time.
 
 ## Open questions
 
-- **Q-01, Q-02** — redraw counter and swap budget, if slice 01 deferred them.
-  They cannot be deferred past this slice.
+- **Q-01, Q-02** — answered: no redraw counter, no swap counter. Redraw is
+  unlimited until the first check-off; a redraw resets the derived swap count.
+  This slice builds that behavior.
 - **Q-06** — where do the focus preview's sample titles come from? §7 shows
   three task titles per focus drawn from its `weight = 3` rows, and
   `/api/catalog` carries no templates or weights. Either the catalog gains
@@ -104,7 +105,7 @@ money and draw it" is a different task in Peru than in Japan.
 
 - Land on a screen showing all twenty tasks. This is the moment you find out
   what your September looks like.
-- **One redraw** and **change focus**, both until the first check-off. Redraw
+- **Redraw** and **change focus**, both unlimited until the first check-off. Redraw
   alone is the wrong lever: it re-rolls with the same weighting, and when
   twenty tasks look wrong the focus is usually why.
 - `POST /api/plans/:id/redraw`

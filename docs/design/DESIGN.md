@@ -274,6 +274,13 @@ is refused on a task already marked `done`.
 month into whatever looks easiest. Swaps used is `COUNT(plan_tasks WHERE
 swapped_from IS NOT NULL)` — no counter column needed.
 
+**A redraw resets that count to zero, and that is correct.** The whole rule is one
+sentence: *before the first check-off everything is free and resettable; after it
+the plan is fixed and three swaps is the budget.* A redraw replaces all twenty
+rows, so the swaps that were spent went with the tasks they were spent on — there
+is nothing left to have a budget against. Nothing needs storing, because there is
+nothing to protect: no work has been done yet.
+
 ---
 
 ## 5. Schema (D1 / SQLite)
@@ -454,7 +461,8 @@ POST   /api/plans                     {person, month, country, focus, project}
                                       -> draws 20 tasks. 409 on UNIQUE(person, month),
                                       which the client treats as "go to that plan".
 GET    /api/plans/:id                 plan + tasks grouped by week
-POST   /api/plans/:id/redraw          one free redraw, until the first check-off
+POST   /api/plans/:id/redraw          redraws all 20. Unlimited until the first
+                                      check-off, refused after it (409)
 PATCH  /api/plans/:id                 {country?, focus?, project_type?} — see below
 POST   /api/plans/:id/complete        {headline?} — gated on 20/20, writes stamp
 DELETE /api/plans/:id/complete        un-complete, removes the stamp. Confirmed.
@@ -503,6 +511,12 @@ locks once any task is checked off, because it shaped the draw — but until tha
 first check-off it is editable, and changing it redraws weeks 2 and 3. That is the
 lever the reveal screen needs: when twenty tasks look wrong, the cause is usually
 the focus, not the roll.
+
+**Redraw sits under the same gate, unlimited until the first check-off.** There is
+no redraw counter and no `redraws_used` column. A limit of one was specced and
+does not survive contact with change-focus, which rerolls weeks 2–3 as often as
+you like under the identical condition — two doors onto the same room, one of them
+locked. The first check-off is the only gate, on both.
 
 ---
 
@@ -588,8 +602,8 @@ not a form.
   is exactly when a parent needs to know they'll want foam board — not on day 22. It
   stays visible on **Plan** all month, because nobody reopens setup.
 - **The draw gets a reveal.** Land on a screen showing all twenty tasks. This is the
-  moment you find out what your September looks like. Then offer **one redraw** and
-  **change focus**, both available until the first check-off. Redraw alone is the
+  moment you find out what your September looks like. Then offer **redraw** and
+  **change focus**, both unlimited until the first check-off. Redraw alone is the
   wrong lever: it re-rolls with the same weighting, and when twenty tasks look wrong
   the focus is usually why.
 - **Starting late is normal, and must not skip weeks.** `start_date` is the later of
@@ -972,10 +986,16 @@ Resolved:
   keeps a late start from dumping ten unseen tasks onto the carry-forward strip. Plans
   are keyed on `month`, so one running past the end of its month collides with
   nothing.
+- **Redraw and the swap budget.** No `redraws_used` column and no `swaps_used`
+  column. Redraw is unlimited until the first check-off and refused after it, the
+  same gate change-focus already sits behind; a redraw resets the derived swap
+  count, which is right, because it also destroys the tasks those swaps bought.
+  One rule covers both: before the first check-off everything is free and
+  resettable, after it the plan is fixed. See §4, §6.
 - **How many devices a person gets.** As many as they like. Identity is per-device and
   nothing server-side is device-bound. See §2.
 - **Names and ink colors for the three people.** Set on `/admin`, not in the seed.
 
 **Still open.** Open questions are tracked in `../other/OPEN-QUESTIONS.md`, each
-assigned to the slice it blocks. Eleven are outstanding. They are answered before
+assigned to the slice it blocks. Nine are outstanding. They are answered before
 the code that depends on them is written, never guessed.

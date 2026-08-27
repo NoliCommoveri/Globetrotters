@@ -32,5 +32,5 @@ The Worker serves the repo as static assets until slice 00 commits
 `wrangler.toml`, which is also what binds D1: a git-connected Worker takes every
 binding from that file, not from the dashboard.
 
-Eleven open questions outstanding. Four of them (Q-01 through Q-04) change the
-schema or a secret and are the expensive ones to answer late.
+Nine open questions outstanding. One of them, Q-04, changes the schema and is
+the expensive one to answer late.
