@@ -513,13 +513,14 @@ built (slice 03); `POST /api/plans`, `GET`/`PATCH /api/plans/:id`,
 `POST /api/plans/:id/redraw`, `GET /api/focuses/:id/samples` and
 `GET /api/passport` are built (slice 04); `PATCH /api/tasks/:id`,
 `POST /api/tasks/:id/swap`, `POST /api/sessions` and `GET /api/stats` are built
-(slice 05). What remains is the two completion routes and `PATCH /api/stamps/:id`
-(slice 06), the three wall routes (slice 07) and the library editor (slice 08).
+(slice 05); the two completion routes and `PATCH /api/stamps/:id` are built
+(slice 06). What remains is the three wall routes (slice 07) and the library
+editor (slice 08).
 
 ```
 POST   /api/auth                      passcode -> cookie. The one family route that
                                       answers without one.
-GET    /api/me                        people list + active plans + this device's person
+GET    /api/me                        people list + every plan + this device's person
                                       + the family's own today and the month
                                       setup would open
 PATCH  /api/me                        {person_id} -> re-issued cookie carrying it
@@ -546,8 +547,8 @@ POST   /api/tasks/:id/swap            redraw same week + focus, excluding this p
                                       tasks only, three per month.
 POST   /api/sessions                  {plan_id, plan_task_id?, minutes?, note?}
 
-GET    /api/passport                  all stamps, all people, every month running,
-                                      plus the nine-slot grid
+GET    /api/passport                  all stamps, all people, every plan, plus the
+                                      nine-slot grid the year is drawn on
 PATCH  /api/stamps/:id                {headline} — the stamp's one line, editable later
 GET    /api/stats                     the cookie's own person; ?all=1 for all three
 
@@ -619,9 +620,9 @@ is the route that exists to write one without touching a task's state.
 
 ## 7. Screens
 
-**Status:** partial · the shell and the first-run path are built (slice 03),
-Month setup and the reveal in slice 04, This week and Plan in slice 05. The
-passport is slice 06. Each screen below carries its own marker.
+**Status:** built · the shell and the first-run path (slice 03), Month setup and
+the reveal (slice 04), This week and Plan (slice 05), the passport (slice 06).
+Each screen below carries its own marker.
 
 Mobile first. The kids will use this on a phone standing at a table. 360px wide.
 
@@ -746,7 +747,7 @@ started yet. Family pressure instead of push.
 
 ### Passport
 
-**Status:** not started · slice 06
+**Status:** built · slice 06
 
 The shared family wall. 27 stamps for the year, and empty until the last day of
 September — so it has to work empty.
@@ -755,6 +756,12 @@ September — so it has to work empty.
   stamp slots. An unfilled passport is a far stronger invitation than an absent one:
   it shows the shape of the goal in September and makes the full page something you
   can see coming for nine months.
+- **Which nine months.** The later of today's month and the newest month anyone has
+  a plan for; with no plans anywhere, the month setup would open. Inside the school
+  year that is simply today's. Over the summer it is the year with work in it: June
+  and July show the year just finished, which is the year you print, and August
+  follows the first September set up early rather than making the stamp it earns
+  invisible until the 1st.
 - **The current month's slot is not blank.** In October, September's slot is stamped
   and October's would otherwise look identical to May's — throwing away the one piece
   of live state the family screen could carry. An in-progress slot shows the country
@@ -783,7 +790,10 @@ September — so it has to work empty.
   stamp, there are no roles, and it is the only destructive control outside `/admin`.
   Typed confirmation is overkill; a confirm step is not.
 - **Printable.** A print stylesheet on `/passport`. In June there are 27 stamps and
-  the year is over — this is the page that goes in the front of the binder.
+  the year is over — this is the page that goes in the front of the binder. **US
+  Letter, one sheet** (D-13): every row is the same fixed height and the whole year
+  scales to fit rather than breaking across pages. All three inks are legible in
+  grey, and the stamp carries the person's name so the ink never has to be read.
 
 ### Plan
 
@@ -974,9 +984,11 @@ makes both meaningless.
 
 ## 11. Design direction
 
-**Status:** partial · the palette, the tokens, the empty state and the shell's
-type scale are built (slice 03). The two self-hosted faces are outstanding on
-D-10; the stamp is slice 06.
+**Status:** partial · everything but the fonts. The palette, the tokens, the
+empty state and the shell's type scale are built (slice 03) and the stamp is
+built (slice 06). The two self-hosted faces are outstanding on D-10, and the
+stamp's grid face is where that shows most: a country name is set to fit ninety
+pixels on a system sans, and a condensed grotesque would let it breathe.
 
 Subject vernacular is the field notebook and the border stamp, not the SaaS dashboard.
 Avoid cream + serif + terracotta, and avoid dark-mode-with-one-acid-accent; both read
@@ -1183,6 +1195,25 @@ Resolved:
   count, which is right, because it also destroys the tasks those swaps bought.
   One rule covers both: before the first check-off everything is free and
   resettable, after it the plan is fixed. See §4, §6.
+- **What completion is gated on, and who can do it.** Twenty of twenty, and
+  nobody in particular. There is no completion button — the twentieth check-off
+  raises the offer and there is no control before it, because one that exists in
+  week two gets tapped in week two and burns the stamp. Completing is open to the
+  family for the same reason checking off is: it *is* a check-off, and a parent
+  finishing a month beside a kid is the normal case. Un-completing is open too
+  and guarded by a confirm step rather than a role, which is the only guard this
+  app has. See §7 Passport.
+- **What a stamp records.** person, country and focus denormalized off the plan
+  at the moment it is written, not joined live. Country is editable at any time,
+  including after the month is over, and a passport whose February changes when
+  somebody corrects a typo in March is not an artifact. The plan stays editable;
+  what it says about a finished month does not.
+- **Which nine months the passport draws.** The later of today's month and the
+  newest month anyone has a plan for; with no plans at all, the month setup would
+  open. Inside the school year that is today's month. Over the summer June and
+  July show the year just finished — the one you print — and August follows the
+  first September set up early, rather than hiding the stamp it earns until the
+  1st. See §7 Passport.
 - **How many devices a person gets.** As many as they like. Identity is per-device and
   nothing server-side is device-bound. See §2.
 - **Names and ink colors for the three people.** Three placeholder rows are

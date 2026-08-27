@@ -17,14 +17,18 @@
 </head>
 <body>
 <!-- The whole app is this one document. Every screen is rendered into <main>
-     by /js/app.js; the header is the only persistent chrome, and it carries a
-     settings link and nothing else. The person switcher lives inside settings
-     because it is not a daily control (DESIGN.md §2). -->
+     by /js/app.js; the header is the only persistent chrome, and it carries two
+     links: the passport, which is the family screen, and settings. The person
+     switcher lives inside settings because it is not a daily control
+     (DESIGN.md §2). -->
 <a class="skip" href="#main">Skip to content</a>
 
 <header id="chrome" hidden>
   <span class="wordmark">Globetrotters</span>
-  <a class="chrome-link" href="/settings" data-route aria-label="Settings">Settings</a>
+  <nav class="chrome-nav">
+    <a class="chrome-link" href="/passport" data-route>Passport</a>
+    <a class="chrome-link" href="/settings" data-route aria-label="Settings">Settings</a>
+  </nav>
 </header>
 
 <main id="main" tabindex="-1">

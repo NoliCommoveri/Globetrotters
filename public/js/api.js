@@ -91,6 +91,21 @@ export const patchTask = (id, status) => send(`/api/tasks/${id}`, 'PATCH', { sta
 export const swapTask = (id) => send(`/api/tasks/${id}/swap`, 'POST', {});
 export const postSession = (body) => send('/api/sessions', 'POST', body);
 
+// The month's end. `complete` answers 201 with the whole plan, the stamp on it;
+// 409 means it is already stamped and carries that stamp, which the shell reads
+// as "go to the passport" rather than as an error (§7).
+export const completePlan = (id, headline) =>
+  send(`/api/plans/${id}/complete`, 'POST', { headline: headline || null });
+
+// The only destructive call the family can make. The confirm step is on the
+// client, where the thing being destroyed is on screen.
+export const uncompletePlan = (id) => send(`/api/plans/${id}/complete`, 'DELETE');
+
+// The stamp's one line, editable from the passport for as long as the passport
+// exists. It answers with the stamp alone — the passport refetches itself.
+export const patchStamp = (id, headline) =>
+  send(`/api/stamps/${id}`, 'PATCH', { headline: headline || null });
+
 // Days worked, the number that replaces the streak. Its own route because it
 // reaches back across every month of the year, which no plan payload does.
 export const getStats = (all = false) => call(all ? '/api/stats?all=1' : '/api/stats');

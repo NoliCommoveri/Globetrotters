@@ -11,6 +11,7 @@ import { el, monthName } from './dom.js';
 import { setupScreen } from './setup.js';
 import { planScreen } from './plan.js';
 import { weekScreen } from './week.js';
+import { passportScreen } from './passport.js';
 
 const main = document.getElementById('main');
 const chrome = document.getElementById('chrome');
@@ -160,10 +161,14 @@ function emptyState(month, unfinished) {
 }
 
 // The month this person is on right now, if there is one. An older month left
-// unfinished is not it — it is the way back on the empty state.
+// unfinished is not it — it is the way back on the empty state, and a month that
+// has been stamped is not unfinished.
 function homePlan(person) {
   const mine = state.me.plans.filter((p) => p.person_id === person.id);
-  return { plan: mine.find((p) => p.month === state.me.month) || null, unfinished: mine[0] };
+  return {
+    plan: mine.find((p) => p.month === state.me.month) || null,
+    unfinished: mine.find((p) => p.status === 'active'),
+  };
 }
 
 function settingsScreen() {
@@ -243,12 +248,18 @@ function screenFor(person) {
     if (!plan) { mounted = null; return emptyState(state.me.month, unfinished); }
     const key = `/week/${plan.id}`;
     if (mounted?.key === key) return mounted.node;
-    const node = weekScreen({ id: plan.id, say, refresh: load });
+    const node = weekScreen({ id: plan.id, say, go, refresh: load });
     mounted = { key, node };
     return node;
   }
 
   if (mounted && mounted.key === here) return mounted.node;
+
+  if (here === '/passport') {
+    const node = passportScreen({ say, refresh: load });
+    mounted = { key: here, node };
+    return node;
+  }
 
   if (here === '/setup') {
     const node = setupScreen({
@@ -343,7 +354,7 @@ window.addEventListener('pageshow', (event) => {
 
 // A path the shell has no screen for is a bookmark from a later slice or a
 // typo. Land it on the default view rather than on nothing.
-const KNOWN = [/^\/$/, /^\/settings$/, /^\/setup$/, /^\/plan\/\d+$/];
+const KNOWN = [/^\/$/, /^\/settings$/, /^\/setup$/, /^\/passport$/, /^\/plan\/\d+$/];
 if (!KNOWN.some((p) => p.test(path()))) go('/', { replace: true });
 
 load();

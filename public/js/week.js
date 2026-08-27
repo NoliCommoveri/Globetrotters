@@ -10,7 +10,8 @@
 // a missed Tuesday shifts forward instead of leaving a dead card behind.
 
 import { el, svg, monthName, left } from './dom.js';
-import { getPlan, patchTask, postSession, SignedOut } from './api.js';
+import { getPlan, patchTask, postSession, completePlan, SignedOut } from './api.js';
+import { headlineChooser } from './stamp.js';
 
 const WEEK_THEMES = { 1: 'Foundations', 2: 'Deep Dive', 3: 'Deep Dive', 4: 'Make & Present' };
 
@@ -30,16 +31,19 @@ const STATE_LABEL = {
   done: 'Done',
 };
 
-// ctx: { id, say, refresh }. No `go` and no `personId` — every control on this
-// screen writes to the plan it is already looking at, and checking off is open
-// to the family rather than to the plan's owner (§15).
+// ctx: { id, say, refresh, go }. No `personId` — every control on this screen
+// writes to the plan it is already looking at, and checking off is open to the
+// family rather than to the plan's owner (§15). `go` is here for one reason:
+// accepting the completion offer routes to the passport, because the stamp
+// lands there and not on a task card (§7).
 export function weekScreen(ctx) {
   const root = el('section', { class: 'panel week-panel' });
 
   const local = {
     body: null,
     error: null,
-    busy: null,      // 'done' | 'undo' | 'session' | 'note'
+    busy: null,      // 'done' | 'undo' | 'session' | 'note' | 'complete'
+    offering: false, // the headline chooser, once the offer has been accepted
     showing: null,   // the card that is up; null means "work it out from the plan"
     asking: null,    // the task whose "What surprised you?" line is open
     draft: '',
@@ -174,6 +178,63 @@ export function weekScreen(ctx) {
     ]);
   }
 
+  // -------------------------------------------------------- the twentieth --
+
+  // Completion is a consequence, not a button. There is no control here until
+  // `completable` — twenty of twenty, unstamped — so it cannot be tapped in week
+  // two, which is what would burn the stamp (§7).
+  async function complete(headline) {
+    set({ busy: 'complete', error: null });
+    try {
+      const body = await completePlan(ctx.id, headline);
+      set({ body, busy: null, offering: false });
+      ctx.say(`${body.plan.country_name} is stamped.`);
+      // The month is complete, so the shell's copy of /api/me is stale — and
+      // then straight to the passport, which is where the stamp lands.
+      ctx.refresh();
+      ctx.go('/passport');
+    } catch (err) {
+      if (err instanceof SignedOut) return ctx.refresh();
+      // Already stamped: a second device, or a double-tap on the one screen the
+      // whole app builds towards. That is a route, not an error.
+      if (err.data?.stamp) {
+        set({ busy: null, offering: false });
+        ctx.refresh();
+        ctx.go('/passport');
+        return;
+      }
+      set({ busy: null, error: err.message });
+    }
+  }
+
+  function offer(body) {
+    if (!body.completable) return null;
+
+    if (!local.offering) {
+      return el('div', { class: 'stack offer' }, [
+        el('p', {
+          class: 'offer-line',
+          text: `That’s twenty. Ready to stamp ${body.plan.country_name}?`,
+        }),
+        el('button', {
+          class: 'primary', type: 'button', text: 'Stamp it',
+          disabled: local.busy != null,
+          on: { click: () => set({ offering: true, asking: null, draft: '' }) },
+        }),
+      ]);
+    }
+
+    return el('div', { class: 'stack offer' }, [
+      headlineChooser({
+        body,
+        confirm: `Stamp ${body.plan.country_name}`,
+        busy: local.busy === 'complete',
+        onPick: complete,
+        onCancel: () => set({ offering: false }),
+      }),
+    ]);
+  }
+
   // One optional line, one tap to skip. By month's end there are twenty of them
   // and the stamp headline writes itself — and they accumulate visibly on Plan,
   // so writing one feels like adding to something rather than paying a toll.
@@ -234,6 +295,9 @@ export function weekScreen(ctx) {
       // mis-tap cost three (§7).
       actions(task),
       local.asking === task.id ? askNote(task) : null,
+      // On the card, not in a corner: the twentieth check-off is what raises it,
+      // and the card is what the kid is looking at when it happens.
+      offer(local.body),
     ]);
   }
 
@@ -290,6 +354,14 @@ export function weekScreen(ctx) {
         el('p', { class: 'eyebrow', text: monthName(body.plan.month) }),
         el('p', { class: 'week-country', text: body.plan.country_name }),
       ]),
+      // A month that is already stamped keeps its twenty cards — nothing is
+      // taken away — but says so, and points at where the stamp is.
+      body.stamp ? el('p', { class: 'stamped-line' }, [
+        el('a', {
+          class: 'chrome-link', href: '/passport', 'data-route': true,
+          text: `${body.plan.country_name} is stamped. See the passport`,
+        }),
+      ]) : null,
       progress(body),
       up ? card(up) : null,
       up ? pips(up) : null,

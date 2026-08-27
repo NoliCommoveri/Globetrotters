@@ -1,6 +1,6 @@
 # Slice 06 — Completion, stamp, passport
 
-**Status:** not started
+**Status:** built
 **Band:** M
 **Implements:** §7 Passport, §11 (the stamp)
 **Depends on:** 05
@@ -14,13 +14,15 @@ nine-month job for one person on one phone.
 
 ## Due-outs
 
-- **D-13** Where the printed passport goes — paper size, and whether it prints
-  to one sheet. §7 specs a print stylesheet for the page that goes in the front
-  of the binder in June.
+- **D-13** Settled: US Letter, one sheet. The print stylesheet sizes the grid in
+  inches — nine rows of `.82in` inside `@page { size: letter; margin: .5in }` —
+  so the whole year scales down rather than breaking across pages.
 
 ## Open questions
 
-None outstanding, provided Q-09 (below) is settled with the wall in slice 07.
+Q-12 was raised and settled here: which nine months the grid draws. The later of
+today's month and the newest month anyone has a plan for, falling back to the
+month setup would open. It is spec in `../design/DESIGN.md` §7.
 
 ## Build
 
@@ -76,6 +78,28 @@ None outstanding, provided Q-09 (below) is settled with the wall in slice 07.
   two people on next open each get the moment exactly one time.
 - **Printable.** A print stylesheet on `/passport`. In June there are 27 stamps
   and the year is over.
+
+## What it built
+
+Three routes — `POST` and `DELETE /api/plans/:id/complete` and
+`PATCH /api/stamps/:id` — in `src/api/stamps.js`. `planPayload` gained `stamp`
+and `completable`, so the screen holding twenty task rows does not re-derive the
+gate from them. `/api/me` stopped filtering to active plans: a month stamped on
+the 28th would otherwise vanish from the home screen, which would then invite
+the kid to start the month they had just finished.
+
+The passport screen is `public/js/passport.js`, a table — months down the side,
+people across the top — so the row and column headers are read out and the page
+prints as a table without being told to. The stamp face and the headline chooser
+are `public/js/stamp.js`, shared with This week, which raises the offer on the
+task card at twenty of twenty.
+
+The stamp's angle is derived from its id rather than `Math.random()`: the
+passport refetches on every return to the tab, and a face that re-rolls its
+angle on each repaint jitters every time you look at it. The landing watermark
+is `localStorage`, keyed on `earned_at` so an un-complete and a re-complete is a
+new landing — and a stamp still in flight survives a refetch, because completing
+refreshes `/api/me` and every screen reloads behind it.
 
 ## Exit criteria
 

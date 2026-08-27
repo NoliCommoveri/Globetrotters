@@ -16,7 +16,7 @@ terminal — if something appears to, it is specced wrong (§3).
 | D-10 | Two font files, licensed for self-hosting | 03 | outstanding — the shell ships on system fonts until they land |
 | D-11 | `FAMILY_TZ` value confirmed | 02 | done — `America/Chicago` |
 | D-12 | The month the school year starts | 04 | done — September through May |
-| D-13 | Paper size the passport prints to | 06 | outstanding |
+| D-13 | Paper size the passport prints to | 06 | done — US Letter, one sheet |
 | D-14 | Which tablet and browser the wall runs on | 07 | outstanding |
 
 ---
@@ -136,9 +136,12 @@ setup (which refuses a month outside the year), by the empty state (which names
 the month it would open, and points at the September ahead over the summer) and
 by the passport grid's nine rows.
 
-**D-13. Paper.** The passport is the page that goes in the front of the binder
-in June, with 27 stamps on it. Letter or A4, and whether it has to fit one
-sheet.
+**D-13. Paper.** US Letter, and it fits one sheet. The passport is the page that
+goes in the front of the binder in June, with 27 stamps on it, and the print
+stylesheet sizes the grid in inches so the whole year scales down rather than
+breaking across pages: `@page { size: letter; margin: .5in }`, nine rows of
+`.82in`, which leaves about `.8in` of slack for a browser's own header and
+footer. Changing to A4 is the two values in `@page` and nothing else.
 
 **D-14. The tablet.** iPad Safari's age decides whether the screen wake lock
 exists at all. If it doesn't, the fallback is the tablet's own display-sleep

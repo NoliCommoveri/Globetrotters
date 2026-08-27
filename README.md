@@ -98,14 +98,32 @@ Plan holds everything month-scale: all twenty tasks, swap with its remaining
 budget, the month's notes accumulating down the page, week 4's materials from
 week 1, and days worked.
 
-**Slice 06 is next** — the passport, the completion offer at 20/20, and the
-stamp.
+**Slice 06 is built, and that is the ship point** — the app does the whole
+nine-month job for one person on one phone. Completion is a consequence, not a
+button: there is no control anywhere until twenty of twenty, and then the
+twentieth check-off raises the offer on the card itself — "That's twenty. Ready
+to stamp Peru?" The headline is chosen from the month's notes rather than
+composed, because a kid asked to summarize a month at the moment they most want
+to be done writes "it was fun"; it is editable afterwards, and it may stay blank.
 
-Every Cloudflare due-out is closed, and so are the three inks and the school year
-(September through May). Two remain: the fonts (D-10), which block nothing, and
-the passport's paper size (D-13), which blocks only slice 06's print stylesheet.
+Accepting routes to the passport, where the stamp lands. The grid is the whole
+year from day one — three columns, nine rows, September through May — because an
+unfilled passport is a far stronger invitation than an absent one. A month
+somebody is still working shows the country without a stamp and a month nobody
+started says so, which puts "who hasn't started yet" on every phone. The stamp
+carries the person, the country, the month and the focus in that person's ink,
+at a slight angle, and it lands with the one animation this app allows — once
+per viewer, so the phone that earned it, the wall in the kitchen and the other
+two people on next open each get the moment exactly once. It prints to one sheet
+of US Letter, all three inks legible in grey.
 
-Three open questions outstanding, none of them against slice 06.
+Every Cloudflare due-out is closed, and so are the three inks, the school year
+(September through May) and the paper (US Letter). One remains: the fonts
+(D-10), which block nothing — the shell and the stamp run on a system stack.
+
+Three open questions outstanding: two against the wall (slice 07) and one
+against the content fill (slice 09). Slice 08, the library editor, is the only
+remaining slice nothing blocks.
 
 The Worker's own tests run with `node --test test/*.test.js` and need nothing
 installed. They are a build-session tool, not something the owner ever runs —

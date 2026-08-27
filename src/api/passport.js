@@ -11,7 +11,24 @@
 // point of it is seeing the other two.
 
 import { json } from '../lib/html.js';
-import { todayIn, monthOf, schoolYearMonths } from '../lib/dates.js';
+import { todayIn, monthOf, schoolYearMonths, setupMonthFor } from '../lib/dates.js';
+
+// Which school year the nine rows are. Inside the year this is simply today's
+// month; over the summer it is the year with work in it (§7).
+//
+// June and July are the print months — 27 stamps and the year is over — and
+// they anchor on the year just finished, which is what a summer month resolves
+// to on its own. August is the month that has to move: a September set up early
+// belongs on the grid the moment it exists, not on the 1st. Taking the later of
+// today's month and the newest plan does both, and a family with no plans at
+// all lands on the month setup would open rather than on an empty year behind
+// them.
+function anchorMonth(plans, today) {
+  const month = monthOf(today);
+  const newest = plans.reduce((max, plan) => (plan.month > max ? plan.month : max), '');
+  if (!newest) return setupMonthFor(today);
+  return newest > month ? newest : month;
+}
 
 export async function apiPassport(request, env, session) {
   const [people, stamps, plans] = await Promise.all([
@@ -52,6 +69,6 @@ export async function apiPassport(request, env, session) {
     // Nine rows, September through May (D-12). Drawn from day one as blank
     // slots: an unfilled passport shows the shape of the goal in September and
     // is a far stronger invitation than an absent one.
-    months: schoolYearMonths(monthOf(today)),
+    months: schoolYearMonths(anchorMonth(plans.results, today)),
   });
 }

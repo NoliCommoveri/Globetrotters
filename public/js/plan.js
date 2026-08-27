@@ -286,6 +286,22 @@ export function planScreen(ctx) {
     const mine = ctx.personId === plan.person_id;
     if (!mine) return el('p', { class: 'note', text: 'This is someone else’s month.' });
 
+    // A stamped month is finished. Country and project type are still technically
+    // open, but offering them here would invite an edit to a month whose stamp
+    // already says what it was — and the stamp is a frozen record (§7). The
+    // controls that still apply to it live next to it, on the passport.
+    if (body.stamp) {
+      return el('div', { class: 'stack' }, [
+        el('p', { class: 'note', text: 'This month is stamped.' }),
+        el('p', { class: 'note' }, [
+          el('a', {
+            class: 'chrome-link', href: '/passport', 'data-route': true,
+            text: 'See it on the passport',
+          }),
+        ]),
+      ]);
+    }
+
     if (body.locked) {
       // The first check-off is the only gate, and it is on both doors: redraw and
       // change focus reroll the same weeks under the same condition, so a limit
