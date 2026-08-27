@@ -9,7 +9,7 @@ terminal — if something appears to, it is specced wrong (§3).
 | # | Due-out | Needed by | State |
 |---|---|---|---|
 | D-02 | D1 database created, name and id | 00 | done — `globetrotters-prod` |
-| D-06 | Worker created and git-connected to this repo; name and route decided | 00 | done — `globetrotters`, `workers.dev` |
+| D-06 | Worker created and git-connected to this repo; name and route decided | 00 | done — `globetrotters` on `workers.dev`. Custom domain outstanding |
 | D-07 | `ADMIN_TOKEN` value chosen | 01 | done |
 | D-08 | Worker secrets set: `FAMILY_PASSCODE`, `ADMIN_TOKEN`, `FAMILY_TZ` | 00 | done |
 | D-09 | Three ink colors for the three people | 02 | outstanding |
@@ -48,6 +48,23 @@ lands `wrangler.toml`:
 - Settings then reports **"Variables cannot be added to a Worker that only has
   static assets."** Nothing is broken; the file that gives the Worker a script
   and its bindings simply does not exist yet.
+
+The app answers on its **`workers.dev`** subdomain. Attaching
+`globetrotters.immotus.app` failed, and until the cause is known the route is
+deliberately **not** declared in `wrangler.toml` — a route to a domain the
+account cannot attach fails the build, which would take the working deploy down
+with it. Nothing in the app hardcodes an origin, so adding the domain later is
+three lines and changes nothing else.
+
+**The deploy command** carries one flag, set in the Worker's build settings:
+
+```
+npx wrangler deploy --var COMMIT_SHA:"${WORKERS_CI_COMMIT_SHA:-unknown}"
+```
+
+The build command is empty — there is no build step. The flag is what puts the
+commit on `/admin/health`; the version tag is empty on a Workers Build, so
+without it that row reads `(not set)`. Nothing breaks if it is missing.
 
 The name in `wrangler.toml` must read `globetrotters`. A mismatch does not fail
 — it deploys a second Worker under the other name and leaves this one serving

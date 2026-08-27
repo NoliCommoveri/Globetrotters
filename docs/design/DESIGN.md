@@ -33,7 +33,8 @@ Everyone has their own device. There is also a tablet on the kitchen wall.
 
 ## 2. Stack
 
-**Status:** not started · slices 00, 03
+**Status:** partial · the Worker, the D1 binding and the deploy are built
+(slice 00). The auth path, the frontend shell and the fonts are slice 03.
 
 - Cloudflare Worker serving both the API (`/api/*`) and static assets
 - **D1** for all relational data
@@ -85,7 +86,8 @@ Nine months should pass without anyone seeing a login screen.
 
 ## 3. Migrations — hard requirement
 
-**Status:** not started · slices 00, 01
+**Status:** partial · the deploy half is built (slice 00). The migration runner,
+`/admin` and its token gate are slice 01.
 
 **The owner cannot use a terminal.** No step in setup, migration, or seeding may
 require `wrangler d1 execute`, `wrangler d1 migrations apply`, or any other CLI
