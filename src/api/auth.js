@@ -3,15 +3,17 @@
 //
 // It is the only unauthenticated route under /api, for the same reason POST
 // /admin is the only unauthenticated write under /admin: it is what issues the
-// cookie the gate checks.
+// cookie the gate checks. It is also the one route a wall cookie is allowed to
+// reach (Q-10), because it is what issues that cookie too and a tablet whose
+// year has run out has no other way back in.
 //
 // No person is selected here. The passcode says the device belongs to the
 // family; PATCH /api/me says who is holding it. Splitting them is what keeps
-// the wall's future exemption (Q-10) to a single route that cannot set an
-// identity.
+// the wall's exemption to a single route that cannot set an identity: the most
+// a wall cookie can get out of this route is another wall cookie.
 
 import { json } from '../lib/html.js';
-import { checkPasscode, issueSessionCookie, clearSessionCookie } from '../lib/auth.js';
+import { checkPasscode, issueSessionCookie, issueWallCookie, clearSessionCookie } from '../lib/auth.js';
 
 export async function apiAuth(request, env) {
   const body = await request.json().catch(() => ({}));
@@ -32,6 +34,13 @@ export async function apiAuth(request, env) {
     });
   }
 
+  // Which cookie comes back is the caller's declaration, not a guess about the
+  // device: the same passcode on the same tablet means one thing typed at /wall
+  // and another typed at /. Only /js/wall.js sends the flag, and it is a
+  // downgrade — asking for it can never get more than the family cookie.
+  if (body.wall === true) {
+    return json({ ok: true, wall: true }, { headers: { 'set-cookie': await issueWallCookie(env) } });
+  }
+
   return json({ ok: true }, { headers: { 'set-cookie': await issueSessionCookie(env, null) } });
 }
-

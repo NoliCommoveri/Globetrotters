@@ -23,7 +23,7 @@ seeding, or deploy requires a terminal.
 | `docs/other/SEED-CONTENT.md` | Column rules and row forms for the hand-written seed lists |
 | `docs/other/OPEN-QUESTIONS.md` | Questions blocking build, and answered ones |
 | `src/` | The Worker: entry and routing, `/api/*`, `/admin`, `lib/`, `migrations/` |
-| `public/` | The family app: one static document, one stylesheet, eight JS modules |
+| `public/` | Two static documents — the family app and the wall — one stylesheet, eleven JS modules |
 | `test/` | `node --test test/*.test.js` — no dependencies, no install |
 
 ## Where things stand
@@ -50,9 +50,11 @@ reading as drift, and what makes a correction in the library editor permanent.
 per device, `PATCH /api/me` writes which of the three people you are into the
 same signed cookie, and the cookie is re-issued on every authenticated response
 so its year slides forward instead of expiring in March. Everything under
-`/api/` is behind that cookie except `POST /api/auth`, which is what issues it.
+`/api/` is behind that cookie except `POST /api/auth`, which is what issues it —
+and, from slice 07, the two wall routes, which a second cookie type reaches
+instead.
 
-The shell is a static `public/index.html` and three vanilla modules — no build
+The shell is a static `public/index.html` and eleven vanilla modules — no build
 step, no framework, no third-party request on any page load. Passcode → person →
 "Pick a country to start September", at 360px.
 
@@ -117,6 +119,29 @@ per viewer, so the phone that earned it, the wall in the kitchen and the other
 two people on next open each get the moment exactly once. It prints to one sheet
 of US Letter, all three inks legible in grey.
 
+**Slice 07 is built** — the wall. `/wall` is the kitchen tablet: the family stamp
+count as the headline, three columns of country, focus and week ring in fixed
+order, and the passport grid underneath. It is read-only and that is enforced at
+the router, not by leaving controls out: the wall has its own cookie type, and a
+request carrying it reaches two read routes and is answered 403 everywhere else,
+so the tablet in the room guests stand in is not holding a full-write family
+cookie for nine months. It heartbeats every five minutes against two aggregates
+and fetches the view only when they move — a 30-second poll of the payload is
+three orders of magnitude more database reads for a screen that changes about
+three times a day.
+
+The month count is deliberately absent, from the screen and from the payload
+both. Three people doing an identical twenty-task structure side by side is
+implicitly a leaderboard; a 0–5 week ring survives that because it resets Monday,
+and "9 of 20" beside a sibling's "17 of 20" does not. The family number is the
+one that gets to be huge.
+
+A stamp earned on a phone lands on the wall within five minutes, full-screen for
+about half a minute, before settling into the grid — two inside one window queue
+and land in turn. The watermark that stops it replaying lives in `localStorage`
+and is seeded to the current time, so a rebooted tablet comes back to the wall
+with no passcode and replays nothing.
+
 **Slice 10 is specced** — printed worksheets (§16). A drawn month becomes about
 seven sheets of ruled, titled pages for the binder: a library of twelve reusable
 layouts, segments measured in thirds of a page, packed a week to a sheet so a
@@ -125,13 +150,15 @@ mid-month swap reprints one week. Nothing is stored and no plan is ever frozen �
 against the same two page variables the passport already prints against.
 
 Every Cloudflare due-out is closed, and so are the three inks, the school year
-(September through May) and the paper (D-13 — US Letter). One remains: the fonts
-(D-10), which block nothing — the shell and the stamp run on a system stack.
+(September through May) and the paper (D-13 — US Letter). Two remain and neither
+blocks code: the fonts (D-10) — the shell, the stamp and the wall run on a system
+stack — and which tablet the wall runs on (D-14), where the wake lock is
+feature-detected either way and what is unresolved is whether the owner has to
+set display sleep by hand.
 
-Four open questions outstanding, none of them against slice 06: two against the
-wall (slice 07), one against the content fill (slice 09), and one against part
-of the worksheets (slice 10). Slice 08, the library editor, is the only
-remaining slice nothing blocks.
+Two open questions outstanding: one against the content fill (slice 09), and one
+against part of the worksheets (slice 10). Slice 08, the library editor, is the
+only remaining slice nothing blocks.
 
 The Worker's own tests run with `node --test test/*.test.js` and need nothing
 installed. They are a build-session tool, not something the owner ever runs —

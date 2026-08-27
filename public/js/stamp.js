@@ -30,14 +30,21 @@ export function skew(stamp) {
 // Person, country, month, focus — in that person's ink. The name is on the face
 // rather than left to column position because the wall's full-screen stamp has
 // no column and a home printer renders all three inks as the same grey (§7).
-export function stampFace(stamp, { size = 'grid' } = {}) {
+//
+// `compact` drops everything but the country. It is for the wall's grid and
+// nowhere else: nine rows of stamps have to share a tablet with the three
+// columns above them, and on that grid the row header is already the month and
+// the column header is already the person. What is left is the one thing the
+// headers do not say — which is also the only line worth reading at that size.
+export function stampFace(stamp, { size = 'grid', compact = false } = {}) {
   const { rotate, dx, dy } = skew(stamp);
+  const country = el('span', { class: 'stamp-country', text: stamp.country_name });
   return el('div', {
-    class: `stamp stamp-${size}`,
+    class: `stamp stamp-${size}${compact ? ' stamp-compact' : ''}`,
     style: `--ink:${stamp.person_color};--rot:${rotate}deg;--dx:${dx}px;--dy:${dy}px`,
-  }, [
+  }, compact ? [country] : [
     el('span', { class: 'stamp-person', text: stamp.person_name }),
-    el('span', { class: 'stamp-country', text: stamp.country_name }),
+    country,
     el('span', { class: 'stamp-month', text: monthName(stamp.month) }),
     el('span', { class: 'stamp-focus', text: stamp.focus_name }),
   ]);

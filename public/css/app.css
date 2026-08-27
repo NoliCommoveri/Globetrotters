@@ -696,6 +696,10 @@ button {
 
 .ring {
   flex: none;
+  /* One drawing at two sizes: This week's is 48px, the wall's is read from six
+   * feet away. The geometry is in dom.js and the size is this token. */
+  width: var(--ring-size, 48px);
+  height: var(--ring-size, 48px);
   /* Segment one starts at twelve o'clock and the week reads clockwise. */
   transform: rotate(-90deg);
 }
@@ -1394,4 +1398,322 @@ button {
   .stamp-person, .stamp-month, .stamp-focus { font-size: 5pt; }
   .stamp-country { font-size: 8pt; }
   .stamp.is-landing { animation: none; }
+}
+
+/* ============================================================== slice 07 ==
+ * The wall tablet (DESIGN.md §8).
+ *
+ * Its own type scale, and the one place the display face gets to be huge. Every
+ * size below is a clamp against the viewport rather than a rem: this screen is
+ * read from six feet away on a tablet nobody will ever adjust, and the same
+ * document has to be legible if it is opened on a phone to check something.
+ *
+ * There is not one control in here that writes. The only button on the screen
+ * is Refresh.
+ */
+
+/* The shell caps <main> at 34rem, which is the phone this app was built for.
+ * The wall is the one screen that is not a phone: it takes the whole tablet and
+ * supplies its own padding below. */
+body.wall > main {
+  max-width: none;
+  padding: 0;
+}
+
+.wall-view {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(.6rem, 1.4vw, 1.25rem);
+  padding: clamp(.75rem, 2vw, 1.5rem);
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* The live region is chrome the wall has no room for: it is thirty-six pixels of
+ * a screen that has to fit a headline, three columns and nine months without
+ * scrolling. Hidden, not removed — a button that says nothing when pressed is a
+ * broken button to anyone listening. */
+body.wall > .status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The passcode screen this tablet sees once. Centered, because there is no
+ * chrome above it and nothing else on the page. */
+body.wall > #wall > .panel {
+  max-width: 26rem;
+  margin: 0 auto;
+  padding-top: 12vh;
+}
+
+/* --------------------------------------------------------- the headline -- */
+
+/* The family number, and the only number on this screen that belongs to
+ * everybody. It is the headline because three people doing an identical
+ * twenty-task structure side by side is implicitly a leaderboard, and the way
+ * out of that is to make the shared number the one that is huge (§8). */
+.wall-headline {
+  display: flex;
+  align-items: baseline;
+  gap: .6em;
+  flex-wrap: wrap;
+}
+
+.wall-count {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(2rem, 5.5vw, 4.5rem);
+  line-height: .95;
+  letter-spacing: -.01em;
+  text-transform: uppercase;
+}
+
+.wall-lede {
+  font-family: var(--font-display);
+  font-size: clamp(.875rem, 1.8vw, 1.375rem);
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--paper-dim);
+}
+
+/* ---------------------------------------------------------- the columns -- */
+
+/* Three, always, in people.sort_order. `1fr` each rather than auto: a column
+ * sized to its content would make the person with the longest country name the
+ * widest one on the wall, which is a ranking nobody chose. */
+.wall-columns {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(.5rem, 1.5vw, 1.25rem);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.wall-column {
+  display: flex;
+  flex-direction: column;
+  gap: .35em;
+  background: var(--navy-raised);
+  border: 1px solid var(--navy-line);
+  border-top: 4px solid var(--ink);
+  border-radius: var(--radius);
+  padding: clamp(.6rem, 1.6vw, 1.25rem);
+  min-width: 0;
+}
+
+.wall-who {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(.8125rem, 1.6vw, 1.25rem);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--ink);
+}
+
+/* Where the condensed grotesque earns its keep. Until D-10 lands this is a
+ * system sans at four rems, and "Central African Republic" has to survive it —
+ * hence the balance, the hyphenation and the hard break. */
+.wall-country {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.125rem, 3vw, 2.5rem);
+  line-height: 1.02;
+  letter-spacing: -.01em;
+  text-wrap: balance;
+  /* Hyphenation only. The grid's stamp face breaks anywhere because it has
+   * ninety pixels to fit a country into; a column has a third of a tablet, and
+   * `anywhere` at four rems stacks "Central African Republic" one syllable per
+   * line. */
+  hyphens: auto;
+}
+
+.wall-country.is-empty { color: var(--paper-dim); }
+
+.wall-focus {
+  font-size: clamp(.75rem, 1.4vw, 1.125rem);
+  line-height: 1.25;
+  color: var(--paper-dim);
+}
+
+.wall-ring {
+  display: flex;
+  align-items: center;
+  gap: .6em;
+  margin-top: auto;
+  padding-top: .5em;
+  --ring-size: clamp(1.75rem, 3.4vw, 2.75rem);
+}
+
+/* A 0-5 count that resets Monday, which is the only progress number allowed on
+ * this screen: being behind is at most a few days old and it repairs itself. The
+ * month count is not here and is not in the payload either (§8, §10). */
+.wall-week {
+  font-family: var(--font-display);
+  font-size: clamp(.75rem, 1.5vw, 1.25rem);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  line-height: 1.1;
+}
+
+/* ------------------------------------------------------------- the grid -- */
+
+/* The passport, underneath, at wall size. It carries its own slot height
+ * because --slot-h is declared on .passport-panel, which is the phone's screen
+ * and not this one. */
+.wall-grid {
+  /* Sized against the viewport's height, not its width. Nine rows compete for
+   * whatever the headline and the three columns leave behind, and that is a
+   * vertical budget — tied to vw the grid grows on a wide tablet exactly where
+   * there is no more room for it. */
+  --slot-h: clamp(1.25rem, 2.7vh, 2.125rem);
+  border-spacing: .38rem;
+  margin: auto 0 0;
+}
+
+/* A stamp is stamp-shaped. Left to fill the cell it becomes a six-hundred-pixel
+ * bar, and three and a half degrees of hand-stamped crookedness across that much
+ * width lifts its corners into the row above. Narrow and centred, the same angle
+ * reads as it was meant to. */
+.wall-grid .stamp {
+  width: min(100%, 9rem);
+  margin: 0 auto;
+  /* The outline is what makes a border stamp a border stamp, but at this row
+   * pitch its offset is the difference between crooked and colliding with the
+   * month above. */
+  outline-offset: 1px;
+}
+
+.wall-grid .passport-gutter { width: clamp(2.1rem, 4vw, 3.5rem); }
+
+.wall-grid .passport-who,
+.wall-grid .passport-month { font-size: clamp(.625rem, 1.4vw, 1.125rem); }
+
+.wall-grid .stamp-country { font-size: clamp(.5625rem, 1.1vw, 1rem); }
+
+.wall-grid .slot-country { font-size: clamp(.625rem, 1.2vw, 1rem); }
+
+/* The grid's face carries the country and nothing else, so there is nothing for
+ * the double rule to rule off from. The stamp's border and its ink are what
+ * still say "stamp" here. */
+.stamp-compact { --pad: .15rem; }
+
+.stamp-compact .stamp-country {
+  border-block: 0;
+  padding-block: 0;
+  margin-block: 0;
+}
+
+/* ------------------------------------------------------------- the foot -- */
+
+.wall-foot {
+  display: flex;
+  align-items: center;
+  gap: clamp(.75rem, 2vw, 1.5rem);
+  flex-wrap: wrap;
+}
+
+/* Sized to be hit from standing, with a pencil in the other hand. Every other
+ * screen refreshes on launch and on visibilitychange; this one never launches
+ * and never changes visibility, which is exactly why the control exists. */
+.wall-refresh {
+  min-height: clamp(3rem, 5vw, 3.75rem);
+  min-width: clamp(8rem, 15vw, 12rem);
+  padding: 0 1.25em;
+  background: none;
+  color: var(--paper);
+  border: 2px solid var(--navy-line);
+  border-radius: var(--radius);
+  font-family: var(--font-display);
+  font-size: clamp(.9375rem, 1.6vw, 1.25rem);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  cursor: pointer;
+}
+
+.wall-refresh:disabled { color: var(--paper-dim); cursor: default; }
+
+.wall-updated {
+  font-size: clamp(.8125rem, 1.4vw, 1.125rem);
+  color: var(--paper-dim);
+}
+
+/* ---------------------------------------------------- the stamp landing -- */
+
+/* Full-screen for about half a minute, then it settles into the grid below.
+ * Appended to <body> rather than rendered into the view, so the heartbeat
+ * repainting underneath cannot cut the app's signature moment short. */
+.wall-showcase {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(1rem, 3vw, 2.5rem);
+  padding: clamp(1rem, 4vw, 3rem);
+  background: var(--navy);
+  text-align: center;
+}
+
+.wall-showcase-lede {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.5rem, 5vw, 4rem);
+  line-height: 1.05;
+  text-transform: uppercase;
+  letter-spacing: .02em;
+  text-wrap: balance;
+}
+
+.wall-showcase-line {
+  font-size: clamp(1rem, 2.5vw, 2rem);
+  color: var(--paper-dim);
+  max-width: 30ch;
+  text-wrap: balance;
+}
+
+/* The third stamp size, after the grid's and the passport detail's. This one is
+ * measured against the viewport because it is the whole screen. */
+.stamp-wall {
+  --pad: clamp(1rem, 3vw, 2.5rem);
+  width: min(70vw, 60vh);
+  height: auto;
+  aspect-ratio: 1;
+  border-width: 4px;
+  outline-width: 2px;
+  outline-offset: 5px;
+}
+
+.stamp-wall .stamp-person,
+.stamp-wall .stamp-month,
+.stamp-wall .stamp-focus { font-size: clamp(.75rem, 2vw, 1.75rem); }
+
+.stamp-wall .stamp-country { font-size: clamp(1.75rem, 6vw, 5rem); }
+
+/* The overlay arrives with the stamp rather than after it. */
+@media (prefers-reduced-motion: no-preference) {
+  .wall-showcase { animation: showcase-in .18s ease-out backwards; }
+  @keyframes showcase-in { from { opacity: 0; } to { opacity: 1; } }
+}
+
+/* A cross-fade, not nothing. One OS toggle on a kitchen tablet must not
+ * silently delete the family's only shared moment for the year (§8). */
+@media (prefers-reduced-motion: reduce) {
+  .wall-showcase { animation: showcase-in .6s ease-out backwards; }
+  @keyframes showcase-in { from { opacity: 0; } to { opacity: 1; } }
+}
+
+/* A phone opening /wall to check something. Not the target device, but it must
+ * not come back broken. */
+@media (max-width: 33rem) {
+  .wall-columns { grid-template-columns: 1fr; }
+  .wall-column { border-top-width: 3px; }
+  .wall-ring { margin-top: 0; }
 }

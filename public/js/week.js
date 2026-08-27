@@ -9,13 +9,11 @@
 // stays free — you just stop being asked which one to do every single day, and
 // a missed Tuesday shifts forward instead of leaving a dead card behind.
 
-import { el, svg, monthName, left } from './dom.js';
+import { el, ring, monthName, left } from './dom.js';
 import { getPlan, patchTask, postSession, completePlan, SignedOut } from './api.js';
 import { headlineChooser } from './stamp.js';
 
 const WEEK_THEMES = { 1: 'Foundations', 2: 'Deep Dive', 3: 'Deep Dive', 4: 'Make & Present' };
-
-const WEEK_LENGTH = 5;
 
 // Three card states, not two. Without a visible mark, "Worked on it" reads as a
 // dead button — tapped once, nothing changes, never tapped again, and the
@@ -98,22 +96,6 @@ export function weekScreen(ctx) {
   }
 
   // ------------------------------------------------------------- progress --
-
-  // A 0-5 ring, drawn as five separate arcs rather than one sweep: five tasks map
-  // to five weekdays, and a continuous arc at three-fifths reads as a percentage,
-  // which is the one thing §10 rules out.
-  function ring(done) {
-    const segments = Array.from({ length: WEEK_LENGTH }, (_, i) => svg('circle', {
-      class: i < done ? 'ring-seg is-done' : 'ring-seg',
-      cx: 24, cy: 24, r: 20,
-      pathLength: WEEK_LENGTH,
-      'stroke-dasharray': `0.78 ${WEEK_LENGTH - 0.78}`,
-      'stroke-dashoffset': -i,
-    }));
-    return svg('svg', {
-      class: 'ring', viewBox: '0 0 48 48', width: 48, height: 48, 'aria-hidden': 'true',
-    }, segments);
-  }
 
   function progress(body) {
     const week = weekTasks();

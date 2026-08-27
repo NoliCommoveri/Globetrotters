@@ -12,27 +12,15 @@ moved to the answered list at the bottom of this file.
 
 | # | Question | Blocks | Kind |
 |---|---|---|---|
-| Q-09 | How does the wall compare its version value? | 07 | api |
-| Q-10 | Is `POST /api/auth` exempt from the wall's write ban? | 07 | auth |
 | Q-11 | Does week 4's "present" task require an audience? | 09 | content |
 | Q-12 | Who prints the month's pages, and from what device? | 10 | household |
 
-Q-09 and Q-10 block slice 07, Q-11 blocks slice 09 and Q-12 blocks part of slice
-10. Nothing is outstanding against slices 05, 06 or 08.
+Q-11 blocks slice 09 and Q-12 blocks part of slice 10. Nothing is outstanding
+against any other slice.
 
 ---
 
 ## Detail
-
-**Q-09 — How does the wall compare its version value?**
-Undo nulls `completed_at`, so `MAX(plan_tasks.completed_at)` can decrease.
-Compared with `>` the wall goes permanently stale after any undo. Proposed:
-compare for inequality.
-
-**Q-10 — Is `POST /api/auth` exempt from the wall's write ban?**
-§8 rejects the wall cookie on every write route. `POST /api/auth` is a write
-route and is also how the wall re-authenticates itself. It needs an explicit
-exemption.
 
 **Q-11 — Does week 4's "present" task require an audience?**
 Carried from §15. Whether the family schedules a presentation night is a
@@ -54,6 +42,8 @@ packer and the twelve layouts are unaffected either way.
 
 | # | Question | Answer |
 |---|---|---|
+| Q-10 | Is `POST /api/auth` exempt from the wall's write ban? | Yes, and it is the whole of the exemption. That route issues the wall cookie, so a tablet whose year has run out has no other way back in; it takes a passcode and hands back a cookie, cannot set a person, and the most a wall cookie gets out of it is another wall cookie. `PATCH /api/me` is not exempt and must not become so. Every other route answers a wall cookie 403 — reads included, since the wall needs exactly two of them. `DESIGN.md` §6, §8, §15. |
+| Q-09 | How does the wall compare its version value? | For inequality, never for growth. Both halves move backwards — undo nulls `completed_at`, and removing a stamp deletes the row behind `MAX(earned_at)` — so `>` leaves the wall permanently stale after any undo. The version is also read before the payload and never after it: a write between the two then leaves the stored version older than the screen, costing one wasted fetch instead of a stale wall. `DESIGN.md` §8, §15. |
 | Q-13 | Which nine months does the passport grid draw? | The later of today's month and the newest month anyone has a plan for; with no plans anywhere, the month setup would open. Inside the year that is today's month. Over the summer it is the year with work in it: June and July show the year just finished, which is the one that gets printed, and August follows the first September set up early instead of hiding the stamp it earns until the 1st. `DESIGN.md` §7, §15. |
 | Q-08 | Does a repeated `done` write a second session? | No. The session is written only on an `open → done` transition. The route stays idempotent and answers 200 whatever state the task was in; writing unconditionally would let two devices or one double-tap count two days, and days worked is the number §10 promises never lies. A genuine second sitting on a finished task goes through `POST /api/sessions`. `DESIGN.md` §6, §10, §15. |
 | Q-07 | How does setup learn the family's stamped countries? | `GET /api/passport`, loaded alongside the catalog. `/api/me` is fetched on every launch and every return to the tab; the stamped set is read by one screen 27 times a year, and carrying it on `/api/me` would send it 180 times a month for that. The passport endpoint has to exist for §7's passport screen anyway, so slice 04 built it. `DESIGN.md` §6, §7, §15. |
