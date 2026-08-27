@@ -22,7 +22,8 @@ seeding, or deploy requires a terminal.
 | `docs/other/DUE-OUTS.md` | What the owner must provide, by slice |
 | `docs/other/SEED-CONTENT.md` | Column rules and row forms for the hand-written seed lists |
 | `docs/other/OPEN-QUESTIONS.md` | Questions blocking build, and answered ones |
-| `src/` | The Worker: entry and routing, `/admin`, `lib/`, `migrations/` |
+| `src/` | The Worker: entry and routing, `/api/*`, `/admin`, `lib/`, `migrations/` |
+| `public/` | The family app: one static document, one stylesheet, three JS modules |
 | `test/` | `node --test test/*.test.js` — no dependencies, no install |
 
 ## Where things stand
@@ -45,13 +46,27 @@ checksummed, applied once — and `SEEDS` — re-run in full on every press, eve
 insert `ON CONFLICT DO NOTHING`. That is what lets the seed grow later without
 reading as drift, and what makes a correction in the library editor permanent.
 
-**Slice 03 is next** — the family passcode, the person picker and the shell. Its
-due-out D-10, two self-hosted font files, is outstanding and has a lead time.
+**Slice 03 is built, except its fonts.** The family passcode gets you in once
+per device, `PATCH /api/me` writes which of the three people you are into the
+same signed cookie, and the cookie is re-issued on every authenticated response
+so its year slides forward instead of expiring in March. Everything under
+`/api/` is behind that cookie except `POST /api/auth`, which is what issues it.
+
+The shell is a static `public/index.html` and three vanilla modules — no build
+step, no framework, no third-party request on any page load. Passcode → person →
+"Pick a country to start September", at 360px.
+
+D-10, the two licensed font files, is outstanding, so the shell runs on a system
+stack. Swapping them in is an `@font-face` pair and two token values in
+`public/css/app.css`, plus a re-tune of the type scale.
+
+**Slice 04 is next** — month setup, the draw, and the reveal. It needs D-12, the
+month the school year starts, and answers to Q-06 and Q-07 first.
 
 Every Cloudflare due-out is closed, and so are the three inks. Two remain: the
-fonts (D-10) and the month the school year starts (D-12, slice 04).
+fonts (D-10) and the month the school year starts (D-12).
 
-Six open questions outstanding, none of them blocking slice 03.
+Six open questions outstanding. Two of them, Q-06 and Q-07, block slice 04.
 
 The Worker's own tests run with `node --test test/*.test.js` and need nothing
 installed. They are a build-session tool, not something the owner ever runs —
