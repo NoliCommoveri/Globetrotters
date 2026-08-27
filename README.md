@@ -17,7 +17,7 @@ seeding, or deploy requires a terminal.
 |---|---|
 | `CLAUDE.md` | Directives for every session. Read first. |
 | `docs/design/DESIGN.md` | The spec. Each section carries a completion marker. |
-| `docs/slices/INDEX.md` | The ten slices, in build order, with status |
+| `docs/slices/INDEX.md` | The eleven slices, in build order, with status |
 | `docs/slices/NN-name.md` | One slice: instructions, due-outs, questions, exit criteria |
 | `docs/other/DUE-OUTS.md` | What the owner must provide, by slice |
 | `docs/other/SEED-CONTENT.md` | Column rules and row forms for the hand-written seed lists |
@@ -101,11 +101,17 @@ week 1, and days worked.
 **Slice 06 is next** — the passport, the completion offer at 20/20, and the
 stamp.
 
-Every Cloudflare due-out is closed, and so are the three inks and the school year
-(September through May). Two remain: the fonts (D-10), which block nothing, and
-the passport's paper size (D-13), which blocks only slice 06's print stylesheet.
+**Slice 10 is specced** — printed worksheets (§16). A drawn month becomes about
+seven sheets of ruled, titled pages for the binder: a library of twelve reusable
+layouts, segments measured in thirds of a page, packed a week to a sheet so a
+mid-month swap reprints one week. Nothing is stored and no plan is ever frozen —
+`/print/:planId` renders live from the plan every time it is asked.
 
-Three open questions outstanding, none of them against slice 06.
+Every Cloudflare due-out is closed, and so are the three inks, the school year
+(September through May) and the paper (D-13 — US Letter). One remains: the fonts
+(D-10), which block nothing.
+
+Four open questions outstanding, none of them against slice 06.
 
 The Worker's own tests run with `node --test test/*.test.js` and need nothing
 installed. They are a build-session tool, not something the owner ever runs —

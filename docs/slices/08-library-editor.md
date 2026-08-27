@@ -3,7 +3,7 @@
 **Status:** not started
 **Band:** L
 **Implements:** §12
-**Depends on:** 02
+**Depends on:** 02 (the layout editor also needs 10)
 
 **Goal.** Tuning without a terminal, after watching two kids actually use it.
 
@@ -33,7 +33,8 @@ Parent-facing, behind `ADMIN_TOKEN`, not part of the kid experience.
 - **Task list** — every template, filterable by week, tier, focus weight, and
   workbook page. Shows how many times each has been drawn and by whom, so it's
   obvious which ones are dead weight. Inline edit for title, prompt, week,
-  tier, workbook page. New tasks default `origin = 'custom'`.
+  tier, workbook page, and the worksheet layout the task's printed segment uses
+  (§16). New tasks default `origin = 'custom'`.
   `POST /admin/api/tasks`, `PATCH /admin/api/tasks/:id`
 - **Focus editor** — name, blurb, and the weight grid: that focus against every
   week 2–3 task, each cell cycling `off / 1 / 3`. Editing weights one form
@@ -45,6 +46,14 @@ Parent-facing, behind `ADMIN_TOKEN`, not part of the kid experience.
   created focus is immediately valid with zero rows and can be tuned
   afterwards. Warn if a focus has fewer than ~15 tasks at weight ≥1 across
   weeks 2 and 3, since the draw needs headroom.
+- **Worksheet layout editor** — the twelve printed forms slice 10 seeds: name,
+  kind, height in thirds, and that kind's own knobs, with the bound-template
+  count beside each one. Editing a layout changes every task bound to it, which
+  is the point of there being twelve rather than ninety. Every field is a named
+  value the renderer reads and escapes — there is no markup field here, because
+  this form is the one place a typed string reaches a printed page (§16).
+  `POST /admin/api/layouts`, `PATCH /admin/api/layouts/:id`
+  Nothing to build here until slice 10 lands the table.
 - **Country editor** — hooks and focus affinities per country, same shape as
   the task list. Generated content needs a spot check, and a wrong hook should
   be one tap to fix or delete.
@@ -78,6 +87,8 @@ Parent-facing, behind `ADMIN_TOKEN`, not part of the kid experience.
   round-trips and a second import is a no-op. There is no preview database to
   restore into (§2), so the round-trip is proven in place
 - Re-running the seed after editing a seeded row leaves the edit alone
+- A layout edited here changes every task bound to it, and a `spec` field
+  containing `<script>` prints as visible text on `/print/:planId`
 
 ## Do not build
 

@@ -15,9 +15,10 @@ moved to the answered list at the bottom of this file.
 | Q-09 | How does the wall compare its version value? | 07 | api |
 | Q-10 | Is `POST /api/auth` exempt from the wall's write ban? | 07 | auth |
 | Q-11 | Does week 4's "present" task require an audience? | 09 | content |
+| Q-12 | Who prints the month's pages, and from what device? | 10 | household |
 
-Q-09 and Q-10 block slice 07, and Q-11 blocks slice 09. Nothing is outstanding
-against slice 05 or slice 06.
+Q-09 and Q-10 block slice 07, Q-11 blocks slice 09 and Q-12 blocks part of slice
+10. Nothing is outstanding against slice 05 or slice 06.
 
 ---
 
@@ -37,6 +38,15 @@ exemption.
 Carried from §15. Whether the family schedules a presentation night is a
 household decision the app can only reflect. It changes the wording of one
 week-4 template per project type, so it blocks slice 09 and nothing earlier.
+
+**Q-12 — Who prints the month's pages, and from what device?**
+§16 puts a **Print this month's pages** button at the end of the reveal, which
+is a screen a kid reaches on a phone. Whether that is real depends on a
+household fact the app cannot see: whether the printer is reachable from the
+kids' phones, or whether printing is something a parent does from a laptop. If
+it is the latter the reveal's button is a dead end and Plan is the only place it
+belongs. It blocks where the button goes and nothing else — the route, the
+packer and the twelve layouts are unaffected either way.
 
 ---
 
