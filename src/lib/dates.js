@@ -139,3 +139,20 @@ export function weekOf(startDate, today) {
   if (days < 0) return 1;
   return Math.min(4, Math.floor(days / 7) + 1);
 }
+
+// Which school year the passport grid and the wall are looking at (Q-13).
+//
+// Inside the year this is simply today's month. Over the summer it is the year
+// with work in it: June and July are the print months and anchor on the year
+// just finished, which is what a summer month resolves to on its own. August is
+// the month that has to move — a September set up early belongs on the grid the
+// moment it exists, not on the 1st — so the later of today's month and the
+// newest month anybody has a plan for is what both screens draw. A family with
+// no plans at all lands on the month setup would open, rather than on an empty
+// year behind them.
+export function anchorMonth(months, today) {
+  const month = monthOf(today);
+  const newest = months.reduce((max, m) => (m > max ? m : max), '');
+  if (!newest) return setupMonthFor(today);
+  return newest > month ? newest : month;
+}

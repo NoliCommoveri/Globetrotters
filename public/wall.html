@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Globetrotters — the wall</title>
+<meta name="description" content="One country a month, ten minutes a day.">
+<meta name="theme-color" content="#0F1C2E">
+<meta name="robots" content="noindex">
+<!-- Added to the tablet's home screen and launched from there, this is the whole
+     screen: no browser chrome, no address bar, nothing to tap out of. -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Globetrotters">
+<link rel="stylesheet" href="/css/app.css">
+</head>
+<!-- Its own document, not a route inside the shell. The shell's first act is to
+     fetch /api/me, which a wall cookie is refused — a wall rendered by app.js
+     would open on the passcode screen every time (DESIGN.md §8).
+
+     Everything below is drawn by /js/wall.js against the same stylesheet the
+     shell uses. The wall's own type scale lives in that file's slice 07 block,
+     on the .wall-* classes. -->
+<body class="wall">
+
+<main id="wall" tabindex="-1">
+  <noscript>
+    <section class="panel">
+      <h1>Globetrotters</h1>
+      <p>This screen needs JavaScript switched on.</p>
+    </section>
+  </noscript>
+</main>
+
+<!-- One live region, as in the shell. Nobody is standing at this screen with a
+     reader on, but the refresh control is a button and a button that says
+     nothing when pressed is a broken button. -->
+<p id="status" class="status" role="status" aria-live="polite"></p>
+
+<script type="module" src="/js/wall.js"></script>
+</body>
+</html>

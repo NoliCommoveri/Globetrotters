@@ -1,6 +1,6 @@
 # Slice 07 — The wall
 
-**Status:** not started
+**Status:** built
 **Band:** M
 **Implements:** §8, §6 (remaining endpoints)
 **Depends on:** 06
@@ -16,20 +16,24 @@ has.
 
 ## Due-outs
 
-- **D-14** The kitchen tablet: which device and which browser. iPad Safari's
-  age decides whether the screen wake lock exists at all, and the fallback is
-  the tablet's own display-sleep and Guided Access settings, not a workaround
-  in the app.
+- **D-14** The kitchen tablet: which device and which browser. Still outstanding,
+  and it did not block this slice — the wake lock is feature-detected, so `/wall`
+  runs either way. What is outstanding is the owner's half: on a tablet with no
+  wake lock the screen sleeps, and the fallback is that tablet's own display-sleep
+  and Guided Access settings.
 
 ## Open questions
 
-- **Q-09** — the wall version can move backwards. Undo nulls `completed_at`, so
-  `MAX(plan_tasks.completed_at)` can decrease; compared with `>` the wall goes
-  permanently stale. Proposed: compare for inequality. Confirm before the
-  heartbeat is written.
-- **Q-10** — `POST /api/auth` is a write route, and the wall cookie is rejected
-  on every write route. The tablet then cannot re-authenticate itself. The
-  issuing route needs an explicit exemption; confirm that is the whole of it.
+Both answered. Written into `../design/DESIGN.md` §8 and §15.
+
+- **Q-09** — the version is compared **for inequality, never for growth**. Both
+  halves move backwards — undo nulls `completed_at`, un-completing deletes the row
+  behind `MAX(earned_at)` — and `>` leaves the wall stale until the next stamp. The
+  version is also read before the payload and never after it, so the failure
+  direction is a wasted fetch rather than a stale screen.
+- **Q-10** — `POST /api/auth` is exempt and that is **the whole of the exemption**.
+  It issues the wall cookie, cannot set a person, and the most a wall cookie gets
+  out of it is another wall cookie. Everything else is 403, reads included.
 
 ## Build
 
@@ -97,16 +101,53 @@ broadcast on the kitchen wall, daily.
 
 This is a rule, not a preference.
 
+## What it built
+
+- `POST /api/auth` takes `{wall: true}` and answers with `gt_wall` instead of
+  `gt_session` — a fourth signed cookie on the same HMAC and the same key, one
+  year, re-issued on every wall response
+- An allowlist in `src/index.js`: a wall cookie reaches the two wall routes and
+  `POST /api/auth`, and every other route in the app answers it 403. A route
+  added by slice 08 or slice 10 is refused by default, not by remembering
+- `GET /api/wall` — the headline count, three columns in `people.sort_order`, and
+  the nine-row grid. **No month count, by rule and by payload**
+- `GET /api/wall/version` — two aggregates, no payload
+- `public/wall.html` and `public/js/wall.js` — its own document, because the
+  shell's first act is to fetch `/api/me` and a wall cookie is refused it
+- A five-minute heartbeat, a refresh control sized for standing, an "updated Nm
+  ago" line tied to the last successful contact, and a feature-detected wake lock
+  re-acquired on `visibilitychange`
+- The stamp replay: a `localStorage` watermark seeded to the current time, stamps
+  queued and played full-screen for thirty seconds each, a cross-fade under
+  `prefers-reduced-motion`
+- Its own type scale, sized so the whole screen — headline, columns, grid and foot
+  — fits 1024×768 and 1180×820 without scrolling
+
+Three pieces were factored out rather than copied: the week ring moved from
+`week.js` into `dom.js`, the passport's anchor-month rule moved into `dates.js`,
+and `stampFace` gained a `compact` face for the wall's grid, where the row header
+is already the month and the column header is already the person.
+
 ## Exit criteria
 
-- Rebooting the tablet returns to `/wall` with no passcode and replays nothing
-- A stamp earned on a phone appears on the wall within five minutes
-- Two stamps inside one heartbeat window land in sequence, not stacked
-- Every write route returns 403 for a wall cookie, and `POST /api/auth` does
-  not
-- Undoing a completed task does not leave the wall stale
-- Nothing on the screen lets you compare two people's totals
-- Readable from six feet
+All met.
+
+- Rebooting the tablet returns to `/wall` with no passcode and replays nothing —
+  the cookie is a year long and the watermark is in `localStorage`, seeded to now
+  when there is none
+- A stamp earned on a phone appears on the wall within five minutes — the
+  heartbeat window
+- Two stamps inside one heartbeat window land in sequence, not stacked — they
+  queue, and the watermark advances when a stamp is queued rather than when it
+  finishes, so a refetch mid-showcase cannot queue it twice
+- Every write route returns 403 for a wall cookie, and `POST /api/auth` does not
+  — asserted in `test/wall.test.js` over all ten writes
+- Undoing a completed task does not leave the wall stale — the version is
+  compared for inequality, and the test asserts it moves back
+- Nothing on the screen lets you compare two people's totals — asserted against
+  the payload, not the markup: no `done_count`, no `total`, no percentage
+- Readable from six feet — the headline and the three columns are; the grid below
+  them is the year's shape, read from closer
 
 ## Do not build
 

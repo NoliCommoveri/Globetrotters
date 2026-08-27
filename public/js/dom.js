@@ -72,3 +72,22 @@ export function svg(tag, props = {}, children = []) {
 // "3 left", "1 left", "Nothing left". Labelled with what is left rather than
 // what is banked: same data, but one of them is an instruction (§10).
 export const left = (n) => (n === 0 ? 'Nothing left' : `${n} left`);
+
+// The 0-5 week ring, drawn as separate arcs rather than one sweep: five tasks
+// map to five weekdays, and a continuous arc at three-fifths reads as a
+// percentage, which is the one thing §10 rules out.
+//
+// This week and the wall draw the same ring at very different sizes. The size is
+// CSS; the geometry is here, once.
+export function ring(done, total = 5) {
+  const segments = Array.from({ length: total }, (_, i) => svg('circle', {
+    class: i < done ? 'ring-seg is-done' : 'ring-seg',
+    cx: 24, cy: 24, r: 20,
+    pathLength: total,
+    'stroke-dasharray': `0.78 ${total - 0.78}`,
+    'stroke-dashoffset': -i,
+  }));
+  return svg('svg', {
+    class: 'ring', viewBox: '0 0 48 48', 'aria-hidden': 'true',
+  }, segments);
+}

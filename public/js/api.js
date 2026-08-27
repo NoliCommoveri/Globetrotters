@@ -1,5 +1,6 @@
-// Every call the shell makes. One place, so the two rules that apply to all of
-// them — send the cookie, treat 401 as "show the passcode" — are written once.
+// Every call the two documents make — the shell and the wall. One place, so the
+// two rules that apply to all of them — send the cookie, treat 401 as "show the
+// passcode" — are written once.
 
 // The session cookie is HttpOnly, so nothing here ever reads it. `same-origin`
 // is the default for fetch, and stating it is the reminder that the cookie is
@@ -53,7 +54,11 @@ function send(path, method, body) {
 // launch and on every return to the tab.
 export const getMe = () => call('/api/me');
 
-export const postAuth = (passcode) => send('/api/auth', 'POST', { passcode });
+// The passcode, and which of the two cookies it should come back as. `wall` is
+// a downgrade and only /js/wall.js asks for it: the cookie it issues reaches two
+// read routes and is refused on every write in the app (§8, Q-10).
+export const postAuth = (passcode, { wall = false } = {}) =>
+  send('/api/auth', 'POST', wall ? { passcode, wall: true } : { passcode });
 
 export const patchMe = (personId) => send('/api/me', 'PATCH', { person_id: personId });
 
@@ -109,3 +114,11 @@ export const patchStamp = (id, headline) =>
 // Days worked, the number that replaces the streak. Its own route because it
 // reaches back across every month of the year, which no plan payload does.
 export const getStats = (all = false) => call(all ? '/api/stats?all=1' : '/api/stats');
+
+// ------------------------------------------------------------------ wall --
+
+// The kitchen tablet's two calls. The heartbeat is the one that runs all day —
+// two aggregates and no payload, every five minutes — and the full view is
+// fetched only when the version it answers with has moved (§8).
+export const getWall = () => call('/api/wall');
+export const getWallVersion = () => call('/api/wall/version');

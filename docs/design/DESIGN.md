@@ -537,12 +537,15 @@ built (slice 03); `POST /api/plans`, `GET`/`PATCH /api/plans/:id`,
 `GET /api/passport` are built (slice 04); `PATCH /api/tasks/:id`,
 `POST /api/tasks/:id/swap`, `POST /api/sessions` and `GET /api/stats` are built
 (slice 05); the two completion routes and `PATCH /api/stamps/:id` are built
-(slice 06). What remains is the three wall routes (slice 07), the library editor
-(slice 08) and the print route (slice 10).
+(slice 06); `GET /wall` and both `/api/wall` routes are built (slice 07). What
+remains is the library editor (slice 08) and the print route (slice 10).
 
 ```
 POST   /api/auth                      passcode -> cookie. The one family route that
-                                      answers without one.
+                                      answers without one, and the one route a wall
+                                      cookie may reach. `{wall: true}` asks for the
+                                      wall's cookie instead of the family's — a
+                                      downgrade, never the other way (§8, Q-10).
 GET    /api/me                        people list + every plan + this device's person
                                       + the family's own today and the month
                                       setup would open
@@ -580,8 +583,11 @@ GET    /print/:planId                 the month's pages as a printable document.
                                       after a swap. Family cookie only; the
                                       wall's is refused. See §16.
 
-GET    /wall                          read-only ambient view (own cookie type)
-GET    /api/wall                      the wall payload
+GET    /wall                          read-only ambient view (own cookie type).
+                                      Its own document, not a shell route: the
+                                      shell opens by fetching /api/me, which a
+                                      wall cookie is refused.
+GET    /api/wall                      the wall payload. No month count, by rule.
 GET    /api/wall/version              MAX(stamps.earned_at) and
                                       MAX(plan_tasks.completed_at). Two rows, no
                                       payload — the wall's heartbeat. See §8.
@@ -860,21 +866,38 @@ of it:
 
 ## 8. The wall tablet
 
-**Status:** not started · slice 07
+**Status:** built · slice 07
 
 A `/wall` route for the kitchen tablet. Read-only, no person identity, all three
 people at once, meant to be read from six feet away.
 
 - **Read-only, enforced at the middleware.** "No checkboxes anywhere" is a layout
-  decision, not a security property. The wall's cookie is **its own type**, and
-  requests carrying it are rejected on every write route. Otherwise the tablet in the
-  room guests stand in is holding a full-write family cookie for nine months.
+  decision, not a security property. The wall's cookie is **its own type**, and a
+  request carrying it reaches `GET /api/wall`, `GET /api/wall/version` and nothing
+  else — every other route in the app answers it 403, reads included. Otherwise the
+  tablet in the room guests stand in is holding a full-write family cookie for nine
+  months.
+
+  **`POST /api/auth` is the one exemption, and it is the whole of it (Q-10).** That
+  route is what issues the wall cookie, so a tablet whose year has run out has no
+  other way back in. It is safe to leave open to the wall for the same reason it is
+  safe to leave open to everyone: it takes the passcode and hands back a cookie, it
+  cannot set a person, and the most a wall cookie can get out of it is another wall
+  cookie. `PATCH /api/me` is not exempt and must not become so — an identity on the
+  kitchen tablet is the thing the ban exists to prevent.
 - **Its own long-lived cookie.** It should survive a reboot and come back to the wall
   view without anyone typing a passcode. Issued once, by entering the family passcode
   at `/wall`.
 - **A heartbeat, not a poll.** Every five minutes the wall calls
   `GET /api/wall/version` — `MAX(stamps.earned_at)`, `MAX(plan_tasks.completed_at)`,
   two rows read, no payload — and fetches the full view only when that value moves.
+  **Compared for inequality, never for growth (Q-09).** Both halves can go
+  backwards: undo nulls `completed_at`, and removing a stamp deletes the row behind
+  the other maximum. Compared with `>` the wall goes permanently stale after any
+  undo, until the next stamp. The version is also read *before* the payload and
+  never after it, so a write landing between the two leaves the stored version
+  older than what is on screen — one wasted fetch on the next beat, rather than a
+  stale wall.
   Roughly 290 requests a day. A 30-second poll of the whole payload is three orders
   of magnitude more D1 reads for a screen that changes about three times a day, and
   the account's row budget is shared with every other database on it.
@@ -922,12 +945,13 @@ behind, broadcast on the kitchen wall, daily. So: fixed display order by
 language anywhere. The **family** number is the headline ("14 stamps this year")
 with the individual rings quiet underneath. This is a rule, not a preference.
 
-**Which is why the month count is not on the wall.** A 0–5 week ring survives the
+**Which is why the month count is not on the wall — and not in its payload.** A 0–5 week ring survives the
 rule by §10's own logic: it resets Monday, so being behind is at most a few days old
 and it repairs itself. "9 of 20" beside a sibling's "17 of 20" accumulates for a
 month and cannot be recovered from quickly — it is the leaderboard, and fixed sort
 order does not undo it. The month count stays on the phone, where one person sees
-their own.
+their own. `GET /api/wall` therefore does not carry one: a number that is not in the
+response cannot be rendered by a later change to the client that forgot why.
 
 ---
 
@@ -1015,8 +1039,8 @@ makes both meaningless.
 ## 11. Design direction
 
 **Status:** partial · everything but the fonts. The palette, the tokens, the
-empty state and the shell's type scale are built (slice 03) and the stamp is
-built (slice 06). The two self-hosted faces are outstanding on D-10, and the
+empty state and the shell's type scale are built (slice 03), the stamp is built
+(slice 06) and the wall's own type scale is built (slice 07). The two self-hosted faces are outstanding on D-10, and the
 stamp's grid face is where that shows most: a country name is set to fit ninety
 pixels on a system sans, and a condensed grotesque would let it breathe.
 
@@ -1264,6 +1288,19 @@ Resolved:
   July show the year just finished — the one you print — and August follows the
   first September set up early, rather than hiding the stamp it earns until the
   1st. See §7 Passport.
+- **What the wall cookie can reach, and what re-issues it.** Two routes —
+  `GET /api/wall` and `GET /api/wall/version` — and `POST /api/auth`, which is
+  the only exemption from the write ban and the only way a tablet whose year has
+  run out gets back in. It cannot set a person and never carries one, so the most
+  it can win is another wall cookie. Everything else is 403, reads included: an
+  allowlist rather than a list of banned methods, so a route added by a later
+  slice is refused by default rather than by remembering. See §6, §8.
+- **How the wall decides the screen has changed.** Inequality on
+  `MAX(stamps.earned_at)` and `MAX(plan_tasks.completed_at)`, never `>`. Both
+  move backwards — undo nulls one and un-completing deletes the row behind the
+  other — and a growth comparison leaves the kitchen stale until the next stamp.
+  The version is read before the payload, so the failure direction is a wasted
+  fetch rather than a stale wall. See §8.
 - **How many devices a person gets.** As many as they like. Identity is per-device and
   nothing server-side is device-bound. See §2.
 - **Names and ink colors for the three people.** Three placeholder rows are

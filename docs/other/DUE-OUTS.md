@@ -163,8 +163,14 @@ rows derived from the printable height, holding back `.6in` for a browser's own
 header and footer, which prints as a single sheet. Slice 10's thirds read the
 same variables.
 
-**D-14. The tablet.** iPad Safari's age decides whether the screen wake lock
-exists at all. If it doesn't, the fallback is the tablet's own display-sleep
-and Guided Access settings, not a workaround in the app — but that is a setting
-the owner has to change, so it needs to be known before slice 07 rather than
-discovered on the wall.
+**D-14. The tablet.** Slice 07 is built and this did not block it: the wake lock
+is feature-detected, so `/wall` runs on a tablet that has `navigator.wakeLock`
+and on one that does not. What is still outstanding is the owner's half. If the
+tablet's browser has no wake lock, the screen sleeps, and the fallback is the
+tablet's own display-sleep and Guided Access settings — a setting the owner has
+to change by hand, on a device nobody has named yet.
+
+Two things to do on the tablet once it is chosen: open `/wall`, type the family
+passcode once, and add it to the home screen; then set display sleep to Never
+and turn on Guided Access so the screen cannot be tapped out of. The wall never
+asks for the passcode again for a year, reboot included.

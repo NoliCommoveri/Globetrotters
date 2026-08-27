@@ -8,10 +8,12 @@
 // is scoped to (DESIGN.md §3).
 //
 // The family gate is a table split: one route answers without a cookie, the
-// rest do not. Both gates check a signature rather than a lookup, so neither
+// rest do not. The wall gate sits beside it — the same passcode issues a second
+// cookie type that reaches two read routes and is refused everywhere else (§8).
+// All three gates check a signature rather than a lookup, so none of them
 // touches D1 (§2).
 
-import { isAdmin, readSession, issueSessionCookie } from './lib/auth.js';
+import { isAdmin, readSession, issueSessionCookie, isWall, issueWallCookie } from './lib/auth.js';
 import { json } from './lib/html.js';
 import { adminPage, adminLogin, adminLogout, tokenForm } from './admin/index.js';
 import { adminHealth } from './admin/health.js';
@@ -27,6 +29,7 @@ import { apiCompletePlan, apiUncompletePlan, apiPatchStamp } from './api/stamps.
 import { apiPatchTask, apiSwapTask } from './api/tasks.js';
 import { apiCreateSession } from './api/sessions.js';
 import { apiStats } from './api/stats.js';
+import { apiWall, apiWallVersion } from './api/wall.js';
 
 function notFound() {
   return new Response('Not found', {
@@ -93,9 +96,29 @@ const OPEN_API = {
   'POST /api/auth': apiAuth,
 };
 
+// What a wall cookie can reach, and the whole of it. An allowlist rather than a
+// list of banned methods: "requests carrying it are rejected on every write
+// route" (§8) is a property that has to survive slice 08 and slice 10 adding
+// routes, and a route added below is behind this by default rather than by
+// remembering.
+//
+// POST /api/auth is not in here because it does not need to be — it is
+// dispatched from OPEN_API before the gate is reached at all, which is exactly
+// the exemption Q-10 asks for and the reason it stays a single route: the most
+// that route can hand a wall cookie back is another wall cookie.
+const WALL_API = {
+  'GET /api/wall': apiWall,
+  'GET /api/wall/version': apiWallVersion,
+};
+
 // Everything else the family reaches. The gate sits in front of this table, not
 // inside each handler, so a route added in a later slice is behind the passcode
 // by default rather than by remembering.
+//
+// The wall's two are spread in rather than repeated: a parent looking at the
+// kitchen screen from their own phone is holding a family cookie, not a wall
+// one, and these are reads of what the family already sees. Spread rather than
+// listed twice so the two tables cannot drift.
 const FAMILY_API = {
   'GET /api/me': apiMe,
   'PATCH /api/me': apiPatchMe,
@@ -104,6 +127,7 @@ const FAMILY_API = {
   'POST /api/plans': apiCreatePlan,
   'POST /api/sessions': apiCreateSession,
   'GET /api/stats': apiStats,
+  ...WALL_API,
 };
 
 async function admin(request, env, url) {
@@ -153,13 +177,41 @@ function withCookie(response, cookie) {
   });
 }
 
+// A request carrying nothing but the wall cookie. Two routes answer it and
+// everything else is 403 — not 404, because the tablet is a family device and
+// "you cannot do that here" is the true answer, and not 401, because it is signed
+// in perfectly well.
+//
+// 403 covers reads as well as writes. §8 only demands the writes, but the wall
+// has no person and no business with /api/me or /api/catalog; a rule that names
+// the two routes it does need is one a later slice cannot widen by accident.
+async function wall(request, env, route) {
+  const handler = WALL_API[route];
+  if (!handler) {
+    return json({
+      ok: false,
+      error: 'The wall screen is read-only.',
+    }, { status: 403 });
+  }
+  return withCookie(await handler(request, env), await issueWallCookie(env));
+}
+
 async function api(request, env, url) {
   const route = `${request.method} ${url.pathname}`;
 
+  // Before either gate. This is the whole of Q-10: a wall cookie reaching the
+  // route that issues wall cookies is how a tablet whose year ran out gets
+  // another one, and there is no second exemption anywhere below.
   const open = OPEN_API[route];
   if (open) return open(request, env);
 
   const session = await readSession(request, env);
+
+  // The family session wins when both cookies are present. A device holding one
+  // is a phone somebody signed in on; the tablet on the wall only ever has the
+  // other, so this can never quietly hand the wall a writeable identity.
+  if (!session && await isWall(request, env)) return wall(request, env, route);
+
   const handler = FAMILY_API[route];
 
   if (!session) {
@@ -203,11 +255,23 @@ const SHELL_PATTERNS = [/^\/plan\/\d+$/];
 const isShellPath = (pathname) =>
   SHELL_PATHS.has(pathname) || SHELL_PATTERNS.some((p) => p.test(pathname));
 
-function shell(request, env, url) {
+function serveDocument(request, env, url, file) {
   if (request.method !== 'GET' && request.method !== 'HEAD') return methodNotAllowed();
   if (!env.ASSETS) return notFound();
-  return env.ASSETS.fetch(new Request(new URL('/index.html', url), request));
+  return env.ASSETS.fetch(new Request(new URL(file, url), request));
 }
+
+const shell = (request, env, url) => serveDocument(request, env, url, '/index.html');
+
+// The wall is its own document, not a route inside the shell. The shell's first
+// act is to fetch /api/me, which a wall cookie is refused — so a wall rendered
+// by app.js would open on the passcode screen every time. Two documents, one
+// stylesheet, and no shared state to get wrong.
+//
+// Like `/`, this normally never arrives here: the assets binding serves
+// /wall.html for /wall before the Worker sees the request. It is wired anyway
+// so the path is declared in one place and answers the same either way.
+const wallPage = (request, env, url) => serveDocument(request, env, url, '/wall.html');
 
 export default {
   async fetch(request, env) {
@@ -220,6 +284,8 @@ export default {
     if (url.pathname === '/api' || url.pathname.startsWith('/api/')) {
       return api(request, env, url);
     }
+
+    if (url.pathname === '/wall') return wallPage(request, env, url);
 
     if (isShellPath(url.pathname)) return shell(request, env, url);
 

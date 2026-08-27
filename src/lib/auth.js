@@ -1,6 +1,6 @@
-// Every signed cookie in the app: the admin cookie at the top, the family
-// session at the bottom. They share one HMAC and one key, which is why they
-// share a file.
+// Every signed cookie in the app, in three blocks: the admin cookie, the family
+// session, the wall. They share one HMAC and one key, which is why they share a
+// file.
 //
 // `ADMIN_TOKEN` is both the admin password and the key every signed cookie in
 // this app is keyed on (DESIGN.md §2, §3, Q-03). Changing it locks the owner
@@ -134,4 +134,49 @@ export async function readSession(request, env) {
 export function checkPasscode(env, submitted) {
   if (!env.FAMILY_PASSCODE) return false;
   return timingSafeEqual(String(submitted ?? '').trim(), String(env.FAMILY_PASSCODE).trim());
+}
+
+// ---------------------------------------------------------------------------
+// The wall cookie. Its own type, so the kitchen tablet is not holding a
+// full-write family cookie for nine months (DESIGN.md §8, Q-10).
+//
+// Same HMAC, same key, one more domain string. What makes it read-only is not
+// the cookie — it is that src/index.js reaches a two-route allowlist with it and
+// 403s everything else. The cookie's whole job is to say "this device typed the
+// passcode once, at /wall".
+//
+// It carries no person and cannot be made to. The wall shows all three people
+// and has no identity of its own, which is exactly why POST /api/auth is safe
+// to leave open to it: the only thing that route can hand back is another
+// cookie just like this one.
+
+const WALL_COOKIE = 'gt_wall';
+
+// A year, re-issued on every wall response. The tablet is plugged into a wall
+// and nobody is standing at it — a cookie that expires in March is a passcode
+// prompt on a screen with no keyboard in front of it.
+const WALL_TTL_SECONDS = 365 * 24 * 60 * 60;
+
+function wallCookie(value, maxAge) {
+  return `${WALL_COOKIE}=${value}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=${maxAge}`;
+}
+
+export async function issueWallCookie(env) {
+  const expires = Math.floor(Date.now() / 1000) + WALL_TTL_SECONDS;
+  const sig = await hmac(env.ADMIN_TOKEN, `wall.${expires}`);
+  return wallCookie(`${expires}.${sig}`, WALL_TTL_SECONDS);
+}
+
+// True when the request carries a valid wall cookie. There is nothing to return
+// but the fact: the wall has no person, no preferences and no state on the
+// server.
+export async function isWall(request, env) {
+  if (!env.ADMIN_TOKEN) return false;
+  const raw = readCookie(request, WALL_COOKIE);
+  if (!raw) return false;
+  const dot = raw.indexOf('.');
+  if (dot === -1) return false;
+  const expires = Number(raw.slice(0, dot));
+  if (!Number.isFinite(expires) || expires < Math.floor(Date.now() / 1000)) return false;
+  return timingSafeEqual(raw.slice(dot + 1), await hmac(env.ADMIN_TOKEN, `wall.${expires}`));
 }
