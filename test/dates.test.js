@@ -7,6 +7,7 @@ import assert from 'node:assert/strict';
 import {
   todayIn, mondayOf, firstMondayOf, startDateFor, monthsBetween, addMonths,
   inSchoolYear, schoolYearStart, schoolYearMonths, setupMonthFor, isMonth, monthOf,
+  daysBetween, weekOf,
 } from '../src/lib/dates.js';
 
 test('mondayOf walks back to Monday, and Sunday walks back six days', () => {
@@ -94,4 +95,32 @@ test('month strings are validated, not trusted', () => {
   assert.ok(!isMonth('2026-9'));
   assert.ok(!isMonth('2026-09-01'));
   assert.equal(monthOf('2026-09-14'), '2026-09');
+});
+
+test('the week turns over on Monday, because start_date is always one', () => {
+  const start = '2026-09-07';   // a Monday
+  assert.equal(weekOf(start, '2026-09-07'), 1);
+  assert.equal(weekOf(start, '2026-09-13'), 1);   // Sunday, still week 1
+  assert.equal(weekOf(start, '2026-09-14'), 2);   // Monday, the ring resets
+  assert.equal(weekOf(start, '2026-09-21'), 3);
+  assert.equal(weekOf(start, '2026-09-28'), 4);
+});
+
+test('week 4 absorbs the remainder, and a date before the start is week 1', () => {
+  const start = '2026-09-07';
+  // A month is 28 to 31 days. Days 29 onward have no week 5 to run into.
+  assert.equal(weekOf(start, '2026-10-05'), 4);
+  assert.equal(weekOf(start, '2026-11-30'), 4);
+  // Setup on a Saturday starts on the Monday ahead, and the cards have to read
+  // before then.
+  assert.equal(weekOf(start, '2026-09-05'), 1);
+});
+
+test('daysBetween counts whole days in either direction', () => {
+  assert.equal(daysBetween('2026-09-07', '2026-09-07'), 0);
+  assert.equal(daysBetween('2026-09-07', '2026-09-14'), 7);
+  assert.equal(daysBetween('2026-09-14', '2026-09-07'), -7);
+  // Across a month boundary, and across a leap day.
+  assert.equal(daysBetween('2026-09-30', '2026-10-01'), 1);
+  assert.equal(daysBetween('2028-02-28', '2028-03-01'), 2);
 });

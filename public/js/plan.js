@@ -1,17 +1,24 @@
-// The reveal — all twenty tasks, the moment you find out what your September
-// looks like (DESIGN.md §7 Month setup).
+// Plan — the whole month at once, and the reveal it starts life as (DESIGN.md
+// §7 Month setup, §7 Plan).
 //
-// It is the end of setup and it is also where the month gets fixed. Everything
-// on it is free until the first check-off and closed after: that is one rule
-// with three doors, and the payload names it `locked` so the screen does not
-// have to re-derive it from twenty rows (Q-01, Q-02).
+// One screen, because they are one screen: the reveal is this page on the day it
+// is drawn. It is where the month gets fixed — everything on it is free until
+// the first check-off and closed after, one rule with three doors, and the
+// payload names it `locked` so the screen does not re-derive it from twenty rows
+// (Q-01, Q-02).
 //
 // Redraw alone would be the wrong lever. It re-rolls with the same weighting,
 // and when twenty tasks look wrong the focus is usually why — so change focus
 // sits beside it, at the same size.
+//
+// It is also the only screen that can hold month-scale state, so it holds all of
+// it: swap and its remaining budget, the month's notes accumulating down the
+// page, the materials for week 4 from week 1, and days worked.
 
-import { el, monthName, adventure, longDate } from './dom.js';
-import { getPlan, redrawPlan, patchPlan, getFocusSamples, getCatalog, SignedOut } from './api.js';
+import { el, monthName, adventure, longDate, left } from './dom.js';
+import {
+  getPlan, redrawPlan, patchPlan, swapTask, getStats, getFocusSamples, getCatalog, SignedOut,
+} from './api.js';
 
 const WEEK_NOTE = {
   1: 'The four pages every country gets, and one more.',
@@ -26,8 +33,9 @@ export function planScreen(ctx) {
   const local = {
     body: ctx.preloaded || null,
     catalog: null,
+    stats: null,
     error: null,
-    busy: null,          // 'redraw' | 'focus' | 'country' | 'project'
+    busy: null,          // 'redraw' | 'focus' | 'country' | 'project' | 'swap'
     open: null,          // which changer is expanded
     query: '',
     samples: new Map(),
@@ -35,13 +43,14 @@ export function planScreen(ctx) {
 
   const set = (patch) => { Object.assign(local, patch); paint(); };
 
-  async function load() {
+  async function load({ refetch = false } = {}) {
     try {
-      const [body, catalog] = await Promise.all([
-        local.body ? Promise.resolve(local.body) : getPlan(ctx.id),
-        getCatalog(),
+      const [body, catalog, stats] = await Promise.all([
+        local.body && !refetch ? Promise.resolve(local.body) : getPlan(ctx.id),
+        local.catalog ? Promise.resolve(local.catalog) : getCatalog(),
+        getStats(),
       ]);
-      set({ body, catalog, error: null });
+      set({ body, catalog, stats: stats.stats[0] || null, error: null });
     } catch (err) {
       if (err instanceof SignedOut) return ctx.refresh();
       set({ error: err.message });
@@ -53,11 +62,13 @@ export function planScreen(ctx) {
   async function change(kind, fn) {
     set({ busy: kind, error: null });
     try {
-      set({ body: await fn(), busy: null, open: null, query: '' });
-      ctx.say(MESSAGES[kind]);
+      const body = await fn();
+      set({ body, busy: null, open: null, query: '' });
+      ctx.say(messageFor(kind, body));
       // Country and focus are on the home screen's summary, so the shell's copy
-      // of /api/me is stale the moment either changes.
-      if (kind !== 'redraw') ctx.refresh();
+      // of /api/me is stale the moment either changes. A swap is not: it changes
+      // one card inside a plan the shell only knows the country of.
+      if (kind !== 'redraw' && !kind.startsWith('swap-')) ctx.refresh();
     } catch (err) {
       if (err instanceof SignedOut) return ctx.refresh();
       set({ busy: null, error: err.message });
@@ -70,6 +81,12 @@ export function planScreen(ctx) {
     country: 'Country changed. Your tasks are the same — they always work anywhere.',
     project: 'Week 4 is new.',
   };
+
+  const messageFor = (kind, body) => (
+    kind.startsWith('swap-')
+      ? `Swapped. ${left(body.swaps_left)} this month.`
+      : MESSAGES[kind]
+  );
 
   // ------------------------------------------------------------- fragments --
 
@@ -90,22 +107,90 @@ export function planScreen(ctx) {
     ]);
   }
 
-  function taskCard(task) {
-    return el('li', { class: 'task' }, [
+  // The same three states This week shows, because they are the same twenty
+  // cards. In progress is an open task with a session against it.
+  const stateOf = (task) => (
+    task.status === 'done' ? 'done' : (task.session_count > 0 ? 'progress' : 'open')
+  );
+
+  const STATE_LABEL = { open: null, progress: 'Started', done: 'Done' };
+
+  // Offered on the fifth week-1 slot and on weeks 2-3, never on the four week-1
+  // core tasks or on week 4, and never on a task already done — the payload has
+  // already worked all of that out per row (§4). The budget is the plan's, so
+  // the button goes quiet for every row at once when it runs out.
+  function swapButton(body, task) {
+    if (!task.swappable) return null;
+    const spent = body.swaps_left <= 0;
+    return el('button', {
+      class: 'quiet task-swap', type: 'button',
+      disabled: spent || local.busy != null,
+      text: local.busy === `swap-${task.id}` ? 'Drawing…' : 'Swap',
+      title: spent ? 'No swaps left this month' : `${left(body.swaps_left)} this month`,
+      on: { click: () => change(`swap-${task.id}`, () => swapTask(task.id)) },
+    });
+  }
+
+  function taskCard(body, task) {
+    const state = stateOf(task);
+    return el('li', { class: 'task', 'data-state': state }, [
       el('span', { class: 'task-no', text: String(task.position) }),
       el('span', { class: 'task-body' }, [
         el('span', { class: 'task-title', text: task.title }),
         el('span', { class: 'task-prompt', text: task.prompt }),
         task.workbook_page ? el('span', { class: 'task-page', text: `${task.workbook_page} page` }) : null,
+        // Two prompts from the same week and focus often read alike, so a swap
+        // that does not say what it replaced is indistinguishable from a bug.
+        task.swapped_from_title
+          ? el('span', { class: 'task-page', text: `Swapped in for “${task.swapped_from_title}”` })
+          : null,
+      ]),
+      el('span', { class: 'task-side' }, [
+        STATE_LABEL[state] ? el('span', { class: 'task-state', text: STATE_LABEL[state] }) : null,
+        ctx.personId === body.plan.person_id ? swapButton(body, task) : null,
       ]),
     ]);
   }
 
-  function week(group) {
+  function week(body, group) {
     return el('div', { class: 'week' }, [
       el('h2', { text: `Week ${group.week_no} · ${group.theme}` }),
       el('p', { class: 'note', text: WEEK_NOTE[group.week_no] }),
-      el('ol', { class: 'tasks' }, group.tasks.map(taskCard)),
+      el('ol', { class: 'tasks' }, group.tasks.map((task) => taskCard(body, task))),
+    ]);
+  }
+
+  // Days worked, cumulative across the whole year. It replaces the streak and it
+  // has no other home in the app (§10) — a streak is the only mechanic here that
+  // can punish, and nine months contain a flu and a winter break.
+  function counters(body) {
+    return el('p', { class: 'meta' }, [
+      el('span', { class: 'pill', text: `${body.done_count} of ${body.total} done` }),
+      local.stats
+        ? el('span', {
+          class: 'pill',
+          text: `${local.stats.days_worked} ${local.stats.days_worked === 1 ? 'day' : 'days'} worked`,
+        })
+        : null,
+    ]);
+  }
+
+  // The month's notes, accumulating down the page. This is what makes "What
+  // surprised you?" worth answering — twenty of them by month's end, and the
+  // pool the stamp headline is picked from.
+  function notes(body) {
+    if (!body.notes.length) {
+      return el('div', { class: 'stack notes' }, [
+        el('h2', { text: 'What surprised you' }),
+        el('p', { class: 'note', text: 'Nothing written down yet. The line after a check-off lands here.' }),
+      ]);
+    }
+    return el('div', { class: 'stack notes' }, [
+      el('h2', { text: 'What surprised you' }),
+      el('ul', { class: 'note-list' }, body.notes.map((row) => el('li', {}, [
+        el('span', { class: 'note-text', text: row.note }),
+        el('span', { class: 'note-from', text: row.task_title || row.local_date }),
+      ]))),
     ]);
   }
 
@@ -206,7 +291,7 @@ export function planScreen(ctx) {
       // change focus reroll the same weeks under the same condition, so a limit
       // on one and not the other is two doors onto one room.
       return el('div', { class: 'stack' }, [
-        el('p', { class: 'note', text: `${body.done_count} of ${body.total} done. The draw is set now.` }),
+        el('p', { class: 'note', text: 'You have started this month. The draw is set now.' }),
         !body.week4_locked ? disclosure('project', 'Change what you’ll make', projectChanger(plan)) : null,
         disclosure('country', 'Change country', countryChanger(plan)),
       ]);
@@ -240,7 +325,9 @@ export function planScreen(ctx) {
 
     root.replaceChildren(...[
       header(local.body.plan),
-      el('div', { class: 'stack' }, local.body.weeks.map(week)),
+      counters(local.body),
+      el('div', { class: 'stack' }, local.body.weeks.map((group) => week(local.body, group))),
+      notes(local.body),
       levers(local.body),
       local.error ? el('p', { class: 'error', role: 'alert', text: local.error }) : null,
       el('p', { class: 'note' }, [
@@ -251,5 +338,10 @@ export function planScreen(ctx) {
 
   paint();
   load();
+
+  // Refetched on every return to the tab, like every other screen: someone else
+  // may have checked something off, and a note written on a phone belongs on the
+  // laptop's copy of this page.
+  root.reload = () => load({ refetch: true });
   return root;
 }

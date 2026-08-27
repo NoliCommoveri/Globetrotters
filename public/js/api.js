@@ -83,3 +83,14 @@ export const createPlan = (body) => send('/api/plans', 'POST', body);
 export const getPlan = (id) => call(`/api/plans/${id}`);
 export const redrawPlan = (id) => send(`/api/plans/${id}/redraw`, 'POST', {});
 export const patchPlan = (id, body) => send(`/api/plans/${id}`, 'PATCH', body);
+
+// The daily loop. All three answer with the whole plan — the ring, the pips, the
+// counts and the notes all move on one tap, and a client merging four of those
+// by hand gets one of them wrong.
+export const patchTask = (id, status) => send(`/api/tasks/${id}`, 'PATCH', { status });
+export const swapTask = (id) => send(`/api/tasks/${id}/swap`, 'POST', {});
+export const postSession = (body) => send('/api/sessions', 'POST', body);
+
+// Days worked, the number that replaces the streak. Its own route because it
+// reaches back across every month of the year, which no plan payload does.
+export const getStats = (all = false) => call(all ? '/api/stats?all=1' : '/api/stats');

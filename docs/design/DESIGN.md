@@ -511,7 +511,10 @@ CREATE INDEX idx_hooks_country        ON country_hooks(country_id);
 routes are built (slice 02); `POST /api/auth` and both `/api/me` routes are
 built (slice 03); `POST /api/plans`, `GET`/`PATCH /api/plans/:id`,
 `POST /api/plans/:id/redraw`, `GET /api/focuses/:id/samples` and
-`GET /api/passport` are built (slice 04). The rest is slices 05–08.
+`GET /api/passport` are built (slice 04); `PATCH /api/tasks/:id`,
+`POST /api/tasks/:id/swap`, `POST /api/sessions` and `GET /api/stats` are built
+(slice 05). What remains is the two completion routes and `PATCH /api/stamps/:id`
+(slice 06), the three wall routes (slice 07) and the library editor (slice 08).
 
 ```
 POST   /api/auth                      passcode -> cookie. The one family route that
@@ -536,7 +539,8 @@ POST   /api/plans/:id/complete        {headline?} — gated on 20/20, writes sta
 DELETE /api/plans/:id/complete        un-complete, removes the stamp. Confirmed.
 
 PATCH  /api/tasks/:id                 {status} sets the target state, idempotent —
-                                      never a toggle. done also writes a session.
+                                      never a toggle. An open -> done transition
+                                      also writes a session; a repeat does not.
 POST   /api/tasks/:id/swap            redraw same week + focus, excluding this plan's
                                       tasks. Week 1 slot 5 and weeks 2-3 only, open
                                       tasks only, three per month.
@@ -601,12 +605,23 @@ does not survive contact with change-focus, which rerolls weeks 2–3 as often a
 you like under the identical condition — two doors onto the same room, one of them
 locked. The first check-off is the only gate, on both.
 
+**What `PATCH /api/tasks/:id` writes, and when.** It sets the state it is given and
+answers the same way whatever the task was already in — `done` on a done task is a
+200, not a 409, because a stale second device is a normal event and not an error.
+The **session is written only on an `open → done` transition**. Idempotence and
+"done writes a session" are otherwise in direct conflict: two devices, or one
+double-tap on a slow connection, would each add a row and inflate days worked —
+the one number §10 promises never lies. A genuine second sitting on a task already
+done is logged the way every other session is, through `POST /api/sessions`, which
+is the route that exists to write one without touching a task's state.
+
 ---
 
 ## 7. Screens
 
-**Status:** partial · the shell, the first-run path and the empty state are
-built (slice 03). Each screen below carries its own marker.
+**Status:** partial · the shell and the first-run path are built (slice 03),
+Month setup and the reveal in slice 04, This week and Plan in slice 05. The
+passport is slice 06. Each screen below carries its own marker.
 
 Mobile first. The kids will use this on a phone standing at a table. 360px wide.
 
@@ -626,7 +641,7 @@ the only control there. Nothing in the app renders a link to `/admin` (§3).
 
 ### This week — the default view
 
-**Status:** not started · slice 05
+**Status:** built · slice 05
 
 Used ~180 times per person. Everything else in the app is occasional.
 
@@ -772,7 +787,7 @@ September — so it has to work empty.
 
 ### Plan
 
-**Status:** not started · slice 05
+**Status:** built · slice 05
 
 Full four-week view for the current month — all twenty tasks grouped by week. This
 is where you look when you want the shape of the month rather than the shape of
@@ -794,6 +809,12 @@ of it:
 - **Plan-level edits**: change country (free, any time), change project type (until
   week 4). Changing project type rewrites the five week-4 cards, so it confirms and
   names what it is replacing, and it is refused once any of them is done.
+- **Swap is owner-only; checking off is not.** A swap is a reroll of one slot
+  against a budget, so a sibling on a shared phone can spend somebody else's month
+  the same way a redraw would — `POST /api/tasks/:id/swap` answers `403` alongside
+  `redraw` and `PATCH /api/plans/:id`. `PATCH /api/tasks/:id` and
+  `POST /api/sessions` stay open to the family: there are no roles here, and a
+  parent checking off beside a kid is the normal case rather than an override.
 
 ---
 
@@ -913,7 +934,7 @@ rest selectable but unadorned.
 
 ## 10. Progress
 
-**Status:** not started · slice 05
+**Status:** built · slice 05
 
 **No streak.** A streak is a loss-aversion device built for adults who opted into a
 daily habit. This is two kids doing parent-assigned work from September to May — a
@@ -1208,7 +1229,14 @@ Resolved:
   are no roles" and it is not one: reading a plan is open to the family, and what
   is refused is a sibling on a shared phone redrawing someone else's month. See
   §6.
+- **When a check-off writes a session.** Only on an `open → done` transition.
+  `PATCH /api/tasks/:id` is idempotent — it sets the state it is given and 200s
+  whatever the task was already in — and writing a session unconditionally would
+  make two devices, or one double-tap, count two days. Days worked is the one
+  number §10 promises never lies, and over-counting is the way it would start.
+  A real second sitting on a finished task goes through `POST /api/sessions`,
+  which is the route for writing a session without touching a task. See §6, §10.
 
 **Still open.** Open questions are tracked in `../other/OPEN-QUESTIONS.md`, each
-assigned to the slice it blocks. Four are outstanding. They are answered before
+assigned to the slice it blocks. Three are outstanding. They are answered before
 the code that depends on them is written, never guessed.

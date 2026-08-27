@@ -89,6 +89,10 @@ test('every family route refuses a request with no session cookie', async () => 
     ['GET', '/api/me'],
     ['PATCH', '/api/me'],
     ['GET', '/api/catalog'],
+    ['GET', '/api/stats'],
+    ['POST', '/api/sessions'],
+    ['PATCH', '/api/tasks/1'],
+    ['POST', '/api/tasks/1/swap'],
   ]) {
     const res = await worker.fetch(
       new Request(`https://example.test${path}`, { method }), e,

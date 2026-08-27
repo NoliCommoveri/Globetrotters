@@ -49,3 +49,22 @@ export const ADVENTURE = {
 };
 
 export const adventure = (depth) => ADVENTURE[depth] || ADVENTURE[1];
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+// The week ring is the one drawing in the app, and an SVG node is not an HTML
+// node: document.createElement('circle') builds an unknown HTML element that
+// renders as nothing at all.
+export function svg(tag, props = {}, children = []) {
+  const node = document.createElementNS(SVG_NS, tag);
+  for (const [key, value] of Object.entries(props)) {
+    if (value === undefined || value === null || value === false) continue;
+    node.setAttribute(key, value === true ? '' : String(value));
+  }
+  for (const child of [].concat(children)) if (child) node.append(child);
+  return node;
+}
+
+// "3 left", "1 left", "Nothing left". Labelled with what is left rather than
+// what is banked: same data, but one of them is an instruction (§10).
+export const left = (n) => (n === 0 ? 'Nothing left' : `${n} left`);
