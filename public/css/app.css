@@ -1300,18 +1300,43 @@ button {
 /* ---------------------------------------------------------------- print -- */
 
 /* The page that goes in the front of the binder in June, with 27 stamps on it.
- * US Letter, one sheet (D-13) — so the grid is sized in inches rather than rem
- * and every stamp shrinks to fit rather than the year breaking across pages.
+ * US Letter, one sheet (D-13) — so the grid is sized against the sheet rather
+ * than in rem, and every stamp shrinks to fit rather than the year breaking
+ * across pages.
  *
  * A home printer renders all three inks as the same grey, which is why the
  * stamp face carries the person's name: the greyscale values are 15 and 20
  * points apart (D-09) and the name is what stops that mattering. */
+
+/* The margin is typed here and mirrored into --page-margin below, which is not
+ * a duplicate by choice: the page context does not inherit custom properties,
+ * so `margin: var(--page-margin)` inside @page is ignored by every engine. This
+ * is the one literal. If a home printer's unprintable area clips, both move —
+ * and nothing else in the app is measured in inches. */
 @page {
   size: letter;
   margin: .5in;
 }
 
 @media print {
+  /* D-13. The printable area every printed page in this app is laid out
+   * against: US Letter less 0.5in margins, so 7.5 x 10in. Slice 10's worksheet
+   * segments are thirds of it (§16); the passport below is the first thing
+   * measured against it. */
+  :root {
+    --page-margin: .5in;
+    --page-width: calc(8.5in - 2 * var(--page-margin));
+    --page-height: calc(11in - 2 * var(--page-margin));
+
+    /* What the title, the count and the column headings take off the top,
+     * border-spacing between the ten rows included. Measured, not guessed. */
+    --page-chrome: 1.85in;
+
+    /* Held back for a browser's own header and footer, which the family may
+     * well have switched on and which no stylesheet can see. */
+    --page-reserve: .6in;
+  }
+
   html { background: #fff; }
 
   body {
@@ -1344,7 +1369,12 @@ button {
   .passport-who { font-size: 8pt; color: #000; padding-bottom: .04in; }
   .passport-month { font-size: 7pt; color: #444; }
 
-  .passport-panel { --slot-h: .82in; }
+  /* Nine rows into whatever the sheet leaves. Derived rather than typed, so a
+   * printer with a wider unprintable margin moves --page-margin and the year
+   * still fits one sheet. */
+  .passport-panel {
+    --slot-h: calc((var(--page-height) - var(--page-chrome) - var(--page-reserve)) / 9);
+  }
 
   .slot { border-color: #bbb; }
   .slot.is-ahead { border-color: #ddd; }

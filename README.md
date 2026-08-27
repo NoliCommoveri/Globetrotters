@@ -17,7 +17,7 @@ seeding, or deploy requires a terminal.
 |---|---|
 | `CLAUDE.md` | Directives for every session. Read first. |
 | `docs/design/DESIGN.md` | The spec. Each section carries a completion marker. |
-| `docs/slices/INDEX.md` | The ten slices, in build order, with status |
+| `docs/slices/INDEX.md` | The eleven slices, in build order, with status |
 | `docs/slices/NN-name.md` | One slice: instructions, due-outs, questions, exit criteria |
 | `docs/other/DUE-OUTS.md` | What the owner must provide, by slice |
 | `docs/other/SEED-CONTENT.md` | Column rules and row forms for the hand-written seed lists |
@@ -117,12 +117,20 @@ per viewer, so the phone that earned it, the wall in the kitchen and the other
 two people on next open each get the moment exactly once. It prints to one sheet
 of US Letter, all three inks legible in grey.
 
+**Slice 10 is specced** — printed worksheets (§16). A drawn month becomes about
+seven sheets of ruled, titled pages for the binder: a library of twelve reusable
+layouts, segments measured in thirds of a page, packed a week to a sheet so a
+mid-month swap reprints one week. Nothing is stored and no plan is ever frozen —
+`/print/:planId` renders live from the plan every time it is asked. It measures
+against the same two page variables the passport already prints against.
+
 Every Cloudflare due-out is closed, and so are the three inks, the school year
-(September through May) and the paper (US Letter). One remains: the fonts
+(September through May) and the paper (D-13 — US Letter). One remains: the fonts
 (D-10), which block nothing — the shell and the stamp run on a system stack.
 
-Three open questions outstanding: two against the wall (slice 07) and one
-against the content fill (slice 09). Slice 08, the library editor, is the only
+Four open questions outstanding, none of them against slice 06: two against the
+wall (slice 07), one against the content fill (slice 09), and one against part
+of the worksheets (slice 10). Slice 08, the library editor, is the only
 remaining slice nothing blocks.
 
 The Worker's own tests run with `node --test test/*.test.js` and need nothing

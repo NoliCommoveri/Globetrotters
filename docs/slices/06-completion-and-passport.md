@@ -20,7 +20,7 @@ nine-month job for one person on one phone.
 
 ## Open questions
 
-Q-12 was raised and settled here: which nine months the grid draws. The later of
+Q-13 was raised and settled here: which nine months the grid draws. The later of
 today's month and the newest month anyone has a plan for, falling back to the
 month setup would open. It is spec in `../design/DESIGN.md` §7.
 

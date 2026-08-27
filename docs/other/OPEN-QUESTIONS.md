@@ -15,9 +15,10 @@ moved to the answered list at the bottom of this file.
 | Q-09 | How does the wall compare its version value? | 07 | api |
 | Q-10 | Is `POST /api/auth` exempt from the wall's write ban? | 07 | auth |
 | Q-11 | Does week 4's "present" task require an audience? | 09 | content |
+| Q-12 | Who prints the month's pages, and from what device? | 10 | household |
 
-Q-09 and Q-10 block slice 07, and Q-11 blocks slice 09. Nothing is outstanding
-against slices 05, 06 or 08.
+Q-09 and Q-10 block slice 07, Q-11 blocks slice 09 and Q-12 blocks part of slice
+10. Nothing is outstanding against slices 05, 06 or 08.
 
 ---
 
@@ -38,13 +39,22 @@ Carried from §15. Whether the family schedules a presentation night is a
 household decision the app can only reflect. It changes the wording of one
 week-4 template per project type, so it blocks slice 09 and nothing earlier.
 
+**Q-12 — Who prints the month's pages, and from what device?**
+§16 puts a **Print this month's pages** button at the end of the reveal, which
+is a screen a kid reaches on a phone. Whether that is real depends on a
+household fact the app cannot see: whether the printer is reachable from the
+kids' phones, or whether printing is something a parent does from a laptop. If
+it is the latter the reveal's button is a dead end and Plan is the only place it
+belongs. It blocks where the button goes and nothing else — the route, the
+packer and the twelve layouts are unaffected either way.
+
 ---
 
 ## Answered
 
 | # | Question | Answer |
 |---|---|---|
-| Q-12 | Which nine months does the passport grid draw? | The later of today's month and the newest month anyone has a plan for; with no plans anywhere, the month setup would open. Inside the year that is today's month. Over the summer it is the year with work in it: June and July show the year just finished, which is the one that gets printed, and August follows the first September set up early instead of hiding the stamp it earns until the 1st. `DESIGN.md` §7, §15. |
+| Q-13 | Which nine months does the passport grid draw? | The later of today's month and the newest month anyone has a plan for; with no plans anywhere, the month setup would open. Inside the year that is today's month. Over the summer it is the year with work in it: June and July show the year just finished, which is the one that gets printed, and August follows the first September set up early instead of hiding the stamp it earns until the 1st. `DESIGN.md` §7, §15. |
 | Q-08 | Does a repeated `done` write a second session? | No. The session is written only on an `open → done` transition. The route stays idempotent and answers 200 whatever state the task was in; writing unconditionally would let two devices or one double-tap count two days, and days worked is the number §10 promises never lies. A genuine second sitting on a finished task goes through `POST /api/sessions`. `DESIGN.md` §6, §10, §15. |
 | Q-07 | How does setup learn the family's stamped countries? | `GET /api/passport`, loaded alongside the catalog. `/api/me` is fetched on every launch and every return to the tab; the stamped set is read by one screen 27 times a year, and carrying it on `/api/me` would send it 180 times a month for that. The passport endpoint has to exist for §7's passport screen anyway, so slice 04 built it. `DESIGN.md` §6, §7, §15. |
 | Q-06 | Where do the focus preview's sample titles come from? | `GET /api/focuses/:id/samples` — three `weight = 3` titles, alternating between weeks 2 and 3, memoized client-side for the life of the page. The catalog stays what it is: it is fetched by every screen and already carries 195 countries. `DESIGN.md` §6, §7, §15. |

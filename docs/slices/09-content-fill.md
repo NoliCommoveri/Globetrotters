@@ -2,8 +2,9 @@
 
 **Status:** not started
 **Band:** L
-**Implements:** §9, §13
-**Depends on:** 04 (needs a working draw to tune against)
+**Implements:** §9, §13, and §16's bindings
+**Depends on:** 04 (needs a working draw to tune against); the worksheet
+bindings additionally need 10
 
 **Goal.** The thing that decides whether the app is good rather than merely
 working.
@@ -68,6 +69,26 @@ dependency, works offline, hand-quality rather than algorithmic.
 - **Coverage: 75–100 countries**, chosen for spread across continent, adventure
   level, and focus affinity. The rest stay selectable but unadorned.
 
+### Worksheet bindings
+
+Every template written or revised here also gets its `worksheet_layout_id` —
+which of slice 10's twelve printed forms its segment uses — and a
+`worksheet_spec` where the layout needs one (a caption, column headers, a line
+count). It is one column on a row this slice is already writing, so it happens
+here rather than in a pass of its own.
+
+Two rules:
+
+- **Weeks 1–3 only.** Week 4 is production and prints as a single sheet with no
+  per-task segments (§16). Its templates leave the column null.
+- **Null is a working answer.** An unbound template prints its prompt over eight
+  ruled lines. Bind the ones where a real form helps — a box for anything drawn,
+  two columns for anything compared, a table for anything with three facts a row
+  — and leave the rest. A wrong form is worse than ruled lines.
+
+If slice 10 has not landed yet the column does not exist, and the bindings are
+the one part of this slice that waits for it. Nothing else here does.
+
 ### The boundary
 
 Affinity never touches the draw. Tasks are country-agnostic; this data only
@@ -83,6 +104,8 @@ property that a kid can change countries any time.
 - Every prompt reads as one action a 5th grader can finish in ten minutes
 - Every hook reads as a lead; spot-check twenty at random for assertions
 - The seed still runs twice with no change on the second run
+- A drawn month prints (§16) with a bespoke form on every drawn task in weeks
+  1–3 that has one, and ruled lines on the rest — no wrong forms, no blanks
 
 ## Do not build
 

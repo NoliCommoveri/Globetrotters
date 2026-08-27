@@ -16,7 +16,7 @@ terminal — if something appears to, it is specced wrong (§3).
 | D-10 | Two font files, licensed for self-hosting | 03 | outstanding — the shell ships on system fonts until they land |
 | D-11 | `FAMILY_TZ` value confirmed | 02 | done — `America/Chicago` |
 | D-12 | The month the school year starts | 04 | done — September through May |
-| D-13 | Paper size the passport prints to | 06 | done — US Letter, one sheet |
+| D-13 | Paper size, for the passport and the worksheets | 06, 10 | done — US Letter |
 | D-14 | Which tablet and browser the wall runs on | 07 | outstanding |
 
 ---
@@ -136,12 +136,32 @@ setup (which refuses a month outside the year), by the empty state (which names
 the month it would open, and points at the September ahead over the summer) and
 by the passport grid's nine rows.
 
-**D-13. Paper.** US Letter, and it fits one sheet. The passport is the page that
-goes in the front of the binder in June, with 27 stamps on it, and the print
-stylesheet sizes the grid in inches so the whole year scales down rather than
-breaking across pages: `@page { size: letter; margin: .5in }`, nine rows of
-`.82in`, which leaves about `.8in` of slack for a browser's own header and
-footer. Changing to A4 is the two values in `@page` and nothing else.
+**D-13. Paper.** **US Letter.** 8.5 × 11in, printed at 0.5in margins, so the
+printable area every printed page in this app is laid out against is 7.5 × 10in.
+
+It settles two things. The passport is the page that goes in the front of the
+binder in June with 27 stamps on it, and it fits one sheet at that size (§7).
+And a worksheet segment is measured in **thirds of that area** — 7.5 × 3.33in
+(§16), which is a comfortable drawing box or about eight ruled lines.
+
+Both numbers live as CSS variables in one place. If the family's printer has a
+wider unprintable margin and a segment clips, the margin moves once and every
+layout follows; nothing else is measured in inches.
+
+They are `--page-margin`, `--page-width` and `--page-height` in
+`public/css/app.css`, declared on `:root` inside the print block, with the width
+and height derived from the margin by `calc()` — move the margin and every
+layout follows.
+
+One literal cannot be folded in: `@page { margin: .5in }`. The page context does
+not inherit custom properties, so `margin: var(--page-margin)` there is ignored
+by every engine. The two are mirrored and commented in place; if the family's
+printer clips, both move together and nothing else does.
+
+The passport (slice 06) is the first thing measured against them — nine stamp
+rows derived from the printable height, holding back `.6in` for a browser's own
+header and footer, which prints as a single sheet. Slice 10's thirds read the
+same variables.
 
 **D-14. The tablet.** iPad Safari's age decides whether the screen wake lock
 exists at all. If it doesn't, the fallback is the tablet's own display-sleep
