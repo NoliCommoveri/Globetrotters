@@ -288,12 +288,19 @@ INSERT INTO countries (name, iso3, continent, region, research_depth) VALUES
 ON CONFLICT (iso3) DO NOTHING;
 
 -- ---------------------------------------------------------------------------
--- Task templates — 27 rows. 6 in week 1 (4 core + 2 competing for the fifth
--- slot), 8 in week 2, 8 in week 3, 5 in week 4 for trifold-board only.
+-- Task templates — 37 rows. 6 in week 1 (4 core + 2 competing for the fifth
+-- slot), 13 in week 2, 13 in week 3, 5 in week 4 for trifold-board only.
 --
--- Twenty-seven rather than the twenty in §14: a 5-template week draws all of
--- itself, which leaves Swap with no candidate, and one project type's week 4 is
--- 5 rows on its own.
+-- Not the twenty in §14: a 5-template week draws all of itself, which leaves
+-- Swap with no candidate, and one project type's week 4 is 5 rows on its own.
+-- That floor is 27, and it sizes the pool for the draw and nothing else.
+--
+-- Thirteen is what the focuses need rather than what the draw needs. Five
+-- tasks are drawn a week whatever the pool holds, so depth costs the kid
+-- nothing; a focus with two on-theme tasks, though, draws both of them every
+-- month it is chosen, and these are picked nine times each. Three on-theme
+-- tasks per focus per week is the floor, and thirteen is what it takes to
+-- give all six of them that in both weeks.
 --
 -- Tier says what is drawn, not how hard it is. `core` is fixed and always
 -- included — week 1's four and all five week-4 rows. `focus` is the
@@ -329,8 +336,8 @@ FROM (
    'Look at the map and list every country that shares a border with yours. If it''s an island with no land borders, write that instead.',
    1, 'map', 'core', NULL, NULL),
 
-  ('language-hello', 'Learn to say hello',
-   'Find out what language or languages people speak there and how to say "hello." Write it in your workbook the way it sounds.',
+  ('language-hello', 'Say hello and write it',
+   'Find out what language people speak there and how to say "hello." Write it in your workbook twice: once copied the way they spell it, and once the way it sounds out loud.',
    1, 'language', 'core', NULL, NULL),
 
   ('currency-animal', 'What is on their money?',
@@ -369,12 +376,36 @@ FROM (
    'Find one wild animal that lives in this country and nowhere else nearby. Draw it and write one fact about where it lives.',
    2, 'ecology', 'focus', NULL, NULL),
 
+  ('animal-in-trouble', 'Find an animal in trouble',
+   'Find one animal from this country that scientists say is endangered. Write down one reason it is disappearing, and how many are left if you can find a number.',
+   2, 'ecology', 'focus', NULL, NULL),
+
+  ('wild-place-protected', 'Find their biggest wild place',
+   'Find the biggest national park or nature reserve in this country. Write down its name and one animal that is safer because that place is protected.',
+   2, 'ecology', 'focus', NULL, NULL),
+
+  ('what-they-grow', 'Find out what they grow',
+   'Find the crop this country grows the most of. Write down what it is, and one thing people there make or cook with it.',
+   2, 'land', 'focus', NULL, NULL),
+
+  ('made-here', 'Find something made there',
+   'Find one thing this country makes and sells to the rest of the world. Write down what it is, then check your own house for anything made there.',
+   2, 'money', 'focus', NULL, NULL),
+
+  ('border-that-moved', 'Find a border that moved',
+   'Find out whether this country''s borders or its name have changed in the last two hundred years. Write down what changed, or write that nothing did.',
+   2, 'history', 'focus', NULL, NULL),
+
   ('before-history', 'Find something from before writing',
    'Find one fossil, cave painting, or prehistoric find from this country. Draw it and write how long ago it was made.',
    2, 'prehistory', 'focus', NULL, NULL),
 
   ('kid-life', 'A day in their life',
    'Find out what a school day looks like for a kid your age in this country. Write three ways it is different from your day.',
+   3, 'people', 'focus', NULL, NULL),
+
+  ('life-outdoors', 'Find what they do outside',
+   'Find out what people there do outdoors: hiking, fishing, herding, surfing, skiing. Pick one, write where in the country people do it, and why the land there suits it.',
    3, 'people', 'focus', NULL, NULL),
 
   ('what-people-believe', 'Find the main religion',
@@ -384,6 +415,22 @@ FROM (
   ('tonights-dinner', 'Plan tonight''s dinner there',
    'Find a dish people eat there for dinner. Write down what''s in it and draw your plate the way it would look.',
    3, 'food', 'focus', NULL, NULL),
+
+  ('animals-on-the-menu', 'Find the animals they eat',
+   'Find out which animals people raise or catch for food in this country. Write down one that people where you live eat too, and one that they don''t. Different isn''t gross, just different.',
+   3, 'food', 'focus', NULL, NULL),
+
+  ('story-they-tell', 'Find a story they tell',
+   'Find a folk tale, legend, or myth from this country. Write one line about who is in it, and draw the part you would most want to see.',
+   3, 'culture', 'focus', NULL, NULL),
+
+  ('who-is-famous', 'Find someone everyone knows',
+   'Find one person from this country that almost everyone there would recognize. Write down who they are and what they did to become known.',
+   3, 'people', 'focus', NULL, NULL),
+
+  ('holiday-they-mark', 'Find their biggest holiday',
+   'Find the one day of the year this whole country celebrates. Write down what it remembers and one thing people do on it.',
+   3, 'culture', 'focus', NULL, NULL),
 
   ('craft-of-the-land', 'Find their craft or art',
    'Find one traditional art or craft from this country: weaving, pottery, painting, carving. Find a picture and draw your own version of the pattern.',
@@ -433,9 +480,15 @@ ON CONFLICT (slug) DO NOTHING;
 -- ---------------------------------------------------------------------------
 -- Focus weights — sparse. A missing row means weight 1, so only an opinion is
 -- stored: 3 for on-theme, 0 to exclude, nothing in between. Every focus needs
--- at least one 3 in weeks 2-3 or the setup preview has nothing to sample, and
--- at most one 0 per focus per week or a 5-of-8 draw leaves Swap with no
--- candidate. Both are asserted in test/seed-content.test.js.
+-- at least one 3 in week 2 *and* one in week 3, or picking it leaves that week
+-- identical to picking nothing; and at most one 0 per focus per week, or a
+-- 5-of-8 draw leaves Swap with no candidate. Both are asserted in
+-- test/seed-content.test.js.
+--
+-- Every focus holds three weight-3 rows in week 2 and three in week 3. Two is
+-- not enough: both get drawn every month that focus is chosen, and the focus a
+-- kid picks nine times has to have nine months in it. wild-places is the one
+-- that gets picked, and it is the one this was sized around.
 --
 -- Joined on slugs, same as above. The join is inner: a slug that matches
 -- nothing contributes no row and raises no error, so the row count is checked
@@ -454,7 +507,18 @@ FROM (
   ('who-leads',           'people-and-power',    3),
   ('law-you-notice',      'conflict-and-change', 3),
   ('landforms',           'land-and-sky',        3),
+  ('landforms',           'food-and-craft',      3),
   ('weather-there-now',   'land-and-sky',        3),
+  ('before-history',      'ancient-world',       3),
+  ('animal-in-trouble',   'wild-places',         3),
+  ('wild-place-protected','wild-places',         3),
+  ('law-you-notice',      'people-and-power',    3),
+  ('animal-in-trouble',   'conflict-and-change', 3),
+  ('what-they-grow',      'food-and-craft',      3),
+  ('what-they-grow',      'land-and-sky',        3),
+  ('made-here',           'food-and-craft',      3),
+  ('made-here',           'people-and-power',    3),
+  ('border-that-moved',   'conflict-and-change', 3),
   ('who-leads',           'wild-places',         0),
   ('wild-animal',         'food-and-craft',      0),
   ('weather-there-now',   'ancient-world',       0),
@@ -463,6 +527,20 @@ FROM (
   ('tonights-dinner',      'food-and-craft',      3),
   ('craft-of-the-land',    'food-and-craft',      3),
   ('what-people-believe',  'conflict-and-change', 3),
+  ('animals-on-the-menu',  'food-and-craft',      3),
+  ('life-outdoors',        'wild-places',         3),
+  ('life-outdoors',        'land-and-sky',        3),
+  ('animals-on-the-menu',  'wild-places',         3),
+  ('landmark-to-see',      'ancient-world',       3),
+  ('craft-of-the-land',    'ancient-world',       3),
+  ('story-they-tell',      'ancient-world',       3),
+  ('who-is-famous',        'people-and-power',    3),
+  ('who-is-famous',        'conflict-and-change', 3),
+  ('holiday-they-mark',    'people-and-power',    3),
+  ('holiday-they-mark',    'conflict-and-change', 3),
+  ('the-sport-they-love',  'land-and-sky',        3),
+  ('landmark-to-see',      'wild-places',         3),
+  ('landmark-to-see',      'land-and-sky',        3),
   ('craft-of-the-land',    'people-and-power',    0),
   ('sound-of-the-country', 'conflict-and-change', 0),
   ('wow-fact',             'land-and-sky',        0)

@@ -131,7 +131,7 @@ imported.
   seed** re-executes the whole list on every press: a row that exists is left
   exactly as it is, a row that is new is inserted.
 
-A seed is not a migration and must not be checksummed. Slice 09 adds ~63 task
+A seed is not a migration and must not be checksummed. Slice 09 adds ~53 task
 templates and all of `003_country_data.sql` to a database that is already
 seeded and already carries a month of real work. Under the checksum rule that
 edit reads as permanent drift and Apply pending refuses to run it; under the
@@ -969,8 +969,8 @@ carried into next school year without a terminal.
 ## 13. Seed data
 
 **Status:** partial · seed v0 is built (slice 02): the runner, 3 people, 6
-focuses, 6 project types, 195 countries, 27 task templates and 17 focus weights.
-The remaining ~63 templates and `003_country_data.sql` are slice 09.
+focuses, 6 project types, 195 countries, 37 task templates and 42 focus weights.
+The remaining ~53 templates and `003_country_data.sql` are slice 09.
 
 Seed files are not migrations (§3). They live beside them in `/src/migrations/`
 and are exported from the same index as `SEEDS`, but they are re-run by **Run
@@ -1001,13 +1001,17 @@ Contents of `002_seed.sql`:
 - **195 countries** with continent, region and `research_depth`, unadorned —
   hooks and affinities are `003`. The conflict key is `iso3`, so a name can be
   corrected without minting a second row for the same country.
-- **27 task templates** and **17 focus weights**. Seed v0 is 27, not the 20 of
-  §14: a 5-template week draws all of itself, which leaves Swap with no
-  candidate, and one project type's week 4 is 5 rows on its own.
+- **37 task templates** and **42 focus weights**. Not the 20 of §14: a
+  5-template week draws all of itself, which leaves Swap with no candidate, and
+  one project type's week 4 is 5 rows on its own. That floor is 27, and it
+  sizes the pool for the draw alone. Thirteen a week is what the **focuses**
+  need: five tasks are drawn however deep the pool is, so depth costs the kid
+  nothing, and every focus holds three on-theme tasks in each of weeks 2 and 3.
+  Two would both be drawn every month that focus is chosen.
 
 | Week | Templates | Note |
 |---|---|---|
-| 1 | 6 | 4 `core` — flag, map, location/borders, language — plus 2 competing for the 5th slot |
+| 1 | 6 | 4 `core` — flag, map, location/borders, language & writing system — plus 2 competing for the 5th slot |
 | 2 | 8 | five drawn, three spare, so Swap has somewhere to go |
 | 3 | 8 | same |
 | 4 | 5 | `trifold-board` only |
@@ -1023,9 +1027,10 @@ week 1's fifth-slot candidates.
 `task_focus_weights` stores only an opinion: 3 for on-theme, 0 to exclude,
 nothing in between, and no row at all for neutral. Two constraints the draw
 cannot report on its own, so they are asserted in the tests instead: every focus
-needs at least one weight-3 task in weeks 2–3 or the setup preview has nothing
-to sample, and no focus may exclude more than one of a week's 8 or a 5-task draw
-leaves Swap with no candidate.
+needs at least one weight-3 task in week 2 **and** one in week 3 — the draw is
+per week, so a focus with an opinion about only one of them leaves the other
+identical to picking no focus at all — and no focus may exclude more than one of
+a week's 8 or a 5-task draw leaves Swap with no candidate.
 
 Full grown, the library is **~90 task templates** — 10 in week 1, 25 in week 2,
 25 in week 3, and 5 per project type in week 4. Slice 09.
@@ -1066,6 +1071,14 @@ Resolved:
   the family's login lifetime to the admin credential — rotating `ADMIN_TOKEN`
   logs everyone out. Three Worker secrets total: `FAMILY_PASSCODE`,
   `ADMIN_TOKEN`, `FAMILY_TZ`.
+- **Week 1 carries four core tasks, not six.** Week 1 is five slots and the
+  20-tasks/20-weekdays mapping is what keeps "3 left this week" meaningful, so
+  six always-drawn tasks do not fit. Flag, map, location/borders and language &
+  writing system are fixed; basic stats and national symbols compete for the
+  fifth slot with the rest of the week-1 pool. The cost is accepted: a month can
+  end with no population figure and no national symbol on its page. Making
+  either one core would spend the fifth slot entirely, and with it week 1's only
+  variation and its only swap.
 - **What breaks a streak.** Nothing, because there is no streak. See §10.
 - **Can a past week's tasks still be checked off?** Yes. No lockout, ever. A lockout
   converts a missed day into a permanently dead card, which is the exact opposite of

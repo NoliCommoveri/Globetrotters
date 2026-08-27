@@ -2,7 +2,7 @@
 
 The three hand-written lists in `002_seed.sql` — countries, task templates,
 focus weights — and the rules a row has to satisfy. Seed v0 is complete: 195
-countries, 27 templates, 17 weights. This is the reference for **adding** to
+countries, 37 templates, 42 weights. This is the reference for **adding** to
 them, which is what slice 09 does.
 
 Each list sits between a `-- BEGIN x` / `-- END x` pair in
@@ -51,19 +51,29 @@ order, and a build session turns it into the rows above.
 
 ## Task templates
 
-**27 rows in v0**, distributed exactly. Slice 09 takes this to ~90 — 10 in week
+**37 rows in v0**, distributed exactly. Slice 09 takes this to ~90 — 10 in week
 1, 25 in week 2, 25 in week 3, and 5 per project type in week 4.
 
 | Week | Rows | What they are |
 |---|---|---|
-| 1 | 6 | 4 `core` — flag, map, location/borders, language — always drawn. Plus 2 more that compete for the 5th slot. |
-| 2 | 8 | History, government, land, climate, ecology, prehistory. Five are drawn; the three spare are what makes Swap work. |
-| 3 | 8 | People, religion, daily life, food, art, music, sport, landmarks, wow facts. Same: five drawn, three spare. |
+| 1 | 6 | 4 `core` — flag, map, location/borders, language & writing system — always drawn. Plus 2 more that compete for the 5th slot. |
+| 2 | 13 | History, government, law, land, climate, ecology, farming, trade, prehistory. Five are drawn; the eight spare are what makes Swap work. |
+| 3 | 13 | People, religion, daily life, food, art, music, story, sport, holidays, landmarks, wow facts. Same: five drawn, eight spare. |
 | 4 | 5 | The `trifold-board` sequence, in order: choose · gather · build · build · rehearse & present. |
 
 The other five project types get no week-4 rows in v0 and stay hidden in setup
-until they are filled. That is deliberate — 27 is the smallest seed that lets
-weeks 2 and 3 be drawn *and* swapped.
+until they are filled. That is deliberate.
+
+Twenty-seven is the smallest seed that lets weeks 2 and 3 be drawn *and*
+swapped — but that number sizes the pool for the **draw**, and the draw is not
+what runs out. Five tasks come out of a week however many are in it, so a
+deeper pool costs the kid nothing at all and only buys variety.
+
+What runs out is a **focus**. A focus with two on-theme tasks in a week draws
+both of them every month it is chosen, and these get chosen nine times. So the
+floor is three on-theme tasks per focus per week, six focuses over two weeks,
+and thirteen a week is what that comes to once tasks that serve two focuses are
+counted once. `test/seed-content.test.js` asserts it.
 
 | Column | Rule |
 |---|---|
@@ -98,17 +108,26 @@ Paste-ready form:
 
 ## Focus weights
 
-17 rows in v0. Sparse: a task with no row for a focus is neutral. Only write a row where a
+42 rows in v0. Sparse: a task with no row for a focus is neutral. Only write a row where a
 focus has an opinion.
 
 - `3` — on theme. This focus should reach for this task.
 - `0` — excluded. This focus should never draw it.
 
-**Every one of the six focuses needs at least one `3` on a week-2 or week-3
-task**, or the focus preview in setup has nothing to show.
+**Every one of the six focuses needs at least three `3`s in week 2 and three in
+week 3.** Per week, because the draw runs per week: a focus with an opinion
+about week 2 and none about week 3 leaves week 3 exactly as it would be with no
+focus chosen. Three rather than one, because one or two on-theme tasks in a
+13-task pool are drawn every single month that focus is picked — and the whole
+point of a focus is that next month is different.
 
-**At most one `0` per focus per week.** Week 2 and week 3 hold 8 tasks each and
-5 are drawn; a second exclusion leaves swap with no candidate.
+A task can carry a `3` for more than one focus, and several do: `landforms` is
+on theme for both `land-and-sky` and `food-and-craft`. That is how thirteen
+covers eighteen focus-weeks.
+
+**At most one `0` per focus per week.** Exclusions eat the spare that swap draws
+from. The rule held when the weeks were 8 and it stays at one now they are 10 —
+the bigger pool is headroom for content, not for exclusions.
 
 Paste-ready form — task slug, focus slug, weight:
 
