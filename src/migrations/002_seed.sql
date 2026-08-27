@@ -288,22 +288,187 @@ INSERT INTO countries (name, iso3, continent, region, research_depth) VALUES
 ON CONFLICT (iso3) DO NOTHING;
 
 -- ---------------------------------------------------------------------------
--- Task templates — 27 rows for seed v0, hand-written. See
--- docs/other/SEED-CONTENT.md. 6 in week 1 (4 core + 2 for the fifth slot),
--- 8 in week 2, 8 in week 3, 5 in week 4 for trifold-board only.
+-- Task templates — 27 rows. 6 in week 1 (4 core + 2 competing for the fifth
+-- slot), 8 in week 2, 8 in week 3, 5 in week 4 for trifold-board only.
 --
 -- Twenty-seven rather than the twenty in §14: a 5-template week draws all of
--- itself, which leaves Swap with no candidate, and a single project type's
--- week 4 is 5 rows on its own. The block goes here as a single INSERT ...
--- ON CONFLICT (slug) DO NOTHING, with project_type_id read by subselect so the
--- week-4 rows do not depend on an id this file cannot know.
+-- itself, which leaves Swap with no candidate, and one project type's week 4 is
+-- 5 rows on its own.
+--
+-- Tier says what is drawn, not how hard it is. `core` is fixed and always
+-- included — week 1's four and all five week-4 rows. `focus` is the
+-- focus-weighted pool, weeks 2 and 3. `wild` is week 1's fifth-slot candidates.
+--
+-- The project type is named by slug and resolved by the LEFT JOIN, so these
+-- rows do not depend on an id this file cannot know. A row with NULL there gets
+-- NULL, which is every row outside week 4.
+--
+-- The header row names the columns and selects nothing: SQLite has no
+-- `AS v(a, b, c)` syntax, and without names the join would have to reach for
+-- `column1`. WHERE true is required before ON CONFLICT on an INSERT ... SELECT,
+-- or the parser reads ON as the start of another join constraint.
 -- ---------------------------------------------------------------------------
+INSERT INTO task_templates
+  (slug, title, prompt, week_theme, workbook_page, tier, project_type_id, position)
+SELECT v.slug, v.title, v.prompt, v.week_theme, v.workbook_page, v.tier, p.id, v.position
+FROM (
+  SELECT NULL AS slug, NULL AS title, NULL AS prompt, NULL AS week_theme,
+         NULL AS workbook_page, NULL AS tier, NULL AS project_type, NULL AS position
+  WHERE 0
+  UNION ALL VALUES
+-- BEGIN task_templates
+  ('flag-draw', 'Draw and color the flag',
+   'Find your country''s flag and copy it into your workbook. Get the colors right, then write one line about what you think the colors are for.',
+   1, 'flag', 'core', NULL, NULL),
+
+  ('map-outline', 'Trace the map and capital',
+   'Find a map of your country and trace its outline into your workbook. Mark a star where the capital city is and write its name next to it.',
+   1, 'map', 'core', NULL, NULL),
+
+  ('neighbors-list', 'Find who your country borders',
+   'Look at the map and list every country that shares a border with yours. If it''s an island with no land borders, write that instead.',
+   1, 'map', 'core', NULL, NULL),
+
+  ('language-hello', 'Learn to say hello',
+   'Find out what language or languages people speak there and how to say "hello." Write it in your workbook the way it sounds.',
+   1, 'language', 'core', NULL, NULL),
+
+  ('currency-animal', 'What is on their money?',
+   'Find a picture of their money. Which animal, plant or person is on it? Draw it, and write who they are.',
+   1, 'money', 'wild', NULL, NULL),
+
+  ('national-symbol', 'Draw the national symbol',
+   'Find the country''s coat of arms, national animal, or national flower. Draw it and write one sentence about why you think it was chosen.',
+   1, 'symbols', 'wild', NULL, NULL),
+
+  ('first-people', 'Find the first known people',
+   'Find out who the earliest known people living in this land were and about when they were there. Write two sentences about them.',
+   2, 'history', 'focus', NULL, NULL),
+
+  ('ancient-site', 'Find an ancient site',
+   'Find one ancient building, ruin, or site in this country that is hundreds or thousands of years old. Draw it and write how old it is.',
+   2, 'history', 'focus', NULL, NULL),
+
+  ('who-leads', 'Find out who leads the country',
+   'Find out how this country chooses its leader and what that person is called. Write one sentence about how they got the job.',
+   2, 'government', 'focus', NULL, NULL),
+
+  ('law-you-notice', 'Find a surprising law',
+   'Find one law or rule in this country that is different from where you live. Write what it is and why you think it exists.',
+   2, 'government', 'focus', NULL, NULL),
+
+  ('landforms', 'Describe the land',
+   'Look at the land: mountains, desert, coastline, or plains. Pick the one word that describes most of it and draw a small sketch.',
+   2, 'land', 'focus', NULL, NULL),
+
+  ('weather-there-now', 'Check the weather there today',
+   'Look up the weather in the capital city right now. Write the temperature and compare it to your own weather today.',
+   2, 'climate', 'focus', NULL, NULL),
+
+  ('wild-animal', 'Draw a wild animal',
+   'Find one wild animal that lives in this country and nowhere else nearby. Draw it and write one fact about where it lives.',
+   2, 'ecology', 'focus', NULL, NULL),
+
+  ('before-history', 'Find something from before writing',
+   'Find one fossil, cave painting, or prehistoric find from this country. Draw it and write how long ago it was made.',
+   2, 'prehistory', 'focus', NULL, NULL),
+
+  ('kid-life', 'A day in their life',
+   'Find out what a school day looks like for a kid your age in this country. Write three ways it is different from your day.',
+   3, 'people', 'focus', NULL, NULL),
+
+  ('what-people-believe', 'Find the main religion',
+   'Find out what religion or religions most people practice there. Find one holiday or celebration that goes with it and write what happens.',
+   3, 'culture', 'focus', NULL, NULL),
+
+  ('tonights-dinner', 'Plan tonight''s dinner there',
+   'Find a dish people eat there for dinner. Write down what''s in it and draw your plate the way it would look.',
+   3, 'food', 'focus', NULL, NULL),
+
+  ('craft-of-the-land', 'Find their craft or art',
+   'Find one traditional art or craft from this country: weaving, pottery, painting, carving. Find a picture and draw your own version of the pattern.',
+   3, 'culture', 'focus', NULL, NULL),
+
+  ('sound-of-the-country', 'Listen to their music',
+   'Find one traditional instrument or style of music from this country. Write its name and one word for what it sounds like.',
+   3, 'culture', 'focus', NULL, NULL),
+
+  ('the-sport-they-love', 'Find their favorite sport',
+   'Find the most popular sport in this country. Write one rule that is different from a sport you play.',
+   3, 'culture', 'focus', NULL, NULL),
+
+  ('wow-fact', 'Find one wow fact',
+   'Dig until you find one fact about this country that makes you say "wow." Write it in your own words.',
+   3, 'culture', 'focus', NULL, NULL),
+
+  ('landmark-to-see', 'Pick a landmark to visit',
+   'Find one famous place in this country you''d want to visit. Draw it and write one sentence about what makes it special.',
+   3, 'landmarks', 'focus', NULL, NULL),
+
+  ('trifold-choose', 'Plan your three panels',
+   'Your board has three panels. Decide what goes on each one and sketch the plan on a scrap of paper first.',
+   4, 'project', 'core', 'trifold-board', 1),
+
+  ('trifold-gather', 'Gather your materials',
+   'Collect everything your plan needs: poster board, markers, glue, printed pictures. Check you have it all before you start building.',
+   4, 'project', 'core', 'trifold-board', 2),
+
+  ('trifold-build-left-and-center', 'Build the left and center panels',
+   'Put together the first two panels of your board: titles, pictures, and captions glued down and readable from a few feet away.',
+   4, 'project', 'core', 'trifold-board', 3),
+
+  ('trifold-build-right-and-finishing', 'Finish the right panel',
+   'Finish the last panel, then step back and fix anything crooked, misspelled, or hard to read.',
+   4, 'project', 'core', 'trifold-board', 4),
+
+  ('trifold-present', 'Rehearse and present your board',
+   'Practice explaining your board out loud once, start to finish. Then present it to your family.',
+   4, 'project', 'core', 'trifold-board', 5)
+-- END task_templates
+) v
+LEFT JOIN project_types p ON p.slug = v.project_type
+WHERE true
+ON CONFLICT (slug) DO NOTHING;
 
 -- ---------------------------------------------------------------------------
 -- Focus weights — sparse. A missing row means weight 1, so only an opinion is
--- stored: 3 for on-theme, 0 to exclude. Every focus needs at least one 3 in
--- weeks 2-3 or the setup preview has nothing to sample, and at most one 0 per
--- focus per week or a 5-of-8 draw leaves Swap with no candidate.
+-- stored: 3 for on-theme, 0 to exclude, nothing in between. Every focus needs
+-- at least one 3 in weeks 2-3 or the setup preview has nothing to sample, and
+-- at most one 0 per focus per week or a 5-of-8 draw leaves Swap with no
+-- candidate. Both are asserted in test/seed-content.test.js.
 --
--- The block joins on slugs rather than ids, for the same reason as above.
+-- Joined on slugs, same as above. The join is inner: a slug that matches
+-- nothing contributes no row and raises no error, so the row count is checked
+-- against this block in the tests rather than trusted.
 -- ---------------------------------------------------------------------------
+INSERT INTO task_focus_weights (task_template_id, focus_id, weight)
+SELECT t.id, f.id, v.weight
+FROM (
+  SELECT NULL AS task, NULL AS focus, NULL AS weight
+  WHERE 0
+  UNION ALL VALUES
+-- BEGIN task_focus_weights
+  ('first-people',        'ancient-world',       3),
+  ('ancient-site',        'ancient-world',       3),
+  ('wild-animal',         'wild-places',         3),
+  ('who-leads',           'people-and-power',    3),
+  ('law-you-notice',      'conflict-and-change', 3),
+  ('landforms',           'land-and-sky',        3),
+  ('weather-there-now',   'land-and-sky',        3),
+  ('who-leads',           'wild-places',         0),
+  ('wild-animal',         'food-and-craft',      0),
+  ('weather-there-now',   'ancient-world',       0),
+
+  ('kid-life',             'people-and-power',    3),
+  ('tonights-dinner',      'food-and-craft',      3),
+  ('craft-of-the-land',    'food-and-craft',      3),
+  ('what-people-believe',  'conflict-and-change', 3),
+  ('craft-of-the-land',    'people-and-power',    0),
+  ('sound-of-the-country', 'conflict-and-change', 0),
+  ('wow-fact',             'land-and-sky',        0)
+-- END task_focus_weights
+) v
+JOIN task_templates t ON t.slug = v.task
+JOIN focuses f ON f.slug = v.focus
+WHERE true
+ON CONFLICT DO NOTHING;

@@ -32,11 +32,11 @@ no terminal step, and `/admin` — behind `ADMIN_TOKEN`, linked from nowhere —
 lists the migrations, applies the pending ones, and shows schema version and
 row counts on `/admin/health`. `001_schema.sql` carries every table in §5.
 
-**Slice 02's machinery is built.** `/admin` now also has **Run seed** and the
-people editor: three names and three inks, changed in a browser. `002_seed.sql`
-carries the six focuses, the six project types, the three people and all 195
-countries, and
-`GET /api/catalog` serves the picker's one fetch with an ETag so a corrected row
+**Slice 02 is built.** `/admin` now also has **Run seed** and the people editor:
+three names and three inks, changed in a browser. `002_seed.sql` carries the
+three people, six focuses, six project types, 195 countries, 27 task templates
+and 17 focus weights — enough library to draw a real month. `GET /api/catalog`
+serves the picker's one fetch with an ETag, so a row corrected in the editor
 reaches a device that already cached it.
 
 Seed files are not migrations. `src/migrations/index.js` exports `MIGRATIONS` —
@@ -44,15 +44,13 @@ checksummed, applied once — and `SEEDS` — re-run in full on every press, eve
 insert `ON CONFLICT DO NOTHING`. That is what lets the seed grow later without
 reading as drift, and what makes a correction in the library editor permanent.
 
-All 195 countries are seeded. **Slice 02's 27 task templates are outstanding.**
-`docs/other/SEED-CONTENT.md` has the column rules and the paste-ready row forms;
-`test/seed-content.test.js` asserts the invariants and fails until they land,
-naming what is missing. Slice 04 cannot draw a month without them.
+**Slice 03 is next** — the family passcode, the person picker and the shell. Its
+due-out D-10, two self-hosted font files, is outstanding and has a lead time.
 
-Every Cloudflare due-out is closed, and so are the three inks. Two remain before
-slice 04: the fonts (D-10) and the month the school year starts (D-12).
+Every Cloudflare due-out is closed, and so are the three inks. Two remain: the
+fonts (D-10) and the month the school year starts (D-12, slice 04).
 
-Six open questions outstanding.
+Six open questions outstanding, none of them blocking slice 03.
 
 The Worker's own tests run with `node --test test/*.test.js` and need nothing
 installed. They are a build-session tool, not something the owner ever runs —

@@ -1,6 +1,6 @@
 # Slice 02 — Seed v0 and catalog
 
-**Status:** in progress — the machinery is built, the content is outstanding
+**Status:** built
 **Band:** M
 **Implements:** §13 (partial — v0 sizing below), §6 (catalog, people)
 **Depends on:** 01

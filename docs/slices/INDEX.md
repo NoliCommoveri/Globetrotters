@@ -10,7 +10,7 @@ Slices are strictly ordered — the dependency column is why, not a suggestion.
 |---|---|---|---|---|---|
 | 00 | [Deploy path](00-deploy-path.md) | built | M | — | §2, §3 (deploy half) |
 | 01 | [Migration runner](01-migration-runner.md) | built | M | 00 | §3, §5 |
-| 02 | [Seed v0 and catalog](02-seed-and-catalog.md) | in progress | M | 01 | §13 (partial), §6 (catalog) |
+| 02 | [Seed v0 and catalog](02-seed-and-catalog.md) | built | M | 01 | §13 (partial), §6 (catalog) |
 | 03 | [Auth and shell](03-auth-and-shell.md) | not started | M | 02 | §2 (auth), §11 |
 | 04 | [Setup, draw, reveal](04-setup-draw-reveal.md) | not started | L | 03 | §4, §7 Month setup |
 | 05 | [This week](05-this-week.md) | not started | L | 04 | §7 This week, §7 Plan, §10 |
@@ -21,9 +21,9 @@ Slices are strictly ordered — the dependency column is why, not a suggestion.
 
 Statuses: `not started` · `in progress` · `built`.
 
-Slice 02's machinery and its 195 countries are in; the 27 task templates are
-outstanding. `test/seed-content.test.js` fails until they land and names what is
-missing on each run, and slice 04 cannot draw a month without them.
+Slice 03 is next. Its one due-out — D-10, two self-hosted font files — is
+outstanding and has a lead time; the shell can be built against system fonts and
+swapped, at the cost of tuning the type scale twice.
 
 ---
 

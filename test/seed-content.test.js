@@ -35,6 +35,19 @@ test.before(async () => {
 
 const rows = (sql) => db.prepare(sql).all().results;
 
+// Rows between a `-- BEGIN x` / `-- END x` pair in the seed file. Both blocks
+// are joined to their lookup tables on a slug, and a slug that matches nothing
+// contributes no row and raises no error — so the count that was written is
+// compared against the count that landed rather than trusted.
+function blockRows(name) {
+  const sql = SEEDS[0].sql;
+  const body = sql.slice(
+    sql.indexOf(`-- BEGIN ${name}`) + `-- BEGIN ${name}`.length,
+    sql.indexOf(`-- END ${name}`),
+  );
+  return body.split('\n').filter((line) => line.trim().startsWith('(')).length;
+}
+
 test('195 countries, each with a real continent and an adventure level', () => {
   const countries = rows('SELECT name, iso3, continent, region, research_depth FROM countries');
   assert.equal(countries.length, 195,
@@ -130,4 +143,35 @@ test('no focus excludes so much of a week that swap runs out of candidates', () 
 test('a weight is an opinion: 3 or 0, never a middling number', () => {
   const odd = rows('SELECT weight FROM task_focus_weights WHERE weight NOT IN (0, 3)');
   assert.deepEqual(odd, [], 'seed weights are 3 for on-theme and 0 to exclude');
+});
+
+test('every task template written into the file is in the database', () => {
+  const [{ n }] = rows('SELECT COUNT(*) AS n FROM task_templates');
+  assert.equal(n, blockRows('task_templates'),
+    'a template did not land — check its project type slug');
+});
+
+test('every focus weight written into the file is in the database', () => {
+  // The one silent failure mode in this seed: a mistyped task or focus slug is
+  // dropped by the join, and the only symptom is a draw that feels slightly
+  // wrong three slices from here.
+  const [{ n }] = rows('SELECT COUNT(*) AS n FROM task_focus_weights');
+  assert.equal(n, blockRows('task_focus_weights'),
+    'a weight did not land — a task or focus slug in the block matches nothing');
+});
+
+test('no seeded task is left with no focus that reaches for it', () => {
+  // Not a failure, but worth seeing: a week 2-3 template that no focus favors
+  // is drawn only at baseline weight, forever.
+  const orphans = rows(`
+    SELECT t.slug FROM task_templates t
+    WHERE t.week_theme IN (2, 3)
+      AND NOT EXISTS (
+        SELECT 1 FROM task_focus_weights w WHERE w.task_template_id = t.id AND w.weight = 3
+      )
+  `).map((r) => r.slug);
+  // Seed v0 has 16 templates across weeks 2-3 and six focuses with two
+  // opinions each, so some are neutral by design. The pool must not be mostly
+  // neutral, or the focus stops shaping the month at all.
+  assert.ok(orphans.length <= 8, `${orphans.length} of 16 week 2-3 tasks are neutral to every focus`);
 });

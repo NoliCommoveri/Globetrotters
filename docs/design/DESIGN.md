@@ -968,9 +968,9 @@ carried into next school year without a terminal.
 
 ## 13. Seed data
 
-**Status:** partial · the seed runner, the fixed rows and all 195 countries are
-built (slice 02). The 27 task templates and `003_country_data.sql` are
-outstanding.
+**Status:** partial · seed v0 is built (slice 02): the runner, 3 people, 6
+focuses, 6 project types, 195 countries, 27 task templates and 17 focus weights.
+The remaining ~63 templates and `003_country_data.sql` are slice 09.
 
 Seed files are not migrations (§3). They live beside them in `/src/migrations/`
 and are exported from the same index as `SEEDS`, but they are re-run by **Run
@@ -1001,9 +1001,9 @@ Contents of `002_seed.sql`:
 - **195 countries** with continent, region and `research_depth`, unadorned —
   hooks and affinities are `003`. The conflict key is `iso3`, so a name can be
   corrected without minting a second row for the same country.
-- **27 task templates.** Seed v0 is 27, not the 20 of §14: a 5-template week
-  draws all of itself, which leaves Swap with no candidate, and one project
-  type's week 4 is 5 rows on its own.
+- **27 task templates** and **17 focus weights**. Seed v0 is 27, not the 20 of
+  §14: a 5-template week draws all of itself, which leaves Swap with no
+  candidate, and one project type's week 4 is 5 rows on its own.
 
 | Week | Templates | Note |
 |---|---|---|
