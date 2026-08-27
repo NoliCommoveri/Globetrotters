@@ -19,6 +19,14 @@ import { adminPage, adminLogin, adminLogout, tokenForm } from './admin/index.js'
 import { adminHealth } from './admin/health.js';
 import { apiMigrate, apiResetMonth, apiSeed } from './admin/api.js';
 import { apiPeople, apiPatchPerson } from './admin/people.js';
+import { libraryPage } from './admin/library.js';
+import { apiLibrary, apiLibraryExport, apiLibraryImport } from './admin/library-api.js';
+import { apiCreateTask, apiPatchTask as apiAdminPatchTask } from './admin/tasks.js';
+import { apiCreateFocus, apiPatchFocus, apiPutFocusWeights } from './admin/focuses.js';
+import { apiCreateProjectType, apiPatchProjectType } from './admin/project-types.js';
+import {
+  apiCountry, apiCreateHook, apiPatchHook, apiDeleteHook, apiPutAffinities,
+} from './admin/countries.js';
 import { apiCatalog } from './api/catalog.js';
 import { apiAuth } from './api/auth.js';
 import { apiMe, apiPatchMe } from './api/me.js';
@@ -47,6 +55,7 @@ function methodNotAllowed() {
 
 const PAGES = {
   'GET /admin': adminPage,
+  'GET /admin/library': libraryPage,
   'GET /admin/health': adminHealth,
   'POST /admin/logout': adminLogout,
 };
@@ -56,6 +65,14 @@ const API = {
   'POST /admin/api/seed': apiSeed,
   'POST /admin/api/reset-month': apiResetMonth,
   'GET /admin/api/people': apiPeople,
+  'GET /admin/api/library': apiLibrary,
+  // The export and the import share a path and differ by verb: it is one file,
+  // going out and coming back, and two paths for that is two names to remember.
+  'GET /admin/api/library.json': apiLibraryExport,
+  'POST /admin/api/library.json': apiLibraryImport,
+  'POST /admin/api/tasks': apiCreateTask,
+  'POST /admin/api/focuses': apiCreateFocus,
+  'POST /admin/api/project-types': apiCreateProjectType,
 };
 
 // Routes carrying an id, matched after the exact tables miss. A regex list
@@ -63,6 +80,15 @@ const API = {
 // read in one go for the whole of v1.
 const API_PATTERNS = [
   { method: 'PATCH', pattern: /^\/admin\/api\/people\/(?<id>\d+)$/, handler: apiPatchPerson },
+  { method: 'PATCH', pattern: /^\/admin\/api\/tasks\/(?<id>\d+)$/, handler: apiAdminPatchTask },
+  { method: 'PATCH', pattern: /^\/admin\/api\/focuses\/(?<id>\d+)$/, handler: apiPatchFocus },
+  { method: 'PUT', pattern: /^\/admin\/api\/focuses\/(?<id>\d+)\/weights$/, handler: apiPutFocusWeights },
+  { method: 'PATCH', pattern: /^\/admin\/api\/project-types\/(?<id>\d+)$/, handler: apiPatchProjectType },
+  { method: 'GET', pattern: /^\/admin\/api\/countries\/(?<id>\d+)$/, handler: apiCountry },
+  { method: 'POST', pattern: /^\/admin\/api\/countries\/(?<id>\d+)\/hooks$/, handler: apiCreateHook },
+  { method: 'PUT', pattern: /^\/admin\/api\/countries\/(?<id>\d+)\/affinities$/, handler: apiPutAffinities },
+  { method: 'PATCH', pattern: /^\/admin\/api\/hooks\/(?<id>\d+)$/, handler: apiPatchHook },
+  { method: 'DELETE', pattern: /^\/admin\/api\/hooks\/(?<id>\d+)$/, handler: apiDeleteHook },
 ];
 
 // The same, behind the family gate. Handlers here take the session as well as

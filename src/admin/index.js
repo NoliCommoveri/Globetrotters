@@ -72,7 +72,10 @@ export async function adminPage(request, env) {
   return page('Globetrotters — admin', `
 <h1>Admin</h1>
 <p class="note"><a href="/admin/health">Health</a> — check the version id matches
-the commit you just pushed before applying anything.</p>
+the commit you just pushed before applying anything.<br>
+<a href="/admin/library">Library</a> — tasks, focuses, project types, country hooks,
+and the backup. This is where a wrong prompt gets fixed and a dead template gets
+archived.</p>
 
 <h2>Migrations</h2>
 ${dbError ? `<p class="err">D1 unreachable: ${escapeHtml(dbError)}</p>` : `

@@ -8,7 +8,7 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { registerHooks } from 'node:module';
 
 registerHooks({
@@ -217,6 +217,21 @@ test('every /admin/api route refuses an unsigned request with JSON, not a form',
     ['POST', '/admin/api/seed'],
     ['GET', '/admin/api/people'],
     ['PATCH', '/admin/api/people/1'],
+    ['GET', '/admin/api/library'],
+    ['GET', '/admin/api/library.json'],
+    ['POST', '/admin/api/library.json'],
+    ['POST', '/admin/api/tasks'],
+    ['PATCH', '/admin/api/tasks/1'],
+    ['POST', '/admin/api/focuses'],
+    ['PATCH', '/admin/api/focuses/1'],
+    ['PUT', '/admin/api/focuses/1/weights'],
+    ['POST', '/admin/api/project-types'],
+    ['PATCH', '/admin/api/project-types/1'],
+    ['GET', '/admin/api/countries/1'],
+    ['POST', '/admin/api/countries/1/hooks'],
+    ['PUT', '/admin/api/countries/1/affinities'],
+    ['PATCH', '/admin/api/hooks/1'],
+    ['DELETE', '/admin/api/hooks/1'],
   ]) {
     const res = await worker.fetch(
       new Request(`https://example.test${path}`, { method }), e,
@@ -249,6 +264,74 @@ test('an id route reached with the wrong method is 405, not 404', async () => {
   const e = await env();
   const res = await asAdmin(e, '/admin/api/people/1', { method: 'DELETE' });
   assert.equal(res.status, 405);
+});
+
+test('the library editor answers on every one of its routes', async () => {
+  const e = await env({ seeded: true });
+
+  const page = await asAdmin(e, '/admin/library');
+  assert.equal(page.status, 200);
+  const html = await page.text();
+  assert.match(html, /Library/);
+  assert.match(html, /admin\/api\/library/);
+
+  const library = await asAdmin(e, '/admin/api/library');
+  assert.equal(library.status, 200);
+  const data = await library.json();
+  assert.equal(data.tasks.length, 37);
+  assert.equal(data.focuses.length, 6);
+
+  const json = (path, method, body) => asAdmin(e, path, {
+    method,
+    headers: { 'content-type': 'application/json' },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+
+  const made = await json('/admin/api/tasks', 'POST', {
+    title: 'Count the coins', prompt: 'Draw one coin.', week_theme: 2, tier: 'wild',
+  });
+  assert.equal(made.status, 201);
+  const taskId = (await made.json()).task.id;
+
+  assert.equal((await json(`/admin/api/tasks/${taskId}`, 'PATCH', { archived: 1 })).status, 200);
+  assert.equal((await json('/admin/api/focuses', 'POST', { name: 'Money' })).status, 201);
+  assert.equal((await json('/admin/api/focuses/1', 'PATCH', { blurb: 'Edited.' })).status, 200);
+  assert.equal((await json('/admin/api/focuses/1/weights', 'PUT', { weights: [] })).status, 200);
+  assert.equal((await json('/admin/api/project-types', 'POST', { name: 'Board game' })).status, 201);
+  assert.equal((await json('/admin/api/project-types/1', 'PATCH', { name: 'Trifold' })).status, 200);
+  assert.equal((await asAdmin(e, '/admin/api/countries/1')).status, 200);
+
+  const hooked = await json('/admin/api/countries/1/hooks', 'POST', { text: 'A lead.' });
+  assert.equal(hooked.status, 201);
+  const hookId = (await hooked.json()).hooks[0].id;
+  assert.equal((await json(`/admin/api/hooks/${hookId}`, 'PATCH', { text: 'A better lead.' })).status, 200);
+  assert.equal((await json(`/admin/api/hooks/${hookId}`, 'DELETE')).status, 200);
+  assert.equal((await json('/admin/api/countries/1/affinities', 'PUT', { affinities: [] })).status, 200);
+
+  const backup = await asAdmin(e, '/admin/api/library.json');
+  assert.equal(backup.status, 200);
+  const restored = await json('/admin/api/library.json', 'POST', await backup.json());
+  assert.equal(restored.status, 200);
+  assert.equal((await restored.json()).changed, false);
+});
+
+// The threat model is a curious 12-year-old on a shared laptop, so the defense
+// is not cryptographic: it is that no link exists. The admin page may link to
+// the library; nothing the kids can reach may link to either.
+test('nothing the kids can reach links to /admin', async () => {
+  const e = await env({ seeded: true });
+  const admin = await (await asAdmin(e, '/admin')).text();
+  assert.match(admin, /href="\/admin\/library"/);
+
+  // A path inside a string literal is a link or a fetch. The word in a comment
+  // is neither, and two of them are load-bearing prose.
+  const linked = /["'`][^"'`\n]*\/admin/;
+  const files = ['index.html', 'wall.html', 'css/app.css']
+    .concat(readdirSync(new URL('../public/js', import.meta.url)).map((n) => `js/${n}`));
+  for (const file of files) {
+    const text = readFileSync(new URL(`../public/${file}`, import.meta.url), 'utf8');
+    assert.doesNotMatch(text, linked, file);
+  }
 });
 
 test('the admin page renders the seeded people', async () => {

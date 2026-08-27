@@ -537,8 +537,9 @@ built (slice 03); `POST /api/plans`, `GET`/`PATCH /api/plans/:id`,
 `GET /api/passport` are built (slice 04); `PATCH /api/tasks/:id`,
 `POST /api/tasks/:id/swap`, `POST /api/sessions` and `GET /api/stats` are built
 (slice 05); the two completion routes and `PATCH /api/stamps/:id` are built
-(slice 06); `GET /wall` and both `/api/wall` routes are built (slice 07). What
-remains is the library editor (slice 08) and the print route (slice 10).
+(slice 06); `GET /wall` and both `/api/wall` routes are built (slice 07); the
+library editor is built (slice 08) but for the two layout routes, whose table
+arrives with slice 10. What remains is the print route and those two.
 
 ```
 POST   /api/auth                      passcode -> cookie. The one family route that
@@ -600,7 +601,9 @@ GET    /admin/api/people              the three people
 PATCH  /admin/api/people/:id          name, ink color, sort order
 
 GET    /admin/library                 library editor page
-GET    /admin/api/library             tasks, focuses, project types, weights
+GET    /admin/api/library             tasks, focuses, project types, weights, draw
+                                      counts by person, and the country list with
+                                      its hook and affinity counts
 POST   /admin/api/tasks               create custom task
 PATCH  /admin/api/tasks/:id           edit, or set archived
 POST   /admin/api/focuses             create
@@ -608,9 +611,17 @@ PATCH  /admin/api/focuses/:id         edit name, blurb, archived
 PUT    /admin/api/focuses/:id/weights bulk weight update (sparse — deletes weight-1 rows)
 POST   /admin/api/project-types       create
 PATCH  /admin/api/project-types/:id   edit, reorder week-4 sequence
+GET    /admin/api/countries/:id       one country's hooks and affinities
+POST   /admin/api/countries/:id/hooks append a hook
+PATCH  /admin/api/hooks/:id           edit text or position
+DELETE /admin/api/hooks/:id           the one delete in the library (§12)
+PUT    /admin/api/countries/:id/affinities  the whole set; off stores no row
 POST   /admin/api/layouts             create a worksheet layout (§16)
 PATCH  /admin/api/layouts/:id         edit name, kind, height, spec, archived
 GET    /admin/api/library.json        full export / backup
+POST   /admin/api/library.json        read one back. Upserts on slug and ISO3,
+                                      never deletes, and a second import of the
+                                      same file is a no-op
 ```
 
 **How `/api/catalog` invalidates.** An **ETag over the response body**, with
@@ -1071,7 +1082,8 @@ carries the first four weeks of the year.
 
 ## 12. Library editor
 
-**Status:** not started · slice 08
+**Status:** partial · slice 08 is built. The worksheet layout editor is the one
+part that is not, because the table it edits arrives with slice 10.
 
 Tasks, focuses, and project types are all editable in the app. Parent-facing, behind
 `ADMIN_TOKEN`, not part of the kid experience.
@@ -1088,22 +1100,36 @@ be miserable at 50 tasks. The grid writes sparsely — cells left at 1 store no 
 
 **New focus flow** — because weights are sparse and missing means 1, a newly created
 focus is immediately valid with zero rows and can be tuned afterward. Warn if a focus
-has fewer than ~15 tasks at weight ≥1 across weeks 2 and 3, since the draw needs
-headroom.
+has fewer than **15 tasks at weight ≥1 in either week 2 or week 3**, since the draw
+takes five from each week and needs headroom. Counted per week, not summed: a focus
+rich in week 2 and bare in week 3 draws the same five tasks every month just as
+surely as one bare in both. Against seed v0's thirteen templates per week every
+focus is thin, which is a fact about the seed and not about the focus — slice 09
+is what clears the warning.
 
 **Worksheet layout editor** — the dozen printed forms of §16: name, kind, height
 in thirds, and that kind's own knobs. Every field is a named value the renderer
 reads and escapes; there is no markup field, here or anywhere, because this form
 is the one place a typed string reaches a printed page. Editing a layout changes
 every task bound to it, which is the point of there being twelve rather than
-ninety — and it is why the editor shows the bound count beside each one.
+ninety — and it is why the editor shows the bound count beside each one. This is
+the one part of the editor that is not built: `worksheet_layouts` arrives with
+slice 10, and so does the layout column on the task list.
 
 **People editor** — the three names, ink colors, and display order. This is where the
 family names itself; nothing about it belongs in a seed migration.
 
 **Country editor** — hooks and focus affinities per country, same shape as the task
-list. Generated content needs a spot check, and a wrong hook should be one tap to fix
-or delete.
+list. Generated content needs a spot check, and a wrong hook is one tap to fix or
+delete. **Hooks are the one thing in the library that can be deleted**, and the
+archive rule is exactly why: `archived = 1` exists because `plan_tasks` and
+`month_plans` reference templates, focuses and project types, so a hard delete
+would break a month already in progress. Nothing references a hook. A junk hook
+with no correct hook to type over it has nowhere else to go. Everything else
+archives, and there is no delete button anywhere else on the page.
+
+Affinities save as a set, the same shape as the weight grid: each of the six
+focuses is off, 2 or 3, and off stores no row.
 
 **Project type editor** — name, materials, and the ordered week-4 sequence. These are
 sequences, not draws, so ordering is drag or up/down buttons.
@@ -1117,9 +1143,19 @@ mid-month — for that, archive the old one and create a new task.
 `INSERT ... ON CONFLICT (slug) DO NOTHING`. Once a row exists, the seed leaves it alone
 forever.
 
-**Export** — `GET /admin/api/library.json` dumps tasks, focuses, project types, weights,
-hooks, and affinities as JSON. This is the backup, and it's how a tuned library gets
-carried into next school year without a terminal.
+**Export and import** — `GET /admin/api/library.json` dumps tasks, focuses, project
+types, weights, hooks, and affinities as JSON, and `POST` to the same path reads one
+back. This is the backup, and it's how a tuned library gets carried into next school
+year without a terminal.
+
+Every row in the file is keyed on a natural key — slug for tasks, focuses and
+project types, ISO3 for countries — and never on an id, because a restore lands in
+a database whose numbering nobody controls. The import upserts on that key and
+**never deletes**: a row already present is compared field by field and written
+only where it differs, so importing a file twice reports nothing changed both
+times. A row whose anchor is missing — a task naming a project type this database
+does not have, a hook naming an unknown ISO3 — is skipped and counted rather than
+written with a dangling reference.
 
 ---
 
@@ -1249,6 +1285,16 @@ Resolved:
   either one core would spend the fifth slot entirely, and with it week 1's only
   variation and its only swap.
 - **What breaks a streak.** Nothing, because there is no streak. See §10.
+- **Country hooks are the one thing in the library that deletes.** Everything
+  else archives, and the reason is structural rather than a policy: `plan_tasks`
+  and `month_plans` hold references to templates, focuses and project types, so a
+  hard delete would break a month already in progress. Nothing holds a reference
+  to a hook. A generated hook that is simply wrong, with no correct hook to type
+  over it, would otherwise sit on the country card forever. See §12.
+- **The thin-focus warning counts per week, not summed.** Fifteen tasks at
+  weight ≥1 in week 2 *and* fifteen in week 3. The draw takes five from each week
+  independently, so a focus with thirty in one week and four in the other is not a
+  focus with headroom. See §12.
 - **Can a past week's tasks still be checked off?** Yes. No lockout, ever. A lockout
   converts a missed day into a permanently dead card, which is the exact opposite of
   what a passport stamp is for.
