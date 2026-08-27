@@ -23,7 +23,8 @@ Everyone has their own device. There is also a tablet on the kitchen wall.
 - Country library: hooks and focus affinities that make the picker worth using
 
 **Explicitly not in v1** (leave hooks, don't build):
-- Photo uploads to R2 — create the binding and the `media` table, no UI
+- Photo uploads — create the `media` table, no bucket, no binding, no UI. The
+  R2 bucket and its binding arrive with the feature, not ahead of it
 - Any notification/reminder system
 
 **Non-goals forever:** multi-family tenancy, public signup, roles/permissions.
@@ -36,10 +37,15 @@ Everyone has their own device. There is also a tablet on the kitchen wall.
 
 - Cloudflare Worker serving both the API (`/api/*`) and static assets
 - **D1** for all relational data
-- **R2** bucket bound and declared in `wrangler.toml`, unused in v1
-- Deploy: GitHub Actions on push to `main`, `wrangler deploy`,
-  `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` as repo secrets
-- Separate `--preview` D1 database
+- **No R2 binding in v1.** The `media` table exists; the bucket does not. A
+  binding whose bucket is missing fails the deploy, so it is not declared until
+  there is a feature writing to it
+- Deploy: **Workers Builds** — the Worker is git-connected to this repo in the
+  Cloudflare dashboard and rebuilds on push to `main`. No API token, no account
+  id, no repo secrets, no workflow file
+- **One D1 database.** No preview database: `preview_database_id` is read only
+  by `wrangler dev --remote` and preview deploys, both terminal operations the
+  owner cannot perform (§3)
 - **Migrations run from the browser, never the terminal — see §3**
 - Frontend: keep it buildless if possible (vanilla JS + a small router). Three
   users, five screens — a bundler is overhead. If a framework is used, Vite +
@@ -121,7 +127,7 @@ command. Everything runs from a browser.
 **The admin page also carries**
 
 - **Run seed** — idempotent, safe to press twice, reports counts inserted
-- **Health check** — D1 reachable, R2 bound, table row counts, schema version, and
+- **Health check** — D1 reachable, table row counts, schema version, and
   **the deployed git SHA and build time**. In a browser-only workflow the standing
   failure mode is pressing Apply pending against a Worker that hasn't finished
   deploying. Five lines, saves an hour of confusion.
@@ -150,10 +156,17 @@ splits by prefix with no content negotiation. JSON must not live at
 `Path=/admin` is never sent to `/api/admin/...` and every admin write would
 arrive unauthenticated.
 
-**Deploy is also browser-only:** GitHub Actions on push to `main`, plus
-`workflow_dispatch` so it can be re-run from the Actions tab by button. Any new
-migration reaches production by editing a file in the GitHub web editor, letting
-the Action deploy, confirming the SHA on `/admin`, then pressing Apply pending.
+**Deploy is also browser-only:** Workers Builds, git-connected to this repo,
+building on every push to `main`. A build can be re-run from the deployment's
+own **Retry build** button in the dashboard. Any new migration reaches
+production by editing a file in the GitHub web editor, letting the build finish,
+confirming the SHA on `/admin`, then pressing Apply pending.
+
+Workers Builds is what the three sibling projects on this account already use.
+It needs one thing the owner does by hand — create the Worker and point it at
+this repo — and nothing else: no API token to scope, no account id to find, no
+secrets pasted into GitHub. Wrangler runs inside Cloudflare's builder, which is
+not a terminal the owner has to touch.
 
 ---
 
@@ -382,7 +395,7 @@ CREATE TABLE stamps (
   headline     TEXT                     -- one thing they'll remember
 );
 
-CREATE TABLE media (                    -- R2 pointers, unused in v1
+CREATE TABLE media (                    -- R2 pointers; table only, no bucket in v1
   id            INTEGER PRIMARY KEY,
   plan_id       INTEGER NOT NULL REFERENCES month_plans(id),
   plan_task_id  INTEGER REFERENCES plan_tasks(id),

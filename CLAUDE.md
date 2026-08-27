@@ -27,8 +27,8 @@ src/
   lib/                        draw engine, auth, migration runner, splitter
   migrations/*.sql            append-only, zero-padded ids
 public/                       static assets: fonts, css, js, wall
-wrangler.toml
-.github/workflows/deploy.yml
+wrangler.toml                 must sit at the repo root: the git-connected
+                              build looks for it there
 ```
 
 `src/` and `public/` do not exist until slice 00 creates them. Do not create

@@ -90,5 +90,5 @@ None outstanding, provided Q-09 (below) is settled with the wall in slice 07.
 
 - The wall's copy of any of this. Slice 07 has its own type scale, its own
   watermark storage, and its own queueing.
-- R2 photo upload. The binding and the `media` table exist; there is no UI in
-  v1.
+- R2 photo upload. The `media` table exists; the bucket, the binding and the UI
+  all arrive together with the feature, and none of them is in v1.

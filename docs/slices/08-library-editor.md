@@ -74,7 +74,9 @@ Parent-facing, behind `ADMIN_TOKEN`, not part of the kid experience.
 - The weight grid round-trips: set a cell to 1, the row disappears
 - A focus created with zero weight rows draws successfully
 - The under-15-tasks warning fires on a fresh focus against the slice 02 seed
-- Export downloads and re-imports into a fresh preview database
+- Export downloads, and re-importing that file changes nothing: every row
+  round-trips and a second import is a no-op. There is no preview database to
+  restore into (§2), so the round-trip is proven in place
 - Re-running the seed after editing a seeded row leaves the edit alone
 
 ## Do not build

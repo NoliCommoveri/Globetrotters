@@ -24,9 +24,9 @@ seeding, or deploy requires a terminal.
 
 ## Where things stand
 
-Design complete. No code yet. Slice 00 is blocked on due-outs D-01 through
-D-06 — the Cloudflare account, the two D1 databases, the R2 bucket, and the
-GitHub secrets.
+Design complete. No code yet. Slice 00 is blocked on D-06 — creating the Worker
+in the Cloudflare dashboard and pointing it at this repo. The D1 database (D-02)
+already exists; the three Worker secrets (D-08) are set in the same visit.
 
 Eleven open questions outstanding. Four of them (Q-01 through Q-04) change the
 schema or a secret and are the expensive ones to answer late.
