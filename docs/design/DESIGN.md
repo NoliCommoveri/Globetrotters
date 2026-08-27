@@ -552,7 +552,8 @@ GET    /api/me                        people list + every plan + this device's p
                                       setup would open
 PATCH  /api/me                        {person_id} -> re-issued cookie carrying it
 GET    /api/catalog                   countries + hooks + affinities + focuses
-                                      + project types. ~60KB, ETag + 304.
+                                      + project types. ~67KB (~16KB gzipped),
+                                      ETag + 304.
 GET    /api/focuses/:id/samples       three weight-3 titles, one week at a time,
                                       for the setup screen's focus preview
 
@@ -635,8 +636,9 @@ neither can be retrofitted into caches already in the wild.
 
 Each `project_type` in the payload carries **`week4_templates`**, the count of
 its week-4 sequence. Setup hides a project type with zero rather than offering a
-month that ends in five blank cards: in seed v0 only `trifold-board` is filled,
-and slice 09 fills the other five by adding rows, with no client change.
+month that ends in five blank cards. All six are filled, so the count is now a
+guard rather than a filter — a project type created in the editor is hidden until
+someone writes its five week-4 rows.
 
 **What `PATCH /api/plans/:id` allows, and when.** Country doesn't affect the draw at
 all — tasks are country-agnostic — so it can change any time, freely. Project type
@@ -752,7 +754,7 @@ not a form.
   195, so the shuffle draws only from countries with **at least two hooks**, and skips
   ones the family has already stamped. When that pool cannot fill three cards the
   control is not offered at all, which is its state until `003_country_data.sql`
-  lands in slice 09. Search and browse still reach all 195.
+  is written. Search and browse still reach all 195.
 - **Tap through** to all hooks and the recommended focuses with their reason lines.
 - **Focus: show the consequence, not the description.** "people-and-power" means
   nothing to a kid. Highlighting a focus shows three sample task titles it would pull
@@ -968,7 +970,7 @@ response cannot be rendered by a later change to the client that forgot why.
 
 ## 9. Country data
 
-**Status:** not started · slice 09
+**Status:** built · slice 09
 
 The picker is only as good as what it can tell you about a country. This does not
 require a recommendation engine — it requires a column. All of it is generated once,
@@ -1001,9 +1003,25 @@ country-agnostic; this data only ranks and explains at pick time. If those two
 systems couple, you lose the property that a kid can change countries any time.
 
 Ships as `003_country_data.sql`, separate from the core seed so it can be extended
-without touching it. Coverage doesn't need to be all 195 — 75–100 countries chosen
-for spread across continent, adventure level, and focus affinity is plenty, with the
-rest selectable but unadorned.
+without touching it. Coverage is not all 195 and does not need to be: **100
+countries** carry 222 hooks and 200 affinities, chosen for spread across
+continent, adventure level and focus affinity — every continent, all three
+adventure levels, and every focus recommended for at least fifteen countries.
+The other 95 stay selectable and unadorned.
+
+**Re-running the file cannot duplicate a hook or resurrect a deleted one.**
+`country_hooks` has no unique key to conflict on — a hook is a line of prose, not
+a keyed row — so the insert is guarded on the country: a country that already
+holds any hook is skipped whole. That is what makes the library editor's one
+delete (§12) survive every future press of Run seed, and it costs the other half
+of the same rule — a hook *added* to the file for a country already seeded will
+not land, and belongs in the editor instead. Affinities have a real key,
+`(country_id, focus_id)`, so they take the ordinary `ON CONFLICT DO NOTHING` and
+a reason reworded in the editor survives.
+
+`research_depth` is the one library column a seed file is allowed to revise,
+because it is the one nothing else writes: the editor does not expose it, so the
+`UPDATE` cannot overwrite anyone's work and the second press changes nothing.
 
 ---
 
@@ -1103,9 +1121,10 @@ focus is immediately valid with zero rows and can be tuned afterward. Warn if a 
 has fewer than **15 tasks at weight ≥1 in either week 2 or week 3**, since the draw
 takes five from each week and needs headroom. Counted per week, not summed: a focus
 rich in week 2 and bare in week 3 draws the same five tasks every month just as
-surely as one bare in both. Against seed v0's thirteen templates per week every
-focus is thin, which is a fact about the seed and not about the focus — slice 09
-is what clears the warning.
+surely as one bare in both. Against the library's twenty-five templates per
+week nothing is thin, seeded or custom: a focus with no weight rows at all still
+counts twenty-five in each week, because a missing row means 1. The warning is
+live for a library someone has archived their way through, not for this one.
 
 **Worksheet layout editor** — the dozen printed forms of §16: name, kind, height
 in thirds, and that kind's own knobs. Every field is a named value the renderer
@@ -1161,10 +1180,11 @@ written with a dangling reference.
 
 ## 13. Seed data
 
-**Status:** partial · seed v0 is built (slice 02): the runner, 3 people, 6
-focuses, 6 project types, 195 countries, 37 task templates and 42 focus weights.
-The remaining ~53 templates and `003_country_data.sql` are slice 09;
-`004_worksheets.sql` is slice 10.
+**Status:** partial · the library is built and full (slices 02 and 09): the
+runner, 3 people, 6 focuses, 6 project types, 195 countries, **90 task
+templates**, 87 focus weights, and `003_country_data.sql`'s 222 hooks and 200
+affinities across 100 countries. What remains is `004_worksheets.sql` and the
+worksheet bindings on the templates, both slice 10.
 
 Seed files are not migrations (§3). They live beside them in `/src/migrations/`
 and are exported from the same index as `SEEDS`, but they are re-run by **Run
@@ -1172,14 +1192,15 @@ seed** on every press rather than applied once, and every insert is
 `ON CONFLICT ... DO NOTHING` on the row's stable key — `slug`, or `iso3` for a
 country. Two consequences, and both are load-bearing: a row that exists is never
 touched again, so an edit made in the library editor survives every future
-press; and the file itself can grow, which is how slice 09 reaches a database
-that is already seeded.
+press; and the file itself can grow, which is how the library reached a database
+that was already seeded and carrying a month of real work.
 
 - `001_schema.sql` — tables and indexes. A migration.
 - `002_seed.sql` — people, focuses, project types, countries, task templates,
   weights. A seed.
 - `003_country_data.sql` — hooks, focus affinities, revised research depth.
-  A seed, slice 09.
+  A seed. Its hook insert is guarded on the country rather than conflict-keyed,
+  because a hook has no natural key and a deleted one must stay deleted (§9).
 - `004_worksheets.sql` — the `worksheet_layouts` table and the two columns it
   hangs off `task_templates`, then the twelve layouts (§16). A migration and a
   seed: the columns are applied once, the layouts are upserted on `slug` like
@@ -1196,26 +1217,26 @@ Contents of `002_seed.sql`:
 - **6 focuses and 6 project types.** Each focus carries a blurb written to a 5th
   grader; each project type a freeform "what you'll need" the week-4 gather task
   points at.
-- **195 countries** with continent, region and `research_depth`, unadorned —
-  hooks and affinities are `003`. The conflict key is `iso3`, so a name can be
-  corrected without minting a second row for the same country.
-- **37 task templates** and **42 focus weights**. Not the 20 of §14: a
-  5-template week draws all of itself, which leaves Swap with no candidate, and
-  one project type's week 4 is 5 rows on its own. That floor is 27, and it
-  sizes the pool for the draw alone. Thirteen a week is what the **focuses**
-  need: five tasks are drawn however deep the pool is, so depth costs the kid
-  nothing, and every focus holds three on-theme tasks in each of weeks 2 and 3.
-  Two would both be drawn every month that focus is chosen.
+- **195 countries** with continent, region and `research_depth`, unadorned here —
+  hooks and affinities are `003`, which also corrects the adventure level on the
+  countries whose hooks proved the first pass wrong. The conflict key is `iso3`,
+  so a name can be corrected without minting a second row for the same country.
+- **90 task templates** and **87 focus weights**. The floor that makes the draw
+  work at all is 27 — a 5-template week draws all of itself and leaves Swap with
+  no candidate, and one project type's week 4 is 5 rows on its own. The library
+  is far past that floor because the floor sizes the pool for the **draw**, and
+  the draw is not what runs out. Five tasks come out of a week however deep it
+  is, so depth costs the kid nothing. What depth buys is nine months that differ
+  from each other, and a focus that still means something in month nine.
 
 | Week | Templates | Note |
 |---|---|---|
-| 1 | 6 | 4 `core` — flag, map, location/borders, language & writing system — plus 2 competing for the 5th slot |
-| 2 | 8 | five drawn, three spare, so Swap has somewhere to go |
-| 3 | 8 | same |
-| 4 | 5 | `trifold-board` only |
+| 1 | 10 | 4 `core` — flag, map, location/borders, language & writing system — plus 6 competing for the 5th slot |
+| 2 | 25 | five drawn; the twenty spare are what makes Swap and nine months work |
+| 3 | 25 | same |
+| 4 | 30 | five for each of the six project types, as ordered sequences |
 
-The other five project types seed as rows with an empty week-4 sequence and are
-hidden in setup until slice 09 fills them.
+All six project types carry a full week-4 sequence, so setup offers all six.
 
 **Tier means what is drawn, not how hard it is.** `core` is fixed and always
 included — week 1's four, and all five week-4 rows. `focus` is the
@@ -1225,26 +1246,46 @@ week 1's fifth-slot candidates.
 `task_focus_weights` stores only an opinion: 3 for on-theme, 0 to exclude,
 nothing in between, and no row at all for neutral. Two constraints the draw
 cannot report on its own, so they are asserted in the tests instead: every focus
-needs at least one weight-3 task in week 2 **and** one in week 3 — the draw is
-per week, so a focus with an opinion about only one of them leaves the other
-identical to picking no focus at all — and no focus may exclude more than one of
-a week's 8 or a 5-task draw leaves Swap with no candidate.
+holds **six** weight-3 tasks in week 2 **and** six in week 3 — per week, because
+the draw is per week, so a focus with an opinion about only one of them leaves
+the other identical to picking no focus at all; and six rather than three
+because against a 25-task pool three on-theme tasks put barely one of them in a
+draw of five, while six put two or three. And no focus may exclude more than one
+task in a week: exclusions eat the spare that Swap draws from, and the headroom
+a wider pool buys is for content, not for exclusions.
 
-Full grown, the library is **~90 task templates** — 10 in week 1, 25 in week 2,
-25 in week 3, and 5 per project type in week 4. Slice 09.
-
-**Worksheet bindings are content, and they land with the templates.** Which of
-the twelve layouts a template wants is one column on a row slice 09 is writing
-anyway (§16), so it is written there rather than in a pass of its own. Until a
-binding exists the task prints ruled lines under its prompt, which is a usable
-page — so slice 10 does not wait on slice 09 and slice 09 does not wait on
-anything.
+**Worksheet bindings are the one piece of content still outstanding.** Which of
+the twelve layouts a template wants is one column on a `task_templates` row
+(§16), and that column does not exist until `004_worksheets.sql` applies. Until
+a binding exists the task prints its prompt over ruled lines, which is a usable
+page — so nothing waits on it, and slice 10 writes the bindings as it adds the
+column.
 
 Every `prompt` is written in second person to a 5th grader, one clear action,
 finishable in ten minutes. "Find out which animal is on their money and draw it"
 — not "Research national symbolism." And **no task is country-specific**: the
 same prompt has to work in Peru and in Japan, which is what lets a kid change
 countries at any point in the month.
+
+**Five templates carry the family's lens, and five is the size of it.** This is
+a Sabbath-keeping Christian household, and the library reflects that the way a
+family's own curriculum does: as a few tasks that look at a country through it,
+not as a frame over all ninety. Two sit in week 2 — `kingdom-over-this-place`
+reads Micah 4:1-4 against something the country is struggling with now, and
+`desert-shall-blossom` reads Isaiah 35:1-2 against its most worn-out land. Three
+sit in week 3 — `their-rest-day` asks which day the country actually rests,
+`sabbath-keepers-there` looks for who keeps the seventh day there and what they
+are called, and `feast-they-keep` reads Zechariah 14:16 against the country's own
+harvest festival.
+
+They obey every rule the other eighty-five do: one action, ten minutes, second
+person, and **not country-specific** — every country has a rest day, a festival,
+and something that needs fixing. A scripture reference is the one assertion a
+task is allowed to make, because a citation is checkable; everything the kid is
+asked to *find* stays a lead. The country hooks carry the same lens the same
+way: where a country's own ground is where scripture happened — Israel, Jordan,
+Turkey, Greece, Malta, Iraq, Egypt, Ethiopia — one of its two or three hooks
+points at it, and elsewhere they do not.
 
 The column rules and the paste-ready row forms for the hand-written lists are in
 `../other/SEED-CONTENT.md`.
@@ -1285,6 +1326,27 @@ Resolved:
   either one core would spend the fifth slot entirely, and with it week 1's only
   variation and its only swap.
 - **What breaks a streak.** Nothing, because there is no streak. See §10.
+- **Week 4's "present" task needs no audience beyond whoever is home** (Q-11).
+  All six sequences end "present it to your family," and nothing in the app
+  schedules a presentation night or asks whether one happened. A scheduled event
+  would be the app asserting a household commitment nine times a year that it
+  cannot see and cannot enforce; the first month it slips, six templates are
+  telling a kid to do something that is not going to happen. Whoever is in the
+  kitchen is a real audience, and it is the one that is always there. See §13.
+- **The library carries the family's lens in five templates, not as a frame.**
+  Five of ninety look at a country through the Sabbath and the coming Kingdom,
+  and the country hooks point at scripture's own ground where a country has it.
+  The alternative — a seventh focus — was rejected: a focus is a *draw weight*,
+  so it would make the lens something a kid picks instead of something the year
+  quietly contains, and it would need six on-theme tasks in each of weeks 2 and
+  3 to satisfy §13, which is eighteen more templates and a much heavier hand
+  than intended. See §13.
+- **A hook is re-seeded per country, not per hook.** `country_hooks` has no
+  natural key, so `003`'s insert skips any country that already holds a hook
+  rather than conflict-matching the text. It is what makes the editor's one
+  delete stick through the next press of Run seed, and it means a hook added to
+  the file for an already-seeded country will not land — that edit belongs in
+  the editor, exactly as a corrected task template does. See §9.
 - **Country hooks are the one thing in the library that deletes.** Everything
   else archives, and the reason is structural rather than a policy: `plan_tasks`
   and `month_plans` hold references to templates, focuses and project types, so a

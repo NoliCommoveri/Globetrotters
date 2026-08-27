@@ -123,7 +123,7 @@ test('the export carries every library table, keyed by slug and ISO3', async () 
   assert.equal(file.version, 1);
   assert.equal(file.focuses.length, 7);
   assert.equal(file.project_types.length, 6);
-  assert.equal(file.tasks.length, 38);
+  assert.equal(file.tasks.length, 91);
   assert.ok(file.weights.length >= 42);
   assert.equal(file.hooks.length, 1);
   assert.equal(file.affinities.length, 1);
@@ -168,7 +168,7 @@ test('an import into an empty library restores all of it', async () => {
   target.DB.db.exec('DELETE FROM project_types');
 
   const counts = await libraryImport(target.DB, file);
-  assert.equal(counts.tasks.inserted, 38);
+  assert.equal(counts.tasks.inserted, 91);
   assert.equal(counts.focuses.inserted, 7);
   assert.equal(counts.project_types.inserted, 6);
   assert.equal(counts.hooks.inserted, 1);

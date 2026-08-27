@@ -35,9 +35,9 @@ row counts on `/admin/health`. `001_schema.sql` carries every table in §5.
 
 **Slice 02 is built.** `/admin` now also has **Run seed** and the people editor:
 three names and three inks, changed in a browser. `002_seed.sql` carries the
-three people, six focuses, six project types, 195 countries, 37 task templates
-and 42 focus weights — enough library to draw a real month, and enough that the
-focus a kid picks every month does not hand back the same week every month. `GET /api/catalog`
+three people, six focuses, six project types, 195 countries and the task
+library — enough to draw a real month, and enough that the focus a kid picks
+every month does not hand back the same week every month. `GET /api/catalog`
 serves the picker's one fetch with an ETag, so a row corrected in the editor
 reaches a device that already cached it.
 
@@ -76,10 +76,10 @@ task is country-specific. `start_date` is always a Monday — the later of the
 month's first Monday and this week's — so a September 20th start lands in week 1
 rather than backdating a kid into week 3.
 
-Three things on the setup screen are built and inert until slice 09: the hook
-line on a country card, the recommended focuses with their reason lines, and
-"Deal me three", which is not offered at all while no country has two hooks.
-`002_seed.sql` carries none — they arrive with `003_country_data.sql`.
+Three things on the setup screen were built inert in this slice and came alive
+with slice 09's content, no client change: the hook line on a country card, the
+recommended focuses with their reason lines, and "Deal me three", which is
+offered because 100 countries now carry at least two hooks.
 
 **Slice 05 is built** — the daily loop, and the screen the app is mostly made
 of. This week puts one card up, not five: the lowest-position open task in the
@@ -156,8 +156,8 @@ Edits reach an active month with no republish, because `plan_tasks` joins to
 a cell at 1 is the absence of an opinion and stores no row, and a cell moved
 back to 1 deletes the row it had. A focus created with no weights at all draws
 immediately, and the page warns when either week 2 or week 3 is under fifteen
-tasks — which, against seed v0's thirteen per week, is every focus until slice
-09 lands.
+tasks — which, against the library's twenty-five a week, is nothing: the warning
+is there for a library someone has archived their way through.
 
 `GET /admin/api/library.json` is the backup and `POST` to the same path reads
 one back. It is keyed on slugs and ISO3 codes rather than ids, so it lands in a
@@ -166,6 +166,27 @@ replaces: importing the same file twice reports nothing changed both times.
 
 The one part not built is the worksheet layout editor, which moved to slice 10
 because the table it edits arrives there.
+
+**Slice 09 is built** — the content, and the thing that decides whether the app
+is good rather than merely working. The library is **90 task templates**: ten in
+week 1, twenty-five in each of weeks 2 and 3, and a five-task sequence for every
+one of the six project types, so setup offers all six. `003_country_data.sql`
+adds **222 hooks and 200 focus affinities across 100 countries**, chosen for
+spread across continent, adventure level and focus, and it corrects the
+adventure level where writing a country's hooks proved the first pass wrong.
+
+Every hook is a lead — "Find out what is carved into the desert at Nazca" — and
+never an assertion, because a few hundred hand-written hooks will contain errors
+and the phrasing decides whether an error costs a dead-end search or a false
+sentence copied into a workbook. Five of the ninety templates carry the family's
+Sabbath and Kingdom lens, and five is the deliberate size of it.
+
+Re-running the seed cannot duplicate a hook or resurrect a deleted one: hooks
+have no natural key, so the insert skips any country that already holds one,
+which is what makes the editor's one delete stick.
+
+The one part not built is the worksheet bindings, which moved to slice 10
+because the column they live in arrives there.
 
 **Slice 10 is specced** — printed worksheets (§16). A drawn month becomes about
 seven sheets of ruled, titled pages for the binder: a library of twelve reusable
@@ -181,9 +202,9 @@ stack — and which tablet the wall runs on (D-14), where the wake lock is
 feature-detected either way and what is unresolved is whether the owner has to
 set display sleep by hand.
 
-Two open questions outstanding: one against the content fill (slice 09), and one
-against part of the worksheets (slice 10). Neither of the two remaining slices is
-blocked outright — Q-12 stops only where the print button goes.
+One open question outstanding, against part of the worksheets (slice 10): Q-12
+stops only where the print button goes, not the route, the packer or the twelve
+layouts.
 
 The Worker's own tests run with `node --test test/*.test.js` and need nothing
 installed. They are a build-session tool, not something the owner ever runs —

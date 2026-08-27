@@ -278,7 +278,7 @@ test('the library editor answers on every one of its routes', async () => {
   const library = await asAdmin(e, '/admin/api/library');
   assert.equal(library.status, 200);
   const data = await library.json();
-  assert.equal(data.tasks.length, 37);
+  assert.equal(data.tasks.length, 90);
   assert.equal(data.focuses.length, 6);
 
   const json = (path, method, body) => asAdmin(e, path, {

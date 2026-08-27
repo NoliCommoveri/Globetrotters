@@ -9,8 +9,8 @@
 //
 // SEEDS is data, and every insert in one is ON CONFLICT DO NOTHING. Run seed
 // re-executes the whole list on every press: a row that exists is left alone,
-// a row that is new is inserted. That is what makes slice 09 able to add
-// ninety task templates to an already-seeded database by editing a file in the
+// a row that is new is inserted. That is what lets the library grow to ninety
+// task templates on an already-seeded database by editing a file in the
 // GitHub web editor — which the checksum rule would forbid, and the browser-only
 // constraint (DESIGN.md §3) leaves no other way to do.
 //
@@ -20,6 +20,7 @@
 
 import m001 from './001_schema.sql';
 import s002 from './002_seed.sql';
+import s003 from './003_country_data.sql';
 
 export const MIGRATIONS = [
   { id: '001', name: '001_schema.sql', sql: m001 },
@@ -27,4 +28,5 @@ export const MIGRATIONS = [
 
 export const SEEDS = [
   { id: '002', name: '002_seed.sql', sql: s002 },
+  { id: '003', name: '003_country_data.sql', sql: s003 },
 ];

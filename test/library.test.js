@@ -12,7 +12,7 @@ import { applyPending } from '../src/lib/migrations.js';
 import { runSeed } from '../src/lib/seed.js';
 import { apiLibrary } from '../src/admin/library-api.js';
 import { apiCreateTask, apiPatchTask } from '../src/admin/tasks.js';
-import { apiCreateFocus, apiPatchFocus, apiPutFocusWeights, POOL_FLOOR } from '../src/admin/focuses.js';
+import { apiCreateFocus, apiPatchFocus, apiPutFocusWeights, POOL_FLOOR, thin } from '../src/admin/focuses.js';
 import { apiCreateProjectType, apiPatchProjectType } from '../src/admin/project-types.js';
 import { apiCountry, apiCreateHook, apiPatchHook, apiDeleteHook, apiPutAffinities }
   from '../src/admin/countries.js';
@@ -69,7 +69,7 @@ test('the read route carries every template, its weights and its draw counts', a
   const p = await plan(e);
   const data = await body(await apiLibrary(req('GET'), e));
 
-  assert.equal(data.tasks.length, 37);
+  assert.equal(data.tasks.length, 90);
   assert.equal(data.focuses.length, 6);
   assert.equal(data.project_types.length, 6);
   assert.equal(data.countries.length, 195);
@@ -239,7 +239,7 @@ test('the grid refuses a weight that is not off, 1 or 3', async () => {
   );
 });
 
-test('a focus created with zero weight rows draws, and warns that the pool is thin', async () => {
+test('a focus created with zero weight rows draws against the full pool', async () => {
   const e = await env();
   const res = await apiCreateFocus(req('POST', {
     name: 'Money and Trade', blurb: 'What things cost and who they come from.',
@@ -254,12 +254,17 @@ test('a focus created with zero weight rows draws, and warns that the pool is th
   ).first();
   assert.equal(rows.n, 0);
 
-  // Seed v0 carries 13 week-2 and 13 week-3 templates. Every one of them is at
-  // an effective weight of 1 for a focus with no rows — which is what makes the
-  // focus valid — and 13 is under the floor, which is what makes it thin.
-  assert.deepEqual(focus.pool, { week2: 13, week3: 13 });
-  assert.ok(POOL_FLOOR > 13);
-  assert.equal(focus.thin, true);
+  // The library carries 25 week-2 and 25 week-3 templates. Every one of them
+  // sits at an effective weight of 1 for a focus with no rows, so a focus with
+  // no opinions at all still draws a full month — it just draws the same month
+  // as picking nothing.
+  assert.deepEqual(focus.pool, { week2: 25, week3: 25 });
+  assert.equal(focus.thin, false);
+
+  // The warning is still live, and still measured per week: it fires on the
+  // week that is short, not on the total.
+  assert.equal(thin({ week2: POOL_FLOOR - 1, week3: 25 }), true);
+  assert.equal(thin({ week2: 25, week3: 25 }), false);
 
   // The draw is the proof the warning is advice and not a gate.
   const country = idOf(e, "SELECT id FROM countries WHERE iso3 = 'PER'");

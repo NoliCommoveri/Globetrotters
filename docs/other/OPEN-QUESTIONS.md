@@ -12,20 +12,13 @@ moved to the answered list at the bottom of this file.
 
 | # | Question | Blocks | Kind |
 |---|---|---|---|
-| Q-11 | Does week 4's "present" task require an audience? | 09 | content |
 | Q-12 | Who prints the month's pages, and from what device? | 10 | household |
 
-Q-11 blocks slice 09 and Q-12 blocks part of slice 10. Nothing is outstanding
-against any other slice.
+Q-12 blocks part of slice 10. Nothing is outstanding against any other slice.
 
 ---
 
 ## Detail
-
-**Q-11 — Does week 4's "present" task require an audience?**
-Carried from §15. Whether the family schedules a presentation night is a
-household decision the app can only reflect. It changes the wording of one
-week-4 template per project type, so it blocks slice 09 and nothing earlier.
 
 **Q-12 — Who prints the month's pages, and from what device?**
 §16 puts a **Print this month's pages** button at the end of the reveal, which
@@ -42,6 +35,7 @@ packer and the twelve layouts are unaffected either way.
 
 | # | Question | Answer |
 |---|---|---|
+| Q-11 | Does week 4's "present" task require an audience? | No. All six sequences end "present it to your family" — whoever is home. A scheduled presentation night would be the app asserting a household commitment nine times a year that it cannot see and cannot enforce, and the first month it slips, six templates are telling a kid to do something that is not going to happen. Nothing in the app schedules the event or asks whether it happened. `DESIGN.md` §13, §15. |
 | Q-14 | Can a country hook be deleted, when nothing else in the library can? | Yes, and it is the whole of the exception. `archived = 1` exists because `plan_tasks` and `month_plans` reference templates, focuses and project types, and a hard delete would break a month already in progress; nothing references a hook. A generated hook that is wrong, with no correct hook to type over it, has nowhere else to go. There is no delete button anywhere else in the editor. `DESIGN.md` §12, §15. |
 | Q-10 | Is `POST /api/auth` exempt from the wall's write ban? | Yes, and it is the whole of the exemption. That route issues the wall cookie, so a tablet whose year has run out has no other way back in; it takes a passcode and hands back a cookie, cannot set a person, and the most a wall cookie gets out of it is another wall cookie. `PATCH /api/me` is not exempt and must not become so. Every other route answers a wall cookie 403 — reads included, since the wall needs exactly two of them. `DESIGN.md` §6, §8, §15. |
 | Q-09 | How does the wall compare its version value? | For inequality, never for growth. Both halves move backwards — undo nulls `completed_at`, and removing a stamp deletes the row behind `MAX(earned_at)` — so `>` leaves the wall permanently stale after any undo. The version is also read before the payload and never after it: a write between the two then leaves the stored version older than the screen, costing one wasted fetch instead of a stale wall. `DESIGN.md` §8, §15. |

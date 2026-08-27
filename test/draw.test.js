@@ -4,6 +4,8 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { DatabaseSync } from 'node:sqlite';
 
 import {
   recency, score, sampleWithoutReplacement, drawWeek1, drawDeepWeek, week4Rows,
@@ -195,5 +197,50 @@ test('a short week says so instead of returning a short month', () => {
     assert.equal(err.week, 3);
     assert.equal(err.needed, 5);
     assert.equal(err.available, 0);
+  }
+});
+
+// The draw against the real library rather than a fixture — the only version of
+// "a school year does not repeat itself" that a family would recognize.
+test('nine consecutive months, one person, one focus, no week repeats itself', () => {
+  const db = new DatabaseSync(':memory:');
+  for (const file of ['001_schema.sql', '002_seed.sql']) {
+    db.exec(readFileSync(new URL(`../src/migrations/${file}`, import.meta.url), 'utf8'));
+  }
+  const templates = db.prepare(
+    'SELECT id, week_theme, tier, project_type_id, position FROM task_templates WHERE archived = 0'
+  ).all();
+  const weights = db.prepare('SELECT task_template_id, focus_id, weight FROM task_focus_weights').all();
+  const projectTypes = db.prepare('SELECT id FROM project_types WHERE archived = 0').all();
+
+  // Worst case on purpose: the same focus nine months running, which is what a
+  // kid who knows what they like actually does.
+  for (const focus of db.prepare('SELECT id, slug FROM focuses').all()) {
+    const opinions = new Map(
+      weights.filter((w) => w.focus_id === focus.id).map((w) => [w.task_template_id, w.weight])
+    );
+    // The sparse table's rule: no row means 1. It is the caller's job, and
+    // getting it wrong empties week 1, which has no weight rows at all.
+    const focusWeight = (id) => (opinions.has(id) ? opinions.get(id) : 1);
+    const lastDrawn = new Map();
+
+    for (let month = 0; month < 9; month += 1) {
+      const plan = drawPlan({
+        templates,
+        projectTypeId: projectTypes[month % projectTypes.length].id,
+        focusWeight,
+        monthsSince: (id) => (lastDrawn.has(id) ? month - lastDrawn.get(id) : null),
+        random: Math.random,
+      });
+
+      assert.equal(plan.length, 20, `${focus.slug} month ${month + 1} is not twenty tasks`);
+      for (const week of [1, 2, 3, 4]) {
+        const ids = plan.filter((r) => r.week_no === week).map((r) => r.task_template_id);
+        assert.equal(ids.length, 5, `${focus.slug} month ${month + 1} week ${week}`);
+        assert.equal(new Set(ids).size, 5,
+          `${focus.slug} month ${month + 1} week ${week} drew the same task twice`);
+      }
+      for (const row of plan) lastDrawn.set(row.task_template_id, month);
+    }
   }
 });

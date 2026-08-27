@@ -57,18 +57,51 @@ test('an ink dot names whoever stamped the country', () => {
 });
 
 // Against the actual seed, which is the only version of this claim that matters.
-test('seed v0 has no country with two hooks, so the shuffle is not offered yet', () => {
+test('the seeded hooks deal three real cards, ten shuffles running', () => {
   const db = new DatabaseSync(':memory:');
-  for (const file of ['001_schema.sql', '002_seed.sql']) {
+  for (const file of ['001_schema.sql', '002_seed.sql', '003_country_data.sql']) {
     db.exec(readFileSync(new URL(`../src/migrations/${file}`, import.meta.url), 'utf8'));
   }
   const rows = db.prepare('SELECT id, name FROM countries').all();
-  const hooked = hooksByCountry(db.prepare('SELECT country_id, text FROM country_hooks').all());
+  const hooks = db.prepare('SELECT country_id, text FROM country_hooks').all();
+  const hooked = hooksByCountry(hooks);
+  const candidates = dealCandidates(rows, hooked);
 
-  // Hooks are `003_country_data.sql`, slice 09. Until they land the eligible
-  // pool is empty and setup hides the control rather than dealing three cards
-  // with nothing written on them. When slice 09 lands this assertion inverts,
-  // and it is the thing that should make someone come back and change it.
-  assert.equal(dealCandidates(rows, hooked).length, 0);
   assert.equal(rows.length, 195);
+  // 100 countries carry hooks; the other 95 stay selectable and unadorned (§9).
+  assert.equal(candidates.length, 100);
+
+  // The exit criterion, run as written: ten consecutive shuffles, and not one
+  // card without a hook on it. A blank card is the failure mode this whole
+  // MIN_HOOKS rule exists to prevent — the shuffle is the front door for a kid
+  // who does not know what they want, and it has to earn that.
+  for (let n = 0; n < 10; n += 1) {
+    const dealt = dealThree(candidates);
+    assert.equal(dealt.length, 3);
+    for (const country of dealt) {
+      assert.ok((hooked.get(country.id) || []).length >= MIN_HOOKS,
+        `${country.name} was dealt with fewer than ${MIN_HOOKS} hooks`);
+    }
+  }
+});
+
+test('every seeded hook is a lead, not a fact stated at a kid', () => {
+  // §9's rule, and the one thing about this file that is not a matter of taste:
+  // a hook that is wrong should send a kid on a dead-end search, never write a
+  // false sentence into a workbook. A lead opens with the instruction to go and
+  // look. Spot-checking twenty by hand is the human half of this; the machine
+  // half is that not one of them opens as an assertion.
+  const db = new DatabaseSync(':memory:');
+  for (const file of ['001_schema.sql', '002_seed.sql', '003_country_data.sql']) {
+    db.exec(readFileSync(new URL(`../src/migrations/${file}`, import.meta.url), 'utf8'));
+  }
+  const hooks = db.prepare('SELECT text FROM country_hooks').all();
+  assert.ok(hooks.length >= 200, `only ${hooks.length} hooks`);
+
+  for (const { text } of hooks) {
+    assert.match(text, /^(Find out |Look up |Find )/,
+      `not phrased as a lead: ${text}`);
+    assert.ok(!text.endsWith('.'), `a hook is an instruction, not a sentence to copy: ${text}`);
+    assert.ok(text.length >= 30 && text.length <= 140, `hook is the wrong length: ${text}`);
+  }
 });
