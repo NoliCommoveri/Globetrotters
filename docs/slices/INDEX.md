@@ -1,7 +1,7 @@
 # Slice index
 
-Ten slices against `../design/DESIGN.md`. Each ends at a state you can open in
-a browser and judge.
+Eleven slices against `../design/DESIGN.md`. Each ends at a state you can open
+in a browser and judge.
 
 A build session takes the first slice not marked `built` and reads its file.
 Slices are strictly ordered — the dependency column is why, not a suggestion.
@@ -18,6 +18,7 @@ Slices are strictly ordered — the dependency column is why, not a suggestion.
 | 07 | [The wall](07-wall.md) | not started | M | 06 | §8 |
 | 08 | [Library editor](08-library-editor.md) | not started | L | 02 | §12 |
 | 09 | [Content fill](09-content-fill.md) | not started | L | 04 | §9, §13 |
+| 10 | [Printed worksheets](10-worksheets.md) | not started | L | 05 | §16 |
 
 Statuses: `not started` · `in progress` · `built`.
 
@@ -58,8 +59,19 @@ before there is data to lose.
 nine-month job for one person on one phone. Slices 07–09 are the family
 experience and the quality of the work; none of them block September.
 
-Slices 08 and 09 depend on earlier slices but not on each other or on 07. They
-can run in any order once their dependency is met.
+Slices 08, 09 and 10 depend on earlier slices but not on each other or on 07.
+They can run in any order once their dependency is met.
+
+**Slice 10 is the binder.** It turns a drawn month into printed pages (§16), and
+it is the one late slice with a hard date on it: pages are worth having in
+September, not in March. Its dependency is slice 05 and nothing more — the
+layout bindings that make the pages good are content and ride along with slice
+09, and until they exist every task prints its prompt over ruled lines, which is
+already better than a blank sheet of looseleaf. That means 10 can run before 09
+without losing anything, and 09 improves it afterwards with no code change.
+
+Its one open question, **Q-12**, blocks where the print button goes and not the
+route or the layouts, so most of the slice can be built before it is answered.
 
 ---
 
@@ -73,8 +85,8 @@ Every section of `DESIGN.md` and the slice that finishes it.
 | §2 Stack | 03 — built but for the fonts (D-10) |
 | §3 Migrations | 02 — built |
 | §4 The task model | 04 — built |
-| §5 Schema | 01 — built |
-| §6 API | 07 (last endpoint lands there) |
+| §5 Schema | 10 (the worksheet tables are the last of it) |
+| §6 API | 10 (last route lands there) |
 | §7 This week | 05 — built |
 | §7 Month setup | 04 — built |
 | §7 Passport | 06 |
@@ -84,6 +96,7 @@ Every section of `DESIGN.md` and the slice that finishes it.
 | §10 Progress | 05 — built |
 | §11 Design direction | 06 (the stamp is the last piece) |
 | §12 Library editor | 08 |
-| §13 Seed data | 09 |
+| §13 Seed data | 09 (10 adds the layout seed) |
 | §14 Build order | — (superseded by this index) |
 | §15 Decisions | — (tracked in ../other/OPEN-QUESTIONS.md) |
+| §16 Printed worksheets | 10 |

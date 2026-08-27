@@ -343,7 +343,9 @@ nothing to protect: no work has been done yet.
 
 ## 5. Schema (D1 / SQLite)
 
-**Status:** built · slice 01, as `src/migrations/001_schema.sql`
+**Status:** partial · `001_schema.sql` is built (slice 01). The two
+worksheet tables and the two columns they hang off `task_templates` are slice
+10, as `004_worksheets.sql`.
 
 ```sql
 CREATE TABLE people (
@@ -410,7 +412,10 @@ CREATE TABLE task_templates (
   position        INTEGER,             -- week 4 ordering
   archived        INTEGER NOT NULL DEFAULT 0,
   origin          TEXT NOT NULL DEFAULT 'seed' CHECK (origin IN ('seed','custom')),
-  updated_at      TEXT
+  updated_at      TEXT,
+  -- §16, added by 004_worksheets.sql. Null layout prints ruled lines.
+  worksheet_layout_id INTEGER REFERENCES worksheet_layouts(id),
+  worksheet_spec      TEXT   -- JSON, overrides keys of the layout's own spec
 );
 
 -- Sparse on purpose: a missing row means weight 1. Only opinions are stored.
@@ -419,6 +424,21 @@ CREATE TABLE task_focus_weights (
   focus_id         INTEGER NOT NULL REFERENCES focuses(id),
   weight           REAL NOT NULL,      -- 0 excludes, 3 favors
   PRIMARY KEY (task_template_id, focus_id)
+);
+
+-- §16. About a dozen rows. A layout is a printed form, not a worksheet: many
+-- templates bind to the same one.
+CREATE TABLE worksheet_layouts (
+  id            INTEGER PRIMARY KEY,
+  slug          TEXT NOT NULL UNIQUE,
+  name          TEXT NOT NULL,          -- 'Drawing box with caption'
+  kind          TEXT NOT NULL           -- decides which renderer, and which spec keys
+    CHECK (kind IN ('lines','box','split','table','timeline','figures',
+                    'checklist','storyboard')),
+  height_thirds INTEGER NOT NULL CHECK (height_thirds BETWEEN 1 AND 3),
+  spec          TEXT NOT NULL,          -- JSON. Named knobs only, never markup.
+  archived      INTEGER NOT NULL DEFAULT 0,
+  origin        TEXT NOT NULL DEFAULT 'seed'
 );
 
 CREATE TABLE month_plans (
@@ -502,6 +522,9 @@ CREATE INDEX idx_hooks_country        ON country_hooks(country_id);
   from future draws while leaving existing `plan_tasks` intact. Hard deletes would
   break months already in progress.
 - Draws must filter `archived = 0`. Display must not.
+- `worksheet_layout_id` is nullable and stays that way. A template with no layout
+  prints ruled lines under its prompt (§16), so the printed month is complete
+  before a single binding is written and improves as they land.
 
 ---
 
@@ -514,7 +537,8 @@ built (slice 03); `POST /api/plans`, `GET`/`PATCH /api/plans/:id`,
 `GET /api/passport` are built (slice 04); `PATCH /api/tasks/:id`,
 `POST /api/tasks/:id/swap`, `POST /api/sessions` and `GET /api/stats` are built
 (slice 05). What remains is the two completion routes and `PATCH /api/stamps/:id`
-(slice 06), the three wall routes (slice 07) and the library editor (slice 08).
+(slice 06), the three wall routes (slice 07), the library editor (slice 08) and
+the print route (slice 10).
 
 ```
 POST   /api/auth                      passcode -> cookie. The one family route that
@@ -551,6 +575,11 @@ GET    /api/passport                  all stamps, all people, every month runnin
 PATCH  /api/stamps/:id                {headline} — the stamp's one line, editable later
 GET    /api/stats                     the cookie's own person; ?all=1 for all three
 
+GET    /print/:planId                 the month's pages as a printable document.
+                                      ?week=N prints one week — the reprint path
+                                      after a swap. Family cookie only; the
+                                      wall's is refused. See §16.
+
 GET    /wall                          read-only ambient view (own cookie type)
 GET    /api/wall                      the wall payload
 GET    /api/wall/version              MAX(stamps.earned_at) and
@@ -573,6 +602,8 @@ PATCH  /admin/api/focuses/:id         edit name, blurb, archived
 PUT    /admin/api/focuses/:id/weights bulk weight update (sparse — deletes weight-1 rows)
 POST   /admin/api/project-types       create
 PATCH  /admin/api/project-types/:id   edit, reorder week-4 sequence
+POST   /admin/api/layouts             create a worksheet layout (§16)
+PATCH  /admin/api/layouts/:id         edit name, kind, height, spec, archived
 GET    /admin/api/library.json        full export / backup
 ```
 
@@ -1012,8 +1043,9 @@ Tasks, focuses, and project types are all editable in the app. Parent-facing, be
 
 **Task list** — every template, filterable by week, tier, focus weight, and workbook
 page. Shows how many times each has been drawn and by whom, so it's obvious which
-ones are dead weight. Inline edit for title, prompt, week, tier, and workbook page.
-New tasks default to `origin = 'custom'`.
+ones are dead weight. Inline edit for title, prompt, week, tier, workbook page,
+and the worksheet layout the task's printed segment uses (§16). New tasks default
+to `origin = 'custom'`.
 
 **Focus editor** — name, blurb, and the weight grid: that focus against every week 2–3
 task, each cell cycling `off / 1 / 3`. Editing weights one form field at a time would
@@ -1023,6 +1055,13 @@ be miserable at 50 tasks. The grid writes sparsely — cells left at 1 store no 
 focus is immediately valid with zero rows and can be tuned afterward. Warn if a focus
 has fewer than ~15 tasks at weight ≥1 across weeks 2 and 3, since the draw needs
 headroom.
+
+**Worksheet layout editor** — the dozen printed forms of §16: name, kind, height
+in thirds, and that kind's own knobs. Every field is a named value the renderer
+reads and escapes; there is no markup field, here or anywhere, because this form
+is the one place a typed string reaches a printed page. Editing a layout changes
+every task bound to it, which is the point of there being twelve rather than
+ninety — and it is why the editor shows the bound count beside each one.
 
 **People editor** — the three names, ink colors, and display order. This is where the
 family names itself; nothing about it belongs in a seed migration.
@@ -1053,7 +1092,8 @@ carried into next school year without a terminal.
 
 **Status:** partial · seed v0 is built (slice 02): the runner, 3 people, 6
 focuses, 6 project types, 195 countries, 37 task templates and 42 focus weights.
-The remaining ~53 templates and `003_country_data.sql` are slice 09.
+The remaining ~53 templates and `003_country_data.sql` are slice 09;
+`004_worksheets.sql` is slice 10.
 
 Seed files are not migrations (§3). They live beside them in `/src/migrations/`
 and are exported from the same index as `SEEDS`, but they are re-run by **Run
@@ -1069,6 +1109,10 @@ that is already seeded.
   weights. A seed.
 - `003_country_data.sql` — hooks, focus affinities, revised research depth.
   A seed, slice 09.
+- `004_worksheets.sql` — the `worksheet_layouts` table and the two columns it
+  hangs off `task_templates`, then the twelve layouts (§16). A migration and a
+  seed: the columns are applied once, the layouts are upserted on `slug` like
+  every other seeded row.
 
 Contents of `002_seed.sql`:
 
@@ -1117,6 +1161,13 @@ a week's 8 or a 5-task draw leaves Swap with no candidate.
 
 Full grown, the library is **~90 task templates** — 10 in week 1, 25 in week 2,
 25 in week 3, and 5 per project type in week 4. Slice 09.
+
+**Worksheet bindings are content, and they land with the templates.** Which of
+the twelve layouts a template wants is one column on a row slice 09 is writing
+anyway (§16), so it is written there rather than in a pass of its own. Until a
+binding exists the task prints ruled lines under its prompt, which is a usable
+page — so slice 10 does not wait on slice 09 and slice 09 does not wait on
+anything.
 
 Every `prompt` is written in second person to a 5th grader, one clear action,
 finishable in ten minutes. "Find out which animal is on their money and draw it"
@@ -1237,6 +1288,173 @@ Resolved:
   A real second sitting on a finished task goes through `POST /api/sessions`,
   which is the route for writing a session without touching a task. See §6, §10.
 
+- **What a printed worksheet is a worksheet of.** A sheet, not a task. A
+  10-minute task fills about a third of a page, so the printed unit is a sheet
+  packed with segments and the reusable part is a library of ~12 **layouts**
+  that many templates bind to — not ~90 bespoke worksheets, most of which would
+  be the same box twice. See §16.
+- **Nothing about a printed month is stored, and no plan is ever finalized.**
+  `GET /print/:planId` renders live from `plan_tasks`. A stored set of pages
+  would need a freeze to stay true, and §4's plan is deliberately unfrozen —
+  redraw, change-focus, three swaps, project type, country. "When the month is
+  finalized" is the end of the reveal and the Plan screen, which are places, not
+  an event. See §16.
+- **Paper is US Letter, and sheets pack by the week.** 0.5in margins, a 7.5 ×
+  10in printable area, a segment measured in thirds of it (D-13). Each week
+  starts a new sheet so a mid-month swap reprints one week instead of the month,
+  at a cost of up to two blank thirds a week. See §16.
+- **Week 4 gets one sheet and four of its five tasks get none.** Week 4 is
+  production, not research; a ruled page under "rehearse it twice" is a page
+  that goes in the bin. What prints is the project type's materials as a
+  checklist, the five steps as check-off lines, and a storyboard. See §16.
+
 **Still open.** Open questions are tracked in `../other/OPEN-QUESTIONS.md`, each
-assigned to the slice it blocks. Three are outstanding. They are answered before
+assigned to the slice it blocks. Four are outstanding. They are answered before
 the code that depends on them is written, never guessed.
+
+---
+
+## 16. Printed worksheets
+
+**Status:** not started · slice 10
+
+The physical looseleaf workbook is the point of the project (§1, §7). Twenty
+tasks a month arrive as prompts on a phone and land on paper the kid has to
+rule, title and lay out themselves before any of the ten minutes goes into the
+work. This section is what turns a drawn month into the pages that go in the
+binder.
+
+**The output is a month's pages, not a task's page.** A single 10-minute task is
+worth about a third of a sheet. Printing one per sheet wastes two thirds of
+seven sheets a month per person and produces a binder nobody can flip. The unit
+is the sheet, composed of segments.
+
+### Three parts
+
+- A **layout** is a reusable printed form — ruled lines, a drawing box with a
+  caption, two labeled columns, a six-panel storyboard. There are about twelve
+  and they live in the library alongside tasks and focuses.
+- A **segment** is one task's slot on paper: its title, its `workbook_page`
+  label, its prompt in full, and the layout under it. Bound at the template, so
+  a task says which form it wants.
+- A **sheet** is what comes out of the printer: a header band and the segments
+  packed into it.
+
+**Layouts are a library, not one worksheet per task.** Ninety bespoke worksheets
+is ninety pieces of content on top of §13, and most of them would be the same
+box twice. "Copy the flag" and "trace the outline and star the capital" want the
+identical form. Twelve layouts plus one binding per template is the same result
+for a twelfth of the writing, and it is the version the parent can keep tuning
+in §12 without designing anything.
+
+**`workbook_page` stays a label, not the unit.** It is what prints in the
+segment's corner so the page has a name — the same string the task card shows on
+the phone (§7), so the kid reads the same word in both places.
+
+### Thirds
+
+Three segments to a sheet is the common case, not the rule. The flag task wants
+half a page and "write hello two ways" wants four lines; forcing both to a third
+gives one a cramped box and the other a field of white.
+
+So a layout declares its height in **thirds** — 1, 2 or 3 — and the sheet holds
+three. US Letter at 0.5in margins is a 7.5 × 10in printable area (D-13), so a
+third is 7.5 × 3.33in, which is a comfortable drawing box and about eight ruled
+lines. Those two numbers are one CSS variable each: if a home printer's
+unprintable margin clips a segment, the margin moves in one place and every
+layout follows.
+
+### Packing
+
+Segments pack in `plan_tasks.position` order and are never reordered. The
+printed order has to match the order on the phone or the kid cannot find the
+page the card is pointing at.
+
+**Each week starts a new sheet.** Five tasks is usually two sheets, so a month is
+about seven, and the binder gets week dividers for free. The real reason is
+containment: a swap on day eight changes one segment, and a segment whose height
+differs from the one it replaced reflows everything after it. Bounded at the
+week, a reprint is one or two sheets. Packed across the month, it is the month.
+The cost is up to two blank thirds a week, which is the cheapest thing on this
+page.
+
+### What prints
+
+**Weeks 1–3: every task gets a segment.** A template with no binding falls
+through to a default of ruled lines under the prompt, so the binder never has a
+hole and printing works before a single layout is bound — the same built-and-
+inert pattern the country hooks use (§7). "Applicable" means a task has a
+bespoke form, not that it has a page.
+
+**Week 4 is one sheet, and four of its five tasks have no segment.** Week 4 is
+production, not research (§4): gather materials, two build sessions, rehearse,
+present. None of those four is written into a workbook, and a ruled page under
+"rehearse it twice" is a page that goes in the bin. What week 4 gets is a single
+sheet carrying the chosen project type's `materials` as a checklist, the
+five-step sequence as check-off lines, and a six-panel storyboard for the one
+week-4 task that is genuinely planning work.
+
+**Every segment carries its prompt in full.** The prompt is the instruction, not
+a title (§7) — a sheet that names the task without saying what to do sends the
+kid back to the phone, which is the friction the sheet exists to remove.
+
+**The sheet header** carries the person's name, the country, the month, the week
+and *sheet n of m*, ruled in that person's ink. The three inks were chosen to
+stay separable as greys on a home printer (§13), which is what keeps three
+people's pages apart on the table.
+
+**Print is ink on white.** The app's deep navy ground (§11) does not follow the
+page: a full-bleed dark background is a print job nobody would run twice. The
+print document is its own stylesheet with its own `@page` rules and shares
+nothing with the app shell but the type scale.
+
+### The route
+
+`GET /print/:planId` — a Worker-rendered document behind the family cookie,
+served the way `/admin` and `/wall` are and not under `/api/`. The app shell is
+a static mobile-first document (§2) and a print stylesheet bolted onto it would
+spend the whole slice fighting it.
+
+`?week=N` prints one week. That is the reprint-after-swap path, and it is also
+the only way to print a single task's sheet — there is no per-task print button,
+because the answer to "print this one task" is a third of a page.
+
+**The wall cookie is refused.** The wall has no person and nothing on it should
+open a print dialog (§8).
+
+### Nothing is stored, and nothing is finalized
+
+There is no `finalized_at`, no generated artifact, no R2. `GET /print/:planId`
+renders live from `plan_tasks` every time it is asked.
+
+A stored set of pages would need a freeze to be correct, and the plan is
+deliberately not frozen: redraw and change-focus are unlimited until the first
+check-off, three swaps run after it, project type changes until week 4 and
+country changes any time (§4, §6). Anything printed at a moment and kept goes
+stale the first time one of those is used, and the fix — invalidating stored
+pages on five different writes — is a cache to maintain for a document that
+takes one query to rebuild.
+
+So "when the month's tasks are finalized" is a **place, not an event**: the
+**Print this month's pages** button sits at the end of the reveal (§7 Month
+setup), which is the moment the month becomes real, and again on **Plan**, which
+is where someone goes when they want the shape of the month. A swap on Plan
+offers to reprint that week.
+
+### Layout specs are data, not markup
+
+A layout carries a `kind` and a JSON `spec` of named knobs — line count, caption
+text, column headers, panel count. A template may override those keys for its
+own segment.
+
+**The renderer never takes markup from the database.** It reads the keys it
+knows for that `kind` and escapes every string it prints. The library editor
+(§12) lets a parent type into these fields, and a `spec` that could carry HTML
+would make the printed page an injection surface reachable from a form.
+
+### What this costs
+
+One migration adding `worksheet_layouts` and two nullable columns on
+`task_templates` (§5), one route, one print stylesheet, and twelve layouts. The
+bindings — which of the twelve each template wants — are content and land with
+§13's fill, with no code change when they do.
