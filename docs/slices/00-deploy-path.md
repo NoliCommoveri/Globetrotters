@@ -69,7 +69,7 @@ None. Q-03 is answered: the session cookie is signed with `ADMIN_TOKEN`
 ## Exit criteria
 
 All met. A commit on `main` becomes a running Worker with no terminal step, and
-`/admin/health` renders on the `workers.dev` subdomain:
+`/admin/health` renders on `globetrotters.immotus.app`:
 
 - Editing a file in the GitHub web editor changes what `/admin/health` prints
 - Re-running a build from the deployment's **Retry build** button works
@@ -91,10 +91,11 @@ every deploy does not belong in a committed file. Nothing depends on it: the
 version id already moves on every deploy, which is what makes the page a deploy
 check.
 
-**The custom domain is not attached.** `globetrotters.immotus.app` failed, so the
-app answers on `workers.dev` and no `routes` entry is declared — a route to a
-domain the account cannot attach fails the build, which would take the working
-deploy down with it. Nothing in the app hardcodes an origin.
+**The custom domain is attached in the dashboard, not in `wrangler.toml`.** The
+app answers on `globetrotters.immotus.app` and on `workers.dev`, and no `routes`
+entry is declared — a `routes` entry the account cannot satisfy fails the build,
+which would take a working deploy down with it. Nothing in the app hardcodes an
+origin.
 
 ## Do not build
 

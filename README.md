@@ -25,14 +25,12 @@ seeding, or deploy requires a terminal.
 ## Where things stand
 
 **Slice 00 is built and deployed.** A commit on `main` becomes a running Worker
-with no terminal step, and `/admin/health` on the `workers.dev` subdomain
+with no terminal step, and `/admin/health` on `globetrotters.immotus.app`
 reports D1 reachable and the `.sql` text rule working — which is what slice 01's
 migration runner rests on.
 
 Every Cloudflare due-out is closed: the D1 database, the git-connected Worker
-`globetrotters`, and all three Worker secrets. One thing is outstanding and is
-not blocking anything — the custom domain `globetrotters.immotus.app` failed to
-attach, so the app answers on `workers.dev` for now.
+`globetrotters`, all three Worker secrets, and the custom domain.
 
 **Slice 01 is next** and has no open questions: the migration runner, the
 `ADMIN_TOKEN` gate on `/admin`, and `001_schema.sql`.
