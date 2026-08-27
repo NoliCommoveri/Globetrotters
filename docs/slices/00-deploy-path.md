@@ -1,6 +1,6 @@
 # Slice 00 — Deploy path
 
-**Status:** in progress — code complete, awaiting the first deploy
+**Status:** built
 **Band:** M
 **Implements:** §2 (stack, bindings), §3 (deploy half)
 **Depends on:** nothing
@@ -68,32 +68,33 @@ None. Q-03 is answered: the session cookie is signed with `ADMIN_TOKEN`
 
 ## Exit criteria
 
-Every one of these is checked in a browser against a deployed Worker, so none of
-them can be confirmed from a build session. The slice is marked `built` once the
-owner has seen all four.
+All met. A commit on `main` becomes a running Worker with no terminal step, and
+`/admin/health` renders on the `workers.dev` subdomain:
 
 - Editing a file in the GitHub web editor changes what `/admin/health` prints
 - Re-running a build from the deployment's **Retry build** button works
-- The `.sql` text rule is proven: `src/lib/probe.sql` is imported and its length
-  printed on the health page
-- `/admin/health` reports D1 reachable
+- The `.sql` text rule is proven — `src/lib/probe.sql` imports and its length
+  prints
+- `/admin/health` reports D1 reachable. D1 failing turns the whole page 503, so a
+  green page is the whole check
 
-**What to look at, on `https://globetrotters.<subdomain>.workers.dev/admin/health`:**
+**The version tag is empty on a Workers Build.** The Commit row read `(not set)`
+on the first deploy, so the fallback this slice named is what ships: the deploy
+command passes the builder's commit through as a plain var.
 
-| Row | Passing |
-|---|---|
-| Version id | any value, and a *different* one after the next push |
-| Commit | the commit sha. `(not set)` means the version tag does not carry it — see below |
-| Deployed at | a timestamp from the build just now, not hours ago |
-| D1 | `yes — reachable` |
-| `.sql` text rule | `yes — probe.sql is N characters` |
+```
+npx wrangler deploy --var COMMIT_SHA:"${WORKERS_CI_COMMIT_SHA:-unknown}"
+```
 
-D1 failing turns the whole page 503, so a green page is the whole check.
+Set in the Worker's build settings, not in `wrangler.toml` — a value that changes
+every deploy does not belong in a committed file. Nothing depends on it: the
+version id already moves on every deploy, which is what makes the page a deploy
+check.
 
-**If Commit reads `(not set)`,** the version tag does not carry the commit on this
-account and the fallback named above applies: inject it from the builder's commit
-environment variable through a build command. Nothing else on the page changes,
-and the deploy check still works — Version id moves on every deploy regardless.
+**The custom domain is not attached.** `globetrotters.immotus.app` failed, so the
+app answers on `workers.dev` and no `routes` entry is declared — a route to a
+domain the account cannot attach fails the build, which would take the working
+deploy down with it. Nothing in the app hardcodes an origin.
 
 ## Do not build
 

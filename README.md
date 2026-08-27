@@ -24,13 +24,18 @@ seeding, or deploy requires a terminal.
 
 ## Where things stand
 
-Design complete. No code yet. **Every Cloudflare due-out is closed** — the D1
-database, the git-connected Worker `globetrotters`, and all three Worker
-secrets. Slices 00, 01 and 02 have nothing outstanding blocking them.
+**Slice 00 is built and deployed.** A commit on `main` becomes a running Worker
+with no terminal step, and `/admin/health` on the `workers.dev` subdomain
+reports D1 reachable and the `.sql` text rule working — which is what slice 01's
+migration runner rests on.
 
-The Worker serves the repo as static assets until slice 00 commits
-`wrangler.toml`, which is also what binds D1: a git-connected Worker takes every
-binding from that file, not from the dashboard.
+Every Cloudflare due-out is closed: the D1 database, the git-connected Worker
+`globetrotters`, and all three Worker secrets. One thing is outstanding and is
+not blocking anything — the custom domain `globetrotters.immotus.app` failed to
+attach, so the app answers on `workers.dev` for now.
+
+**Slice 01 is next** and has no open questions: the migration runner, the
+`ADMIN_TOKEN` gate on `/admin`, and `001_schema.sql`.
 
 Nine open questions outstanding. One of them, Q-04, changes the schema and is
 the expensive one to answer late.

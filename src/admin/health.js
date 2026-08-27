@@ -15,15 +15,24 @@ function escapeHtml(value) {
 }
 
 // The version metadata binding hands us { id, tag, timestamp }. `id` changes on
-// every deploy and is what makes this page a deploy check at all. `tag` carries
-// the commit for a git-connected build; it can be empty, which is worth showing
-// rather than hiding.
+// every deploy and is what makes this page a deploy check at all.
+//
+// `tag` does not carry the commit on this account — a Workers Build leaves it
+// empty, which is what the first deploy showed. The commit arrives instead as a
+// plain var set by the deploy command:
+//
+//   npx wrangler deploy --var COMMIT_SHA:"${WORKERS_CI_COMMIT_SHA:-unknown}"
+//
+// This is slice 00's named fallback and it costs no build step. If the var is
+// missing the page still renders and the row reads (not set); nothing depends
+// on it, because `id` already answers "is this the code I just pushed".
 function versionOf(env) {
   const meta = env.CF_VERSION_METADATA;
-  if (!meta) return { id: NOT_SET, tag: NOT_SET, timestamp: NOT_SET };
+  const commit = env.COMMIT_SHA || meta?.tag || NOT_SET;
+  if (!meta) return { id: NOT_SET, tag: commit, timestamp: NOT_SET };
   return {
     id: meta.id || NOT_SET,
-    tag: meta.tag || NOT_SET,
+    tag: commit,
     timestamp: meta.timestamp || NOT_SET,
   };
 }
