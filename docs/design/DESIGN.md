@@ -1023,9 +1023,10 @@ week 1's fifth-slot candidates.
 `task_focus_weights` stores only an opinion: 3 for on-theme, 0 to exclude,
 nothing in between, and no row at all for neutral. Two constraints the draw
 cannot report on its own, so they are asserted in the tests instead: every focus
-needs at least one weight-3 task in weeks 2–3 or the setup preview has nothing
-to sample, and no focus may exclude more than one of a week's 8 or a 5-task draw
-leaves Swap with no candidate.
+needs at least one weight-3 task in week 2 **and** one in week 3 — the draw is
+per week, so a focus with an opinion about only one of them leaves the other
+identical to picking no focus at all — and no focus may exclude more than one of
+a week's 8 or a 5-task draw leaves Swap with no candidate.
 
 Full grown, the library is **~90 task templates** — 10 in week 1, 25 in week 2,
 25 in week 3, and 5 per project type in week 4. Slice 09.

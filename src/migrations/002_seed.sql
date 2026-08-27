@@ -329,8 +329,8 @@ FROM (
    'Look at the map and list every country that shares a border with yours. If it''s an island with no land borders, write that instead.',
    1, 'map', 'core', NULL, NULL),
 
-  ('language-hello', 'Learn to say hello',
-   'Find out what language or languages people speak there and how to say "hello." Write it in your workbook the way it sounds.',
+  ('language-hello', 'Say hello and write it',
+   'Find out what language people speak there and how to say "hello." Write it in your workbook twice: once copied the way they spell it, and once the way it sounds out loud.',
    1, 'language', 'core', NULL, NULL),
 
   ('currency-animal', 'What is on their money?',
@@ -433,9 +433,15 @@ ON CONFLICT (slug) DO NOTHING;
 -- ---------------------------------------------------------------------------
 -- Focus weights — sparse. A missing row means weight 1, so only an opinion is
 -- stored: 3 for on-theme, 0 to exclude, nothing in between. Every focus needs
--- at least one 3 in weeks 2-3 or the setup preview has nothing to sample, and
--- at most one 0 per focus per week or a 5-of-8 draw leaves Swap with no
--- candidate. Both are asserted in test/seed-content.test.js.
+-- at least one 3 in week 2 *and* one in week 3, or picking it leaves that week
+-- identical to picking nothing; and at most one 0 per focus per week, or a
+-- 5-of-8 draw leaves Swap with no candidate. Both are asserted in
+-- test/seed-content.test.js.
+--
+-- Weeks 2 and 3 hold no nature or geography task in v0, so `landmark-to-see`
+-- is the single week-3 carrier for ancient-world, wild-places and land-and-sky
+-- alike. Those three focuses are therefore separated by week 2 and by their
+-- exclusions, not by week 3. Slice 09's 25-template week 3 is what fixes it.
 --
 -- Joined on slugs, same as above. The join is inner: a slug that matches
 -- nothing contributes no row and raises no error, so the row count is checked
@@ -454,7 +460,9 @@ FROM (
   ('who-leads',           'people-and-power',    3),
   ('law-you-notice',      'conflict-and-change', 3),
   ('landforms',           'land-and-sky',        3),
+  ('landforms',           'food-and-craft',      3),
   ('weather-there-now',   'land-and-sky',        3),
+  ('before-history',      'ancient-world',       3),
   ('who-leads',           'wild-places',         0),
   ('wild-animal',         'food-and-craft',      0),
   ('weather-there-now',   'ancient-world',       0),
@@ -463,6 +471,9 @@ FROM (
   ('tonights-dinner',      'food-and-craft',      3),
   ('craft-of-the-land',    'food-and-craft',      3),
   ('what-people-believe',  'conflict-and-change', 3),
+  ('landmark-to-see',      'ancient-world',       3),
+  ('landmark-to-see',      'wild-places',         3),
+  ('landmark-to-see',      'land-and-sky',        3),
   ('craft-of-the-land',    'people-and-power',    0),
   ('sound-of-the-country', 'conflict-and-change', 0),
   ('wow-fact',             'land-and-sky',        0)

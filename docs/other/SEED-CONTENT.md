@@ -2,7 +2,7 @@
 
 The three hand-written lists in `002_seed.sql` — countries, task templates,
 focus weights — and the rules a row has to satisfy. Seed v0 is complete: 195
-countries, 27 templates, 17 weights. This is the reference for **adding** to
+countries, 27 templates, 22 weights. This is the reference for **adding** to
 them, which is what slice 09 does.
 
 Each list sits between a `-- BEGIN x` / `-- END x` pair in
@@ -56,7 +56,7 @@ order, and a build session turns it into the rows above.
 
 | Week | Rows | What they are |
 |---|---|---|
-| 1 | 6 | 4 `core` — flag, map, location/borders, language — always drawn. Plus 2 more that compete for the 5th slot. |
+| 1 | 6 | 4 `core` — flag, map, location/borders, language & writing system — always drawn. Plus 2 more that compete for the 5th slot. |
 | 2 | 8 | History, government, land, climate, ecology, prehistory. Five are drawn; the three spare are what makes Swap work. |
 | 3 | 8 | People, religion, daily life, food, art, music, sport, landmarks, wow facts. Same: five drawn, three spare. |
 | 4 | 5 | The `trifold-board` sequence, in order: choose · gather · build · build · rehearse & present. |
@@ -98,14 +98,16 @@ Paste-ready form:
 
 ## Focus weights
 
-17 rows in v0. Sparse: a task with no row for a focus is neutral. Only write a row where a
+22 rows in v0. Sparse: a task with no row for a focus is neutral. Only write a row where a
 focus has an opinion.
 
 - `3` — on theme. This focus should reach for this task.
 - `0` — excluded. This focus should never draw it.
 
-**Every one of the six focuses needs at least one `3` on a week-2 or week-3
-task**, or the focus preview in setup has nothing to show.
+**Every one of the six focuses needs at least one `3` in week 2 and at least one
+in week 3.** The draw runs per week: a focus with an opinion about week 2 and
+none about week 3 leaves week 3 exactly as it would be with no focus chosen, and
+the focus preview in setup has half as much to show.
 
 **At most one `0` per focus per week.** Week 2 and week 3 hold 8 tasks each and
 5 are drawn; a second exclusion leaves swap with no candidate.

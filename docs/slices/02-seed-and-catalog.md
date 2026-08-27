@@ -62,7 +62,7 @@ Seed v0 is therefore **27**:
 
 | Week | Templates | Note |
 |---|---|---|
-| 1 | 6 | 4 `core` (flag, map, location/borders, language) + 2 for the fifth slot |
+| 1 | 6 | 4 `core` (flag, map, location/borders, language & writing system) + 2 for the fifth slot |
 | 2 | 8 | three spare beyond the five drawn, so swap has candidates |
 | 3 | 8 | same |
 | 4 | 5 | `trifold-board` only |
@@ -89,21 +89,26 @@ a library-editor correction survive.
 | Editing a seeded task's title, then re-running the seed, leaves the edit | met |
 | Renaming a person on `/admin` sticks and does not require touching SQL | met |
 | `/api/catalog` returns and is under ~60KB | met — 22.7KB with all 195 countries |
-| Every focus has at least one `weight = 3` row in weeks 2–3 | **not met** — needs the content |
+| Every focus has a `weight = 3` row in week 2 and in week 3 | met — 22 weight rows |
 | 195 countries | met |
-| 27 task templates in a 6 / 8 / 8 / 5 split | **not met** — needs the content |
+| 27 task templates in a 6 / 8 / 8 / 5 split | met |
 
-The unmet ones are asserted in `test/seed-content.test.js`, which fails today
-and names what is missing on each run. The slice is `built` when that file is
-green.
+All of it is asserted in `test/seed-content.test.js`, which is green. Each
+assertion names what is missing rather than reporting a count, because the draw
+in slice 04 cannot report "the pool was one short" — it just produces a thin
+month.
 
-## What is outstanding
+## Where v0 is thin on purpose
 
-**27 task templates and their focus weights**, being written by the owner.
-Column rules, allowed values and paste-ready row forms are in
-`../other/SEED-CONTENT.md`. The rows go into `002_seed.sql` at the two marked
-places; nothing else has to change, and Run seed loads them into a database that
-is already seeded without touching anything already in it.
+Two gaps are real and are slice 09's to close, not this slice's:
+
+- **Weeks 2 and 3 hold no nature or geography task.** `landmark-to-see` is
+  therefore the only week-3 task `ancient-world`, `wild-places` and
+  `land-and-sky` can reach for, and those three focuses are separated by week 2
+  and by their exclusions rather than by week 3.
+- **Week 1's fifth slot has two candidates**, so basic stats, time zones and
+  size comparison have no template yet. `national-symbol` and `currency-animal`
+  split that slot between them until slice 09 widens the pool to six.
 
 ## Do not build
 

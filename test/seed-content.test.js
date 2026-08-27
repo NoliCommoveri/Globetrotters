@@ -106,20 +106,28 @@ test('every prompt is written to be read, not skimmed', () => {
   }
 });
 
-test('every focus has something to show in the setup preview', () => {
-  // §7's focus highlight samples that focus's weight-3 rows. A focus with none
-  // renders an empty panel at the moment a kid is choosing it.
+test('every focus reshapes week 2 and week 3, not just one of them', () => {
+  // §7's focus highlight samples that focus's weight-3 rows, so a focus with
+  // none renders an empty panel at the moment a kid is choosing it. Per week,
+  // because a focus with a 3 in week 2 and nothing in week 3 leaves week 3
+  // identical to picking no focus at all — the draw is per week, so the
+  // coverage has to be too.
   const covered = rows(`
-    SELECT f.slug, COUNT(w.task_template_id) AS n
+    SELECT f.slug AS focus, t.week_theme AS week, COUNT(*) AS n
     FROM focuses f
-    LEFT JOIN task_focus_weights w ON w.focus_id = f.id AND w.weight = 3
-    LEFT JOIN task_templates t ON t.id = w.task_template_id AND t.week_theme IN (2, 3)
-    WHERE f.archived = 0
-    GROUP BY f.id
+    JOIN task_focus_weights w ON w.focus_id = f.id AND w.weight = 3
+    JOIN task_templates t ON t.id = w.task_template_id
+    WHERE f.archived = 0 AND t.week_theme IN (2, 3)
+    GROUP BY f.id, t.week_theme
   `);
-  assert.equal(covered.length, 6);
-  for (const f of covered) {
-    assert.ok(f.n >= 1, `${f.slug} has no weight-3 task in weeks 2-3`);
+  const seen = new Set(covered.map((r) => `${r.focus}/${r.week}`));
+  const focuses = rows('SELECT slug FROM focuses WHERE archived = 0').map((r) => r.slug);
+  assert.equal(focuses.length, 6);
+  for (const focus of focuses) {
+    for (const week of [2, 3]) {
+      assert.ok(seen.has(`${focus}/${week}`),
+        `${focus} has no weight-3 task in week ${week} — picking it changes that week by nothing`);
+    }
   }
 });
 
