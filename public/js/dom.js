@@ -28,6 +28,10 @@ const MONTHS = [
 // language and a month name is not worth a locale database.
 export const monthName = (month) => MONTHS[Number(month.slice(5, 7)) - 1] || month;
 
+// '2026-09' -> 'Sep'. The passport's row gutter: nine full month names down the
+// side of a three-column grid is most of the width at 360px.
+export const monthAbbr = (month) => monthName(month).slice(0, 3);
+
 const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 // '2026-09-07' -> 'Monday, September 7'. Parsed as UTC: a plain date string has

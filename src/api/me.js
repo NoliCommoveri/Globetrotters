@@ -21,25 +21,31 @@ async function people(env) {
   return results;
 }
 
-// Active plans for all three, not just this person's. "Who hasn't started yet"
-// is a family-visible fact by design (§7), and three rows is not a payload.
-async function activePlans(env) {
+// Every plan for all three, not just this person's and not only the active ones.
+// "Who hasn't started yet" is a family-visible fact by design (§7), and three
+// rows is not a payload.
+//
+// Completed months are here because the home screen reads this list to decide
+// what it is showing. Filtered to active, the month a kid stamped on the 28th
+// would vanish and Home would invite them to start the month they had just
+// finished. `status` is on each row, so the two are still told apart.
+async function plansForEveryone(env) {
   const { results } = await env.DB.prepare(`
     SELECT month_plans.id, month_plans.person_id, month_plans.month,
            month_plans.start_date, month_plans.country_id, month_plans.focus_id,
            month_plans.project_type_id, month_plans.status,
+           month_plans.completed_at,
            countries.name AS country_name, focuses.name AS focus_name
     FROM month_plans
     JOIN countries ON countries.id = month_plans.country_id
     JOIN focuses ON focuses.id = month_plans.focus_id
-    WHERE month_plans.status = 'active'
     ORDER BY month_plans.month DESC, month_plans.person_id
   `).all();
   return results;
 }
 
 export async function apiMe(request, env, session) {
-  const [list, plans] = await Promise.all([people(env), activePlans(env)]);
+  const [list, plans] = await Promise.all([people(env), plansForEveryone(env)]);
 
   // A person id in a valid cookie that names nobody — the row was deleted, or
   // the seed was reset — sends the device back to the picker rather than to a

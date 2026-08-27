@@ -23,6 +23,7 @@ import { apiMe, apiPatchMe } from './api/me.js';
 import { apiCreatePlan, apiGetPlan, apiRedrawPlan, apiPatchPlan } from './api/plans.js';
 import { apiFocusSamples } from './api/focuses.js';
 import { apiPassport } from './api/passport.js';
+import { apiCompletePlan, apiUncompletePlan, apiPatchStamp } from './api/stamps.js';
 import { apiPatchTask, apiSwapTask } from './api/tasks.js';
 import { apiCreateSession } from './api/sessions.js';
 import { apiStats } from './api/stats.js';
@@ -67,6 +68,9 @@ const FAMILY_API_PATTERNS = [
   { method: 'GET', pattern: /^\/api\/plans\/(?<id>\d+)$/, handler: apiGetPlan },
   { method: 'PATCH', pattern: /^\/api\/plans\/(?<id>\d+)$/, handler: apiPatchPlan },
   { method: 'POST', pattern: /^\/api\/plans\/(?<id>\d+)\/redraw$/, handler: apiRedrawPlan },
+  { method: 'POST', pattern: /^\/api\/plans\/(?<id>\d+)\/complete$/, handler: apiCompletePlan },
+  { method: 'DELETE', pattern: /^\/api\/plans\/(?<id>\d+)\/complete$/, handler: apiUncompletePlan },
+  { method: 'PATCH', pattern: /^\/api\/stamps\/(?<id>\d+)$/, handler: apiPatchStamp },
   { method: 'GET', pattern: /^\/api\/focuses\/(?<id>\d+)\/samples$/, handler: apiFocusSamples },
   { method: 'PATCH', pattern: /^\/api\/tasks\/(?<id>\d+)$/, handler: apiPatchTask },
   { method: 'POST', pattern: /^\/api\/tasks\/(?<id>\d+)\/swap$/, handler: apiSwapTask },
@@ -190,7 +194,7 @@ async function api(request, env, url) {
 //
 // An explicit list, not a catch-all: a typo in a fetch URL should 404, not
 // return HTML that the client then fails to parse as JSON.
-const SHELL_PATHS = new Set(['/', '/settings', '/setup']);
+const SHELL_PATHS = new Set(['/', '/settings', '/setup', '/passport']);
 
 // The one client route carrying an id. `/plan/12` is a screen; `/plan/twelve` is
 // a typo and 404s like any other.

@@ -3,8 +3,9 @@
 Eleven slices against `../design/DESIGN.md`. Each ends at a state you can open
 in a browser and judge.
 
-A build session takes the first slice not marked `built` and reads its file.
-Slices are strictly ordered — the dependency column is why, not a suggestion.
+A build session takes the first slice not marked `built` and reads its file. The
+dependency column is what actually orders them, not the numbering: 00–06 are a
+chain, and the three that remain are not.
 
 | # | Slice | Status | Band | Depends on | Design sections |
 |---|---|---|---|---|---|
@@ -14,7 +15,7 @@ Slices are strictly ordered — the dependency column is why, not a suggestion.
 | 03 | [Auth and shell](03-auth-and-shell.md) | built | M | 02 | §2 (auth), §11 |
 | 04 | [Setup, draw, reveal](04-setup-draw-reveal.md) | built | L | 03 | §4, §7 Month setup |
 | 05 | [This week](05-this-week.md) | built | L | 04 | §7 This week, §7 Plan, §10 |
-| 06 | [Completion and passport](06-completion-and-passport.md) | not started | M | 05 | §7 Passport |
+| 06 | [Completion and passport](06-completion-and-passport.md) | built | M | 05 | §7 Passport |
 | 07 | [The wall](07-wall.md) | not started | M | 06 | §8 |
 | 08 | [Library editor](08-library-editor.md) | not started | L | 02 | §12 |
 | 09 | [Content fill](09-content-fill.md) | not started | L | 04 | §9, §13 |
@@ -22,24 +23,31 @@ Slices are strictly ordered — the dependency column is why, not a suggestion.
 
 Statuses: `not started` · `in progress` · `built`.
 
-Slice 06 is next. No open question blocks it, and its one due-out — D-13, the
-paper size the passport prints to — blocks the print stylesheet and nothing
-else, so the screen and the stamp can be built before it lands. Slice 04 built
-`GET /api/passport` whole (Q-07), so 06 inherits the endpoint and builds the
-screen, the completion offer at 20/20 and the stamp.
+**Slice 06 is built, and that is the ship point: the app does the whole
+nine-month job for one person on one phone.** What is left is the family
+experience, the quality of the work, and the binder.
 
-The pool the stamp headline is picked from is already filling: slice 05's
-"What surprised you?" writes `sessions.note`, and the plan payload carries them
-as `notes`.
+Four slices remain and none of them blocks September, though slice 10 has a date
+on it in a way the others do not — printed pages are worth having in September,
+not in March. 07 is next in file order but not in priority: 08, 09 and 10 depend
+on 02, 04 and 05 rather than on 07, so any of the four can go first.
 
-Setup's three content-dependent features — the hook line on a country card, the
-recommended focuses with their reason lines, and "Deal me three" — are built and
-inert: `002_seed.sql` carries no hooks and no affinities. They come alive when
-slice 09 lands `003_country_data.sql`, with no client change.
+Two open questions (Q-09, Q-10) block 07 and one (Q-11) blocks 09. **08 is the
+only one of the four nothing blocks at all**, and 10's Q-12 stops only where the
+print button goes, so most of that slice can be built before it is answered.
+
+Slice 09 is the one with the most leverage on how the app feels: setup's three
+content-dependent features — the hook line on a country card, the recommended
+focuses with their reason lines, and "Deal me three" — are built and inert,
+because `002_seed.sql` carries no hooks and no affinities. They come alive when
+09 lands `003_country_data.sql`, with no client change. It also improves slice
+10's pages afterwards with no code change.
 
 Slice 03 is built except for its fonts. D-10 is still outstanding, so the shell
 runs on a system stack; swapping in the real faces is an `@font-face` pair and
-two token values, plus a re-tune of the type scale.
+two token values, plus a re-tune of the type scale. The stamp's grid face is
+where the missing condensed grotesque shows most — a country name is set to fit
+ninety pixels on a system sans.
 
 ---
 
@@ -55,9 +63,10 @@ correct and worth stating so it doesn't read as slow progress: the project's
 hard constraint is browser-only migration (§3), and it is cheapest to satisfy
 before there is data to lose.
 
-**Ship point: end of slice 06.** At that point the app does the whole
-nine-month job for one person on one phone. Slices 07–09 are the family
-experience and the quality of the work; none of them block September.
+**Ship point: end of slice 06, and it is built.** The app does the whole
+nine-month job for one person on one phone. Slices 07–10 are the family
+experience, the quality of the work and the binder; none of them block
+September.
 
 Slices 08, 09 and 10 depend on earlier slices but not on each other or on 07.
 They can run in any order once their dependency is met.
@@ -72,6 +81,10 @@ without losing anything, and 09 improves it afterwards with no code change.
 
 Its one open question, **Q-12**, blocks where the print button goes and not the
 route or the layouts, so most of the slice can be built before it is answered.
+
+The two page numbers it measures thirds against are already declared and in use:
+slice 06 prints the passport against `--page-margin` and `--page-height` in
+`public/css/app.css` (D-13), and slice 10 reads the same two.
 
 ---
 
@@ -89,12 +102,12 @@ Every section of `DESIGN.md` and the slice that finishes it.
 | §6 API | 10 (last route lands there) |
 | §7 This week | 05 — built |
 | §7 Month setup | 04 — built |
-| §7 Passport | 06 |
+| §7 Passport | 06 — built |
 | §7 Plan | 05 — built |
 | §8 The wall tablet | 07 |
 | §9 Country data | 09 |
 | §10 Progress | 05 — built |
-| §11 Design direction | 06 (the stamp is the last piece) |
+| §11 Design direction | 06 — built but for the fonts (D-10) |
 | §12 Library editor | 08 |
 | §13 Seed data | 09 (10 adds the layout seed) |
 | §14 Build order | — (superseded by this index) |

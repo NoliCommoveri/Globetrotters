@@ -90,10 +90,30 @@ async function planNotes(env, id) {
   return results;
 }
 
+// The stamp for one plan, with the three names the face is printed from. Read
+// back rather than assumed from the insert: the face says "Ana · Peru · October
+// · Wild Places" and every one of those four is a join.
+export async function stampFor(env, planId) {
+  return env.DB.prepare(`
+    SELECT stamps.id, stamps.plan_id, stamps.person_id, stamps.country_id,
+           stamps.focus_id, stamps.earned_at, stamps.headline,
+           month_plans.month,
+           people.name AS person_name, people.color AS person_color,
+           countries.name AS country_name,
+           focuses.name AS focus_name
+    FROM stamps
+    JOIN month_plans ON month_plans.id = stamps.plan_id
+    JOIN people ON people.id = stamps.person_id
+    JOIN countries ON countries.id = stamps.country_id
+    JOIN focuses ON focuses.id = stamps.focus_id
+    WHERE stamps.plan_id = ?
+  `).bind(planId).first();
+}
+
 // The one payload every route in this file answers with.
 export async function planPayload(env, id) {
-  const [plan, tasks, notes] = await Promise.all([
-    planRow(env, id), planTasks(env, id), planNotes(env, id),
+  const [plan, tasks, notes, stamp] = await Promise.all([
+    planRow(env, id), planTasks(env, id), planNotes(env, id), stampFor(env, id),
   ]);
   if (!plan) return null;
 
@@ -121,6 +141,15 @@ export async function planPayload(env, id) {
     week4_locked: tasks.some((t) => t.week_no === 4 && t.status === 'done'),
     swaps_used: swapsUsed,
     swaps_left: Math.max(0, SWAP_BUDGET - swapsUsed),
+    // The month's stamp, or null. Named on the payload for the same reason
+    // `locked` is: the screen that has to decide whether to offer completion is
+    // the one holding twenty task rows, and re-deriving it there is how the
+    // offer ends up appearing on a month that is already stamped (§7).
+    stamp,
+    // Twenty of twenty and not yet stamped. The gate is a count and nothing
+    // else — the offer rides on the last check-off rather than sitting in a
+    // corner all month where it gets tapped in week two.
+    completable: tasks.length > 0 && done === tasks.length && !stamp,
   };
 }
 

@@ -148,6 +148,21 @@ Both numbers live as CSS variables in one place. If the family's printer has a
 wider unprintable margin and a segment clips, the margin moves once and every
 layout follows; nothing else is measured in inches.
 
+They are `--page-margin`, `--page-width` and `--page-height` in
+`public/css/app.css`, declared on `:root` inside the print block, with the width
+and height derived from the margin by `calc()` — move the margin and every
+layout follows.
+
+One literal cannot be folded in: `@page { margin: .5in }`. The page context does
+not inherit custom properties, so `margin: var(--page-margin)` there is ignored
+by every engine. The two are mirrored and commented in place; if the family's
+printer clips, both move together and nothing else does.
+
+The passport (slice 06) is the first thing measured against them — nine stamp
+rows derived from the printable height, holding back `.6in` for a browser's own
+header and footer, which prints as a single sheet. Slice 10's thirds read the
+same variables.
+
 **D-14. The tablet.** iPad Safari's age decides whether the screen wake lock
 exists at all. If it doesn't, the fallback is the tablet's own display-sleep
 and Guided Access settings, not a workaround in the app — but that is a setting

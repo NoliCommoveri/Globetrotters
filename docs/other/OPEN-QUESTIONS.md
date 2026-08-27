@@ -18,7 +18,7 @@ moved to the answered list at the bottom of this file.
 | Q-12 | Who prints the month's pages, and from what device? | 10 | household |
 
 Q-09 and Q-10 block slice 07, Q-11 blocks slice 09 and Q-12 blocks part of slice
-10. Nothing is outstanding against slice 05 or slice 06.
+10. Nothing is outstanding against slices 05, 06 or 08.
 
 ---
 
@@ -54,6 +54,7 @@ packer and the twelve layouts are unaffected either way.
 
 | # | Question | Answer |
 |---|---|---|
+| Q-13 | Which nine months does the passport grid draw? | The later of today's month and the newest month anyone has a plan for; with no plans anywhere, the month setup would open. Inside the year that is today's month. Over the summer it is the year with work in it: June and July show the year just finished, which is the one that gets printed, and August follows the first September set up early instead of hiding the stamp it earns until the 1st. `DESIGN.md` §7, §15. |
 | Q-08 | Does a repeated `done` write a second session? | No. The session is written only on an `open → done` transition. The route stays idempotent and answers 200 whatever state the task was in; writing unconditionally would let two devices or one double-tap count two days, and days worked is the number §10 promises never lies. A genuine second sitting on a finished task goes through `POST /api/sessions`. `DESIGN.md` §6, §10, §15. |
 | Q-07 | How does setup learn the family's stamped countries? | `GET /api/passport`, loaded alongside the catalog. `/api/me` is fetched on every launch and every return to the tab; the stamped set is read by one screen 27 times a year, and carrying it on `/api/me` would send it 180 times a month for that. The passport endpoint has to exist for §7's passport screen anyway, so slice 04 built it. `DESIGN.md` §6, §7, §15. |
 | Q-06 | Where do the focus preview's sample titles come from? | `GET /api/focuses/:id/samples` — three `weight = 3` titles, alternating between weeks 2 and 3, memoized client-side for the life of the page. The catalog stays what it is: it is fetched by every screen and already carries 195 countries. `DESIGN.md` §6, §7, §15. |

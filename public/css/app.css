@@ -943,3 +943,455 @@ button {
   .today-actions > .primary,
   .today-actions > .secondary { flex: 0 1 12rem; }
 }
+
+/* ============================================================== slice 06 ==
+ * The stamp and the passport (DESIGN.md §7 Passport, §11).
+ *
+ * The signature. Everything else in this file is paper on navy precisely so
+ * that this reads as an event: three inks, used only for ownership and
+ * completion, and the one animation the app is allowed.
+ */
+
+/* Visually hidden but read aloud. The passport's row and column headers carry
+ * full month names for a screen reader while the gutter shows 'Sep'. */
+.vh {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.chrome-nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* --------------------------------------------------------------- the stamp -- */
+
+/* A border stamp, not a badge: double rule, square corners, and the person's
+ * ink on everything. It is set at an angle because it was stamped by hand — the
+ * angle is derived from the stamp's id in stamp.js, so it is crooked once
+ * rather than crooked differently every repaint. */
+.stamp {
+  --pad: .3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .1em;
+  width: 100%;
+  height: 100%;
+  padding: var(--pad);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  outline: 1px solid var(--ink);
+  outline-offset: 2px;
+  border-radius: var(--radius);
+  text-align: center;
+  text-wrap: balance;
+  overflow: hidden;
+  transform: translate(var(--dx, 0), var(--dy, 0)) rotate(var(--rot, 0deg));
+}
+
+.stamp-person,
+.stamp-month,
+.stamp-focus {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  line-height: 1.1;
+  font-size: .5rem;
+}
+
+/* Ruled off above and below, the way a border stamp is. */
+.stamp-country {
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0;
+  line-height: 1.05;
+  font-size: .6875rem;
+  width: 100%;
+  /* Ninety pixels of cell and no condensed face until D-10 lands. Hyphenation
+   * where the browser has a dictionary, a hard break where it does not —
+   * "Central African Republic" has to fit inside a stamp either way. */
+  hyphens: auto;
+  overflow-wrap: anywhere;
+  border-block: 1px solid currentColor;
+  padding-block: .12em;
+  margin-block: .12em;
+}
+
+.stamp-focus { opacity: .8; }
+
+.stamp-large {
+  --pad: 1rem;
+  max-width: 15rem;
+  height: auto;
+  aspect-ratio: 1;
+  margin: 0 auto;
+}
+.stamp-large .stamp-person,
+.stamp-large .stamp-month,
+.stamp-large .stamp-focus { font-size: .75rem; }
+.stamp-large .stamp-country { font-size: 1.75rem; }
+
+/* The one animation in the app. It lands once per viewer — the phone that
+ * earned it, the wall, and the other two people on next open each get the
+ * moment exactly once (§8, §11) — and it is a stamp coming down onto paper:
+ * fast, from above, overshooting nothing. */
+@media (prefers-reduced-motion: no-preference) {
+  .stamp.is-landing {
+    animation: land .42s cubic-bezier(.2, .8, .3, 1) var(--delay, 0s) backwards;
+  }
+  @keyframes land {
+    from {
+      opacity: 0;
+      transform: translate(var(--dx, 0), var(--dy, 0))
+                 rotate(calc(var(--rot, 0deg) - 8deg)) scale(2.4);
+    }
+    60% { opacity: 1; }
+    to {
+      opacity: 1;
+      transform: translate(var(--dx, 0), var(--dy, 0)) rotate(var(--rot, 0deg)) scale(1);
+    }
+  }
+}
+
+/* Asked for less motion, the moment still happens — it just arrives rather than
+ * travels. A stamp that appears with no transition at all is indistinguishable
+ * from one that was always there. */
+@media (prefers-reduced-motion: reduce) {
+  .stamp.is-landing { animation: arrive .5s ease-out var(--delay, 0s) backwards; }
+  @keyframes arrive {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+}
+
+/* -------------------------------------------------------------- the grid -- */
+
+/* One height for a slot, whether it holds a stamp or not. A table cell ignores
+ * aspect-ratio, so without this a row of three unstamped months — every month
+ * after the current one, in September — collapses to nothing and the empty
+ * passport stops being an invitation. */
+.passport-panel { --slot-h: 5.25rem; }
+
+.passport-head { margin-bottom: .25rem; }
+
+/* Months down the side, people across the top. A table because that is what it
+ * is: the row and column headers are read out, and it prints without being
+ * told how. */
+.passport {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: .3rem;
+  margin: 0 -.3rem;
+}
+
+.passport-gutter { width: 2.1rem; }
+
+.passport-who {
+  font-family: var(--font-display);
+  font-size: .6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--ink);
+  padding-bottom: .25rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.passport-month {
+  font-family: var(--font-display);
+  font-size: .6875rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--paper-dim);
+  text-align: right;
+  vertical-align: middle;
+  padding-right: .15rem;
+}
+
+/* The month everyone is in gets the one mark the grid has to give. */
+.passport tr[aria-current] .passport-month { color: var(--paper); }
+
+/* An empty slot is the invitation. A dashed rule rather than a filled box: it
+ * reads as somewhere a stamp goes, which a box does not. */
+/* The cell draws the slot; the block inside it sets the height. A table cell's
+ * own height is a minimum rather than a definite value, so nine equal rows have
+ * to come from the content — and on one sheet of Letter, equal rows are the
+ * difference between the year fitting and not. */
+.slot {
+  padding: 0;
+  vertical-align: middle;
+  text-align: center;
+  border: 1px dashed var(--navy-line);
+  border-radius: var(--radius);
+}
+
+.slot-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .1rem;
+  height: var(--slot-h);
+  overflow: hidden;
+}
+
+.slot.is-stamped { border-color: transparent; }
+
+/* A month that has arrived with nobody in it says so; one still ahead is blank.
+ * Between them they are what puts "who hasn't started yet" on every phone. */
+.slot-state {
+  font-size: .5625rem;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--paper-dim);
+  padding: 0 .25rem;
+}
+
+.slot-country {
+  font-family: var(--font-display);
+  font-size: .75rem;
+  font-weight: 700;
+  line-height: 1.1;
+  padding: 0 .2rem;
+  text-wrap: balance;
+  hyphens: auto;
+  overflow: hidden;
+}
+
+.slot.is-running { border-style: solid; border-color: var(--navy-line); }
+.slot.is-ahead { border-color: color-mix(in srgb, var(--navy-line) 55%, transparent); }
+
+/* The stamp is the hit target, and it fills its cell. The height is the token
+ * rather than 100%: a table cell grows to its content, so a four-line stamp
+ * would make September's row taller than May's and the grid would go ragged —
+ * which on one sheet of Letter is the difference between fitting and not. */
+.slot-button {
+  display: block;
+  width: 100%;
+  height: var(--slot-h);
+  padding: 0;
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+/* ------------------------------------------------------------- the detail -- */
+
+.detail {
+  border-top: 1px solid var(--navy-line);
+  padding-top: 1rem;
+  margin-top: .5rem;
+}
+
+.detail-headline {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  line-height: 1.2;
+  text-align: center;
+  text-wrap: balance;
+  color: var(--paper);
+}
+
+.passport-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap);
+  padding-top: .5rem;
+}
+
+/* The only destructive control outside /admin, and it looks like one — but only
+ * after the confirm step has already been taken. */
+.danger {
+  border: 1px solid var(--wrong);
+  color: var(--wrong);
+  background: none;
+}
+
+.confirm {
+  border: 1px solid var(--wrong);
+  border-radius: var(--radius);
+  padding: .75rem;
+}
+
+/* ------------------------------------------------------------- the offer -- */
+
+/* Twenty of twenty, on the card. It exists for one tap and then never again. */
+.offer {
+  border-top: 1px solid var(--ink);
+  padding-top: .75rem;
+  margin-top: .25rem;
+}
+
+.offer-line {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  line-height: 1.2;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.stamped-line { font-size: .875rem; }
+
+.headline-list {
+  display: flex;
+  flex-direction: column;
+  gap: .375rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 15rem;
+  overflow-y: auto;
+}
+
+.headline-pick {
+  display: block;
+  width: 100%;
+  min-height: var(--tap);
+  text-align: left;
+  padding: .5rem .625rem;
+  background: none;
+  color: var(--paper);
+  font: inherit;
+  border: 1px solid var(--navy-line);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.headline-pick[aria-pressed=true] {
+  border-color: var(--ink);
+  background: var(--navy-raised);
+}
+
+.headline-text { font-size: .9375rem; line-height: 1.35; }
+.headline-none { font-size: .875rem; color: var(--paper-dim); }
+
+/* Room to breathe once there is any — the passport is the one screen that gains
+ * the most from a laptop, because it is the whole year at once. */
+@media (min-width: 30rem) {
+  .passport-panel { --slot-h: 6.5rem; }
+  .passport { border-spacing: .5rem; }
+  .passport-gutter { width: 3rem; }
+  .passport-who { font-size: .875rem; }
+  .passport-month { font-size: .8125rem; }
+  .stamp-country { font-size: 1rem; }
+  .stamp-person, .stamp-month, .stamp-focus { font-size: .625rem; }
+  .slot-country { font-size: 1rem; }
+  .slot-state { font-size: .6875rem; }
+}
+
+/* ---------------------------------------------------------------- print -- */
+
+/* The page that goes in the front of the binder in June, with 27 stamps on it.
+ * US Letter, one sheet (D-13) — so the grid is sized against the sheet rather
+ * than in rem, and every stamp shrinks to fit rather than the year breaking
+ * across pages.
+ *
+ * A home printer renders all three inks as the same grey, which is why the
+ * stamp face carries the person's name: the greyscale values are 15 and 20
+ * points apart (D-09) and the name is what stops that mattering. */
+
+/* The margin is typed here and mirrored into --page-margin below, which is not
+ * a duplicate by choice: the page context does not inherit custom properties,
+ * so `margin: var(--page-margin)` inside @page is ignored by every engine. This
+ * is the one literal. If a home printer's unprintable area clips, both move —
+ * and nothing else in the app is measured in inches. */
+@page {
+  size: letter;
+  margin: .5in;
+}
+
+@media print {
+  /* D-13. The printable area every printed page in this app is laid out
+   * against: US Letter less 0.5in margins, so 7.5 x 10in. Slice 10's worksheet
+   * segments are thirds of it (§16); the passport below is the first thing
+   * measured against it. */
+  :root {
+    --page-margin: .5in;
+    --page-width: calc(8.5in - 2 * var(--page-margin));
+    --page-height: calc(11in - 2 * var(--page-margin));
+
+    /* What the title, the count and the column headings take off the top,
+     * border-spacing between the ten rows included. Measured, not guessed. */
+    --page-chrome: 1.85in;
+
+    /* Held back for a browser's own header and footer, which the family may
+     * well have switched on and which no stylesheet can see. */
+    --page-reserve: .6in;
+  }
+
+  html { background: #fff; }
+
+  body {
+    color: #000;
+    padding: 0;
+    display: block;
+  }
+
+  /* Everything that is a control rather than the artifact. */
+  header,
+  .status,
+  .skip,
+  .detail,
+  .passport-foot,
+  .error { display: none !important; }
+
+  /* The shell centres <main> in a phone-width column. The passport is the one
+   * page that wants the whole sheet — 27 stamps across three columns. */
+  main { max-width: none; margin: 0; padding: 0; }
+  .panel { animation: none; padding: 0; max-width: none; }
+
+  .passport-head { margin-bottom: .12in; }
+  .passport-head h1 { font-size: 16pt; color: #000; }
+  .passport-head .note,
+  .passport-head .invitation { font-size: 9pt; color: #333; }
+
+  /* Nine rows into the 10in the margins leave, header included. */
+  .passport { border-spacing: .06in; margin: 0; }
+  .passport-gutter { width: .4in; }
+  .passport-who { font-size: 8pt; color: #000; padding-bottom: .04in; }
+  .passport-month { font-size: 7pt; color: #444; }
+
+  /* Nine rows into whatever the sheet leaves. Derived rather than typed, so a
+   * printer with a wider unprintable margin moves --page-margin and the year
+   * still fits one sheet. */
+  .passport-panel {
+    --slot-h: calc((var(--page-height) - var(--page-chrome) - var(--page-reserve)) / 9);
+  }
+
+  .slot { border-color: #bbb; }
+  .slot.is-ahead { border-color: #ddd; }
+  .slot.is-running { border-color: #999; }
+  .slot-state { font-size: 6pt; color: #666; }
+  .slot-country { font-size: 8pt; color: #000; }
+
+  /* The ink survives as grey. `print-color-adjust` is what stops a browser
+   * dropping the border and the type back to black and taking the one piece of
+   * ownership the sheet carries with it. */
+  .stamp {
+    --pad: .04in;
+    border-width: 1.5pt;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  .stamp-person, .stamp-month, .stamp-focus { font-size: 5pt; }
+  .stamp-country { font-size: 8pt; }
+  .stamp.is-landing { animation: none; }
+}
