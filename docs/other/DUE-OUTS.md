@@ -9,8 +9,8 @@ terminal — if something appears to, it is specced wrong (§3).
 | # | Due-out | Needed by | State |
 |---|---|---|---|
 | D-01 | Cloudflare account, account ID known | 00 | outstanding |
-| D-02 | D1 database created (production), name and id | 00 | outstanding |
-| D-03 | D1 database created (preview), name and id | 00 | outstanding |
+| D-02 | D1 database created (production), name and id | 00 | done — `globetrotters-prod` |
+| D-03 | D1 database created (preview), name and id | 00 | done — `globetrotters-preview` |
 | D-04 | R2 bucket created, name known | 00 | outstanding |
 | D-05 | GitHub repo secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` | 00 | outstanding |
 | D-06 | Worker name and route decided | 00 | outstanding |
@@ -33,6 +33,13 @@ no partial version. All of it is done in the Cloudflare dashboard and the
 GitHub repo settings page.
 
 The API token needs permission to edit Workers, D1, and R2 on the account.
+
+The two D1 databases exist. Their ids go straight into `wrangler.toml`:
+
+| Binding | Name | `database_id` |
+|---|---|---|
+| production | `globetrotters-prod` | `5f351cd1-d7e7-4ddc-af41-c2e1b0a68e02` |
+| preview | `globetrotters-preview` | `3304a4c4-ae23-4900-b7f9-4904bac01e99` |
 
 **D-07, D-08. Secrets.** Four Worker secrets, set once in the dashboard:
 
