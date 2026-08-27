@@ -13,7 +13,7 @@ terminal — if something appears to, it is specced wrong (§3).
 | D-07 | `ADMIN_TOKEN` value chosen | 01 | done |
 | D-08 | Worker secrets set: `FAMILY_PASSCODE`, `ADMIN_TOKEN`, `FAMILY_TZ` | 00 | done |
 | D-09 | Three ink colors for the three people | 02 | done — deep purple, lilac, blue |
-| D-10 | Two font files, licensed for self-hosting | 03 | outstanding |
+| D-10 | Two font files, licensed for self-hosting | 03 | outstanding — the shell ships on system fonts until they land |
 | D-11 | `FAMILY_TZ` value confirmed | 02 | done — `America/Chicago` |
 | D-12 | The month the school year starts | 04 | outstanding |
 | D-13 | Paper size the passport prints to | 06 | outstanding |
@@ -123,9 +123,12 @@ the stamp face — against a plain humanist sans for body and prompts. Both with
 tabular numerals; this app counts things constantly. Both self-hosted in the
 Worker's assets, which means a webfont license that permits self-hosting.
 
-This is the one due-out with a cost and a lead time. The shell can be built
-against system fonts and swapped later, but the type scale is tuned to the real
-faces and tuning it twice is the more expensive path.
+This is the one due-out with a cost and a lead time, and it is the only part of
+slice 03 that did not get built. The shell runs on a system stack in the
+meantime. Swapping in the real faces is three edits to `public/css/app.css`: an
+`@font-face` pair at the top, and the first family in each of `--font-display`
+and `--font-body`. The type scale under them is tuned to a system sans and wants
+re-tuning to the real ones — that re-tune is the cost of having gone first.
 
 **D-12. The school year.** September through May is what the doc assumes: the
 empty state reads "Pick a country to start September" and the passport grid is

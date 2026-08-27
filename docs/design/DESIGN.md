@@ -33,8 +33,10 @@ Everyone has their own device. There is also a tablet on the kitchen wall.
 
 ## 2. Stack
 
-**Status:** partial · the Worker, the D1 binding and the deploy are built
-(slice 00). The auth path, the frontend shell and the fonts are slice 03.
+**Status:** partial · everything but the fonts. The Worker, the D1 binding and
+the deploy are built (slice 00); the auth path, the person cookie and the
+frontend shell are built (slice 03). The two self-hosted faces are outstanding
+on D-10 and the shell runs on a system stack until they land.
 
 - Cloudflare Worker serving both the API (`/api/*`) and static assets
 - **D1** for all relational data
@@ -48,11 +50,19 @@ Everyone has their own device. There is also a tablet on the kitchen wall.
   by `wrangler dev --remote` and preview deploys, both terminal operations the
   owner cannot perform (§3)
 - **Migrations run from the browser, never the terminal — see §3**
-- Frontend: keep it buildless if possible (vanilla JS + a small router). Three
-  users, five screens — a bundler is overhead. If a framework is used, Vite +
+- Frontend: buildless. Vanilla JS modules and a small router — three users, five
+  screens, a bundler is overhead. If a framework ever proves necessary, Vite +
   Preact.
+- **The shell is a static file, not a Worker-rendered page.** `public/index.html`
+  is served by the assets binding; the Worker returns that same document for a
+  client route with no file behind it, and 404s for a path it does not know.
+  `/admin` stays Worker-rendered, and the two have nothing to do with each
+  other.
 - **Self-host the two fonts** in the Worker's assets. Buildless doesn't have to
-  mean a third-party dependency on every page load.
+  mean a third-party dependency on every page load. Until the licensed files
+  arrive the stylesheet points `--font-display` and `--font-body` at the system
+  stack; swapping them is an `@font-face` pair and two values, and a re-tune of
+  the type scale.
 
 **Auth:** one shared family passcode held as a Worker secret, checked once,
 stored in a signed cookie (`HttpOnly; Secure; SameSite=Lax`, max-age one year).
@@ -65,10 +75,22 @@ coupling to hold onto: **changing `ADMIN_TOKEN` invalidates every session
 cookie and logs all three people out.** The two rotations are one event, and
 `ADMIN_TOKEN` is therefore set once and left alone.
 
-After the passcode you pick which of the three people you are. **`person_id`
-lives in that same signed cookie**, set by the server — not in `localStorage`,
-where Safari's seven-day cap on script-writable storage would quietly forget who
-someone is over spring break while leaving them logged in.
+After the passcode you pick which of the three people you are, and **`PATCH
+/api/me` writes `person_id` into that same signed cookie**, server-side — not
+into `localStorage`, where Safari's seven-day cap on script-writable storage
+would quietly forget who someone is over spring break while leaving them logged
+in.
+
+Identity is a separate route from the passcode on purpose. `POST /api/auth`
+says the device belongs to the family; `PATCH /api/me` says who is holding it.
+That split is what lets §8's wall cookie be exempted from the write ban on the
+first without ever being able to reach the second.
+
+The gate is a route table, not a check inside each handler: `POST /api/auth` is
+the one family route that answers without a cookie, and everything else under
+`/api/` is behind it by construction. An unauthenticated request gets a `401`
+whether or not the path exists — which routes there are is not something it
+gets to map.
 
 **One person, several devices.** Identity is per-device, and nothing server-side
 is device-bound: the same person picks themselves on a phone and again on a
@@ -486,11 +508,14 @@ CREATE INDEX idx_hooks_country        ON country_hooks(country_id);
 ## 6. API
 
 **Status:** partial · `/api/catalog`, `POST /admin/api/seed` and the two people
-routes are built (slice 02). The rest is slices 03–07.
+routes are built (slice 02); `POST /api/auth` and both `/api/me` routes are
+built (slice 03). The rest is slices 04–07.
 
 ```
-POST   /api/auth                      passcode -> cookie
-GET    /api/me                        people list + active plans
+POST   /api/auth                      passcode -> cookie. The one family route that
+                                      answers without one.
+GET    /api/me                        people list + active plans + this device's person
+PATCH  /api/me                        {person_id} -> re-issued cookie carrying it
 GET    /api/catalog                   countries + hooks + affinities + focuses
                                       + project types. ~60KB, ETag + 304.
 
@@ -573,13 +598,24 @@ locked. The first check-off is the only gate, on both.
 
 ## 7. Screens
 
-**Status:** not started · see each screen below
+**Status:** partial · the shell, the first-run path and the empty state are
+built (slice 03). Each screen below carries its own marker.
 
 Mobile first. The kids will use this on a phone standing at a table. 360px wide.
 
 **First run, in full:** family passcode → pick which of the three people you are →
 land on the empty state, which reads "Pick a country to start September." Three
-steps, once per device, and it is the only path every user takes.
+steps, once per device, and it is the only path every user takes. **Built —
+slice 03.**
+
+The app is one static document at `/` that routes client-side. The Worker serves
+that same document for every client route it knows, and 404s for any it does
+not: a mistyped fetch has to fail as a fetch rather than come back as HTML. The
+first two steps are not routes — a device with no passcode, or no person, gets
+that screen whatever the URL says.
+
+The person switcher lives in **settings**, reached from the header, and it is
+the only control there. Nothing in the app renders a link to `/admin` (§3).
 
 ### This week — the default view
 
@@ -893,7 +929,9 @@ makes both meaningless.
 
 ## 11. Design direction
 
-**Status:** not started · slices 03, 06
+**Status:** partial · the palette, the tokens, the empty state and the shell's
+type scale are built (slice 03). The two self-hosted faces are outstanding on
+D-10; the stamp is slice 06.
 
 Subject vernacular is the field notebook and the border stamp, not the SaaS dashboard.
 Avoid cream + serif + terracotta, and avoid dark-mode-with-one-acid-accent; both read
@@ -1107,6 +1145,19 @@ Resolved:
   first run, and every change after that is made on `/admin`. The three inks —
   `#5B2A86` deep purple, `#D07AC0` lilac, `#2E6FD9` blue — are chosen to stay
   separable as greys on a home printer. See §3, §13.
+- **Static shell, not a Worker-rendered one.** The family app is
+  `public/index.html`, served by the assets binding. The alternative — rendering
+  it from the Worker the way `/admin` is — was rejected on what it costs to
+  retrofit: a service worker precaches a static file, where a Worker-rendered
+  page means caching a navigation response instead, and the shell already has
+  nothing server-side to render. It carries no session state and no person's
+  name; every screen on it comes from `GET /api/me`. Neither choice precludes a
+  service worker, and this one makes it a shorter file. See §2, §7.
+- **Which route sets the person.** `PATCH /api/me`, not a second field on
+  `POST /api/auth`. Identity is a property of "me", and keeping it off the auth
+  route is what keeps §8's wall exemption a whole-route exemption rather than a
+  field-level one — the wall can re-authenticate itself and can never pick a
+  person. See §2, §6.
 - **How `/api/catalog` invalidates.** An ETag over the body plus
   `Cache-Control: no-cache`. The browser does the caching; a corrected hook
   reaches a device that already loaded the old one. See §6.

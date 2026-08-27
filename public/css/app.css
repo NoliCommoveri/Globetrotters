@@ -1,0 +1,317 @@
+/* Design tokens and the whole app's layout (DESIGN.md §11).
+ *
+ * Subject vernacular is the field notebook and the border stamp. Deep ink navy
+ * ground, chart-paper off-white, and three stamp inks that appear only where
+ * something is owned or finished. Nothing else in the app is allowed to be
+ * colorful — that restraint is what makes a stamp read as an event.
+ *
+ * Built at 360px first. Every rule below holds at 360 and gets more room after.
+ */
+
+:root {
+  /* Ground and paper. */
+  --navy:        #0F1C2E;
+  --navy-raised: #17263B;   /* a card lifted off the ground, not a second color */
+  --navy-line:   #2A3A52;
+  --paper:       #F2EFE4;
+  --paper-dim:   #A9B4C4;   /* secondary text: paper knocked back into the navy */
+
+  /* The one non-ink signal color, for a passcode that did not work. It is a
+   * desaturated brick rather than a UI red: this palette has no red in it and a
+   * pure #C00 would read as a different app. */
+  --wrong:       #D98A7B;
+
+  /* The current person's ink, from people.color. Set on <html> by the shell the
+   * moment a person is known; until then nothing on screen is colorful, which
+   * is correct — before you say who you are, nothing here is yours. */
+  --ink:         var(--paper);
+
+  /* D-10 outstanding. These two are the swap point: when the licensed faces
+   * land, an @font-face pair goes above and the first family in each stack
+   * becomes the real name. Nothing else in this file changes, but the scale
+   * below is tuned to a system sans and will want re-tuning to the real ones.
+   *
+   * A condensed grotesque for display, a plain humanist sans for body. Both
+   * self-hosted from this Worker's own assets — no third-party request on any
+   * page load (§2). */
+  --font-display: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-body:    system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+  --gap:    1rem;
+  --radius: 3px;   /* stamped edges, not app-store corners */
+
+  /* Every hit target in the app clears this. A kid taps this standing at a
+   * table with a pencil in the other hand. */
+  --tap: 3rem;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  background: var(--navy);
+  /* This app counts things constantly: days worked, 12 of 20, 3 left. Lining
+   * tabular figures everywhere means a number never reflows as it changes. */
+  font-variant-numeric: tabular-nums lining-nums;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  font: 1rem/1.5 var(--font-body);
+  color: var(--paper);
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+           env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+h1, h2, .display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: .01em;
+  line-height: 1.15;
+  margin: 0;
+  text-wrap: balance;
+}
+
+h1 { font-size: 1.75rem; }
+h2 { font-size: 1.125rem; text-transform: uppercase; letter-spacing: .08em; }
+
+p { margin: 0; }
+
+/* Focus is visible everywhere and never removed. Two colors so the ring shows
+ * against both the ground and a person's ink. */
+:focus-visible {
+  outline: 2px solid var(--paper);
+  outline-offset: 2px;
+  border-radius: 1px;
+}
+
+.skip {
+  position: absolute;
+  left: -9999px;
+}
+.skip:focus {
+  left: var(--gap);
+  top: var(--gap);
+  z-index: 2;
+  background: var(--paper);
+  color: var(--navy);
+  padding: .5rem .75rem;
+}
+
+/* ---------------------------------------------------------------- chrome -- */
+
+/* `display` on the element beats the hidden attribute's own rule, and the shell
+ * hides the chrome by setting that attribute. Without this, the passcode screen
+ * shows a Settings link to a device that has not signed in. */
+[hidden] { display: none !important; }
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap);
+  padding: .75rem var(--gap);
+  border-bottom: 1px solid var(--navy-line);
+}
+
+.wordmark {
+  font-family: var(--font-display);
+  font-size: .875rem;
+  text-transform: uppercase;
+  letter-spacing: .18em;
+  color: var(--paper-dim);
+}
+
+.chrome-link {
+  color: var(--paper-dim);
+  text-decoration: none;
+  font-size: .875rem;
+  /* A link is a tap target too, and this one sits in a corner. */
+  min-height: var(--tap);
+  display: inline-flex;
+  align-items: center;
+  padding-inline: .25rem;
+}
+.chrome-link:hover { color: var(--paper); }
+
+main {
+  flex: 1;
+  width: 100%;
+  max-width: 34rem;
+  margin: 0 auto;
+  padding: var(--gap);
+}
+main:focus { outline: none; }
+
+/* ---------------------------------------------------------------- panels -- */
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  padding-block: 1.5rem;
+}
+
+.lede {
+  font-size: 1.0625rem;
+  color: var(--paper-dim);
+  max-width: 30ch;
+}
+
+.note {
+  font-size: .875rem;
+  color: var(--paper-dim);
+}
+
+/* The empty state is an invitation, not "no data" (§11). It gets the largest
+ * type on the screen because it is the only thing on the screen. */
+.invitation {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  line-height: 1.1;
+  text-wrap: balance;
+  margin-block: 1rem;
+}
+
+/* A hairline frame, the way a form in a passport booklet is boxed. */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+  border: 1px solid var(--navy-line);
+  border-radius: var(--radius);
+  background: var(--navy-raised);
+  padding: var(--gap);
+}
+.card > label { margin-bottom: -.25rem; }
+
+/* ------------------------------------------------------------- controls -- */
+
+label {
+  display: block;
+  font-size: .875rem;
+  color: var(--paper-dim);
+  margin-bottom: .375rem;
+}
+
+input[type=password], input[type=text] {
+  width: 100%;
+  min-height: var(--tap);
+  font: 1.125rem var(--font-body);
+  font-variant-numeric: tabular-nums lining-nums;
+  color: var(--paper);
+  background: var(--navy);
+  border: 1px solid var(--navy-line);
+  border-radius: var(--radius);
+  padding: .5rem .75rem;
+}
+input:focus-visible { border-color: var(--paper); }
+
+button {
+  font: 1rem/1 var(--font-body);
+  min-height: var(--tap);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.primary {
+  width: 100%;
+  background: var(--paper);
+  color: var(--navy);
+  border: 1px solid var(--paper);
+  font-family: var(--font-display);
+  font-size: 1.0625rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  padding: .75rem 1rem;
+}
+.primary[disabled] { opacity: .5; cursor: default; }
+
+.quiet {
+  background: none;
+  color: var(--paper-dim);
+  border: 1px solid var(--navy-line);
+  padding: .625rem 1rem;
+}
+.quiet:hover { color: var(--paper); }
+
+.error {
+  color: var(--wrong);
+  font-size: .9375rem;
+}
+
+/* -------------------------------------------------------- person picker -- */
+
+.people {
+  display: flex;
+  flex-direction: column;
+  gap: .625rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* One of three. The ink swatch is the only color on the screen, and it is doing
+ * the one job ink is allowed to do: saying whose this is. The name carries it
+ * too, because ink alone is not a reliable signal — the same reason the stamp
+ * is printed over a name (§7). */
+.person {
+  --ink: var(--paper);
+  display: flex;
+  align-items: center;
+  gap: .875rem;
+  width: 100%;
+  text-align: left;
+  background: var(--navy-raised);
+  border: 1px solid var(--navy-line);
+  color: var(--paper);
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  padding: .875rem 1rem;
+}
+.person:hover { border-color: var(--ink); }
+.person[aria-current=true] { border-color: var(--ink); }
+
+.swatch {
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  background: var(--ink);
+}
+
+.person-mine {
+  margin-left: auto;
+  font-family: var(--font-body);
+  font-size: .8125rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--paper-dim);
+}
+
+/* ---------------------------------------------------------------- status -- */
+
+.status {
+  margin: 0;
+  padding: 0 var(--gap) var(--gap);
+  min-height: 1.25rem;
+  font-size: .875rem;
+  color: var(--paper-dim);
+  text-align: center;
+}
+
+/* ------------------------------------------------------------- motion --- */
+
+/* The passport stamp in slice 06 is the only place motion is allowed. What is
+ * here is a fade on screen changes, and it goes away entirely when asked. */
+@media (prefers-reduced-motion: no-preference) {
+  .panel { animation: rise .18s ease-out; }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(.25rem); }
+    to   { opacity: 1; transform: none; }
+  }
+}
