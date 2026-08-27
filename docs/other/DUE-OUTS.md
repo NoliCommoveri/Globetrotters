@@ -15,7 +15,7 @@ terminal — if something appears to, it is specced wrong (§3).
 | D-09 | Three ink colors for the three people | 02 | done — deep purple, lilac, blue |
 | D-10 | Two font files, licensed for self-hosting | 03 | outstanding — the shell ships on system fonts until they land |
 | D-11 | `FAMILY_TZ` value confirmed | 02 | done — `America/Chicago` |
-| D-12 | The month the school year starts | 04 | outstanding |
+| D-12 | The month the school year starts | 04 | done — September through May |
 | D-13 | Paper size the passport prints to | 06 | outstanding |
 | D-14 | Which tablet and browser the wall runs on | 07 | outstanding |
 
@@ -130,9 +130,11 @@ meantime. Swapping in the real faces is three edits to `public/css/app.css`: an
 and `--font-body`. The type scale under them is tuned to a system sans and wants
 re-tuning to the real ones — that re-tune is the cost of having gone first.
 
-**D-12. The school year.** September through May is what the doc assumes: the
-empty state reads "Pick a country to start September" and the passport grid is
-nine rows. Confirm before slice 04 hardcodes either.
+**D-12. The school year.** September through May. Nine months, 27 stamps for the
+family. It is hardcoded in one place, `src/lib/dates.js`, and read from there by
+setup (which refuses a month outside the year), by the empty state (which names
+the month it would open, and points at the September ahead over the summer) and
+by the passport grid's nine rows.
 
 **D-13. Paper.** The passport is the page that goes in the front of the binder
 in June, with 27 stamps on it. Letter or A4, and whether it has to fit one

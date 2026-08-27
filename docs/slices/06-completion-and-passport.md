@@ -46,7 +46,9 @@ None outstanding, provided Q-09 (below) is settled with the wall in slice 07.
 - `DELETE /api/plans/:id/complete` — a confirm step, not typed. It destroys an
   earned stamp, there are no roles, and it is the only destructive control
   outside `/admin`.
-- `GET /api/passport` — all stamps, all people, plus the empty grid shape
+- `GET /api/passport` — **built in slice 04** (Q-07 needed it for setup's ink
+  dots). It already carries all stamps, all people, every plan running, and the
+  nine-slot Sep–May grid. This slice builds the screen over it.
 
 ### The passport
 

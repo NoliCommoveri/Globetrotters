@@ -12,31 +12,17 @@ moved to the answered list at the bottom of this file.
 
 | # | Question | Blocks | Kind |
 |---|---|---|---|
-| Q-06 | Where do the focus preview's sample titles come from? | 04 | api |
-| Q-07 | How does setup learn the family's stamped countries? | 04 | api |
 | Q-08 | Does a repeated `done` write a second session? | 05 | api |
 | Q-09 | How does the wall compare its version value? | 07 | api |
 | Q-10 | Is `POST /api/auth` exempt from the wall's write ban? | 07 | auth |
 | Q-11 | Does week 4's "present" task require an audience? | 09 | content |
 
-Q-06 and Q-07 both gate slice 04's setup screen, and both are the same shape:
-what the client needs in one fetch versus what it has to ask for separately.
-Answering them together is cheaper than answering them apart.
+Q-08 blocks slice 05, Q-09 and Q-10 block slice 07, and Q-11 blocks slice 09.
+Nothing is outstanding against slice 06.
 
 ---
 
 ## Detail
-
-**Q-06 — Where do the focus preview's sample titles come from?**
-§7's focus highlight shows three task titles from that focus's `weight = 3`
-rows. `/api/catalog` carries no templates and no weights. Either the catalog
-gains three sample titles per focus, or setup gets
-`GET /api/focuses/:id/samples`. The first keeps setup on a single fetch.
-
-**Q-07 — How does setup learn the family's stamped countries?**
-"Deal me three" skips already-stamped countries and browse marks them with an
-ink dot. Either `/api/me` carries the stamped set, or setup also loads
-`/api/passport`.
 
 **Q-08 — Does a repeated `done` write a second session?**
 §6 calls `PATCH /api/tasks/:id` idempotent and says done also writes a session.
@@ -65,6 +51,8 @@ week-4 template per project type, so it blocks slice 09 and nothing earlier.
 
 | # | Question | Answer |
 |---|---|---|
+| Q-07 | How does setup learn the family's stamped countries? | `GET /api/passport`, loaded alongside the catalog. `/api/me` is fetched on every launch and every return to the tab; the stamped set is read by one screen 27 times a year, and carrying it on `/api/me` would send it 180 times a month for that. The passport endpoint has to exist for §7's passport screen anyway, so slice 04 built it. `DESIGN.md` §6, §7, §15. |
+| Q-06 | Where do the focus preview's sample titles come from? | `GET /api/focuses/:id/samples` — three `weight = 3` titles, alternating between weeks 2 and 3, memoized client-side for the life of the page. The catalog stays what it is: it is fetched by every screen and already carries 195 countries. `DESIGN.md` §6, §7, §15. |
 | Q-05 | How does `/api/catalog` invalidate? | An ETag over the body, with `Cache-Control: no-cache`. The browser revalidates and takes a 304 when nothing changed. A version field would need a second endpoint and a hand-rolled cache to do what the browser already does. `DESIGN.md` §6, §15. |
 | Q-04 | Are people seeded as placeholders, or created on `/admin`? | Placeholders. The seed writes three rows with explicit ids — `people` has no natural key to conflict on — and `/admin` renames them. §3's "not seeded from SQL" sentence was the half that was wrong. `DESIGN.md` §3, §13, §15. |
 | Q-03 | What is the session cookie signed with? | `ADMIN_TOKEN`, HMAC-SHA-256. No fourth secret; rotating it logs the family out. `DESIGN.md` §2, §3, §15. |

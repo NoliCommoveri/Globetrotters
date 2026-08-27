@@ -7,6 +7,9 @@
 
 import { getMe, postAuth, patchMe, SignedOut } from './api.js';
 import { start, onRoute, go, path } from './router.js';
+import { el, monthName } from './dom.js';
+import { setupScreen } from './setup.js';
+import { planScreen } from './plan.js';
 
 const main = document.getElementById('main');
 const chrome = document.getElementById('chrome');
@@ -21,22 +24,9 @@ const state = {
 
 // ---------------------------------------------------------------- helpers --
 
-// Elements are built, never interpolated. A person's name comes from the
-// database and is typed by a parent on /admin; building it into a string is how
-// an apostrophe in a name becomes a rendering bug.
-function el(tag, props = {}, children = []) {
-  const node = document.createElement(tag);
-  for (const [key, value] of Object.entries(props)) {
-    if (value === undefined || value === null || value === false) continue;
-    if (key === 'class') node.className = value;
-    else if (key === 'text') node.textContent = value;
-    else if (key === 'on') for (const [type, fn] of Object.entries(value)) node.addEventListener(type, fn);
-    else if (key === 'style') node.setAttribute('style', value);
-    else node.setAttribute(key, value === true ? '' : String(value));
-  }
-  for (const child of [].concat(children)) if (child) node.append(child);
-  return node;
-}
+// el() and the two shared labels live in ./dom.js — three screens build
+// elements now, and a country name has to survive an apostrophe in every one of
+// them.
 
 function say(message) {
   statusLine.textContent = message || '';
@@ -144,30 +134,48 @@ function personScreen() {
   ]);
 }
 
-// The empty state is an invitation (§11). The country picker it points at is
-// slice 04, so the button is here and does not work yet — which is the honest
-// shape of it, and better than an invitation with nothing under it at all.
-function emptyState() {
+// The empty state is an invitation (§11), and the month it names comes from the
+// family's own clock rather than from the device's — a phone on a trip is in the
+// wrong timezone, and over the summer the invitation points at the September
+// ahead.
+function emptyState(month, unfinished) {
   return el('section', { class: 'panel' }, [
-    el('h2', { text: 'September' }),
-    el('p', { class: 'invitation', text: 'Pick a country to start September' }),
-    el('button', { class: 'primary', type: 'button', disabled: true, text: 'Pick a country' }),
-    el('p', { class: 'note', text: 'Not open yet.' }),
+    el('h2', { text: monthName(month) }),
+    el('p', { class: 'invitation', text: `Pick a country to start ${monthName(month)}` }),
+    el('button', {
+      class: 'primary', type: 'button', text: 'Pick a country',
+      on: { click: () => go('/setup') },
+    }),
+    // A month that ran past its own end is not a reason to hide the invitation
+    // to the next one — the finish line is the month, and there is no lockout
+    // anywhere in this app (§15). It is a reason to keep a way back to it.
+    unfinished ? el('p', { class: 'note' }, [
+      el('a', {
+        class: 'chrome-link', href: `/plan/${unfinished.id}`, 'data-route': true,
+        text: `${monthName(unfinished.month)} is still open — ${unfinished.country_name}`,
+      }),
+    ]) : null,
   ]);
 }
 
 function homeScreen() {
   const person = currentPerson();
-  const plan = state.me.plans.find((p) => p.person_id === person.id);
-  if (!plan) return emptyState();
+  const mine = state.me.plans.filter((p) => p.person_id === person.id);
+  const plan = mine.find((p) => p.month === state.me.month);
+  if (!plan) return emptyState(state.me.month, mine[0]);
 
   // Not the This week screen — that is slice 05, and it is the screen this app
   // is mostly made of. This is the one line that keeps someone who already has
-  // a month from being invited to start it again.
+  // a month from being invited to start it again, and the way back to their
+  // twenty tasks.
   return el('section', { class: 'panel' }, [
-    el('h2', { text: plan.month }),
+    el('h2', { text: monthName(plan.month) }),
     el('p', { class: 'invitation', text: plan.country_name }),
     el('p', { class: 'note', text: plan.focus_name }),
+    el('button', {
+      class: 'primary', type: 'button', text: 'See your twenty tasks',
+      on: { click: () => go(`/plan/${plan.id}`) },
+    }),
   ]);
 }
 
@@ -215,6 +223,62 @@ function settingsScreen() {
 
 // ---------------------------------------------------------------- render --
 
+// Setup and the reveal own state the shell does not have — which stage you are
+// on, which country you tapped through to — so they are built once per route and
+// reused. Every return to the tab calls load(), and rebuilding them there would
+// throw away a half-finished setup every time a kid checked a message.
+let mounted = null;
+
+// The plan the reveal would otherwise have to fetch: POST /api/plans already
+// answered with it, and re-asking for it is a spinner over a screen that is the
+// whole point of the ceremony.
+let preloaded = null;
+
+function goWith(to, body) {
+  preloaded = body || null;
+  go(to);
+  // A plan was just created, so the shell's copy of /api/me — which is what the
+  // home screen reads — is a month out of date. Refreshing it here is what keeps
+  // Home from inviting someone to start a month they are already looking at.
+  if (body) load();
+}
+
+function screenFor(person) {
+  const here = path();
+  const planId = here.match(/^\/plan\/(\d+)$/)?.[1];
+
+  if (mounted && mounted.key === here) return mounted.node;
+
+  if (here === '/setup') {
+    const node = setupScreen({
+      month: state.me.month,
+      say,
+      go: goWith,
+      refresh: load,
+    });
+    mounted = { key: here, node };
+    return node;
+  }
+
+  if (planId) {
+    const body = preloaded;
+    preloaded = null;
+    const node = planScreen({
+      id: Number(planId),
+      personId: person.id,
+      preloaded: body && String(body.plan.id) === planId ? body : null,
+      say,
+      go: goWith,
+      refresh: load,
+    });
+    mounted = { key: here, node };
+    return node;
+  }
+
+  mounted = null;
+  return here === '/settings' ? settingsScreen() : homeScreen();
+}
+
 function render() {
   const person = currentPerson();
   paintInk(person);
@@ -224,10 +288,12 @@ function render() {
   // else it could correctly be shown.
   let view;
   if (state.loading && !state.me) view = el('section', { class: 'panel' }, [el('p', { class: 'note', text: 'Loading…' })]);
-  else if (!state.signedIn) view = passcodeScreen();
-  else if (!person) view = personScreen();
-  else if (path() === '/settings') view = settingsScreen();
-  else view = homeScreen();
+  else if (!state.signedIn || !person) {
+    // Signing out or losing the person drops whatever was mounted: a setup
+    // half-finished by one person must not come back under another.
+    mounted = null;
+    view = state.signedIn ? personScreen() : passcodeScreen();
+  } else view = screenFor(person);
 
   chrome.hidden = !person;
   main.replaceChildren(view);
@@ -271,6 +337,7 @@ window.addEventListener('pageshow', (event) => {
 
 // A path the shell has no screen for is a bookmark from a later slice or a
 // typo. Land it on the default view rather than on nothing.
-if (path() !== '/' && path() !== '/settings') go('/', { replace: true });
+const KNOWN = [/^\/$/, /^\/settings$/, /^\/setup$/, /^\/plan\/\d+$/];
+if (!KNOWN.some((p) => p.test(path()))) go('/', { replace: true });
 
 load();

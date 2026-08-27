@@ -23,7 +23,7 @@ seeding, or deploy requires a terminal.
 | `docs/other/SEED-CONTENT.md` | Column rules and row forms for the hand-written seed lists |
 | `docs/other/OPEN-QUESTIONS.md` | Questions blocking build, and answered ones |
 | `src/` | The Worker: entry and routing, `/api/*`, `/admin`, `lib/`, `migrations/` |
-| `public/` | The family app: one static document, one stylesheet, three JS modules |
+| `public/` | The family app: one static document, one stylesheet, seven JS modules |
 | `test/` | `node --test test/*.test.js` — no dependencies, no install |
 
 ## Where things stand
@@ -60,13 +60,32 @@ D-10, the two licensed font files, is outstanding, so the shell runs on a system
 stack. Swapping them in is an `@font-face` pair and two token values in
 `public/css/app.css`, plus a re-tune of the type scale.
 
-**Slice 04 is next** — month setup, the draw, and the reveal. It needs D-12, the
-month the school year starts, and answers to Q-06 and Q-07 first.
+**Slice 04 is built.** A kid picks a country — browse by continent, search all
+195, or "Deal me three" — then a focus, then what they will make, and lands on
+twenty tasks for the month. The draw lives in `src/lib/draw.js`: four fixed
+week-1 tasks plus one drawn, two focus-weighted Deep Dive weeks, and week 4's
+project sequence. A focus weight of 0 excludes; everything else is scaled by how
+long since that person last drew it, so a task drawn last month scores half a
+fresh one and nothing is ever locked out.
 
-Every Cloudflare due-out is closed, and so are the three inks. Two remain: the
-fonts (D-10) and the month the school year starts (D-12).
+Everything on the reveal is free until the first check-off and fixed after it:
+redraw, change focus, change what you'll make. Country is free always, because no
+task is country-specific. `start_date` is always a Monday — the later of the
+month's first Monday and this week's — so a September 20th start lands in week 1
+rather than backdating a kid into week 3.
 
-Six open questions outstanding. Two of them, Q-06 and Q-07, block slice 04.
+Three things on the setup screen are built and inert until slice 09: the hook
+line on a country card, the recommended focuses with their reason lines, and
+"Deal me three", which is not offered at all while no country has two hooks.
+`002_seed.sql` carries none — they arrive with `003_country_data.sql`.
+
+**Slice 05 is next** — the daily loop. Check-off, the carry-forward strip, swap,
+and the two numbers in §10.
+
+Every Cloudflare due-out is closed, and so are the three inks and the school year
+(September through May). One remains that blocks nothing: the fonts, D-10.
+
+Four open questions outstanding, none of them against slice 06.
 
 The Worker's own tests run with `node --test test/*.test.js` and need nothing
 installed. They are a build-session tool, not something the owner ever runs —

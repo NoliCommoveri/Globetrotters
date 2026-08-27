@@ -20,6 +20,9 @@ import { apiPeople, apiPatchPerson } from './admin/people.js';
 import { apiCatalog } from './api/catalog.js';
 import { apiAuth } from './api/auth.js';
 import { apiMe, apiPatchMe } from './api/me.js';
+import { apiCreatePlan, apiGetPlan, apiRedrawPlan, apiPatchPlan } from './api/plans.js';
+import { apiFocusSamples } from './api/focuses.js';
+import { apiPassport } from './api/passport.js';
 
 function notFound() {
   return new Response('Not found', {
@@ -55,9 +58,18 @@ const API_PATTERNS = [
   { method: 'PATCH', pattern: /^\/admin\/api\/people\/(?<id>\d+)$/, handler: apiPatchPerson },
 ];
 
-function matchPattern(method, pathname) {
+// The same, behind the family gate. Handlers here take the session as well as
+// the params, because every one of them writes or reads something owned.
+const FAMILY_API_PATTERNS = [
+  { method: 'GET', pattern: /^\/api\/plans\/(?<id>\d+)$/, handler: apiGetPlan },
+  { method: 'PATCH', pattern: /^\/api\/plans\/(?<id>\d+)$/, handler: apiPatchPlan },
+  { method: 'POST', pattern: /^\/api\/plans\/(?<id>\d+)\/redraw$/, handler: apiRedrawPlan },
+  { method: 'GET', pattern: /^\/api\/focuses\/(?<id>\d+)\/samples$/, handler: apiFocusSamples },
+];
+
+function matchPattern(method, pathname, patterns = API_PATTERNS) {
   let pathExists = false;
-  for (const route of API_PATTERNS) {
+  for (const route of patterns) {
     const m = route.pattern.exec(pathname);
     if (!m) continue;
     pathExists = true;
@@ -79,6 +91,8 @@ const FAMILY_API = {
   'GET /api/me': apiMe,
   'PATCH /api/me': apiPatchMe,
   'GET /api/catalog': apiCatalog,
+  'GET /api/passport': apiPassport,
+  'POST /api/plans': apiCreatePlan,
 };
 
 async function admin(request, env, url) {
@@ -144,13 +158,19 @@ async function api(request, env, url) {
     return json({ ok: false, error: 'Not signed in' }, { status: 401 });
   }
 
-  if (handler) {
-    const response = await handler(request, env, session);
+  const matched = handler ? null : matchPattern(request.method, url.pathname, FAMILY_API_PATTERNS);
+
+  if (handler || matched?.handler) {
+    const response = handler
+      ? await handler(request, env, session)
+      : await matched.handler(request, env, session, matched.params);
     // PATCH /api/me sets its own cookie carrying the new person. Re-issuing on
     // top of it would append a second Set-Cookie with the old identity.
     const alreadySet = response.headers.has('set-cookie');
     return alreadySet ? response : withCookie(response, await issueSessionCookie(env, session.personId));
   }
+
+  if (matched?.pathExists) return methodNotAllowed();
 
   const tables = { ...OPEN_API, ...FAMILY_API };
   const exists = Object.keys(tables).some((k) => k.endsWith(` ${url.pathname}`));
@@ -163,7 +183,14 @@ async function api(request, env, url) {
 //
 // An explicit list, not a catch-all: a typo in a fetch URL should 404, not
 // return HTML that the client then fails to parse as JSON.
-const SHELL_PATHS = new Set(['/', '/settings']);
+const SHELL_PATHS = new Set(['/', '/settings', '/setup']);
+
+// The one client route carrying an id. `/plan/12` is a screen; `/plan/twelve` is
+// a typo and 404s like any other.
+const SHELL_PATTERNS = [/^\/plan\/\d+$/];
+
+const isShellPath = (pathname) =>
+  SHELL_PATHS.has(pathname) || SHELL_PATTERNS.some((p) => p.test(pathname));
 
 function shell(request, env, url) {
   if (request.method !== 'GET' && request.method !== 'HEAD') return methodNotAllowed();
@@ -183,7 +210,7 @@ export default {
       return api(request, env, url);
     }
 
-    if (SHELL_PATHS.has(url.pathname)) return shell(request, env, url);
+    if (isShellPath(url.pathname)) return shell(request, env, url);
 
     return notFound();
   },

@@ -35,7 +35,10 @@ None. Everything this slice needs exists after slice 04.
   week is clear, the default card is the first item on the carry-forward strip,
   and failing that the first task of the next week.
 - Current week is `floor((today - start_date) / 7) + 1`, clamped to 4 so any
-  remainder days fold into Make & Present.
+  remainder days fold into Make & Present. `today` comes from `GET /api/me`,
+  which slice 04 gave it: it is computed from `FAMILY_TZ` server-side, because a
+  phone on a trip is in the wrong timezone. `src/lib/dates.js` holds the
+  arithmetic.
 - **The prompt is the screen.** `title` is a label; `prompt` is the actual
   instruction and gets the largest type on the phone, readable at arm's length
   by someone standing over a workbook.

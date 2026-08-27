@@ -315,3 +315,338 @@ button {
     to   { opacity: 1; transform: none; }
   }
 }
+
+/* ============================================================== slice 04 ==
+ * Setup and the reveal (DESIGN.md §7 Month setup).
+ *
+ * The densest UI in the app, and it still gets to be quiet. The only color on
+ * either screen is an ink dot on a country somebody in this house has already
+ * stamped — everything else is paper on navy, because a stamp only reads as an
+ * event if nothing else in the app is competing with it (§11).
+ */
+
+/* A vertical rhythm that nests. Setup is stages inside stages, and one gap
+ * token applied at every level is what keeps that from drifting. */
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+}
+
+/* ------------------------------------------------------------- the steps -- */
+
+.steps {
+  display: flex;
+  gap: .5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: .75rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--paper-dim);
+}
+
+.step {
+  padding-bottom: .375rem;
+  border-bottom: 2px solid var(--navy-line);
+  flex: 1;
+}
+.step[data-done] { color: var(--paper); }
+.step[aria-current=step] {
+  color: var(--paper);
+  border-bottom-color: var(--paper);
+}
+
+/* What has been chosen so far, and the way back to it. */
+.crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+
+.crumb {
+  background: none;
+  border: none;
+  border-bottom: 1px dotted var(--paper-dim);
+  border-radius: 0;
+  color: var(--paper-dim);
+  font: .875rem var(--font-body);
+  min-height: 2rem;
+  padding: 0 0 .125rem;
+  text-align: left;
+}
+.crumb:hover { color: var(--paper); border-bottom-color: var(--paper); }
+
+/* ------------------------------------------------------------- countries -- */
+
+.deal {
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+  border: 1px solid var(--navy-line);
+  border-radius: var(--radius);
+  padding: var(--gap);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .375rem;
+}
+
+.chip {
+  background: none;
+  border: 1px solid var(--navy-line);
+  color: var(--paper-dim);
+  font: .875rem var(--font-body);
+  min-height: 2.5rem;
+  padding: .375rem .75rem;
+}
+.chip:hover { color: var(--paper); }
+.chip[aria-pressed=true] {
+  background: var(--paper);
+  border-color: var(--paper);
+  color: var(--navy);
+}
+
+/* The hook is the card. Name, one lead, and the adventure level — depth belongs
+ * where the choice is made, not one level down (§9). */
+.country {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: .375rem;
+  width: 100%;
+  text-align: left;
+  background: var(--navy-raised);
+  border: 1px solid var(--navy-line);
+  color: var(--paper);
+  padding: .875rem 1rem;
+}
+.country:hover { border-color: var(--paper-dim); }
+
+.country-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: .5rem;
+}
+
+.country-name {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  line-height: 1.2;
+}
+
+.hook {
+  font-size: .9375rem;
+  line-height: 1.4;
+  color: var(--paper);
+  text-wrap: pretty;
+}
+
+.hooks, .fits, .samples {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.hooks li, .samples li {
+  border-left: 2px solid var(--navy-line);
+  padding-left: .75rem;
+  font-size: .9375rem;
+}
+.fits li { display: flex; flex-direction: column; gap: .125rem; }
+.fit-name { font-family: var(--font-display); font-size: 1rem; }
+
+.meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+.meta-dim { font-size: .8125rem; color: var(--paper-dim); }
+
+.pill {
+  border: 1px solid var(--navy-line);
+  border-radius: 999px;
+  padding: .1875rem .5rem;
+  font-size: .75rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--paper-dim);
+  white-space: nowrap;
+}
+
+/* Already stamped by someone in this house. A dot, not a lockout: browse still
+ * reaches it and setup still accepts it. */
+.stamped { display: inline-flex; gap: .25rem; flex: none; }
+.dot {
+  width: .5rem;
+  height: .5rem;
+  border-radius: 50%;
+  background: var(--ink);
+}
+
+/* ---------------------------------------------------------------- focus -- */
+
+.focus, .project {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: .375rem;
+  width: 100%;
+  text-align: left;
+  background: var(--navy-raised);
+  border: 1px solid var(--navy-line);
+  color: var(--paper);
+  padding: .875rem 1rem;
+}
+.focus[data-open] { border-color: var(--paper-dim); }
+.focus[aria-current=true], .project[aria-current=true] { border-color: var(--ink); }
+
+.focus-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  width: 100%;
+  background: none;
+  border: none;
+  color: inherit;
+  padding: 0;
+  min-height: 2rem;
+  text-align: left;
+}
+
+.focus-name {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+}
+
+/* The country's own reason for recommending this focus, in the kid's words. */
+.reason {
+  font-size: .875rem;
+  border-left: 2px solid var(--ink);
+  padding-left: .625rem;
+}
+
+.preview {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  margin-top: .375rem;
+  padding-top: .625rem;
+  border-top: 1px solid var(--navy-line);
+}
+
+.preview-label {
+  font-size: .75rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--paper-dim);
+}
+
+/* --------------------------------------------------------------- reveal -- */
+
+.eyebrow {
+  font-size: .8125rem;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--paper-dim);
+}
+
+/* The moment you find out what your September looks like. The country gets the
+ * largest type on the screen it will ever get. */
+.reveal-country {
+  font-size: 2.25rem;
+  line-height: 1.05;
+}
+
+.week {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  padding-top: .75rem;
+  border-top: 1px solid var(--navy-line);
+}
+
+.tasks {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  list-style: none;
+  margin: .25rem 0 0;
+  padding: 0;
+}
+
+.task {
+  display: flex;
+  gap: .75rem;
+  background: var(--navy-raised);
+  border: 1px solid var(--navy-line);
+  border-radius: var(--radius);
+  padding: .75rem;
+}
+
+.task-no {
+  flex: none;
+  width: 1.25rem;
+  font-family: var(--font-display);
+  font-size: .875rem;
+  color: var(--paper-dim);
+  padding-top: .125rem;
+}
+
+.task-body { display: flex; flex-direction: column; gap: .1875rem; }
+
+.task-title {
+  font-family: var(--font-display);
+  font-size: 1rem;
+}
+
+/* The prompt is the instruction, and on This week it gets the largest type on
+ * the phone (slice 05). Here there are twenty of them at once, so the title
+ * leads and the prompt is what makes the month feel real underneath it. */
+.task-prompt {
+  font-size: .9375rem;
+  line-height: 1.45;
+  color: var(--paper);
+  text-wrap: pretty;
+}
+
+.task-page {
+  font-size: .75rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--paper-dim);
+}
+
+/* -------------------------------------------------------------- changers -- */
+
+.changer { display: flex; flex-direction: column; gap: .5rem; }
+.changer > .quiet { width: 100%; text-align: left; }
+
+.changer-body {
+  border-left: 1px solid var(--navy-line);
+  padding-left: .75rem;
+}
+
+.focus-pick {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: .1875rem;
+  width: 100%;
+  text-align: left;
+  background: var(--navy-raised);
+  border: 1px solid var(--navy-line);
+  color: var(--paper);
+  padding: .75rem;
+}
+.focus-pick:hover:not([disabled]) { border-color: var(--paper-dim); }
+.focus-pick[disabled] { opacity: .55; cursor: default; }
+.focus-pick[aria-current=true] { border-color: var(--ink); opacity: 1; }
