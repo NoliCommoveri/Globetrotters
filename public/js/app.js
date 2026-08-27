@@ -10,6 +10,7 @@ import { start, onRoute, go, path } from './router.js';
 import { el, monthName } from './dom.js';
 import { setupScreen } from './setup.js';
 import { planScreen } from './plan.js';
+import { weekScreen } from './week.js';
 
 const main = document.getElementById('main');
 const chrome = document.getElementById('chrome');
@@ -158,25 +159,11 @@ function emptyState(month, unfinished) {
   ]);
 }
 
-function homeScreen() {
-  const person = currentPerson();
+// The month this person is on right now, if there is one. An older month left
+// unfinished is not it — it is the way back on the empty state.
+function homePlan(person) {
   const mine = state.me.plans.filter((p) => p.person_id === person.id);
-  const plan = mine.find((p) => p.month === state.me.month);
-  if (!plan) return emptyState(state.me.month, mine[0]);
-
-  // Not the This week screen — that is slice 05, and it is the screen this app
-  // is mostly made of. This is the one line that keeps someone who already has
-  // a month from being invited to start it again, and the way back to their
-  // twenty tasks.
-  return el('section', { class: 'panel' }, [
-    el('h2', { text: monthName(plan.month) }),
-    el('p', { class: 'invitation', text: plan.country_name }),
-    el('p', { class: 'note', text: plan.focus_name }),
-    el('button', {
-      class: 'primary', type: 'button', text: 'See your twenty tasks',
-      on: { click: () => go(`/plan/${plan.id}`) },
-    }),
-  ]);
+  return { plan: mine.find((p) => p.month === state.me.month) || null, unfinished: mine[0] };
 }
 
 function settingsScreen() {
@@ -247,6 +234,20 @@ function screenFor(person) {
   const here = path();
   const planId = here.match(/^\/plan\/(\d+)$/)?.[1];
 
+  // This week is the default view, so it lives at `/` rather than on a route of
+  // its own. It is keyed on the plan and not on the path: a month rolling over
+  // has to build a new screen, and a return to the tab must not throw away which
+  // card is up.
+  if (here === '/') {
+    const { plan, unfinished } = homePlan(person);
+    if (!plan) { mounted = null; return emptyState(state.me.month, unfinished); }
+    const key = `/week/${plan.id}`;
+    if (mounted?.key === key) return mounted.node;
+    const node = weekScreen({ id: plan.id, say, refresh: load });
+    mounted = { key, node };
+    return node;
+  }
+
   if (mounted && mounted.key === here) return mounted.node;
 
   if (here === '/setup') {
@@ -276,8 +277,9 @@ function screenFor(person) {
   }
 
   mounted = null;
-  return here === '/settings' ? settingsScreen() : homeScreen();
+  return settingsScreen();
 }
+
 
 function render() {
   const person = currentPerson();
@@ -319,6 +321,10 @@ async function load() {
   } finally {
     state.loading = false;
     render();
+    // A screen that owns its own fetch is stale for the same reason the shell
+    // was: it has been sitting in a background tab. render() reuses the mounted
+    // node rather than rebuilding it, so the refetch has to be asked for.
+    mounted?.node?.reload?.();
   }
 }
 

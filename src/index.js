@@ -23,6 +23,9 @@ import { apiMe, apiPatchMe } from './api/me.js';
 import { apiCreatePlan, apiGetPlan, apiRedrawPlan, apiPatchPlan } from './api/plans.js';
 import { apiFocusSamples } from './api/focuses.js';
 import { apiPassport } from './api/passport.js';
+import { apiPatchTask, apiSwapTask } from './api/tasks.js';
+import { apiCreateSession } from './api/sessions.js';
+import { apiStats } from './api/stats.js';
 
 function notFound() {
   return new Response('Not found', {
@@ -65,6 +68,8 @@ const FAMILY_API_PATTERNS = [
   { method: 'PATCH', pattern: /^\/api\/plans\/(?<id>\d+)$/, handler: apiPatchPlan },
   { method: 'POST', pattern: /^\/api\/plans\/(?<id>\d+)\/redraw$/, handler: apiRedrawPlan },
   { method: 'GET', pattern: /^\/api\/focuses\/(?<id>\d+)\/samples$/, handler: apiFocusSamples },
+  { method: 'PATCH', pattern: /^\/api\/tasks\/(?<id>\d+)$/, handler: apiPatchTask },
+  { method: 'POST', pattern: /^\/api\/tasks\/(?<id>\d+)\/swap$/, handler: apiSwapTask },
 ];
 
 function matchPattern(method, pathname, patterns = API_PATTERNS) {
@@ -93,6 +98,8 @@ const FAMILY_API = {
   'GET /api/catalog': apiCatalog,
   'GET /api/passport': apiPassport,
   'POST /api/plans': apiCreatePlan,
+  'POST /api/sessions': apiCreateSession,
+  'GET /api/stats': apiStats,
 };
 
 async function admin(request, env, url) {

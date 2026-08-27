@@ -10,9 +10,21 @@
 
 import { json } from '../lib/html.js';
 import { drawPlan, drawDeepWeek, week4Rows, ShortPoolError } from '../lib/draw.js';
-import { isMonth, inSchoolYear, monthsBetween, startDateFor, todayIn } from '../lib/dates.js';
+import { isMonth, inSchoolYear, monthsBetween, startDateFor, todayIn, weekOf } from '../lib/dates.js';
 
 const WEEK_THEMES = { 1: 'Foundations', 2: 'Deep Dive', 3: 'Deep Dive', 4: 'Make & Present' };
+
+// Three a month. Enough to fix a genuine mismatch, not enough to reroll a month
+// into whatever looks easiest (§4). Derived from the rows, never stored — a
+// redraw replaces all twenty and the budget goes with the tasks it bought.
+export const SWAP_BUDGET = 3;
+
+// Week 1's fifth slot and weeks 2-3. Not the four week-1 `core` tasks, which
+// anchor workbook pages and are meant to repeat — swapping one leaves a physical
+// page with nothing feeding it. Not week 4, which is an ordered sequence rather
+// than a draw. And not a task already done.
+export const swappable = (task) =>
+  task.status === 'open' && task.week_no !== 4 && task.tier !== 'core';
 
 // ------------------------------------------------------------------ reads --
 
@@ -42,37 +54,73 @@ async function planTasks(env, id) {
            plan_tasks.swapped_from,
            task_templates.title, task_templates.prompt,
            task_templates.workbook_page, task_templates.tier,
-           task_templates.archived
+           task_templates.archived,
+           -- The third card state. In progress is any open task with a session
+           -- against it, and it needs no column: without a visible mark "Worked
+           -- on it" reads as a dead button and the two-sittings case never
+           -- surfaces again (§7).
+           (SELECT COUNT(*) FROM sessions WHERE sessions.plan_task_id = plan_tasks.id)
+             AS session_count,
+           -- What this card replaced. Two prompts from the same week and focus
+           -- often read alike, so without this a swap is indistinguishable from
+           -- a bug (§4).
+           replaced.title AS swapped_from_title
     FROM plan_tasks
     JOIN task_templates ON task_templates.id = plan_tasks.task_template_id
+    LEFT JOIN task_templates AS replaced ON replaced.id = plan_tasks.swapped_from
     WHERE plan_tasks.plan_id = ?
     ORDER BY plan_tasks.week_no, plan_tasks.position
   `).bind(id).all();
   return results;
 }
 
+// The month's notes, oldest first, accumulating down the Plan page. This is what
+// makes "What surprised you?" worth answering, and it is the pool the stamp
+// headline is picked from in slice 06 (§7).
+async function planNotes(env, id) {
+  const { results } = await env.DB.prepare(`
+    SELECT sessions.id, sessions.plan_task_id, sessions.note, sessions.local_date,
+           task_templates.title AS task_title
+    FROM sessions
+    LEFT JOIN plan_tasks ON plan_tasks.id = sessions.plan_task_id
+    LEFT JOIN task_templates ON task_templates.id = plan_tasks.task_template_id
+    WHERE sessions.plan_id = ? AND sessions.note IS NOT NULL AND sessions.note != ''
+    ORDER BY sessions.local_date, sessions.id
+  `).bind(id).all();
+  return results;
+}
+
 // The one payload every route in this file answers with.
-async function planPayload(env, id) {
-  const [plan, tasks] = await Promise.all([planRow(env, id), planTasks(env, id)]);
+export async function planPayload(env, id) {
+  const [plan, tasks, notes] = await Promise.all([
+    planRow(env, id), planTasks(env, id), planNotes(env, id),
+  ]);
   if (!plan) return null;
 
   const weeks = [1, 2, 3, 4].map((week) => ({
     week_no: week,
     theme: WEEK_THEMES[week],
-    tasks: tasks.filter((t) => t.week_no === week),
+    tasks: tasks.filter((t) => t.week_no === week).map((t) => ({ ...t, swappable: swappable(t) })),
   }));
 
   const done = tasks.filter((t) => t.status === 'done').length;
+  const swapsUsed = tasks.filter((t) => t.swapped_from != null).length;
   return {
     plan,
     weeks,
+    notes,
     done_count: done,
     total: tasks.length,
+    // Which week This week is showing. Computed here rather than on the client
+    // because the only clock that decides what day it is belongs to FAMILY_TZ —
+    // a phone on a trip is in the wrong timezone (§5, §7).
+    current_week: weekOf(plan.start_date, todayIn(env.FAMILY_TZ)),
     // The single gate. Named on the payload so the reveal does not have to
     // re-derive it from twenty rows to decide whether to offer Redraw.
     locked: done > 0,
     week4_locked: tasks.some((t) => t.week_no === 4 && t.status === 'done'),
-    swaps_used: tasks.filter((t) => t.swapped_from != null).length,
+    swaps_used: swapsUsed,
+    swaps_left: Math.max(0, SWAP_BUDGET - swapsUsed),
   };
 }
 
@@ -80,7 +128,7 @@ async function planPayload(env, id) {
 
 // Two lookups the pure engine takes as functions: what this focus thinks of a
 // template, and how long since this person last drew it.
-async function drawInputs(env, { personId, month, focusId }) {
+export async function drawInputs(env, { personId, month, focusId }) {
   const [templates, weights, history] = await Promise.all([
     env.DB.prepare(
       'SELECT id, week_theme, tier, project_type_id, position FROM task_templates WHERE archived = 0'
@@ -119,7 +167,7 @@ const insertTask = (env, planId, row) => env.DB.prepare(
    VALUES (?, ?, ?, ?, 'open')`
 ).bind(planId, row.task_template_id, row.week_no, row.position);
 
-function shortPool(err) {
+export function shortPool(err) {
   return json({
     ok: false,
     error: err.week === 4
@@ -206,7 +254,7 @@ export async function apiCreatePlan(request, env, session) {
 // The plan is family-visible — the passport is shared and so is the wall — but
 // only its owner rerolls it. There are no roles in this app, and this is the one
 // place that costs something: a sibling on a shared phone redrawing a month.
-async function owned(env, session, id) {
+export async function owned(env, session, id) {
   const plan = await env.DB.prepare('SELECT * FROM month_plans WHERE id = ?').bind(id).first();
   if (!plan) return { error: json({ ok: false, error: 'No such plan.' }, { status: 404 }) };
   if (plan.person_id !== session.personId) {

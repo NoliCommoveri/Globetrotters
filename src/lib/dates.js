@@ -120,3 +120,22 @@ export function setupMonthFor(today) {
   if (inSchoolYear(month)) return month;
   return `${today.slice(0, 4)}-09`;
 }
+
+// Whole days from one plain date to the other. Negative when `to` is earlier.
+export function daysBetween(from, to) {
+  return Math.round((parse(to) - parse(from)) / 86400000);
+}
+
+// Which of a plan's four weeks a date falls in. `start_date` is always a Monday
+// (§15), so a plan week and a calendar week are the same seven days and the week
+// ring resets when the calendar does.
+//
+// Clamped at both ends. Below 1 because a plan set up on a Saturday starts on
+// the Monday ahead and its cards have to be readable before then; at 4 because
+// a month is 28 to 31 days and the remainder folds into Make & Present rather
+// than running off into a week 5 that has no tasks in it.
+export function weekOf(startDate, today) {
+  const days = daysBetween(startDate, today);
+  if (days < 0) return 1;
+  return Math.min(4, Math.floor(days / 7) + 1);
+}

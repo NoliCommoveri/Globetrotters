@@ -23,7 +23,7 @@ seeding, or deploy requires a terminal.
 | `docs/other/SEED-CONTENT.md` | Column rules and row forms for the hand-written seed lists |
 | `docs/other/OPEN-QUESTIONS.md` | Questions blocking build, and answered ones |
 | `src/` | The Worker: entry and routing, `/api/*`, `/admin`, `lib/`, `migrations/` |
-| `public/` | The family app: one static document, one stylesheet, seven JS modules |
+| `public/` | The family app: one static document, one stylesheet, eight JS modules |
 | `test/` | `node --test test/*.test.js` — no dependencies, no install |
 
 ## Where things stand
@@ -79,13 +79,33 @@ line on a country card, the recommended focuses with their reason lines, and
 "Deal me three", which is not offered at all while no country has two hooks.
 `002_seed.sql` carries none — they arrive with `003_country_data.sql`.
 
-**Slice 05 is next** — the daily loop. Check-off, the carry-forward strip, swap,
-and the two numbers in §10.
+**Slice 05 is built** — the daily loop, and the screen the app is mostly made
+of. This week puts one card up, not five: the lowest-position open task in the
+current week, with the prompt at the largest type on the phone and the workbook
+page it feeds under it. **Done** completes it and writes a session; **Worked on
+it** writes a session and leaves the card open, which is the two-sittings case
+the schema was built for. A repeated `done` writes no second session, so days
+worked cannot be inflated by a double-tap, and **Undo** leaves the session rows
+alone, so it cannot be deflated by a mis-tap either.
+
+Nothing is ever locked out. A missed Tuesday shifts forward, and unfinished
+tasks from earlier weeks sit on a carry-forward strip that still checks off in
+week 3. Progress is two numbers and no streak: a 0–5 week ring labelled with
+what is left — "3 left this week" — and "12 of 20" for the month. Never a
+percentage.
+
+Plan holds everything month-scale: all twenty tasks, swap with its remaining
+budget, the month's notes accumulating down the page, week 4's materials from
+week 1, and days worked.
+
+**Slice 06 is next** — the passport, the completion offer at 20/20, and the
+stamp.
 
 Every Cloudflare due-out is closed, and so are the three inks and the school year
-(September through May). One remains that blocks nothing: the fonts, D-10.
+(September through May). Two remain: the fonts (D-10), which block nothing, and
+the passport's paper size (D-13), which blocks only slice 06's print stylesheet.
 
-Four open questions outstanding, none of them against slice 06.
+Three open questions outstanding, none of them against slice 06.
 
 The Worker's own tests run with `node --test test/*.test.js` and need nothing
 installed. They are a build-session tool, not something the owner ever runs —

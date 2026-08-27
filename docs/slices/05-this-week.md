@@ -1,6 +1,6 @@
 # Slice 05 — This week, and Plan
 
-**Status:** not started
+**Status:** built
 **Band:** L
 **Implements:** §7 This week, §7 Plan, §10
 **Depends on:** 04
@@ -16,11 +16,12 @@ None. Everything this slice needs exists after slice 04.
 
 ## Open questions
 
-- **Q-08** — `PATCH /api/tasks/:id` is specced idempotent and also writes a
-  session on done. Two devices sending `done` writes two sessions and inflates
-  days worked, the one number specced to be trustworthy. Proposed: write the
-  session only on an `open → done` transition. Confirm before building the
-  handler.
+None outstanding. **Q-08** is answered: the session is written only on an
+`open → done` transition. `PATCH /api/tasks/:id` stays idempotent and answers
+200 whatever state the task was already in, so a second device costs nothing —
+and days worked, the one number §10 promises never lies, cannot be inflated by a
+double-tap. A genuine second sitting on a finished task goes through
+`POST /api/sessions`.
 
 ## Build
 
@@ -35,10 +36,11 @@ None. Everything this slice needs exists after slice 04.
   week is clear, the default card is the first item on the carry-forward strip,
   and failing that the first task of the next week.
 - Current week is `floor((today - start_date) / 7) + 1`, clamped to 4 so any
-  remainder days fold into Make & Present. `today` comes from `GET /api/me`,
-  which slice 04 gave it: it is computed from `FAMILY_TZ` server-side, because a
-  phone on a trip is in the wrong timezone. `src/lib/dates.js` holds the
-  arithmetic.
+  remainder days fold into Make & Present, and clamped to 1 for a plan whose
+  start date has not arrived. `src/lib/dates.js` holds the arithmetic as
+  `weekOf`, and the plan payload carries the answer as `current_week`: the
+  client never does the sum, because the only clock allowed to decide what day
+  it is belongs to `FAMILY_TZ`.
 - **The prompt is the screen.** `title` is a label; `prompt` is the actual
   instruction and gets the largest type on the phone, readable at arm's length
   by someone standing over a workbook.
@@ -89,7 +91,8 @@ so it holds all of it.
 - `POST /api/tasks/:id/swap` — same week and focus, excluding every template
   already in this plan (`UNIQUE (plan_id, task_template_id)` enforces it at the
   database level). Week 1 slot 5 and weeks 2–3 only. Open tasks only. Three a
-  month, counted as `COUNT(plan_tasks WHERE swapped_from IS NOT NULL)`.
+  month, counted as `COUNT(plan_tasks WHERE swapped_from IS NOT NULL)`. Owner
+  only, like the other two rerolls; checking off is not.
 - `POST /api/sessions` — `{plan_id, plan_task_id?, minutes?, note?}`.
   `local_date` written at insert from `FAMILY_TZ` via `Intl.DateTimeFormat`.
   Never computed from UTC later.

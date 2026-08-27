@@ -650,3 +650,296 @@ button {
 .focus-pick:hover:not([disabled]) { border-color: var(--paper-dim); }
 .focus-pick[disabled] { opacity: .55; cursor: default; }
 .focus-pick[aria-current=true] { border-color: var(--ink); opacity: 1; }
+
+/* ============================================================== slice 05 ==
+ * This week, and the month-scale state on Plan (DESIGN.md §7 This week,
+ * §7 Plan, §10).
+ *
+ * The screen used ~180 times per person. One card, full-bleed, with the prompt
+ * at the largest size in the app — it is read at arm's length by someone
+ * standing over a workbook with a pencil in the other hand. Everything else on
+ * the screen is smaller than it, deliberately.
+ *
+ * Ink appears in exactly two places here: the filled arcs of the week ring and
+ * the done pips. Completion is the only thing in this app allowed to be
+ * colorful, and that restraint is what makes the stamp in slice 06 read as an
+ * event.
+ */
+
+.week-panel { gap: 1.25rem; }
+
+.week-head { display: flex; flex-direction: column; gap: .125rem; }
+
+.week-country {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  line-height: 1.15;
+}
+
+/* --------------------------------------------------------------- progress -- */
+
+.progress {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+}
+
+.progress-text { display: flex; flex-direction: column; gap: .125rem; }
+
+/* Labelled with what is left rather than what is banked: same data, but one of
+ * them is an instruction (§10). */
+.progress-week {
+  font-family: var(--font-display);
+  font-size: 1.0625rem;
+  letter-spacing: .02em;
+}
+
+.ring {
+  flex: none;
+  /* Segment one starts at twelve o'clock and the week reads clockwise. */
+  transform: rotate(-90deg);
+}
+
+.ring-seg {
+  fill: none;
+  stroke: var(--navy-line);
+  stroke-width: 5;
+  stroke-linecap: butt;
+}
+
+.ring-seg.is-done { stroke: var(--ink); }
+
+/* ------------------------------------------------------------- the card -- */
+
+.today {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  background: var(--navy-raised);
+  border: 1px solid var(--navy-line);
+  border-left: 3px solid var(--navy-line);
+  border-radius: var(--radius);
+  padding: 1rem;
+}
+
+/* The three card states. In progress has to be visible or "Worked on it" reads
+ * as a dead button — tapped once, nothing changes, never tapped again (§7). */
+.today[data-state=progress] { border-left-color: var(--paper-dim); }
+.today[data-state=done] { border-left-color: var(--ink); }
+
+.today-label {
+  font-family: var(--font-display);
+  font-size: .8125rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--paper-dim);
+}
+
+/* The prompt is the screen. */
+.today-prompt {
+  font-family: var(--font-body);
+  font-size: 1.375rem;
+  line-height: 1.3;
+  font-weight: 500;
+  letter-spacing: normal;
+  text-transform: none;
+  margin: 0;
+  text-wrap: pretty;
+}
+
+.today-page {
+  font-size: .8125rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--paper-dim);
+}
+
+.today-state {
+  font-family: var(--font-display);
+  font-size: .8125rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.today-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin-top: .25rem;
+}
+
+.today-actions > .primary { width: auto; flex: 1 1 8rem; }
+.today-actions > .quiet { flex: 1 1 6rem; }
+
+.secondary {
+  flex: 1 1 8rem;
+  background: none;
+  color: var(--paper);
+  border: 1px solid var(--paper-dim);
+  font-family: var(--font-display);
+  font-size: 1.0625rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  padding: .75rem 1rem;
+}
+.secondary:hover { border-color: var(--paper); }
+.secondary[disabled] { opacity: .5; cursor: default; }
+
+/* One optional line, one tap to skip. It has to cost less than not answering it,
+ * or twenty of them never get written. */
+.ask {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  margin-top: .25rem;
+  padding-top: .75rem;
+  border-top: 1px solid var(--navy-line);
+}
+
+/* --------------------------------------------------------------- the pips -- */
+
+.pips {
+  display: flex;
+  gap: .5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.pips li { flex: 1 1 0; }
+
+.pip {
+  width: 100%;
+  min-height: 2.75rem;
+  background: none;
+  border: 1px solid var(--navy-line);
+  border-bottom: 3px solid var(--navy-line);
+  color: var(--paper-dim);
+  font-family: var(--font-display);
+  font-size: .9375rem;
+}
+
+.pip[data-state=progress] { border-bottom-color: var(--paper-dim); color: var(--paper); }
+.pip[data-state=done] { border-bottom-color: var(--ink); color: var(--paper); }
+.pip[aria-current=true] { border-color: var(--paper); color: var(--paper); }
+.pip[aria-current=true][data-state=done] { border-bottom-color: var(--ink); }
+
+/* ------------------------------------------------------ carry-forward -- */
+
+/* Never blocking, never a lockout. The finish line is the month, not the week —
+ * a missed Tuesday shifts forward and lands here (§7). */
+.carry {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  padding-top: .75rem;
+  border-top: 1px solid var(--navy-line);
+}
+
+.carry-list {
+  display: flex;
+  flex-direction: column;
+  gap: .375rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.carry-item {
+  display: flex;
+  align-items: baseline;
+  gap: .5rem;
+  width: 100%;
+  min-height: 2.5rem;
+  text-align: left;
+  background: none;
+  border: 1px solid transparent;
+  border-left: 2px solid var(--navy-line);
+  color: var(--paper-dim);
+  font: .9375rem/1.35 var(--font-body);
+  padding: .5rem .625rem;
+}
+.carry-item:hover { color: var(--paper); }
+.carry-item[aria-current=true] { border-left-color: var(--paper); color: var(--paper); }
+.carry-item[data-state=progress] { border-left-color: var(--paper-dim); }
+
+.carry-week {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: .75rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+/* ------------------------------------------------------- plan additions -- */
+
+.task { align-items: flex-start; }
+.task[data-state=done] .task-title { color: var(--paper-dim); }
+.task[data-state=done] .task-no { color: var(--ink); }
+.task[data-state=progress] .task-no { color: var(--paper); }
+
+.task-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: .375rem;
+  margin-left: auto;
+}
+
+.task-state {
+  font-family: var(--font-display);
+  font-size: .6875rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.task-swap {
+  min-height: 2.25rem;
+  padding: .375rem .625rem;
+  font-size: .8125rem;
+}
+.task-swap[disabled] { opacity: .4; cursor: default; }
+
+/* The month's notes, accumulating down the page. This is the pool the stamp
+ * headline is picked from, and seeing it grow is what makes the twentieth one
+ * worth writing (§7). */
+.notes {
+  padding-top: .75rem;
+  border-top: 1px solid var(--navy-line);
+}
+
+.note-list {
+  display: flex;
+  flex-direction: column;
+  gap: .625rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.note-list li {
+  display: flex;
+  flex-direction: column;
+  gap: .125rem;
+  border-left: 2px solid var(--navy-line);
+  padding-left: .625rem;
+}
+
+.note-text { font-size: .9375rem; line-height: 1.4; text-wrap: pretty; }
+
+.note-from {
+  font-size: .75rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--paper-dim);
+}
+
+/* Room to breathe once there is any. Everything above holds at 360px. */
+@media (min-width: 30rem) {
+  .today-prompt { font-size: 1.5rem; }
+  .today-actions > .primary,
+  .today-actions > .secondary { flex: 0 1 12rem; }
+}
