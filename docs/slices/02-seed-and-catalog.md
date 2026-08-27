@@ -1,6 +1,6 @@
 # Slice 02 — Seed v0 and catalog
 
-**Status:** not started
+**Status:** built
 **Band:** M
 **Implements:** §13 (partial — v0 sizing below), §6 (catalog, people)
 **Depends on:** 01
@@ -11,29 +11,26 @@
 
 ## Due-outs
 
-- **D-09** Three people's names and ink colors. The names can be typed on
-  `/admin` after this slice ships, but the three inks are a palette decision
-  (§11: three saturated stamp inks against ink navy and chart-paper off-white)
-  and placeholder colors that ship are placeholder colors that stay.
-- **D-11** `FAMILY_TZ` value confirmed (set in D-08, used from here on) — done,
-  `America/Chicago`
+Both closed.
+
+- **D-09** Three inks: `#5B2A86` deep purple, `#D07AC0` lilac, `#2E6FD9` blue.
+  Seeded, and editable on `/admin` where the names are typed.
+- **D-11** `FAMILY_TZ` — `America/Chicago`.
 
 ## Open questions
 
-- **Q-04** — the people seed contradicts itself. §3 says people "are not seeded
-  from SQL"; §13 seeds "3 placeholder people, renamed on `/admin`." A person
-  row must exist before anyone can pick themselves, so placeholders plus an
-  editor is the workable reading. Confirm, then fix §3's sentence.
-- **Q-05** — how does `/api/catalog` invalidate? It is cached client-side and
-  the slice 08 country editor edits exactly what it contains. Without an ETag
-  or a version field, a fixed hook stays wrong on every device that already
-  loaded it. Adding the header costs nothing here and cannot be retrofitted
-  into caches already in the wild.
+Both answered, and written into `DESIGN.md`.
+
+- **Q-04** — placeholders. The seed writes three people with explicit ids and
+  `/admin` renames them; §3's "not seeded from SQL" sentence was the half that
+  was wrong.
+- **Q-05** — an ETag over the response body with `Cache-Control: no-cache`.
 
 ## Build
 
-- `002_seed.sql`, `INSERT ... ON CONFLICT (slug) DO NOTHING` throughout — once
-  a row exists the seed leaves it alone forever, so re-runs never clobber edits
+- `002_seed.sql`, `INSERT ... ON CONFLICT DO NOTHING` throughout on the row's
+  stable key — `slug`, `iso3` for a country, `id` for a person — so once a row
+  exists the seed leaves it alone forever and re-runs never clobber edits
   - 6 focuses: `ancient-world`, `wild-places`, `people-and-power`,
     `food-and-craft`, `conflict-and-change`, `land-and-sky`
   - 6 project types: `trifold-board`, `model-or-diorama`, `video`, `skit`,
@@ -73,14 +70,40 @@ Seed v0 is therefore **27**:
 The other five project types seed as rows with no week-4 templates and are
 hidden in setup until slice 09 fills them.
 
+## Seeds are not migrations
+
+`src/migrations/index.js` exports two lists. `MIGRATIONS` is checksummed,
+append-only and applied once by Apply pending; `SEEDS` is re-executed in full by
+Run seed on every press. A seed file must not be checksummed: slice 09 adds ~63
+task templates and all of `003_country_data.sql` to a database that is already
+seeded and already carries real work, and under the checksum rule that edit
+reads as permanent drift with Apply pending refusing to run it. `ON CONFLICT DO
+NOTHING` is what makes re-execution safe, and it is the same property that lets
+a library-editor correction survive.
+
 ## Exit criteria
 
-- Seed runs twice; the second run inserts zero and changes nothing
-- Editing a seeded task's title, then re-running the seed, leaves the edit
-- Renaming a person on `/admin` sticks and does not require touching SQL
-- `/api/catalog` returns and is under ~60KB
-- Every focus has at least one `weight = 3` row in weeks 2–3, so slice 04's
-  focus preview has something to sample
+| Criterion | State |
+|---|---|
+| Seed runs twice; the second run inserts zero and changes nothing | met |
+| Editing a seeded task's title, then re-running the seed, leaves the edit | met |
+| Renaming a person on `/admin` sticks and does not require touching SQL | met |
+| `/api/catalog` returns and is under ~60KB | met — 22.7KB with all 195 countries |
+| Every focus has at least one `weight = 3` row in weeks 2–3 | **not met** — needs the content |
+| 195 countries | met |
+| 27 task templates in a 6 / 8 / 8 / 5 split | **not met** — needs the content |
+
+The unmet ones are asserted in `test/seed-content.test.js`, which fails today
+and names what is missing on each run. The slice is `built` when that file is
+green.
+
+## What is outstanding
+
+**27 task templates and their focus weights**, being written by the owner.
+Column rules, allowed values and paste-ready row forms are in
+`../other/SEED-CONTENT.md`. The rows go into `002_seed.sql` at the two marked
+places; nothing else has to change, and Run seed loads them into a database that
+is already seeded without touching anything already in it.
 
 ## Do not build
 

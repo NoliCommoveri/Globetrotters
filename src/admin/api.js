@@ -6,7 +6,8 @@
 
 import { json } from '../lib/html.js';
 import { applyPending, resetMonth } from '../lib/migrations.js';
-import { MIGRATIONS } from '../migrations/index.js';
+import { runSeed } from '../lib/seed.js';
+import { MIGRATIONS, SEEDS } from '../migrations/index.js';
 
 async function readJson(request) {
   try {
@@ -45,4 +46,16 @@ export async function apiResetMonth(request, env) {
 
   const deleted = await resetMonth(env.DB, planId);
   return json({ ok: true, plan_id: planId, month: plan.month, deleted });
+}
+
+// Run seed. Safe to press twice and expected to be: the second press reports
+// zero inserted everywhere, which is the check that the seed is idempotent
+// (DESIGN.md §3).
+export async function apiSeed(request, env) {
+  try {
+    const result = await runSeed(env.DB, SEEDS);
+    return json(result, { status: result.ok ? 200 : 500 });
+  } catch (err) {
+    return json({ ok: false, files: [], inserted: {}, error: err.message }, { status: 500 });
+  }
 }

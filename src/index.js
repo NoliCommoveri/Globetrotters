@@ -11,7 +11,9 @@ import { isAdmin } from './lib/auth.js';
 import { json } from './lib/html.js';
 import { adminPage, adminLogin, adminLogout, tokenForm } from './admin/index.js';
 import { adminHealth } from './admin/health.js';
-import { apiMigrate, apiResetMonth } from './admin/api.js';
+import { apiMigrate, apiResetMonth, apiSeed } from './admin/api.js';
+import { apiPeople, apiPatchPerson } from './admin/people.js';
+import { apiCatalog } from './api/catalog.js';
 
 function notFound() {
   return new Response('Not found', {
@@ -35,7 +37,34 @@ const PAGES = {
 
 const API = {
   'POST /admin/api/migrate': apiMigrate,
+  'POST /admin/api/seed': apiSeed,
   'POST /admin/api/reset-month': apiResetMonth,
+  'GET /admin/api/people': apiPeople,
+};
+
+// Routes carrying an id, matched after the exact tables miss. A regex list
+// rather than a router: the app has five screens and this stays a list you can
+// read in one go for the whole of v1.
+const API_PATTERNS = [
+  { method: 'PATCH', pattern: /^\/admin\/api\/people\/(?<id>\d+)$/, handler: apiPatchPerson },
+];
+
+function matchPattern(method, pathname) {
+  let pathExists = false;
+  for (const route of API_PATTERNS) {
+    const m = route.pattern.exec(pathname);
+    if (!m) continue;
+    pathExists = true;
+    if (route.method === method) return { handler: route.handler, params: m.groups || {} };
+  }
+  return { handler: null, params: null, pathExists };
+}
+
+// The family API. No auth on it yet — the passcode cookie is slice 03, and
+// /api/catalog is country names and focus blurbs either way. Slice 03 puts the
+// gate in front of this table, not in front of each handler.
+const PUBLIC_API = {
+  'GET /api/catalog': apiCatalog,
 };
 
 async function admin(request, env, url) {
@@ -57,10 +86,23 @@ async function admin(request, env, url) {
   const handler = (isApi ? API : PAGES)[route];
   if (handler) return handler(request, env);
 
+  if (isApi) {
+    const matched = matchPattern(request.method, url.pathname);
+    if (matched.handler) return matched.handler(request, env, matched.params);
+    if (matched.pathExists) return methodNotAllowed();
+  }
+
   // A known path reached with the wrong method is worth distinguishing from a
   // path that does not exist.
   const table = isApi ? API : PAGES;
   const exists = Object.keys(table).some((k) => k.endsWith(` ${url.pathname}`));
+  return exists ? methodNotAllowed() : notFound();
+}
+
+function api(request, env, url) {
+  const handler = PUBLIC_API[`${request.method} ${url.pathname}`];
+  if (handler) return handler(request, env);
+  const exists = Object.keys(PUBLIC_API).some((k) => k.endsWith(` ${url.pathname}`));
   return exists ? methodNotAllowed() : notFound();
 }
 
@@ -70,6 +112,10 @@ export default {
 
     if (url.pathname === '/admin' || url.pathname.startsWith('/admin/')) {
       return admin(request, env, url);
+    }
+
+    if (url.pathname === '/api' || url.pathname.startsWith('/api/')) {
+      return api(request, env, url);
     }
 
     return notFound();
