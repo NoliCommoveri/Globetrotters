@@ -142,6 +142,31 @@ and land in turn. The watermark that stops it replaying lives in `localStorage`
 and is seeded to the current time, so a rebooted tablet comes back to the wall
 with no passcode and replays nothing.
 
+**Slice 08 is built** — the library editor. `/admin/library`, behind the same
+token and linked only from `/admin`: the task list with every template's draw
+count and by whom, the focus editor with the weight grid, the project type
+editor with its week-4 sequence, and the country editor for hooks and focus
+fits. Nothing is deleted — `archived = 1` takes a template out of future draws
+and leaves every month already drawn intact — with one exception: a country
+hook, which nothing references, and which a wrong generated line has nowhere
+else to go from.
+
+Edits reach an active month with no republish, because `plan_tasks` joins to
+`task_templates` rather than copying the text. The weight grid writes sparsely:
+a cell at 1 is the absence of an opinion and stores no row, and a cell moved
+back to 1 deletes the row it had. A focus created with no weights at all draws
+immediately, and the page warns when either week 2 or week 3 is under fifteen
+tasks — which, against seed v0's thirteen per week, is every focus until slice
+09 lands.
+
+`GET /admin/api/library.json` is the backup and `POST` to the same path reads
+one back. It is keyed on slugs and ISO3 codes rather than ids, so it lands in a
+database whose numbering nobody controls, and the import upserts rather than
+replaces: importing the same file twice reports nothing changed both times.
+
+The one part not built is the worksheet layout editor, which moved to slice 10
+because the table it edits arrives there.
+
 **Slice 10 is specced** — printed worksheets (§16). A drawn month becomes about
 seven sheets of ruled, titled pages for the binder: a library of twelve reusable
 layouts, segments measured in thirds of a page, packed a week to a sheet so a
@@ -157,8 +182,8 @@ feature-detected either way and what is unresolved is whether the owner has to
 set display sleep by hand.
 
 Two open questions outstanding: one against the content fill (slice 09), and one
-against part of the worksheets (slice 10). Slice 08, the library editor, is the
-only remaining slice nothing blocks.
+against part of the worksheets (slice 10). Neither of the two remaining slices is
+blocked outright — Q-12 stops only where the print button goes.
 
 The Worker's own tests run with `node --test test/*.test.js` and need nothing
 installed. They are a build-session tool, not something the owner ever runs —

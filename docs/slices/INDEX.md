@@ -4,8 +4,8 @@ Eleven slices against `../design/DESIGN.md`. Each ends at a state you can open
 in a browser and judge.
 
 A build session takes the first slice not marked `built` and reads its file. The
-dependency column is what actually orders them, not the numbering: 00–07 are a
-chain, and the three that remain are not.
+dependency column is what actually orders them, not the numbering: 00–08 are
+built, and the two that remain do not depend on each other.
 
 | # | Slice | Status | Band | Depends on | Design sections |
 |---|---|---|---|---|---|
@@ -17,7 +17,7 @@ chain, and the three that remain are not.
 | 05 | [This week](05-this-week.md) | built | L | 04 | §7 This week, §7 Plan, §10 |
 | 06 | [Completion and passport](06-completion-and-passport.md) | built | M | 05 | §7 Passport |
 | 07 | [The wall](07-wall.md) | built | M | 06 | §8 |
-| 08 | [Library editor](08-library-editor.md) | not started | L | 02 | §12 |
+| 08 | [Library editor](08-library-editor.md) | built | L | 02 | §12 |
 | 09 | [Content fill](09-content-fill.md) | not started | L | 04 | §9, §13 |
 | 10 | [Printed worksheets](10-worksheets.md) | not started | L | 05 | §16 |
 
@@ -25,21 +25,22 @@ Statuses: `not started` · `in progress` · `built`.
 
 **Slice 06 was the ship point and slice 07 is the family screen on top of it: the
 app does the whole nine-month job for one person on one phone, and the kitchen
-tablet now shows all three.** What is left is the quality of the work and the
-binder.
+tablet now shows all three.** Slice 08 made the library tunable from a browser.
+What is left is the content and the binder.
 
-Three slices remain and none of them blocks September, though slice 10 has a date
-on it in a way the others do not — printed pages are worth having in September,
-not in March. 08, 09 and 10 depend on 02, 04 and 05, not on each other, so any of
-them can go first.
+Two slices remain and neither blocks September, though slice 10 has a date on it
+in a way 09 does not — printed pages are worth having in September, not in March.
+They depend on 04 and 05, not on each other, so either can go first.
 
-One open question (Q-11) blocks 09. **08 is the only one of the three nothing
-blocks at all**, and 10's Q-12 stops only where the print button goes, so most of
-that slice can be built before it is answered.
+One open question (Q-11) blocks 09. 10's Q-12 stops only where the print button
+goes, so most of that slice can be built before it is answered.
 
-The two content-shaped slices reach further than their own screens. Slice 09 is
-the one with the most leverage on how the app feels: setup's three
-content-dependent features — the hook line on a country card, the recommended
+**Slice 10 now carries the worksheet layout editor.** Slice 08 built the rest of
+`/admin/library` and could not build that one tab: `worksheet_layouts` does not
+exist until `004_worksheets.sql`.
+
+Slice 09 reaches further than its own screens and has the most leverage on how
+the app feels. Setup's three content-dependent features — the hook line on a country card, the recommended
 focuses with their reason lines, and "Deal me three" — are built and inert,
 because `002_seed.sql` carries no hooks and no affinities. They come alive when
 09 lands `003_country_data.sql`, with no client change. It also improves slice
@@ -74,8 +75,8 @@ before there is data to lose.
 
 **Ship point: end of slice 06, and it is built.** The app does the whole
 nine-month job for one person on one phone. Slice 07 added the family screen on
-top of it. Slices 08, 09 and 10 are the quality of the work and the binder; none
-of them block September.
+top of it and slice 08 the parent's editor. Slices 09 and 10 are the content and
+the binder; neither blocks September.
 
 They depend on earlier slices but not on each other, and can run in any order
 once their dependency is met.
@@ -108,7 +109,7 @@ Every section of `DESIGN.md` and the slice that finishes it.
 | §3 Migrations | 02 — built |
 | §4 The task model | 04 — built |
 | §5 Schema | 10 (the worksheet tables are the last of it) |
-| §6 API | 10 (last route lands there; the wall's three landed in 07) |
+| §6 API | 10 (the print route and the two layout routes; slice 08 landed the rest of the editor's) |
 | §7 This week | 05 — built |
 | §7 Month setup | 04 — built |
 | §7 Passport | 06 — built |
@@ -117,7 +118,7 @@ Every section of `DESIGN.md` and the slice that finishes it.
 | §9 Country data | 09 |
 | §10 Progress | 05 — built |
 | §11 Design direction | 07 — built but for the fonts (D-10) |
-| §12 Library editor | 08 |
+| §12 Library editor | 10 — 08 built all of it but the layout editor |
 | §13 Seed data | 09 (10 adds the layout seed) |
 | §14 Build order | — (superseded by this index) |
 | §15 Decisions | — (tracked in ../other/OPEN-QUESTIONS.md) |

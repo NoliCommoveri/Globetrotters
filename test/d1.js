@@ -22,7 +22,12 @@ class Prepared {
   run() {
     const stmt = this.db.prepare(this.sql);
     const info = stmt.run(...this.args);
-    return { meta: { changes: Number(info.changes ?? 0) } };
+    return {
+      meta: {
+        changes: Number(info.changes ?? 0),
+        last_row_id: Number(info.lastInsertRowid ?? 0),
+      },
+    };
   }
 
   all() {

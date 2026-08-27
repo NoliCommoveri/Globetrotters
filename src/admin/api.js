@@ -5,17 +5,10 @@
 // arrive unauthenticated (DESIGN.md §3).
 
 import { json } from '../lib/html.js';
+import { readJson } from '../lib/body.js';
 import { applyPending, resetMonth } from '../lib/migrations.js';
 import { runSeed } from '../lib/seed.js';
 import { MIGRATIONS, SEEDS } from '../migrations/index.js';
-
-async function readJson(request) {
-  try {
-    return await request.json();
-  } catch {
-    return {};
-  }
-}
 
 export async function apiMigrate(request, env) {
   try {

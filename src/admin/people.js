@@ -6,14 +6,7 @@
 // clear of that import is what lets them be tested against a real SQLite.
 
 import { json } from '../lib/html.js';
-
-async function readJson(request) {
-  try {
-    return await request.json();
-  } catch {
-    return {};
-  }
-}
+import { readJson } from '../lib/body.js';
 
 export async function apiPeople(request, env) {
   const { results } = await env.DB.prepare(

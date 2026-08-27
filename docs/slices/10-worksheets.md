@@ -110,6 +110,24 @@ eight ruled lines.
 
 Placement on the reveal is the half that waits on **Q-12**.
 
+### The layout editor
+
+Slice 08 built the rest of `/admin/library` and left this to the slice that
+creates the table (§12). It is a fifth tab on the page already there, rendering
+from the same `GET /admin/api/library` payload as the other four.
+
+- Name, kind, height in thirds, and that kind's own knobs, with the
+  bound-template count beside each one. Editing a layout changes every task
+  bound to it, which is the point of there being twelve rather than ninety.
+- Every field is a named value the renderer reads and escapes. There is no
+  markup field, because this form is the one place a typed string reaches a
+  printed page.
+- The task list gains one column: the layout each template's printed segment
+  uses. `PATCH /admin/api/tasks/:id` takes `worksheet_layout_id` once the column
+  exists.
+- `POST /admin/api/layouts`, `PATCH /admin/api/layouts/:id`. Archived, never
+  deleted, like everything else on that page but a country hook.
+
 ## Exit criteria
 
 - A freshly drawn September prints, with no layout bound to any template, as
@@ -126,6 +144,9 @@ Placement on the reveal is the half that waits on **Q-12**.
 - A swap changes only the sheets of the week it happened in
 - The three people's headers are legible and distinct printed in greyscale
 - A layout `spec` containing `<script>` prints as visible text on the page
+- A layout edited in `/admin/library` changes every task bound to it, and a
+  `spec` typed there containing `<script>` prints as visible text on
+  `/print/:planId`
 - The wall's cookie gets a 401; a family cookie with no person still prints
 - Printed at 100% on Letter, nothing clips
 
@@ -138,9 +159,9 @@ Placement on the reveal is the half that waits on **Q-12**.
   keep working exactly as §4 specs them after a month has been printed.
 - **No per-task print button.** `?week=N` covers the reprint case; a single task
   is a third of a page.
-- **No layout editor.** That is slice 08's, and this slice seeds twelve rows it
-  does not offer a way to change. If a layout is wrong before 08 lands, it is
-  wrong in `004_worksheets.sql`.
+- **Not the layout editor.** It is in this slice's Build, not out of it: slice
+  08 is built and could not carry it, because `worksheet_layouts` does not exist
+  until `004_worksheets.sql` lands here.
 - **No worksheet bindings for the ~90 templates.** Content, slice 09. This slice
   binds only what its exit criteria need.
 - **Nothing on `/wall`.** No print button, no print route, no exception.
