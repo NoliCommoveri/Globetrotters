@@ -21,9 +21,9 @@ moved to the answered list at the bottom of this file.
 | Q-10 | Is `POST /api/auth` exempt from the wall's write ban? | 07 | auth |
 | Q-11 | Does week 4's "present" task require an audience? | 09 | content |
 
-Q-04 is the expensive one. It changes `001_schema.sql`, which is append-only —
-a column missed there costs a second migration and a second deploy cycle through
-the browser.
+Q-04 is the one that gates slice 02 entirely — nothing can be seeded until it
+is settled. It does not touch the schema: `001_schema.sql` is applied, and its
+`people` table serves either answer unchanged.
 
 ---
 
@@ -33,7 +33,9 @@ the browser.
 §3 says people "are not seeded from SQL." §13 seeds "3 placeholder people,
 renamed on `/admin`." These contradict. A person row must exist before anyone
 can pick themselves at first run, so placeholders plus an editor is the
-workable reading — but §3's sentence needs to say that instead.
+workable reading — but §3's sentence needs to say that instead. The `people`
+table is the same either way; what changes is whether slice 02's seed writes
+three rows.
 
 **Q-05 — How does `/api/catalog` invalidate?**
 It is ~60KB, cached client-side, and the slice 08 country editor edits exactly

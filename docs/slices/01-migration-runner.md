@@ -1,6 +1,6 @@
 # Slice 01 — Migration runner and `/admin`
 
-**Status:** not started
+**Status:** built
 **Band:** M
 **Implements:** §3, §5
 **Depends on:** 00
@@ -52,6 +52,11 @@ bought (`DESIGN.md` §4, §6, §15).
 
 ## Exit criteria
 
+All met. `node --test test/*.test.js` proves every one of them against a real
+SQLite — `test/d1.js` is a D1-shaped wrapper over `node:sqlite` that matches D1
+on the two behaviors the runner depends on: foreign keys enforced, and
+`batch()` atomic.
+
 - Apply pending on an empty database creates every table
 - Pressing it again reports nothing pending and does not re-run
 - Editing an applied `.sql` file shows it drifted rather than reapplying it
@@ -60,6 +65,13 @@ bought (`DESIGN.md` §4, §6, §15).
 - The splitter is unit-tested against `INSERT INTO x VALUES ('a;b')` and
   against a prompt containing an apostrophe
 - Reset month deletes a plan and its children without a foreign key error
+
+Two things the slice did not name and the code settles:
+
+- **The admin cookie lasts eight hours**, holds its own expiry, and is signed
+  with `ADMIN_TOKEN` — the same key §2's family cookie uses. `DESIGN.md` §3.
+- **Reset month's typed confirmation is the plan's month**, not a fixed word.
+  `DESIGN.md` §3.
 
 ## Do not build
 

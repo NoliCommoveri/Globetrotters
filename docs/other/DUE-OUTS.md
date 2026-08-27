@@ -9,7 +9,7 @@ terminal — if something appears to, it is specced wrong (§3).
 | # | Due-out | Needed by | State |
 |---|---|---|---|
 | D-02 | D1 database created, name and id | 00 | done — `globetrotters-prod` |
-| D-06 | Worker created and git-connected to this repo; name and route decided | 00 | done — `globetrotters` on `workers.dev`. Custom domain outstanding |
+| D-06 | Worker created and git-connected to this repo; name and route decided | 00 | done — `globetrotters` on `globetrotters.immotus.app` |
 | D-07 | `ADMIN_TOKEN` value chosen | 01 | done |
 | D-08 | Worker secrets set: `FAMILY_PASSCODE`, `ADMIN_TOKEN`, `FAMILY_TZ` | 00 | done |
 | D-09 | Three ink colors for the three people | 02 | outstanding |
@@ -40,21 +40,22 @@ script to run, what to serve as static assets, and every binding — from
 a Worker: a binding added there does not persist, because Cloudflare will not
 let the two sources drift. The binding is a commit, not a click.
 
-Two symptoms of the same missing file, both worth recognizing before slice 00
-lands `wrangler.toml`:
+`wrangler.toml` is committed at the repo root and the Worker runs a script. Two
+symptoms mean it has stopped being found there — a rename, a moved file, a
+changed build root — and they are the same fault, not two:
 
-- The Worker deploys the repo as **static assets with no script**. That is what
-  is deployed right now, and it is expected — there is no `src/` yet.
+- The Worker deploys the repo as **static assets with no script**.
 - Settings then reports **"Variables cannot be added to a Worker that only has
-  static assets."** Nothing is broken; the file that gives the Worker a script
-  and its bindings simply does not exist yet.
+  static assets."**
 
-The app answers on its **`workers.dev`** subdomain. Attaching
-`globetrotters.immotus.app` failed, and until the cause is known the route is
-deliberately **not** declared in `wrangler.toml` — a route to a domain the
-account cannot attach fails the build, which would take the working deploy down
-with it. Nothing in the app hardcodes an origin, so adding the domain later is
-three lines and changes nothing else.
+The app answers on **`globetrotters.immotus.app`**, attached as a custom domain
+in the dashboard. The `workers.dev` subdomain still answers as well.
+
+The route is deliberately **not** declared in `wrangler.toml`. The domain is
+already bound where it works, and a `routes` entry the account cannot satisfy
+fails the build — which would take a working deploy down. Nothing in the app
+hardcodes an origin, so moving the binding into the file later is three lines
+and changes nothing else.
 
 **The deploy command** carries one flag, set in the Worker's build settings:
 
@@ -62,9 +63,10 @@ three lines and changes nothing else.
 npx wrangler deploy --var COMMIT_SHA:"${WORKERS_CI_COMMIT_SHA:-unknown}"
 ```
 
-The build command is empty — there is no build step. The flag is what puts the
-commit on `/admin/health`; the version tag is empty on a Workers Build, so
-without it that row reads `(not set)`. Nothing breaks if it is missing.
+It belongs in the **Deploy command** field, and the **Build command** field is
+empty — there is no build step. The flag is what puts the commit on
+`/admin/health`; the version tag is empty on a Workers Build, so without it that
+row reads `(not set)`. Nothing breaks if it is missing.
 
 The name in `wrangler.toml` must read `globetrotters`. A mismatch does not fail
 — it deploys a second Worker under the other name and leaves this one serving
