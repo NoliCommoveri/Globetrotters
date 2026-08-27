@@ -15,7 +15,8 @@
   `/admin` after this slice ships, but the three inks are a palette decision
   (§11: three saturated stamp inks against ink navy and chart-paper off-white)
   and placeholder colors that ship are placeholder colors that stay.
-- **D-11** `FAMILY_TZ` value confirmed (set in D-08, used from here on)
+- **D-11** `FAMILY_TZ` value confirmed (set in D-08, used from here on) — done,
+  `America/Chicago`
 
 ## Open questions
 

@@ -1,0 +1,49 @@
+# Must live at the repository root. A git-connected build looks for this file at
+# the build root; without it the Worker deploys as static assets with no script,
+# and Settings then reports "Variables cannot be added to a Worker that only has
+# static assets."
+#
+# This file is also the only place bindings can be declared. The dashboard's
+# Bindings editor is locked for a git-connected Worker — a binding added there
+# does not persist. Committing this file is the binding step.
+# See docs/other/DUE-OUTS.md, D-02/D-06.
+
+name = "globetrotters"
+main = "src/index.js"
+compatibility_date = "2026-08-01"
+
+[assets]
+directory = "public"
+binding = "ASSETS"
+
+# One database. There is deliberately no preview_database_id: it is read only by
+# `wrangler dev --remote` and preview deploys, both terminal operations the owner
+# cannot perform (DESIGN.md §2, §3).
+#
+# Both fields must match the dashboard. Wrangler validates the pair and fails the
+# build on a mismatch rather than writing somewhere unexpected.
+[[d1_databases]]
+binding = "DB"
+database_name = "globetrotters-prod"
+database_id = "5f351cd1-d7e7-4ddc-af41-c2e1b0a68e02"
+
+# Hands the Worker its own version id, tag and timestamp at runtime, with no
+# build step. This is what /admin/health prints, and it is how you tell whether
+# the code you just pushed is the code that is running — the standing failure
+# mode in a browser-only workflow (DESIGN.md §3).
+[version_metadata]
+binding = "CF_VERSION_METADATA"
+
+# Bundles each .sql file into the Worker as importable text. Wrangler does not
+# treat .sql as text by default, and the migration runner (slice 01) hands these
+# strings straight to D1.
+[[rules]]
+type = "Text"
+globs = ["**/*.sql"]
+fallthrough = true
+
+# No R2 binding. The media table exists; the bucket does not, and a binding to a
+# missing bucket fails the deploy (DESIGN.md §1, §2).
+#
+# Secrets — FAMILY_PASSCODE, ADMIN_TOKEN, FAMILY_TZ — are set in the dashboard,
+# never here. A secret value must not be committed to git.

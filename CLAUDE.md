@@ -27,12 +27,13 @@ src/
   lib/                        draw engine, auth, migration runner, splitter
   migrations/*.sql            append-only, zero-padded ids
 public/                       static assets: fonts, css, js, wall
-wrangler.toml
-.github/workflows/deploy.yml
+wrangler.toml                 must sit at the repo root: the git-connected
+                              build looks for it there
 ```
 
-`src/` and `public/` do not exist until slice 00 creates them. Do not create
-them ahead of it.
+`src/` and `public/` exist. Only `public/` is served as static assets, so `docs/`,
+`src/` and `wrangler.toml` are not publicly downloadable and no `.assetsignore`
+is needed.
 
 ---
 

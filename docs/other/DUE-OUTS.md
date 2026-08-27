@@ -8,17 +8,13 @@ terminal — if something appears to, it is specced wrong (§3).
 
 | # | Due-out | Needed by | State |
 |---|---|---|---|
-| D-01 | Cloudflare account, account ID known | 00 | outstanding |
-| D-02 | D1 database created (production), name and id | 00 | done — `globetrotters-prod` |
-| D-03 | D1 database created (preview), name and id | 00 | done — `globetrotters-preview` |
-| D-04 | R2 bucket created, name known | 00 | outstanding |
-| D-05 | GitHub repo secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` | 00 | outstanding |
-| D-06 | Worker name and route decided | 00 | outstanding |
-| D-07 | `ADMIN_TOKEN` value chosen | 01 | outstanding |
-| D-08 | Worker secrets set: `FAMILY_PASSCODE`, `ADMIN_TOKEN`, `FAMILY_TZ` | 00 | outstanding |
+| D-02 | D1 database created, name and id | 00 | done — `globetrotters-prod` |
+| D-06 | Worker created and git-connected to this repo; name and route decided | 00 | done — `globetrotters`, `workers.dev` |
+| D-07 | `ADMIN_TOKEN` value chosen | 01 | done |
+| D-08 | Worker secrets set: `FAMILY_PASSCODE`, `ADMIN_TOKEN`, `FAMILY_TZ` | 00 | done |
 | D-09 | Three ink colors for the three people | 02 | outstanding |
 | D-10 | Two font files, licensed for self-hosting | 03 | outstanding |
-| D-11 | `FAMILY_TZ` value confirmed | 02 | outstanding |
+| D-11 | `FAMILY_TZ` value confirmed | 02 | done — `America/Chicago` |
 | D-12 | The month the school year starts | 04 | outstanding |
 | D-13 | Paper size the passport prints to | 06 | outstanding |
 | D-14 | Which tablet and browser the wall runs on | 07 | outstanding |
@@ -27,19 +23,43 @@ terminal — if something appears to, it is specced wrong (§3).
 
 ## Detail
 
-**D-01 — D-06. Cloudflare and GitHub.** None of slice 00 can be built before
-these exist. `wrangler.toml` without database ids does not deploy, and there is
-no partial version. All of it is done in the Cloudflare dashboard and the
-GitHub repo settings page.
+**D-02, D-06. Cloudflare.** Both are done. The database is `globetrotters-prod`
+and the Worker is `globetrotters`, git-connected to this repo and building on
+push to `main`.
 
-The API token needs permission to edit Workers, D1, and R2 on the account.
-
-The two D1 databases exist. Their ids go straight into `wrangler.toml`:
+The database id goes straight into `wrangler.toml`:
 
 | Binding | Name | `database_id` |
 |---|---|---|
-| production | `globetrotters-prod` | `5f351cd1-d7e7-4ddc-af41-c2e1b0a68e02` |
-| preview | `globetrotters-preview` | `3304a4c4-ae23-4900-b7f9-4904bac01e99` |
+| `DB` | `globetrotters-prod` | `5f351cd1-d7e7-4ddc-af41-c2e1b0a68e02` |
+
+**There is no dashboard step that binds D1 to this Worker, and looking for one
+is a dead end.** A git-connected Worker takes *all* of its configuration — what
+script to run, what to serve as static assets, and every binding — from
+`wrangler.toml` in the repo. The dashboard's Bindings editor is locked for such
+a Worker: a binding added there does not persist, because Cloudflare will not
+let the two sources drift. The binding is a commit, not a click.
+
+Two symptoms of the same missing file, both worth recognizing before slice 00
+lands `wrangler.toml`:
+
+- The Worker deploys the repo as **static assets with no script**. That is what
+  is deployed right now, and it is expected — there is no `src/` yet.
+- Settings then reports **"Variables cannot be added to a Worker that only has
+  static assets."** Nothing is broken; the file that gives the Worker a script
+  and its bindings simply does not exist yet.
+
+The name in `wrangler.toml` must read `globetrotters`. A mismatch does not fail
+— it deploys a second Worker under the other name and leaves this one serving
+the old build, which is a confusing half-hour.
+
+Both fields of the D1 pair must match the dashboard. Wrangler validates
+`database_name` against `database_id` and fails the build on a mismatch rather
+than writing somewhere unexpected.
+
+**Secrets are the exception** (D-07, D-08). They are set in the dashboard, never
+in `wrangler.toml`, which is correct — a secret value must not be committed to
+git.
 
 **D-07, D-08. Secrets.** Three Worker secrets, set once in the dashboard:
 
@@ -49,12 +69,18 @@ The two D1 databases exist. Their ids go straight into `wrangler.toml`:
   a curious 12-year-old out of the library editor and Reset month. It is also
   the key the family session cookie is signed with, so changing it logs all
   three people out. Set once and left alone.
-- `FAMILY_TZ` — an IANA zone name, e.g. `America/Denver`. Every `local_date` is
-  computed from it at insert. Getting it wrong shifts which calendar day a
-  session lands on.
+- `FAMILY_TZ` — `America/Chicago` (D-11). Every `local_date` is computed from it
+  at insert, so getting it wrong shifts which calendar day a session lands on.
 
-`FAMILY_TZ` isn't read until slice 02 and `ADMIN_TOKEN` not until 01, but all
-three are set in one visit rather than three.
+All three are set. They were added before the Worker's first real build, which
+is the right order: a secret is picked up by the next deploy, not by code
+already running.
+
+**The values live in the Cloudflare dashboard and nowhere else.** A secret's
+value is not viewable again after saving, and none of the three belongs in this
+repo — not here, not in `wrangler.toml`, not in a slice. Keep a copy in a
+password manager; `ADMIN_TOKEN` in particular cannot be rotated casually,
+because every family session cookie is signed with it (§2).
 
 **D-09. Ink colors.** Three saturated colors against a deep ink navy ground and
 chart-paper off-white (§11). They are used only for ownership and completion —
