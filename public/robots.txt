@@ -1,0 +1,4 @@
+# Three people and a kitchen tablet. Nothing here is for a search engine, and
+# DESIGN.md §3 wants /admin unreachable by accident.
+User-agent: *
+Disallow: /

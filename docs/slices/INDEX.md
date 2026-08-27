@@ -8,7 +8,7 @@ Slices are strictly ordered — the dependency column is why, not a suggestion.
 
 | # | Slice | Status | Band | Depends on | Design sections |
 |---|---|---|---|---|---|
-| 00 | [Deploy path](00-deploy-path.md) | not started | M | — | §2, §3 (deploy half) |
+| 00 | [Deploy path](00-deploy-path.md) | in progress | M | — | §2, §3 (deploy half) |
 | 01 | [Migration runner](01-migration-runner.md) | not started | M | 00 | §3, §5 |
 | 02 | [Seed v0 and catalog](02-seed-and-catalog.md) | not started | M | 01 | §13 (partial), §6 (catalog) |
 | 03 | [Auth and shell](03-auth-and-shell.md) | not started | M | 02 | §2 (auth), §11 |

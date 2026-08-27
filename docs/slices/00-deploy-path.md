@@ -1,6 +1,6 @@
 # Slice 00 — Deploy path
 
-**Status:** not started
+**Status:** in progress — code complete, awaiting the first deploy
 **Band:** M
 **Implements:** §2 (stack, bindings), §3 (deploy half)
 **Depends on:** nothing
@@ -68,11 +68,32 @@ None. Q-03 is answered: the session cookie is signed with `ADMIN_TOKEN`
 
 ## Exit criteria
 
+Every one of these is checked in a browser against a deployed Worker, so none of
+them can be confirmed from a build session. The slice is marked `built` once the
+owner has seen all four.
+
 - Editing a file in the GitHub web editor changes what `/admin/health` prints
 - Re-running a build from the deployment's **Retry build** button works
-- The `.sql` text rule is proven: import one throwaway `.sql` file and print
-  its length on the health page
+- The `.sql` text rule is proven: `src/lib/probe.sql` is imported and its length
+  printed on the health page
 - `/admin/health` reports D1 reachable
+
+**What to look at, on `https://globetrotters.<subdomain>.workers.dev/admin/health`:**
+
+| Row | Passing |
+|---|---|
+| Version id | any value, and a *different* one after the next push |
+| Commit | the commit sha. `(not set)` means the version tag does not carry it — see below |
+| Deployed at | a timestamp from the build just now, not hours ago |
+| D1 | `yes — reachable` |
+| `.sql` text rule | `yes — probe.sql is N characters` |
+
+D1 failing turns the whole page 503, so a green page is the whole check.
+
+**If Commit reads `(not set)`,** the version tag does not carry the commit on this
+account and the fallback named above applies: inject it from the builder's commit
+environment variable through a build command. Nothing else on the page changes,
+and the deploy check still works — Version id moves on every deploy regardless.
 
 ## Do not build
 
