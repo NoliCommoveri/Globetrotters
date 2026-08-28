@@ -108,15 +108,20 @@ sixteen.
 - Header band per sheet: person, country, month, week, *sheet n of m*, ruled in
   that person's ink. **n of m counts within the week** in both the whole-month
   and the `?week=N` render, so a reprinted week is the same sheets it was.
+- A sticky **Print** button on the document itself, hidden on paper, calling
+  `window.print()`. The browser's own print entry is inside a share sheet on a
+  phone and absent from the menu on some Android builds.
 
 ### The buttons
 
-- **Print this month's pages** at the end of the reveal (§7 Month setup) — the
-  moment the month becomes real.
-- The same on **Plan**, which is where anyone goes for the shape of the month.
-- After a swap on Plan, offer to reprint that week. One sheet or two, not seven.
+- **Print week ↗** beside every week's heading on **Plan**, opening
+  `/print/:planId?week=N` in a new tab. There is no month-wide button: printing
+  four weeks the day the month is drawn puts weeks 2 and 3 on paper a swap away
+  from being wrong.
+- After a swap on Plan, the toast names the week to print again. One sheet or
+  two, not seven.
 
-Placement on the reveal is the half that waits on **Q-12**.
+**Q-12 is answered:** anyone prints, from any device but the wall.
 
 ### The layout editor
 

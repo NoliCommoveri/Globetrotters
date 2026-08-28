@@ -234,6 +234,40 @@ body {
   }
 }
 
+/* The Print button. It is the reason the page exists on a screen: the browser's
+ * own print entry is buried in a share sheet on a phone and absent from the
+ * menu on some Android builds. Sticky, so it is still there four sheets down. */
+.print-bar {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: .12in;
+  flex-wrap: wrap;
+  padding: .12in .2in;
+  margin-bottom: .3in;
+  background: #fff;
+  border-bottom: 1px solid #c9c9cf;
+  font-size: .82rem;
+}
+
+.print-bar[hidden] { display: none; }
+
+.print-now {
+  font: inherit;
+  font-weight: 600;
+  padding: .08in .28in;
+  color: #fff;
+  background: #111;
+  border: 0;
+  border-radius: .06in;
+  cursor: pointer;
+}
+
+.print-hint { color: #4a4a52; }
+
 @media print {
   body { padding: 0; }
+  .print-bar { display: none; }
 }

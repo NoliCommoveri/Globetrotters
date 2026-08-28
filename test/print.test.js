@@ -90,6 +90,22 @@ test('a family cookie with no person picked still prints', async () => {
   assert.match(html, /class="sheet"/);
 });
 
+// The document is the only route to a print dialog on a phone: the browser's
+// own entry is inside a share sheet, and some Android builds do not carry it at
+// all. A page of sheets with no button on it cannot be printed.
+test('every printed document carries its own print button', async () => {
+  const e = await env();
+  const { cookie, id } = await plan(e);
+  for (const path of [`/print/${id}`, `/print/${id}?week=4`]) {
+    const { html } = await printed(e, path, cookie);
+    assert.match(html, /class="print-now"/);
+    assert.match(html, /<script src="\/js\/print-page\.js"/);
+  }
+  // The button is inert without the file, and a dangling src is silent.
+  const script = readFileSync(new URL('../public/js/print-page.js', import.meta.url), 'utf8');
+  assert.match(script, /window\.print\(\)/);
+});
+
 test('a month that does not exist is 404, and a bad week is 400', async () => {
   const e = await env();
   const { cookie, id } = await plan(e);
