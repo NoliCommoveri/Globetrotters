@@ -82,11 +82,16 @@ export function planScreen(ctx) {
     project: 'Week 4 is new.',
   };
 
-  const messageFor = (kind, body) => (
-    kind.startsWith('swap-')
-      ? `Swapped. ${left(body.swaps_left)} this month.`
-      : MESSAGES[kind]
-  );
+  // A swap names its week, because the sheets for that week are already in the
+  // binder and the new card is not on any of them. Printing again is one week,
+  // never seven (§16).
+  function messageFor(kind, body) {
+    if (!kind.startsWith('swap-')) return MESSAGES[kind];
+    const id = Number(kind.slice(5));
+    const group = body.weeks.find((w) => w.tasks.some((t) => t.id === id));
+    const reprint = group ? ` Print week ${group.week_no} again if it is on paper.` : '';
+    return `Swapped. ${left(body.swaps_left)} this month.${reprint}`;
+  }
 
   // ------------------------------------------------------------- fragments --
 
@@ -152,9 +157,29 @@ export function planScreen(ctx) {
     ]);
   }
 
+  // The printed pages, one week at a time (§16). A week is the unit because a
+  // week is what the sheets break on: printing the month up front means a swap
+  // in week 3 stales pages that are already in the binder, and reprinting the
+  // month to fix it reprints weeks 1 and 2 that nothing changed.
+  //
+  // Not a data-route link. It is a Worker-rendered document with its own
+  // stylesheet, so the router must let the browser have it.
+  function printWeek(body, group) {
+    return el('a', {
+      class: 'chrome-link week-print',
+      href: `/print/${body.plan.id}?week=${group.week_no}`,
+      target: '_blank', rel: 'noopener',
+      text: 'Print week ↗',
+      title: `Week ${group.week_no}'s sheets, ready for the binder`,
+    });
+  }
+
   function week(body, group) {
     return el('div', { class: 'week' }, [
-      el('h2', { text: `Week ${group.week_no} · ${group.theme}` }),
+      el('div', { class: 'week-head' }, [
+        el('h2', { text: `Week ${group.week_no} · ${group.theme}` }),
+        printWeek(body, group),
+      ]),
       el('p', { class: 'note', text: WEEK_NOTE[group.week_no] }),
       el('ol', { class: 'tasks' }, group.tasks.map((task) => taskCard(body, task))),
     ]);

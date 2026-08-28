@@ -343,9 +343,9 @@ nothing to protect: no work has been done yet.
 
 ## 5. Schema (D1 / SQLite)
 
-**Status:** partial · `001_schema.sql` is built (slice 01). The two
-worksheet tables and the two columns they hang off `task_templates` are slice
-10, as `004_worksheets.sql`.
+**Status:** built · `001_schema.sql` (slice 01) and `004_worksheets.sql`, which
+adds `worksheet_layouts` and the two columns it hangs off `task_templates`
+(slice 10).
 
 ```sql
 CREATE TABLE people (
@@ -530,7 +530,7 @@ CREATE INDEX idx_hooks_country        ON country_hooks(country_id);
 
 ## 6. API
 
-**Status:** partial · `/api/catalog`, `POST /admin/api/seed` and the two people
+**Status:** built · `/api/catalog`, `POST /admin/api/seed` and the two people
 routes are built (slice 02); `POST /api/auth` and both `/api/me` routes are
 built (slice 03); `POST /api/plans`, `GET`/`PATCH /api/plans/:id`,
 `POST /api/plans/:id/redraw`, `GET /api/focuses/:id/samples` and
@@ -538,8 +538,8 @@ built (slice 03); `POST /api/plans`, `GET`/`PATCH /api/plans/:id`,
 `POST /api/tasks/:id/swap`, `POST /api/sessions` and `GET /api/stats` are built
 (slice 05); the two completion routes and `PATCH /api/stamps/:id` are built
 (slice 06); `GET /wall` and both `/api/wall` routes are built (slice 07); the
-library editor is built (slice 08) but for the two layout routes, whose table
-arrives with slice 10. What remains is the print route and those two.
+library editor is built (slice 08) and its two layout routes with slice 10, as
+is `GET /print/:planId`. Every route in this section is built.
 
 ```
 POST   /api/auth                      passcode -> cookie. The one family route that
@@ -581,9 +581,11 @@ PATCH  /api/stamps/:id                {headline} — the stamp's one line, edita
 GET    /api/stats                     the cookie's own person; ?all=1 for all three
 
 GET    /print/:planId                 the month's pages as a printable document.
-                                      ?week=N prints one week — the reprint path
-                                      after a swap. Family cookie only; the
-                                      wall's is refused. See §16.
+                                      ?week=N prints one week, and is what every
+                                      button in the app asks for — the sheets
+                                      break on the week, so a week is what
+                                      reprints. Family cookie only, no person
+                                      needed; the wall's is refused. See §16.
 
 GET    /wall                          read-only ambient view (own cookie type).
                                       Its own document, not a shell route: the
@@ -1100,8 +1102,8 @@ carries the first four weeks of the year.
 
 ## 12. Library editor
 
-**Status:** partial · slice 08 is built. The worksheet layout editor is the one
-part that is not, because the table it edits arrives with slice 10.
+**Status:** built · slice 08 built all of it but the worksheet layout editor,
+which arrived with its table in slice 10.
 
 Tasks, focuses, and project types are all editable in the app. Parent-facing, behind
 `ADMIN_TOKEN`, not part of the kid experience.
@@ -1131,9 +1133,11 @@ in thirds, and that kind's own knobs. Every field is a named value the renderer
 reads and escapes; there is no markup field, here or anywhere, because this form
 is the one place a typed string reaches a printed page. Editing a layout changes
 every task bound to it, which is the point of there being twelve rather than
-ninety — and it is why the editor shows the bound count beside each one. This is
-the one part of the editor that is not built: `worksheet_layouts` arrives with
-slice 10, and so does the layout column on the task list.
+ninety — and it is why the editor shows the bound count beside each one. The
+form is drawn from the knobs the server sends with the payload, so a knob added
+to a kind appears in the editor with no second list to keep in step. The task
+list carries the matching column: which form each template's segment prints as,
+or ruled lines.
 
 **People editor** — the three names, ink colors, and display order. This is where the
 family names itself; nothing about it belongs in a seed migration.
@@ -1163,28 +1167,31 @@ mid-month — for that, archive the old one and create a new task.
 forever.
 
 **Export and import** — `GET /admin/api/library.json` dumps tasks, focuses, project
-types, weights, hooks, and affinities as JSON, and `POST` to the same path reads one
-back. This is the backup, and it's how a tuned library gets carried into next school
+types, weights, hooks, affinities, and the worksheet layouts with each task's
+binding, as JSON, and `POST` to the same path reads one back. This is the backup, and it's how a tuned library gets carried into next school
 year without a terminal.
 
-Every row in the file is keyed on a natural key — slug for tasks, focuses and
-project types, ISO3 for countries — and never on an id, because a restore lands in
+Every row in the file is keyed on a natural key — slug for tasks, focuses,
+project types and layouts, ISO3 for countries — and never on an id, because a restore lands in
 a database whose numbering nobody controls. The import upserts on that key and
 **never deletes**: a row already present is compared field by field and written
 only where it differs, so importing a file twice reports nothing changed both
 times. A row whose anchor is missing — a task naming a project type this database
 does not have, a hook naming an unknown ISO3 — is skipped and counted rather than
-written with a dangling reference.
+written with a dangling reference. A task naming a layout that is missing is the
+one exception: it keeps everything else and loses only the binding, because a
+task with no layout prints ruled lines and that is a complete page, where
+skipping the task would leave the week one short.
 
 ---
 
 ## 13. Seed data
 
-**Status:** partial · the library is built and full (slices 02 and 09): the
-runner, 3 people, 6 focuses, 6 project types, 195 countries, **90 task
-templates**, 87 focus weights, and `003_country_data.sql`'s 222 hooks and 200
-affinities across 100 countries. What remains is `004_worksheets.sql` and the
-worksheet bindings on the templates, both slice 10.
+**Status:** built · the runner, 3 people, 6 focuses, 6 project types, 195
+countries, **90 task templates**, 87 focus weights, `003_country_data.sql`'s 222
+hooks and 200 affinities across 100 countries (slices 02 and 09), and
+`005_worksheet_layouts.sql`'s twelve printed forms with a binding on every week
+1–3 template and on each project type's planning step (slice 10).
 
 Seed files are not migrations (§3). They live beside them in `/src/migrations/`
 and are exported from the same index as `SEEDS`, but they are re-run by **Run
@@ -1202,9 +1209,11 @@ that was already seeded and carrying a month of real work.
   A seed. Its hook insert is guarded on the country rather than conflict-keyed,
   because a hook has no natural key and a deleted one must stay deleted (§9).
 - `004_worksheets.sql` — the `worksheet_layouts` table and the two columns it
-  hangs off `task_templates`, then the twelve layouts (§16). A migration and a
-  seed: the columns are applied once, the layouts are upserted on `slug` like
-  every other seeded row.
+  hangs off `task_templates` (§16). A migration: DDL, applied once, never edited.
+- `005_worksheet_layouts.sql` — the twelve layouts and the binding for every
+  week 1–3 template. A seed: the layouts upsert on `slug` like every other
+  seeded row, and each binding is written only where the column is still empty,
+  so a task rebound in the library editor keeps what was chosen there.
 
 Contents of `002_seed.sql`:
 
@@ -1254,12 +1263,16 @@ draw of five, while six put two or three. And no focus may exclude more than one
 task in a week: exclusions eat the spare that Swap draws from, and the headroom
 a wider pool buys is for content, not for exclusions.
 
-**Worksheet bindings are the one piece of content still outstanding.** Which of
-the twelve layouts a template wants is one column on a `task_templates` row
-(§16), and that column does not exist until `004_worksheets.sql` applies. Until
-a binding exists the task prints its prompt over ruled lines, which is a usable
-page — so nothing waits on it, and slice 10 writes the bindings as it adds the
-column.
+**Every week 1–3 template is bound to one of the twelve layouts**, in
+`005_worksheet_layouts.sql` (§16). The heights are the load-bearing half: a
+sheet holds three thirds, so the mix decides how much paper a month is. Twenty-
+one templates rule four lines, seventeen sketch beside notes, and only nine take
+two thirds or three — which puts a drawn month at seven to nine sheets rather
+than the twelve a library of drawing boxes would print.
+
+Week 4 is bound differently, because its sheet is composed rather than packed:
+only each project type's planning step carries a binding, and it is what tells
+the renderer which task the storyboard belongs to.
 
 Every `prompt` is written in second person to a 5th grader, one clear action,
 finishable in ten minutes. "Find out which animal is on their money and draw it"
@@ -1491,7 +1504,7 @@ the code that depends on them is written, never guessed.
 
 ## 16. Printed worksheets
 
-**Status:** not started · slice 10
+**Status:** built · slice 10
 
 The physical looseleaf workbook is the point of the project (§1, §7). Twenty
 tasks a month arrive as prompts on a phone and land on paper the kid has to
@@ -1533,11 +1546,16 @@ half a page and "write hello two ways" wants four lines; forcing both to a third
 gives one a cramped box and the other a field of white.
 
 So a layout declares its height in **thirds** — 1, 2 or 3 — and the sheet holds
-three. US Letter at 0.5in margins is a 7.5 × 10in printable area (D-13), so a
-third is 7.5 × 3.33in, which is a comfortable drawing box and about eight ruled
-lines. Those two numbers are one CSS variable each: if a home printer's
-unprintable margin clips a segment, the margin moves in one place and every
-layout follows.
+three. US Letter at 0.5in margins is a 7.5 × 10in printable area (D-13). The
+header band takes 0.62in off the top of that, so a third is 7.5 × 3.13in, which
+is a comfortable drawing box and about eight ruled lines. Thirds are measured
+against what is left under the band rather than against the paper: measured
+against the paper, three full-height segments and a band would not fit, and the
+last one would fall off the sheet.
+
+All of it derives from `--page-margin` and `--band` in `public/css/print.css`. If
+a home printer's unprintable margin clips a segment, the margin moves in one
+place and every layout follows.
 
 ### Packing
 
@@ -1556,10 +1574,14 @@ page.
 ### What prints
 
 **Weeks 1–3: every task gets a segment.** A template with no binding falls
-through to a default of ruled lines under the prompt, so the binder never has a
-hole and printing works before a single layout is bound — the same built-and-
-inert pattern the country hooks use (§7). "Applicable" means a task has a
-bespoke form, not that it has a page.
+through to a default of **one third of eight ruled lines** under the prompt, so
+the binder never has a hole and printing works before a single layout is bound —
+the same built-and-inert pattern the country hooks use (§7). "Applicable" means
+a task has a bespoke form, not that it has a page.
+
+One third rather than two is what keeps an unbound month at seven sheets. The
+same twenty tasks bound to drawing boxes and tables run to eight or nine, and
+that extra paper is exactly what the bindings buy.
 
 **Week 4 is one sheet, and four of its five tasks have no segment.** Week 4 is
 production, not research (§4): gather materials, two build sessions, rehearse,
@@ -1574,7 +1596,9 @@ a title (§7) — a sheet that names the task without saying what to do sends th
 kid back to the phone, which is the friction the sheet exists to remove.
 
 **The sheet header** carries the person's name, the country, the month, the week
-and *sheet n of m*, ruled in that person's ink. The three inks were chosen to
+and *sheet n of m*, ruled in that person's ink. **n of m counts within the
+week**, not across the month: a week reprinted after a swap has to produce the
+same sheets it did the first time, or it cannot drop back into the binder. The three inks were chosen to
 stay separable as greys on a home printer (§13), which is what keeps three
 people's pages apart on the table.
 
@@ -1590,9 +1614,9 @@ served the way `/admin` and `/wall` are and not under `/api/`. The app shell is
 a static mobile-first document (§2) and a print stylesheet bolted onto it would
 spend the whole slice fighting it.
 
-`?week=N` prints one week. That is the reprint-after-swap path, and it is also
-the only way to print a single task's sheet — there is no per-task print button,
-because the answer to "print this one task" is a third of a page.
+`?week=N` prints one week, and it is what every button in the app points at. It
+is also the only way to print a single task's sheet — there is no per-task print
+button, because the answer to "print this one task" is a third of a page.
 
 **The wall cookie is refused.** The wall has no person and nothing on it should
 open a print dialog (§8).
@@ -1610,11 +1634,21 @@ stale the first time one of those is used, and the fix — invalidating stored
 pages on five different writes — is a cache to maintain for a document that
 takes one query to rebuild.
 
-So "when the month's tasks are finalized" is a **place, not an event**: the
-**Print this month's pages** button sits at the end of the reveal (§7 Month
-setup), which is the moment the month becomes real, and again on **Plan**, which
-is where someone goes when they want the shape of the month. A swap on Plan
-offers to reprint that week.
+So "when the month's tasks are finalized" is a **place, not an event** — and the
+place is a week, not a month. **Print week** sits beside every week's heading on
+**Plan**, which is the reveal on the day the month is drawn and the page anyone
+opens for the shape of the month afterwards.
+
+**The trigger is the week because the sheets break on the week.** Printing all
+four weeks the day the month is drawn puts weeks 2 and 3 on paper a fortnight
+before anyone reads them and a swap away from being wrong — and the fix,
+reprinting, reprints weeks 1 and 2 that nothing changed. Printing a week at a
+time means a swap on day eighteen costs one or two sheets and leaves everything
+already in the binder alone. There is no month-wide button; `/print/:planId`
+with no `?week` still renders all four and nothing in the app links to it.
+
+A swap says which week it was in, so the toast that reports it is also the
+reminder to print that week again.
 
 ### Layout specs are data, not markup
 
@@ -1622,14 +1656,25 @@ A layout carries a `kind` and a JSON `spec` of named knobs — line count, capti
 text, column headers, panel count. A template may override those keys for its
 own segment.
 
+**A layout's spec is complete; a template's is a patch.** A layout carries every
+knob its kind has, so the editor's form is the whole form. A template's override
+carries only the keys it changes, and is merged over the layout's key by key —
+an override that filled in the rest would silently replace values the parent
+typed with defaults nobody chose.
+
 **The renderer never takes markup from the database.** It reads the keys it
 knows for that `kind` and escapes every string it prints. The library editor
 (§12) lets a parent type into these fields, and a `spec` that could carry HTML
 would make the printed page an injection surface reachable from a form.
 
-### What this costs
+### What it cost
 
-One migration adding `worksheet_layouts` and two nullable columns on
-`task_templates` (§5), one route, one print stylesheet, and twelve layouts. The
-bindings — which of the twelve each template wants — are content and land with
-§13's fill, with no code change when they do.
+`004_worksheets.sql`, a migration adding `worksheet_layouts` and two nullable
+columns on `task_templates` (§5); `005_worksheet_layouts.sql`, a seed carrying
+the twelve layouts and the binding for every week 1–3 template; one route, one
+print stylesheet, and the layout tab of §12.
+
+The DDL and the rows are two files because they are protected by opposite rules
+(§3): SQLite has no `ADD COLUMN IF NOT EXISTS`, so the ALTERs cannot be in a file
+Run seed re-executes — and the layouts and bindings have to be in one, or they
+could never be corrected without reading as drift.

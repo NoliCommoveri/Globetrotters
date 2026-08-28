@@ -22,8 +22,8 @@ seeding, or deploy requires a terminal.
 | `docs/other/DUE-OUTS.md` | What the owner must provide, by slice |
 | `docs/other/SEED-CONTENT.md` | Column rules and row forms for the hand-written seed lists |
 | `docs/other/OPEN-QUESTIONS.md` | Questions blocking build, and answered ones |
-| `src/` | The Worker: entry and routing, `/api/*`, `/admin`, `lib/`, `migrations/` |
-| `public/` | Two static documents — the family app and the wall — one stylesheet, eleven JS modules |
+| `src/` | The Worker: entry and routing, `/api/*`, `/admin`, `/print`, `lib/`, `migrations/` |
+| `public/` | Two static documents — the family app and the wall — the app stylesheet and the print stylesheet, eleven JS modules |
 | `test/` | `node --test test/*.test.js` — no dependencies, no install |
 
 ## Where things stand
@@ -185,26 +185,42 @@ Re-running the seed cannot duplicate a hook or resurrect a deleted one: hooks
 have no natural key, so the insert skips any country that already holds one,
 which is what makes the editor's one delete stick.
 
-The one part not built is the worksheet bindings, which moved to slice 10
-because the column they live in arrives there.
+**Slice 10 is built.** A drawn month comes out of the printer as the pages that
+go in the binder (§16). Twelve reusable layouts — ruled lines, drawing boxes,
+two labelled columns, a six-panel storyboard — each declaring a height in thirds
+of a page, and one binding per template says which form a task wants. Segments
+pack in position order, three thirds to a sheet, a week to a sheet-run, and no
+segment ever crosses a page break. Week 4 is one composed sheet: the project
+type's materials as a checklist, its five steps as check-off lines, and a
+storyboard for the one task that is planning work.
 
-**Slice 10 is specced** — printed worksheets (§16). A drawn month becomes about
-seven sheets of ruled, titled pages for the binder: a library of twelve reusable
-layouts, segments measured in thirds of a page, packed a week to a sheet so a
-mid-month swap reprints one week. Nothing is stored and no plan is ever frozen —
-`/print/:planId` renders live from the plan every time it is asked. It measures
-against the same two page variables the passport already prints against.
+**Print week** sits beside every week's heading on Plan, and there is no
+month-wide button. The sheets break on the week, so printing all four the day
+the month is drawn puts weeks 2 and 3 on paper a swap away from being wrong, and
+reprinting the month to fix one week reprints two that nothing changed. Sheets
+are numbered within their week for the same reason: a week reprinted is the same
+sheets it was.
 
-Every Cloudflare due-out is closed, and so are the three inks, the school year
-(September through May) and the paper (D-13 — US Letter). Two remain and neither
-blocks code: the fonts (D-10) — the shell, the stamp and the wall run on a system
-stack — and which tablet the wall runs on (D-14), where the wake lock is
-feature-detected either way and what is unresolved is whether the owner has to
-set display sleep by hand.
+Nothing is stored and no plan is ever frozen — `/print/:planId` renders live from
+the plan every time it is asked, behind the family cookie, refused to the wall.
+The renderer never takes markup from the database: every layout field is a named
+value it coerces and escapes, which is what lets a parent type into these fields
+in `/admin/library` without the printed page becoming an injection surface.
 
-One open question outstanding, against part of the worksheets (slice 10): Q-12
-stops only where the print button goes, not the route, the packer or the twelve
-layouts.
+Its schema is two files. `004_worksheets.sql` is the migration — the table and
+two nullable columns — and `005_worksheet_layouts.sql` is the seed carrying the
+twelve layouts and the bindings. SQLite has no `ADD COLUMN IF NOT EXISTS`, so
+DDL cannot live in a file Run seed re-executes; and layouts in a migration could
+never be corrected without reading as drift.
+
+**Every slice is built.** Every Cloudflare due-out is closed, and so are the
+three inks, the school year (September through May) and the paper (D-13 — US
+Letter). Two remain and neither blocks code: the fonts (D-10) — the shell, the
+stamp and the wall run on a system stack — and which tablet the wall runs on
+(D-14), where the wake lock is feature-detected either way and what is
+unresolved is whether the owner has to set display sleep by hand.
+
+No open questions outstanding.
 
 The Worker's own tests run with `node --test test/*.test.js` and need nothing
 installed. They are a build-session tool, not something the owner ever runs —

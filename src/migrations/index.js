@@ -21,12 +21,16 @@
 import m001 from './001_schema.sql';
 import s002 from './002_seed.sql';
 import s003 from './003_country_data.sql';
+import m004 from './004_worksheets.sql';
+import s005 from './005_worksheet_layouts.sql';
 
 export const MIGRATIONS = [
   { id: '001', name: '001_schema.sql', sql: m001 },
+  { id: '004', name: '004_worksheets.sql', sql: m004 },
 ];
 
 export const SEEDS = [
   { id: '002', name: '002_seed.sql', sql: s002 },
   { id: '003', name: '003_country_data.sql', sql: s003 },
+  { id: '005', name: '005_worksheet_layouts.sql', sql: s005 },
 ];

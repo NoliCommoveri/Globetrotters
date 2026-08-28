@@ -1,6 +1,6 @@
 # Slice 10 — Printed worksheets
 
-**Status:** not started
+**Status:** built
 **Band:** L
 **Implements:** §16
 **Depends on:** 05
@@ -21,24 +21,30 @@ Nothing else. Everything this slice reads exists after slice 05.
 
 ## Open questions
 
-- **Q-12** — Who prints, and from what device? It decides whether the button
-  belongs at the end of the reveal at all, which is a screen a kid reaches on a
-  phone. Answer it before the buttons are placed; the route and the layouts do
-  not depend on it.
+- **Q-12** — Answered: **anyone, from any device.** The printer is reachable
+  from the kids' phones, so the button is real wherever it sits. The household
+  fact settled; where the button went was then decided by the sheets rather than
+  by the device — see The buttons.
 
 ## Build
 
-### The migration
+### The migration and the seed
 
-`004_worksheets.sql` — `worksheet_layouts`, plus `worksheet_layout_id` and
-`worksheet_spec` on `task_templates` (§5). Both columns are nullable and stay
-that way.
+Two files, because they are protected by opposite rules (§3).
 
-It is a migration and a seed in one file: the two `ALTER TABLE`s apply once, the
-twelve layout rows upsert on `slug` on every **Run seed** like every other
-seeded row. `003` is slice 09's and may not exist yet — the runner applies in id
-order and a gap is not a state it can be in, so this file takes `004` and slice
-09 keeps `003` whichever lands first.
+`004_worksheets.sql` is the migration: `worksheet_layouts`, plus
+`worksheet_layout_id` and `worksheet_spec` on `task_templates` (§5). Both columns
+are nullable and stay that way. Checksummed, applied once, never edited.
+
+`005_worksheet_layouts.sql` is the seed: the twelve layout rows, upserted on
+`slug` on every **Run seed** like every other seeded row, and the binding for
+every week 1–3 template, written only where the column is still empty.
+
+They cannot be one file. SQLite has no `ADD COLUMN IF NOT EXISTS`, so a file
+carrying the two `ALTER TABLE`s fails its second Run seed and halts the press —
+and layouts that live in a migration can never be corrected or added to without
+reading as drift forever. The split is what the machinery leaves, and it is also
+the right shape: the DDL is written once and the content keeps growing.
 
 ### The twelve layouts
 
@@ -62,8 +68,10 @@ off the sheet.
 | `checklist` | checklist | 1 | `items` | week 4 materials |
 | `storyboard` | storyboard | 2 | `panels` | week 4 planning |
 
-`lines-8` is the fallback: a template with no binding renders as its prompt over
-eight ruled lines.
+A template with no binding renders as its prompt over eight ruled lines **in one
+third** — a built-in fallback, not a row. One third rather than `lines-8`'s two
+is what holds an unbound month to seven sheets; a two-third default would print
+sixteen.
 
 ### The renderer
 
@@ -93,13 +101,13 @@ eight ruled lines.
 - `GET /print/:planId` — a Worker-rendered document, family cookie required, the
   wall's cookie refused. Not under `/api/`. It joins `plan_tasks` →
   `task_templates` → `worksheet_layouts` in one query and renders.
-- `?week=N` renders one week. This is the reprint path after a swap and the only
-  way to print less than a month.
+- `?week=N` renders one week, and it is what every button in the app asks for.
 - Its own stylesheet: `@page { size: letter; margin: 0.5in }`,
   `page-break-inside: avoid` on every segment, ink on white. It shares nothing
   with `public/css/app.css` but the type scale.
 - Header band per sheet: person, country, month, week, *sheet n of m*, ruled in
-  that person's ink.
+  that person's ink. **n of m counts within the week** in both the whole-month
+  and the `?week=N` render, so a reprinted week is the same sheets it was.
 
 ### The buttons
 
@@ -162,13 +170,17 @@ from the same `GET /admin/api/library` payload as the other four.
 - **Not the layout editor.** It is in this slice's Build, not out of it: slice
   08 is built and could not carry it, because `worksheet_layouts` does not exist
   until `004_worksheets.sql` lands here.
-- **No worksheet bindings for the ~90 templates.** Content, slice 09. This slice
-  binds only what its exit criteria need.
+- **No new task prompts, focuses or project types.** The library is slice 09's
+  and it is full. The bindings — which of the twelve layouts each template wants
+  — are this slice's, because the column they live in does not exist until
+  `004_worksheets.sql` applies.
 - **Nothing on `/wall`.** No print button, no print route, no exception.
 
-## If it runs over
+## What it came to
 
-The split is the layout table: build `lines-4`, `lines-8`, `box-caption`,
-`checklist` and `storyboard` — enough for every exit criterion and for a real
-September — and leave the other seven to a follow-on. The packer, the route and
-the stylesheet are the slice; the layouts are the volume.
+All twelve layouts landed, so the split named here was not needed.
+
+A drawn month is **seven to nine sheets** — exactly seven with nothing bound,
+eight on average once the bindings are in, ten at the far end of a draw that
+lands three drawing boxes in one week. §16's "about seven" is the unbound
+number; the extra sheet or two is the room the bindings buy.

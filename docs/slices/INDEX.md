@@ -3,9 +3,9 @@
 Eleven slices against `../design/DESIGN.md`. Each ends at a state you can open
 in a browser and judge.
 
-A build session takes the first slice not marked `built` and reads its file. The
-dependency column is what actually orders them, not the numbering: 00–09 are
-built, and slice 10 is what remains.
+A build session takes the first slice not marked `built` and reads its file.
+**Every slice is built.** What is left in this repo is the two outstanding
+due-outs, D-10 and D-14, and neither is code.
 
 | # | Slice | Status | Band | Depends on | Design sections |
 |---|---|---|---|---|---|
@@ -19,17 +19,18 @@ built, and slice 10 is what remains.
 | 07 | [The wall](07-wall.md) | built | M | 06 | §8 |
 | 08 | [Library editor](08-library-editor.md) | built | L | 02 | §12 |
 | 09 | [Content fill](09-content-fill.md) | built | L | 04 | §9, §13 |
-| 10 | [Printed worksheets](10-worksheets.md) | not started | L | 05 | §16 |
+| 10 | [Printed worksheets](10-worksheets.md) | built | L | 05 | §16 |
 
 Statuses: `not started` · `in progress` · `built`.
 
 **Slice 06 was the ship point and slice 07 is the family screen on top of it: the
 app does the whole nine-month job for one person on one phone, and the kitchen
-tablet shows all three.** Slice 08 made the library tunable from a browser and
-slice 09 filled it. What is left is the binder.
+tablet shows all three.** Slice 08 made the library tunable from a browser,
+slice 09 filled it, and slice 10 turned a drawn month into the pages that go in
+the binder.
 
-**Slice 09 had the most leverage on how the app feels, and it has landed.** The
-library is 90 templates, all six project types carry a week-4 sequence, and
+**Slice 09 had the most leverage on how the app feels.** The library is 90
+templates, all six project types carry a week-4 sequence, and
 `003_country_data.sql` puts 222 hooks and 200 affinities on 100 countries.
 Setup's three content-dependent features — the hook line on a country card, the
 recommended focuses with their reason lines, and "Deal me three" — were built
@@ -37,18 +38,21 @@ inert in slice 04 and came alive with no client change. Its one open question,
 Q-11, is answered: week 4's present task needs no audience beyond whoever is
 home.
 
-**Slice 10 is all that remains, and it has a date on it in a way nothing else
-did** — printed pages are worth having in September, not in March. Its Q-12
-stops only where the print button goes, so most of it can be built before that
-is answered. It also carries the worksheet layout editor: slice 08 built the
-rest of `/admin/library` and could not build that one tab, because
-`worksheet_layouts` does not exist until `004_worksheets.sql`.
+**Slice 10 is the binder, and it landed with its schema in two files rather than
+one.** `004_worksheets.sql` is the migration — the table and the two nullable
+columns — and `005_worksheet_layouts.sql` is the seed carrying the twelve
+layouts and a binding for every week 1–3 template. They cannot be one file:
+SQLite has no `ADD COLUMN IF NOT EXISTS`, so DDL cannot sit in a file Run seed
+re-executes, and layouts that sit in a migration can never be corrected without
+reading as drift. It also carries the worksheet layout editor, the one tab slice
+08 could not build.
 
-**The worksheet bindings are slice 10's now, and that is a change from the
-plan.** They were meant to ride along with the templates in 09, but the column
-they live in does not exist until 10 applies it, so 10 writes the column and the
-bindings together. Nothing is lost: an unbound task prints its prompt over ruled
-lines, which is already better than blank looseleaf.
+**Q-12 is answered — anyone prints, from any device — and the buttons then went
+where the sheets break rather than where the device is.** **Print week** sits
+beside each week's heading on Plan, and there is no month-wide button: printing
+all four weeks the day the month is drawn puts weeks 2 and 3 on paper a swap
+away from being wrong, and reprinting the month to fix one week reprints two
+that nothing changed.
 
 Slice 03 is built except for its fonts. D-10 is still outstanding, so the shell
 runs on a system stack; swapping in the real faces is an `@font-face` pair and
@@ -80,23 +84,15 @@ before there is data to lose.
 
 **Ship point: end of slice 06, and it is built.** The app does the whole
 nine-month job for one person on one phone. Slice 07 added the family screen on
-top of it, slice 08 the parent's editor, and slice 09 the content that decides
-whether the app is good rather than merely working. Slice 10 is the binder, and
-it does not block September either.
+top of it, slice 08 the parent's editor, slice 09 the content that decides
+whether the app is good rather than merely working, and slice 10 the binder.
 
-**Slice 10 is the binder.** It turns a drawn month into printed pages (§16), and
-it is the one late slice with a hard date on it: pages are worth having in
-September, not in March. Its dependency is slice 05 and nothing more. It writes
-the layout bindings itself, in the same file that adds the column they live in;
-until a task has one it prints its prompt over ruled lines, which is already
-better than a blank sheet of looseleaf.
-
-Its one open question, **Q-12**, blocks where the print button goes and not the
-route or the layouts, so most of the slice can be built before it is answered.
-
-The two page numbers it measures thirds against are already declared and in use:
-slice 06 prints the passport against `--page-margin` and `--page-height` in
-`public/css/app.css` (D-13), and slice 10 reads the same two.
+**Slice 10 measures its thirds against the same paper the passport uses.** Slice
+06 prints the passport against `--page-margin` and `--page-height` in
+`public/css/app.css` (D-13); `public/css/print.css` declares the same two, plus
+`--band` for the header, and a third is a third of what is left under it. The
+two files have to agree, and a printer with a wider unprintable margin moves
+`--page-margin` in both.
 
 ---
 
@@ -110,8 +106,8 @@ Every section of `DESIGN.md` and the slice that finishes it.
 | §2 Stack | 03 — built but for the fonts (D-10) |
 | §3 Migrations | 02 — built |
 | §4 The task model | 04 — built |
-| §5 Schema | 10 (the worksheet tables are the last of it) |
-| §6 API | 10 (the print route and the two layout routes; slice 08 landed the rest of the editor's) |
+| §5 Schema | 10 — built |
+| §6 API | 10 — built |
 | §7 This week | 05 — built |
 | §7 Month setup | 04 — built |
 | §7 Passport | 06 — built |
@@ -120,8 +116,8 @@ Every section of `DESIGN.md` and the slice that finishes it.
 | §9 Country data | 09 — built |
 | §10 Progress | 05 — built |
 | §11 Design direction | 07 — built but for the fonts (D-10) |
-| §12 Library editor | 10 — 08 built all of it but the layout editor |
-| §13 Seed data | 10 — 09 filled the library; 10 adds the layout seed and the bindings |
+| §12 Library editor | 10 — built |
+| §13 Seed data | 10 — built |
 | §14 Build order | — (superseded by this index) |
 | §15 Decisions | — (tracked in ../other/OPEN-QUESTIONS.md) |
-| §16 Printed worksheets | 10 |
+| §16 Printed worksheets | 10 — built |

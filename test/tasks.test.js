@@ -25,6 +25,7 @@ const { applyPending } = await import('../src/lib/migrations.js');
 const { MIGRATIONS, SEEDS } = await import('../src/migrations/index.js');
 const { runSeed } = await import('../src/lib/seed.js');
 const { issueSessionCookie } = await import('../src/lib/auth.js');
+const { todayIn } = await import('../src/lib/dates.js');
 
 const ADMIN_TOKEN = 'test-token';
 const FAMILY_TZ = 'America/Chicago';
@@ -319,8 +320,11 @@ test('current_week is derived from start_date and folds the remainder into week 
   const e = await env();
   const p = await plan(e);
 
+  // Counted back from the family's own today, not from UTC's. weekOf reads the
+  // clock through FAMILY_TZ, so a UTC base makes every offset a day late for
+  // the six hours a night the two dates disagree.
   const at = async (offsetDays) => {
-    const start = new Date();
+    const start = new Date(`${todayIn(FAMILY_TZ)}T00:00:00Z`);
     start.setUTCDate(start.getUTCDate() - offsetDays);
     await e.DB.prepare('UPDATE month_plans SET start_date = ? WHERE id = ?')
       .bind(start.toISOString().slice(0, 10), p.plan.id).run();

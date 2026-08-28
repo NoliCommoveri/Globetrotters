@@ -144,6 +144,15 @@ function option(value, label, selected) {
   return o;
 }
 
+function layoutSelect(value, onchange) {
+  var sel = el('select', { onchange: onchange }, [option('', 'ruled lines', !value)]);
+  state.data.layouts.forEach(function (l) {
+    if (l.archived && l.id !== value) return;
+    sel.appendChild(option(String(l.id), l.name + ' (' + l.height_thirds + '/3)', l.id === value));
+  });
+  return sel;
+}
+
 function projectSelect(value, onchange) {
   var sel = el('select', { onchange: onchange }, [option('', '—', !value)]);
   state.data.project_types.forEach(function (p) {
@@ -174,6 +183,14 @@ function taskRow(task) {
 
   var project = projectSelect(task.project_type_id, function () {
     edits.project_type_id = project.value ? Number(project.value) : null;
+    mark();
+  });
+
+  // The printed form this task's segment uses (§16). A task with none prints
+  // its prompt over ruled lines, which is why the empty option is a real
+  // choice rather than a missing value.
+  var layout = layoutSelect(task.worksheet_layout_id, function () {
+    edits.worksheet_layout_id = layout.value ? Number(layout.value) : null;
     mark();
   });
 
@@ -221,6 +238,7 @@ function taskRow(task) {
   row.appendChild(el('td', { class: 'narrow' }, [tier]));
   row.appendChild(el('td', { class: 'narrow' }, [pageInput]));
   row.appendChild(el('td', { class: 'narrow' }, [project, position]));
+  row.appendChild(el('td', { class: 'narrow' }, [layout]));
   row.appendChild(who);
   row.appendChild(el('td', { class: 'narrow' }, [save, archive]));
   return row;
@@ -232,7 +250,9 @@ function renderTasks() {
   var table = el('table', {}, [el('tr', {}, [
     el('th', { text: 'Task' }), el('th', { class: 'narrow', text: 'Week' }),
     el('th', { class: 'narrow', text: 'Tier' }), el('th', { class: 'narrow', text: 'Page' }),
-    el('th', { class: 'narrow', text: 'Project / pos' }), el('th', { class: 'narrow', text: 'Drawn' }),
+    el('th', { class: 'narrow', text: 'Project / pos' }),
+    el('th', { class: 'narrow', text: 'Prints as' }),
+    el('th', { class: 'narrow', text: 'Drawn' }),
     el('th', { class: 'narrow', text: '' }),
   ])]);
   shown.forEach(function (t) { table.appendChild(taskRow(t)); });
@@ -630,6 +650,158 @@ function newProjectForm() {
   ]);
 }
 
+// ---------------------------------------------------------------- layouts
+
+// The dozen printed forms of §16. Every field here is a named value the
+// renderer reads and escapes, and there is no markup field anywhere on this
+// panel, because this form is the one place a typed string reaches a printed
+// page.
+//
+// The knobs are drawn from kind_knobs, which the server sends with the payload.
+// A knob added to a kind appears here without this file learning about it.
+
+function knobField(kind, key, meta, spec, onchange) {
+  var value = spec[key];
+  var input;
+  if (meta.type === 'int') {
+    input = el('input', { type: 'number', step: '1', min: String(meta.min),
+      max: String(meta.max), style: 'width:4.5rem',
+      value: value === undefined || value === null ? '' : String(value) });
+    input.addEventListener('input', function () {
+      onchange(key, input.value === '' ? null : Number(input.value));
+    });
+  } else if (meta.type === 'list') {
+    input = el('input', { type: 'text', style: 'width:16rem',
+      placeholder: 'comma separated',
+      value: Array.isArray(value) ? value.join(', ') : '' });
+    input.addEventListener('input', function () {
+      onchange(key, input.value.split(',').map(function (v) { return v.trim(); })
+        .filter(function (v) { return v.length; }));
+    });
+  } else {
+    input = el('input', { type: 'text', style: 'width:16rem',
+      value: value === undefined || value === null ? '' : String(value) });
+    input.addEventListener('input', function () { onchange(key, input.value); });
+  }
+  return el('label', {}, [el('span', { text: key.replace(/_/g, ' ') }), input]);
+}
+
+function parseSpec(raw) {
+  try {
+    var parsed = JSON.parse(raw || '{}');
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch (err) { return {}; }
+}
+
+function layoutPanel(layout) {
+  var spec = parseSpec(layout.spec);
+  var edits = {};
+  var kind = layout.kind;
+
+  var name = el('input', { type: 'text', value: layout.name, maxlength: '60',
+    oninput: function () { edits.name = name.value; } });
+
+  var thirds = el('select', { onchange: function () {
+    edits.height_thirds = Number(thirds.value);
+  } }, [1, 2, 3].map(function (n) {
+    return option(String(n), n + ' of 3', n === layout.height_thirds);
+  }));
+
+  var knobs = el('div', { class: 'bar' });
+  function paintKnobs() {
+    knobs.innerHTML = '';
+    var meta = state.data.kind_knobs[kind] || {};
+    Object.keys(meta).forEach(function (key) {
+      knobs.appendChild(knobField(kind, key, meta[key], spec, function (k, v) {
+        spec[k] = v;
+        edits.spec = spec;
+      }));
+    });
+  }
+
+  // Changing the kind changes which knobs exist, so the spec is re-read through
+  // the new one on save and the form redraws immediately rather than showing
+  // fields the renderer will drop.
+  var kindSel = el('select', { onchange: function () {
+    kind = kindSel.value;
+    edits.kind = kind;
+    edits.spec = spec;
+    paintKnobs();
+  } }, Object.keys(state.data.kind_knobs).map(function (k) {
+    return option(k, k, k === layout.kind);
+  }));
+  paintKnobs();
+
+  var save = el('button', { text: 'Save', onclick: async function () {
+    save.disabled = true;
+    try {
+      var data = await send('PATCH', '/admin/api/layouts/' + layout.id, edits);
+      Object.assign(layout, data.layout);
+      say('Saved ' + data.layout.name + '. ' + layout.bound
+        + ' task' + (layout.bound === 1 ? '' : 's') + ' print with it.');
+      renderLayouts();
+    } catch (err) { say(String(err.message), true); }
+    save.disabled = false;
+  } });
+
+  var archive = el('button', { text: layout.archived ? 'Restore' : 'Archive',
+    onclick: async function () {
+      try {
+        var data = await send('PATCH', '/admin/api/layouts/' + layout.id,
+          { archived: layout.archived ? 0 : 1 });
+        Object.assign(layout, data.layout);
+        say(data.layout.archived
+          ? 'Archived. Its tasks print their prompt over ruled lines until you bind them again.'
+          : 'Back in use.');
+        renderLayouts();
+      } catch (err) { say(String(err.message), true); }
+    } });
+
+  return el('div', { class: layout.archived ? 'archived' : '' }, [
+    el('div', { class: 'bar' }, [
+      el('label', {}, [el('span', { text: 'Name' }), name]),
+      el('label', {}, [el('span', { text: 'Kind' }), kindSel]),
+      el('label', {}, [el('span', { text: 'Height' }), thirds]),
+      el('span', { class: 'pill', text: layout.bound + ' bound' }),
+      save, archive,
+    ]),
+    knobs,
+    el('div', { class: 'note', text: layout.slug + ' \u00b7 ' + layout.origin }),
+  ]);
+}
+
+function renderLayouts() {
+  fill('layout-list', [
+    el('p', { class: 'note', text: 'A sheet holds three thirds and a segment never'
+      + ' splits across a page break, so a form that overflows its height pushes the'
+      + ' next task off the paper. Editing a layout changes every task bound to it.' }),
+    newLayoutForm(),
+  ].concat(state.data.layouts.map(layoutPanel)));
+}
+
+function newLayoutForm() {
+  var name = el('input', { type: 'text', maxlength: '60', placeholder: 'Name' });
+  var kindSel = el('select', {}, Object.keys(state.data.kind_knobs).map(function (k) {
+    return option(k, k, k === 'lines');
+  }));
+  var thirds = el('select', {}, [1, 2, 3].map(function (n) {
+    return option(String(n), n + ' of 3', n === 1);
+  }));
+  var create = el('button', { text: 'Create layout', onclick: async function () {
+    try {
+      await send('POST', '/admin/api/layouts', { name: name.value, kind: kindSel.value,
+        height_thirds: Number(thirds.value) });
+      say('Created with that kind\'s default fields. Tune them, then bind tasks to it'
+        + ' from the task list.');
+      await load();
+    } catch (err) { say(String(err.message), true); }
+  } });
+  return el('details', {}, [
+    el('summary', { text: 'New layout' }),
+    el('div', { class: 'bar' }, [name, kindSel, thirds, create]),
+  ]);
+}
+
 // ---------------------------------------------------------------- backup
 
 function renderBackup() {
@@ -675,6 +847,7 @@ function renderAll() {
   renderFocuses();
   renderProjects();
   renderCountryList();
+  renderLayouts();
   renderBackup();
   fill('new-task', [newTaskForm()]);
   fill('new-focus', [newFocusForm()]);
@@ -690,7 +863,7 @@ document.getElementById('c-search').addEventListener('input', function () {
   if (state.data) renderCountryList();
 });
 
-var panes = ['tasks', 'focuses', 'projects', 'countries', 'backup-pane'];
+var panes = ['tasks', 'focuses', 'projects', 'layouts', 'countries', 'backup-pane'];
 panes.forEach(function (name) {
   document.getElementById('tab-' + name).addEventListener('click', function () {
     panes.forEach(function (other) {
@@ -718,6 +891,7 @@ rather than copying it.</p>
   <button id="tab-tasks" aria-selected="true">Tasks</button>
   <button id="tab-focuses" aria-selected="false">Focuses</button>
   <button id="tab-projects" aria-selected="false">Project types</button>
+  <button id="tab-layouts" aria-selected="false">Worksheets</button>
   <button id="tab-countries" aria-selected="false">Countries</button>
   <button id="tab-backup-pane" aria-selected="false">Backup</button>
 </div>
@@ -753,6 +927,10 @@ rather than copying it.</p>
 <section id="pane-projects" hidden>
   <div id="new-project"></div>
   <div id="project-list"></div>
+</section>
+
+<section id="pane-layouts" hidden>
+  <div id="layout-list"></div>
 </section>
 
 <section id="pane-countries" hidden>
