@@ -31,12 +31,35 @@ const monthName = (month) => {
 // attribute.
 const ink = (color) => (/^#[0-9a-fA-F]{3,8}$/.test(String(color || '')) ? String(color) : '#000000');
 
+// The document carries its own Print button. Without one the only way to reach
+// a print dialog is the browser's own menu, and on a phone that is a share
+// sheet full of upload targets with Print buried in it — on some Android builds
+// it is not in the menu at all. The button is the whole point of the page, so
+// it is on the page.
+//
+// Hidden until the script unhides it: a button that calls window.print() is
+// dead weight in a browser that did not run the script.
+//
+// The script is a file, not inline. This document escapes everything it prints
+// and carries no inline script at all, which is the property the injection test
+// asserts on the whole document rather than on one segment at a time.
+//
+// Not window.print() on load. A tab that opens straight into a print dialog
+// hides the sheets behind it, and fires before the layout has settled on the
+// slower phone this is most often opened on.
+const PRINT_BAR = `<div class="print-bar" hidden>
+<button type="button" class="print-now">Print</button>
+<span class="print-hint">Pick <b>Save as PDF</b> in the printer list to keep a copy.</span>
+</div>
+<script src="/js/print-page.js" defer></script>`;
+
 function document_(title, body) {
   return new Response(`<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeHtml(title)}</title>
 <link rel="stylesheet" href="/css/print.css">
+${PRINT_BAR}
 ${body}
 `, {
     status: 200,

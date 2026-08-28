@@ -1621,6 +1621,15 @@ button, because the answer to "print this one task" is a third of a page.
 **The wall cookie is refused.** The wall has no person and nothing on it should
 open a print dialog (§8).
 
+**The document carries its own Print button**, sticky at the top of the screen
+view and absent from the paper. The browser's own route to a print dialog is a
+share sheet on a phone — Print buried among upload targets, and missing from the
+menu outright on some Android builds — and a page whose only purpose is to be
+printed cannot depend on the reader finding it. The button calls
+`window.print()` and nothing else; the dialog is not fired on load, because a
+tab that opens into a dialog hides the sheets it is about to print, and Save as
+PDF is one choice inside that dialog rather than a second path to build.
+
 ### Nothing is stored, and nothing is finalized
 
 There is no `finalized_at`, no generated artifact, no R2. `GET /print/:planId`
