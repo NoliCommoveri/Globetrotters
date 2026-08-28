@@ -1,10 +1,9 @@
-// Seed v0's content invariants.
+// The library's content invariants.
 //
-// These are the exit criteria of slice 02 expressed as assertions, and they run
-// against whatever is currently in 002_seed.sql. Until the two hand-written
-// lists land — see docs/other/SEED-CONTENT.md — they fail, and each failure
-// names exactly what is missing. That is their job: the draw in slice 04 has no
-// way to report "the pool was one short", it just produces a thin month.
+// They run against whatever is currently in 002_seed.sql — see
+// docs/other/SEED-CONTENT.md — and each failure names exactly what is missing.
+// That is their job: the draw has no way to report "the pool was one short", it
+// just quietly produces a thin month.
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -20,19 +19,21 @@ const SEEDS = [{ id: '002', name: '002_seed.sql', sql: read('002_seed.sql') }];
 
 const CONTINENTS = ['Africa', 'Asia', 'Europe', 'North America', 'South America', 'Oceania'];
 
-// Week 1 draws 4 core + 1 from the rest. Weeks 2 and 3 draw 5 from 13. Week 4
-// is trifold-board's five, in order.
+// Week 1 draws 4 core + 1 from the other six. Weeks 2 and 3 draw 5 from 25.
+// Week 4 is one project type's five, in order, and all six are filled.
 //
-// Twenty-seven templates is the floor that makes the draw work at all. The
-// weeks are wider than the floor because the floor sizes the pool for the draw
-// and nothing else: five tasks are drawn a week however big it is, so depth
-// costs the kid nothing and buys every focus a real week. Thirteen is what it
-// takes for all six focuses to hold three on-theme tasks in both weeks.
-const WEEK_SIZES = { 1: 6, 2: 13, 3: 13, 4: 5 };
+// Twenty-seven templates was the floor that made the draw work at all, and the
+// weeks are far wider than it because the floor sizes the pool for the draw and
+// nothing else: five tasks are drawn a week however big the week is, so depth
+// costs the kid nothing. What depth buys is nine different months and a focus
+// that still means something in month nine.
+const WEEK_SIZES = { 1: 10, 2: 25, 3: 25, 4: 30 };
 
-// Three on-theme tasks per focus per week. Two would both be drawn every month
-// that focus is chosen, which over nine months is the same week twice.
-const MIN_ON_THEME = 3;
+// Six on-theme tasks per focus per week. Three was the floor against a 13-task
+// week; against 25 it is not enough to shape a month — three 3s among 22 ones
+// is barely more than one on-theme task in a draw of five. Six puts two or
+// three of the five on theme, which is what picking a focus is supposed to do.
+const MIN_ON_THEME = 6;
 
 let db;
 test.before(async () => {
@@ -70,7 +71,7 @@ test('195 countries, each with a real continent and an adventure level', () => {
   assert.equal(new Set(countries.map((c) => c.iso3)).size, countries.length, 'duplicate iso3');
 });
 
-test('37 task templates, distributed 6 / 13 / 13 / 5', () => {
+test('90 task templates, distributed 10 / 25 / 25 / 30', () => {
   const counts = Object.fromEntries(
     rows('SELECT week_theme, COUNT(*) AS n FROM task_templates GROUP BY week_theme')
       .map((r) => [r.week_theme, r.n]),
@@ -86,17 +87,24 @@ test('week 1 carries exactly four core tasks — the workbook pages depend on th
   assert.equal(core.length, 4, `week 1 needs 4 core templates, found ${core.length}`);
 });
 
-test('week 4 is one ordered trifold-board sequence and nothing else', () => {
+test('every project type has a full week-4 sequence, in order', () => {
+  // A project type with an empty week 4 is hidden in setup and refused by the
+  // server, so an unfilled one is a project type that does not exist as far as
+  // a kid is concerned. All six are filled.
   const week4 = rows(`
     SELECT t.slug, t.position, p.slug AS project
     FROM task_templates t LEFT JOIN project_types p ON p.id = t.project_type_id
-    WHERE t.week_theme = 4 ORDER BY t.position
+    WHERE t.week_theme = 4 ORDER BY p.slug, t.position
   `);
-  assert.equal(week4.length, 5);
-  for (const row of week4) {
-    assert.equal(row.project, 'trifold-board', `${row.slug}: week 4 is trifold-board only in v0`);
+  assert.equal(week4.length, 30);
+
+  const types = rows('SELECT slug FROM project_types WHERE archived = 0').map((r) => r.slug);
+  assert.equal(types.length, 6);
+  for (const type of types) {
+    const seq = week4.filter((r) => r.project === type);
+    assert.deepEqual(seq.map((r) => r.position), [1, 2, 3, 4, 5],
+      `${type}: week 4 must be five tasks at positions 1-5`);
   }
-  assert.deepEqual(week4.map((r) => r.position), [1, 2, 3, 4, 5], 'week 4 positions must be 1-5');
 });
 
 test('no template outside week 4 claims a project type or a position', () => {
@@ -115,15 +123,15 @@ test('every prompt is written to be read, not skimmed', () => {
   }
 });
 
-test('every focus holds three on-theme tasks in week 2 and in week 3', () => {
+test('every focus holds six on-theme tasks in week 2 and in week 3', () => {
   // §7's focus highlight samples that focus's weight-3 rows, so a focus with
   // none renders an empty panel at the moment a kid is choosing it. Per week,
   // because the draw is per week: a focus with a 3 in week 2 and nothing in
   // week 3 leaves week 3 identical to picking no focus at all.
   //
-  // Three rather than one, because one or two on-theme tasks in a 13-task pool
-  // are drawn every month that focus is chosen. The focus a kid picks nine
-  // times has to have nine months in it.
+  // Six rather than three, because the pool is 25 now: a focus needs enough
+  // on-theme tasks that the five it draws are not the same five every month.
+  // The focus a kid picks nine times has to have nine months in it.
   const covered = rows(`
     SELECT f.slug AS focus, t.week_theme AS week, COUNT(*) AS n
     FROM focuses f
@@ -140,15 +148,16 @@ test('every focus holds three on-theme tasks in week 2 and in week 3', () => {
       const got = n.get(`${focus}/${week}`) ?? 0;
       assert.ok(got >= MIN_ON_THEME,
         `${focus} has ${got} weight-3 tasks in week ${week}, needs ${MIN_ON_THEME} — ` +
-        'below three it draws the same week every month it is chosen');
+        'below that it draws much the same week every month it is chosen');
     }
   }
 });
 
 test('no focus excludes so much of a week that swap runs out of candidates', () => {
-  // 13 in the pool, 5 drawn. Exclusions eat the spare that Swap draws from, and
+  // 25 in the pool, 5 drawn. Exclusions eat the spare that Swap draws from, and
   // the rule stays at one per focus per week: it held when the pool was 8 and
-  // the headroom the wider pool bought is for content, not for exclusions.
+  // again at 13, and the headroom a wider pool buys is for content, not for
+  // exclusions.
   const excluded = rows(`
     SELECT f.slug AS focus, t.week_theme AS week, COUNT(*) AS n
     FROM task_focus_weights w
@@ -159,7 +168,7 @@ test('no focus excludes so much of a week that swap runs out of candidates', () 
   `);
   for (const row of excluded) {
     assert.ok(row.n <= 1,
-      `${row.focus} excludes ${row.n} of week ${row.week}'s 13 — at most one`);
+      `${row.focus} excludes ${row.n} of week ${row.week}'s 25 — at most one`);
   }
 });
 
@@ -193,8 +202,9 @@ test('no seeded task is left with no focus that reaches for it', () => {
         SELECT 1 FROM task_focus_weights w WHERE w.task_template_id = t.id AND w.weight = 3
       )
   `).map((r) => r.slug);
-  // 26 templates across weeks 2-3, and some are neutral by design — a wow fact
+  // 50 templates across weeks 2-3, and some are neutral by design — a wow fact
   // belongs to no focus in particular. The pool must not be mostly neutral, or
   // the focus stops shaping the month at all.
-  assert.ok(orphans.length <= 8, `${orphans.length} of 26 week 2-3 tasks are neutral to every focus`);
+  assert.ok(orphans.length <= 12,
+    `${orphans.length} of 50 week 2-3 tasks are neutral to every focus`);
 });

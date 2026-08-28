@@ -347,6 +347,21 @@ FROM (
   ('national-symbol', 'Draw the national symbol',
    'Find the country''s coat of arms, national animal, or national flower. Draw it and write one sentence about why you think it was chosen.',
    1, 'symbols', 'wild', NULL, NULL),
+  ('how-many-people', 'How many people live there?',
+   'Find out how many people live in your country. Write the number down, then find a US state with about the same number so you know what it feels like.',
+   1, 'people', 'wild', NULL, NULL),
+
+  ('time-there-now', 'Find out what time it is there',
+   'Work out what time it is in their capital right now. Write it next to your own time, and write one sentence about what people there are probably doing.',
+   1, 'map', 'wild', NULL, NULL),
+
+  ('size-next-to-yours', 'How big is it really?',
+   'Find out how much land the country covers. Then find a state or a country you already know that is about the same size, and write the comparison down.',
+   1, 'map', 'wild', NULL, NULL),
+
+  ('anthem-listen', 'Listen to their anthem',
+   'Find their national anthem and listen to the first thirty seconds. Write one word for how it sounds, and one line about what it is asking for.',
+   1, 'symbols', 'wild', NULL, NULL),
 
   ('first-people', 'Find the first known people',
    'Find out who the earliest known people living in this land were and about when they were there. Write two sentences about them.',
@@ -398,6 +413,53 @@ FROM (
 
   ('before-history', 'Find something from before writing',
    'Find one fossil, cave painting, or prehistoric find from this country. Draw it and write how long ago it was made.',
+   2, 'prehistory', 'focus', NULL, NULL),
+  ('who-ruled-before', 'Find out who ruled before',
+   'Find out who was in charge of this land five hundred years ago — a king, an empire, a set of villages that ran themselves. Write two sentences about them.',
+   2, 'history', 'focus', NULL, NULL),
+
+  ('independence-day', 'Find the day they became a country',
+   'Find out when this country started ruling itself, and who it belonged to before that. Write the date down and draw one thing people do to celebrate it.',
+   2, 'history', 'focus', NULL, NULL),
+
+  ('war-that-changed', 'Find a fight that changed things',
+   'Find one war or uprising that changed this country. Write down who was fighting, and one thing that was different afterwards.',
+   2, 'history', 'focus', NULL, NULL),
+
+  ('who-can-vote', 'Find out who gets a say',
+   'Find out who is allowed to vote there and how old you have to be. Write down one way that is different from where you live.',
+   2, 'government', 'focus', NULL, NULL),
+
+  ('kingdom-over-this-place', 'What the Kingdom fixes here',
+   'Find one thing this country is struggling with right now: war, hunger, drought, a ruler nobody chose. Read Micah 4:1-4, then write two lines about what will be different here when the Kingdom comes.',
+   2, 'government', 'focus', NULL, NULL),
+
+  ('river-that-matters', 'Follow their biggest river',
+   'Find the biggest river or lake in the country. Trace where it starts and where it ends, and write down one town that sits on it.',
+   2, 'land', 'focus', NULL, NULL),
+
+  ('highest-point', 'Find the highest place',
+   'Find the highest mountain or hill in the country and how high it is. Then write down something near you that is about that tall, so you can picture it.',
+   2, 'land', 'focus', NULL, NULL),
+
+  ('under-the-ground', 'Find out what they dig up',
+   'Find out what people take out of the ground there: oil, copper, salt, diamonds, or not much at all. Write down what it gets used for.',
+   2, 'land', 'focus', NULL, NULL),
+
+  ('desert-shall-blossom', 'Find the land that needs healing',
+   'Find the driest, most worn-out or most polluted place in this country. Read Isaiah 35:1-2, then draw that same place the way it will look when the land is healed.',
+   2, 'land', 'focus', NULL, NULL),
+
+  ('weather-that-hits', 'Find the weather they brace for',
+   'Find out what kind of big weather this country gets: hurricanes, monsoons, drought, blizzards, or none worth naming. Write down one way people get ready for it.',
+   2, 'climate', 'focus', NULL, NULL),
+
+  ('tree-that-grows', 'Find a tree that grows there',
+   'Find one tree or plant that grows well in this country. Draw a leaf from it, and write one thing people there make or eat from it.',
+   2, 'ecology', 'focus', NULL, NULL),
+
+  ('oldest-thing-here', 'Find the oldest thing they keep',
+   'Find the oldest object in one of this country''s museums. Write down what it is, how old it is, and where it was dug up.',
    2, 'prehistory', 'focus', NULL, NULL),
 
   ('kid-life', 'A day in their life',
@@ -451,6 +513,53 @@ FROM (
   ('landmark-to-see', 'Pick a landmark to visit',
    'Find one famous place in this country you''d want to visit. Draw it and write one sentence about what makes it special.',
    3, 'landmarks', 'focus', NULL, NULL),
+  ('girls-and-women', 'Find out how girls grow up there',
+   'Find out what school and work look like for girls and women in this country. Write down two things that are different from your house.',
+   3, 'people', 'focus', NULL, NULL),
+
+  ('city-and-country', 'City or countryside?',
+   'Find out whether most people there live in cities or out in the countryside, and name the biggest city. Write down one reason people are moving where they are moving.',
+   3, 'people', 'focus', NULL, NULL),
+
+  ('getting-around', 'Find out how they get around',
+   'Find out how people there get to school and to work: bus, train, boat, motorbike, walking. Draw the one you would take and write how long it would take you.',
+   3, 'people', 'focus', NULL, NULL),
+
+  ('house-they-live-in', 'Draw an ordinary house',
+   'Find a picture of an ordinary home in this country — not a palace. Draw it, and label two things about it that the weather or the land made necessary.',
+   3, 'people', 'focus', NULL, NULL),
+
+  ('game-kids-play', 'Learn a game kids play there',
+   'Find a game kids play in this country. Write the rules in three lines, then go play one round of it.',
+   3, 'people', 'focus', NULL, NULL),
+
+  ('their-rest-day', 'Find their day off',
+   'Find out which days are the weekend in this country and which day people rest. Write down what closes on the seventh day there, if anything does.',
+   3, 'people', 'focus', NULL, NULL),
+
+  ('sabbath-keepers-there', 'Find who keeps the seventh day',
+   'Find out whether anyone in this country keeps a seventh-day Sabbath — Adventists, a Church of God, Jewish or Messianic congregations. Write down what they are called there and roughly how many there are.',
+   3, 'culture', 'focus', NULL, NULL),
+
+  ('feast-they-keep', 'Find their harvest feast',
+   'Find the biggest harvest or thanksgiving festival in this country and what happens at it. Read Zechariah 14:16, then write one line about the part of it that could still be kept when all nations come up to keep the Feast.',
+   3, 'culture', 'focus', NULL, NULL),
+
+  ('place-of-worship', 'Draw where they worship',
+   'Find a church, mosque, temple or shrine in this country. Draw the outside, and write one line about what happens inside on their main day.',
+   3, 'culture', 'focus', NULL, NULL),
+
+  ('what-they-wear', 'Draw what they wear',
+   'Find what people there wear for a wedding, a holiday or a festival. Draw one outfit and label the part that would tell someone where it is from.',
+   3, 'culture', 'focus', NULL, NULL),
+
+  ('breakfast-there', 'Eat their breakfast',
+   'Find out what people eat for breakfast in this country. Draw the plate, and write down whether you would eat it.',
+   3, 'food', 'focus', NULL, NULL),
+
+  ('market-day', 'Walk through their market',
+   'Find a photo of a market in this country. List five things being sold in it, and circle the one you have never seen for sale where you live.',
+   3, 'food', 'focus', NULL, NULL),
 
   ('trifold-choose', 'Plan your three panels',
    'Your board has three panels. Decide what goes on each one and sketch the plan on a scrap of paper first.',
@@ -470,7 +579,106 @@ FROM (
 
   ('trifold-present', 'Rehearse and present your board',
    'Practice explaining your board out loud once, start to finish. Then present it to your family.',
-   4, 'project', 'core', 'trifold-board', 5)
+   4, 'project', 'core', 'trifold-board', 5),
+  ('model-choose', 'Decide what you will build',
+   'Pick the one scene from your country worth building: a mountain, a market, a temple, a harbor. Sketch it from the side and from above so you know how it will stand up.',
+   4, 'project', 'core', 'model-or-diorama', 1),
+
+  ('model-gather', 'Gather your materials',
+   'Collect what your model needs: a base to build on, cardboard, clay, paint, paper, glue. Put it all in one place and check nothing is missing before you start.',
+   4, 'project', 'core', 'model-or-diorama', 2),
+
+  ('model-build-base', 'Build the base and big shapes',
+   'Build the ground your scene sits on and the biggest shapes standing on it. Do not paint anything yet — get it standing first.',
+   4, 'project', 'core', 'model-or-diorama', 3),
+
+  ('model-build-details', 'Paint it and add the details',
+   'Paint your model and add the small things that make it this country and nowhere else. Write two labels for the parts a visitor would ask about.',
+   4, 'project', 'core', 'model-or-diorama', 4),
+
+  ('model-present', 'Show your model and explain it',
+   'Practice explaining your model out loud once, start to finish. Then show it to your family and answer their questions.',
+   4, 'project', 'core', 'model-or-diorama', 5),
+
+  ('video-choose', 'Plan your shots',
+   'Decide what your video will show, then write the shots you need in the order they happen. Six to ten shots is plenty for two minutes.',
+   4, 'project', 'core', 'video', 1),
+
+  ('video-gather', 'Gather what you will film',
+   'Collect the maps, drawings, objects and props your shot list needs, and find the quietest room in the house to record in.',
+   4, 'project', 'core', 'video', 2),
+
+  ('video-shoot', 'Film your shot list',
+   'Film your shots one at a time. Say each line twice so you have a spare, and hold the camera still for three seconds after every shot.',
+   4, 'project', 'core', 'video', 3),
+
+  ('video-edit', 'Cut it together',
+   'Put your shots in order, cut out the mistakes, and put a title on the front. Watch the whole thing once and fix the worst part.',
+   4, 'project', 'core', 'video', 4),
+
+  ('video-present', 'Show your video',
+   'Watch your video once on your own to check you can hear it. Then play it for your family and tell them one thing you learned making it.',
+   4, 'project', 'core', 'video', 5),
+
+  ('skit-choose', 'Pick the scene you will act',
+   'Pick one moment from your country worth acting out: a market, a journey, a story they tell. Write who is in it and what happens, in three lines.',
+   4, 'project', 'core', 'skit', 1),
+
+  ('skit-gather', 'Gather props and costumes',
+   'Collect what your scene needs from around the house: a hat, a length of cloth, a spoon, a map. A prop that is nearly right is fine — a label fixes the rest.',
+   4, 'project', 'core', 'skit', 2),
+
+  ('skit-script', 'Write the lines out',
+   'Write down what each character says, start to finish. Keep it under two minutes, which is about one page of talking.',
+   4, 'project', 'core', 'skit', 3),
+
+  ('skit-rehearse-run', 'Run it twice, out loud',
+   'Act your scene all the way through twice, standing up and out loud. Fix the line that trips you both times.',
+   4, 'project', 'core', 'skit', 4),
+
+  ('skit-present', 'Perform your skit',
+   'Perform your scene for your family, from the top and without stopping. Afterwards, say one sentence about why you picked that moment.',
+   4, 'project', 'core', 'skit', 5),
+
+  ('museum-choose', 'Choose your six objects',
+   'A museum box holds a few things that tell a whole country. List the six objects yours will hold, and write one line on why each one earns its place.',
+   4, 'project', 'core', 'museum-box', 1),
+
+  ('museum-gather', 'Find your box and materials',
+   'Find a box about the size of a shoebox and collect what your objects need: clay, paper, foil, fabric, string. Line the box so it opens like a case.',
+   4, 'project', 'core', 'museum-box', 2),
+
+  ('museum-make-objects', 'Make the first three objects',
+   'Make the first three objects on your list. They do not have to be perfect — they have to be recognizable from across a table.',
+   4, 'project', 'core', 'museum-box', 3),
+
+  ('museum-finish-and-label', 'Finish the rest and label them',
+   'Make the objects you have left, then write a museum label for each one: what it is, where it is from, and why it matters. Two sentences each.',
+   4, 'project', 'core', 'museum-box', 4),
+
+  ('museum-present', 'Open your box for someone',
+   'Practice walking through your box once, object by object. Then open it for your family and take them through it.',
+   4, 'project', 'core', 'museum-box', 5),
+
+  ('zine-choose', 'Plan your pages',
+   'A zine is one sheet folded into eight pages. Fold a scrap sheet, number the pages, and write what goes on each one from the cover to the back.',
+   4, 'project', 'core', 'illustrated-zine', 1),
+
+  ('zine-gather', 'Gather your drawings and pens',
+   'Collect your paper and pens, and every drawing, map and note from this month you want to copy in. Fold your good sheet so you can see the page order.',
+   4, 'project', 'core', 'illustrated-zine', 2),
+
+  ('zine-draw-first', 'Draw the cover and first pages',
+   'Draw and letter the cover and the first three pages. Letter the titles before you draw, so the words are not squeezed in afterwards.',
+   4, 'project', 'core', 'illustrated-zine', 3),
+
+  ('zine-draw-rest', 'Finish the pages',
+   'Finish the pages you have left, then read the whole zine through once and fix anything misspelled or too small to read.',
+   4, 'project', 'core', 'illustrated-zine', 4),
+
+  ('zine-present', 'Read your zine out loud',
+   'Read your zine out loud once on your own. Then hand it to your family and read it with them, page by page.',
+   4, 'project', 'core', 'illustrated-zine', 5)
 -- END task_templates
 ) v
 LEFT JOIN project_types p ON p.slug = v.project_type
@@ -543,7 +751,53 @@ FROM (
   ('landmark-to-see',      'land-and-sky',        3),
   ('craft-of-the-land',    'people-and-power',    0),
   ('sound-of-the-country', 'conflict-and-change', 0),
-  ('wow-fact',             'land-and-sky',        0)
+  ('wow-fact',             'land-and-sky',        0),
+  ('who-ruled-before',      'ancient-world',       3),
+  ('war-that-changed',      'ancient-world',       3),
+  ('oldest-thing-here',     'ancient-world',       3),
+  ('oldest-thing-here',     'food-and-craft',      3),
+  ('river-that-matters',    'wild-places',         3),
+  ('highest-point',         'wild-places',         3),
+  ('tree-that-grows',       'wild-places',         3),
+  ('desert-shall-blossom',  'wild-places',         3),
+  ('independence-day',      'people-and-power',    3),
+  ('who-can-vote',          'people-and-power',    3),
+  ('kingdom-over-this-place','people-and-power',   3),
+  ('tree-that-grows',       'food-and-craft',      3),
+  ('under-the-ground',      'food-and-craft',      3),
+  ('independence-day',      'conflict-and-change', 3),
+  ('war-that-changed',      'conflict-and-change', 3),
+  ('kingdom-over-this-place','conflict-and-change',3),
+  ('river-that-matters',    'land-and-sky',        3),
+  ('highest-point',         'land-and-sky',        3),
+  ('weather-that-hits',     'land-and-sky',        3),
+  ('desert-shall-blossom',  'land-and-sky',        3),
+  ('who-can-vote',          'land-and-sky',        0),
+  ('tree-that-grows',       'people-and-power',    0),
+  ('highest-point',         'conflict-and-change', 0),
+
+  ('place-of-worship',      'ancient-world',       3),
+  ('sabbath-keepers-there', 'ancient-world',       3),
+  ('feast-they-keep',       'ancient-world',       3),
+  ('city-and-country',      'wild-places',         3),
+  ('getting-around',        'wild-places',         3),
+  ('house-they-live-in',    'wild-places',         3),
+  ('girls-and-women',       'people-and-power',    3),
+  ('city-and-country',      'people-and-power',    3),
+  ('their-rest-day',        'people-and-power',    3),
+  ('breakfast-there',       'food-and-craft',      3),
+  ('market-day',            'food-and-craft',      3),
+  ('what-they-wear',        'food-and-craft',      3),
+  ('feast-they-keep',       'food-and-craft',      3),
+  ('girls-and-women',       'conflict-and-change', 3),
+  ('city-and-country',      'conflict-and-change', 3),
+  ('sabbath-keepers-there', 'conflict-and-change', 3),
+  ('getting-around',        'land-and-sky',        3),
+  ('house-they-live-in',    'land-and-sky',        3),
+  ('city-and-country',      'land-and-sky',        3),
+  ('getting-around',        'ancient-world',       0),
+  ('market-day',            'wild-places',         0),
+  ('place-of-worship',      'food-and-craft',      0)
 -- END task_focus_weights
 ) v
 JOIN task_templates t ON t.slug = v.task

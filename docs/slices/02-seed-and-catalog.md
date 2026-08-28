@@ -56,7 +56,7 @@ list:
   the week-4 sequence comes back empty.
 - Weeks 2 and 3 draw 5 without replacement. A 5-template pool draws all of it,
   which leaves swap with no candidates — `UNIQUE (plan_id, task_template_id)`
-  excludes everything already drawn. Swap would be untestable until slice 09.
+  excludes everything already drawn. Swap would have been untestable on it.
 
 Twenty-seven is the floor, and it is the floor for the **draw** — the point
 below which a week draws all of itself and Swap has nothing left. Seed v0 is
@@ -76,8 +76,8 @@ a week because a task can be on theme for two focuses at once.
 | 3 | 13 | same |
 | 4 | 5 | `trifold-board` only |
 
-The other five project types seed as rows with no week-4 templates and are
-hidden in setup until slice 09 fills them.
+The other five project types seeded as rows with no week-4 templates and were
+hidden in setup. Slice 09 filled all six.
 
 ## Seeds are not migrations
 
@@ -97,7 +97,7 @@ a library-editor correction survive.
 | Seed runs twice; the second run inserts zero and changes nothing | met |
 | Editing a seeded task's title, then re-running the seed, leaves the edit | met |
 | Renaming a person on `/admin` sticks and does not require touching SQL | met |
-| `/api/catalog` returns and is under ~60KB | met — 22.7KB with all 195 countries |
+| `/api/catalog` returns and is under ~60KB | met — 22.7KB with all 195 countries and no hooks. Slice 09's content took it to 66.8KB, ~16KB gzipped |
 | Every focus has three `weight = 3` rows in week 2 and in week 3 | met — 42 weight rows |
 | 195 countries | met |
 | 37 task templates in a 6 / 13 / 13 / 5 split | met |
@@ -107,15 +107,15 @@ assertion names what is missing rather than reporting a count, because the draw
 in slice 04 cannot report "the pool was one short" — it just produces a thin
 month.
 
-## Where v0 is thin on purpose
+## Where v0 was thin on purpose
 
-One gap is left, and it is slice 09's to close:
+One gap was left for slice 09, and it has been closed:
 
-- **Week 1's fifth slot has two candidates**, so basic stats, time zones and
-  size comparison have no template yet. `national-symbol` and `currency-animal`
-  split that slot between them until slice 09 widens the pool to six. Unlike
-  the focus gaps, this one costs nothing to leave: the fifth slot is one task a
-  month and both candidates are worth drawing.
+- **Week 1's fifth slot had two candidates**, so basic stats, time zones and
+  size comparison had no template. `national-symbol` and `currency-animal` split
+  that slot between them. Unlike the focus gaps, this one cost nothing to leave:
+  the fifth slot is one task a month and both candidates are worth drawing.
+  Slice 09 widened the pool to six.
 
 Weeks 2 and 3 no longer have a thin focus. They did — three focuses had a
 single week-3 task between them — and it was closed here rather than deferred,

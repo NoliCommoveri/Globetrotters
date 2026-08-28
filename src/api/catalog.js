@@ -4,7 +4,10 @@
 //
 // It is one request rather than five because setup is a screen a kid scrolls,
 // and five round trips on a phone on house wifi is a screen that arrives in
-// pieces. ~60KB is small enough to hold and large enough to want caching.
+// pieces. 67KB with the country data in it, which compresses to about 16KB on
+// the wire and is a 304 on every load after the first — small enough to hold,
+// and large enough that the caching below is doing real work rather than
+// decorating.
 //
 // Cached by ETag (Q-05). The body is hashed, the hash is the ETag, and a
 // browser that already has it sends If-None-Match and gets a 304 with no body.

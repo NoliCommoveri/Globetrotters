@@ -177,9 +177,16 @@ test('setup refuses a month outside September to May, and a nonsense one', async
 
 test('a project type with no week 4 is refused rather than ending the month in blanks', async () => {
   const e = await env();
-  // Seed v0 fills trifold-board only; the other five are rows with an empty
-  // sequence until slice 09. Setup hides them, and the server refuses them.
-  const { res, body } = await call(e, 1, '/api/plans', { method: 'POST', body: setup({ project_type_id: 2 }) });
+  // All six seeded project types carry a five-task sequence, so the empty one
+  // has to be made: a project type created in the library editor has no week 4
+  // until someone writes it. Setup hides it, and the server refuses it.
+  e.DB.db.exec(
+    "INSERT INTO project_types (slug, name, materials, origin) " +
+    "VALUES ('shadow-box', 'Shadow box', 'A box, and things to put in it', 'custom')"
+  );
+  const empty = e.DB.prepare("SELECT id FROM project_types WHERE slug = 'shadow-box'").first().id;
+
+  const { res, body } = await call(e, 1, '/api/plans', { method: 'POST', body: setup({ project_type_id: empty }) });
   assert.equal(res.status, 409);
   assert.match(body.error, /no week 4/);
 
