@@ -148,10 +148,15 @@ Both numbers live as CSS variables in one place. If the family's printer has a
 wider unprintable margin and a segment clips, the margin moves once and every
 layout follows; nothing else is measured in inches.
 
-They are `--page-margin`, `--page-width` and `--page-height` in
-`public/css/app.css`, declared on `:root` inside the print block, with the width
-and height derived from the margin by `calc()` — move the margin and every
-layout follows.
+They are `--page-margin`, `--page-width` and `--page-height`, declared twice:
+in `public/css/app.css` inside the print block, where the passport is laid out,
+and in `public/css/print.css`, which is the worksheets' own stylesheet and
+shares nothing else with the app. The width and height are derived from the
+margin by `calc()` in both. `print.css` adds `--band` for the header, and a
+worksheet third is a third of what is left under it.
+
+The two files have to agree. Move `--page-margin` in one and it moves in the
+other, or the passport and the worksheets are laid out against different paper.
 
 One literal cannot be folded in: `@page { margin: .5in }`. The page context does
 not inherit custom properties, so `margin: var(--page-margin)` there is ignored

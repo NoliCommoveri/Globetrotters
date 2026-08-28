@@ -19,7 +19,10 @@ import { apiCreateFocus, apiPutFocusWeights } from '../src/admin/focuses.js';
 import { apiCreateHook, apiPutAffinities } from '../src/admin/countries.js';
 
 const read = (name) => readFileSync(new URL(`../src/migrations/${name}`, import.meta.url), 'utf8');
-const MIGRATIONS = [{ id: '001', name: '001_schema.sql', sql: read('001_schema.sql') }];
+const MIGRATIONS = [
+  { id: '001', name: '001_schema.sql', sql: read('001_schema.sql') },
+  { id: '004', name: '004_worksheets.sql', sql: read('004_worksheets.sql') },
+];
 const SEEDS = [{ id: '002', name: '002_seed.sql', sql: read('002_seed.sql') }];
 
 async function env() {

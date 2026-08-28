@@ -10,24 +10,8 @@ moved to the answered list at the bottom of this file.
 
 ## Open
 
-| # | Question | Blocks | Kind |
-|---|---|---|---|
-| Q-12 | Who prints the month's pages, and from what device? | 10 | household |
-
-Q-12 blocks part of slice 10. Nothing is outstanding against any other slice.
-
----
-
-## Detail
-
-**Q-12 — Who prints the month's pages, and from what device?**
-§16 puts a **Print this month's pages** button at the end of the reveal, which
-is a screen a kid reaches on a phone. Whether that is real depends on a
-household fact the app cannot see: whether the printer is reachable from the
-kids' phones, or whether printing is something a parent does from a laptop. If
-it is the latter the reveal's button is a dead end and Plan is the only place it
-belongs. It blocks where the button goes and nothing else — the route, the
-packer and the twelve layouts are unaffected either way.
+Nothing. Every question raised against a slice has been answered and written
+into `../design/DESIGN.md`.
 
 ---
 
@@ -35,6 +19,7 @@ packer and the twelve layouts are unaffected either way.
 
 | # | Question | Answer |
 |---|---|---|
+| Q-12 | Who prints the month's pages, and from what device? | Anyone, from any device. The printer is reachable from the kids' phones, so a print button is real wherever it sits — which then left where it sits to be decided by the sheets rather than by the device. It is **Print week**, beside every week's heading on Plan, and there is no month-wide button: the sheets break on the week, so printing all four the day the month is drawn puts weeks 2 and 3 on paper a swap away from being wrong, and reprinting the month to fix one week reprints two that nothing changed. `DESIGN.md` §7, §16. |
 | Q-11 | Does week 4's "present" task require an audience? | No. All six sequences end "present it to your family" — whoever is home. A scheduled presentation night would be the app asserting a household commitment nine times a year that it cannot see and cannot enforce, and the first month it slips, six templates are telling a kid to do something that is not going to happen. Nothing in the app schedules the event or asks whether it happened. `DESIGN.md` §13, §15. |
 | Q-14 | Can a country hook be deleted, when nothing else in the library can? | Yes, and it is the whole of the exception. `archived = 1` exists because `plan_tasks` and `month_plans` reference templates, focuses and project types, and a hard delete would break a month already in progress; nothing references a hook. A generated hook that is wrong, with no correct hook to type over it, has nowhere else to go. There is no delete button anywhere else in the editor. `DESIGN.md` §12, §15. |
 | Q-10 | Is `POST /api/auth` exempt from the wall's write ban? | Yes, and it is the whole of the exemption. That route issues the wall cookie, so a tablet whose year has run out has no other way back in; it takes a passcode and hands back a cookie, cannot set a person, and the most a wall cookie gets out of it is another wall cookie. `PATCH /api/me` is not exempt and must not become so. Every other route answers a wall cookie 403 — reads included, since the wall needs exactly two of them. `DESIGN.md` §6, §8, §15. |

@@ -574,6 +574,21 @@ button {
   border-top: 1px solid var(--navy-line);
 }
 
+.week-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: .5rem;
+}
+
+/* The print link sits beside its week's heading, because a week is the unit
+ * that prints: the sheets break between weeks, so reprinting week 3 after a
+ * swap leaves weeks 1 and 2 in the binder untouched (§16). */
+.week-print {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
 .tasks {
   display: flex;
   flex-direction: column;

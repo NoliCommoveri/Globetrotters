@@ -19,6 +19,7 @@ import { runChunked } from './migrations.js';
 export const SEEDED_TABLES = [
   'people', 'focuses', 'project_types', 'countries',
   'task_templates', 'task_focus_weights', 'country_hooks', 'country_focus_affinity',
+  'worksheet_layouts',
 ];
 
 async function counts(db) {

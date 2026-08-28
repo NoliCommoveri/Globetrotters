@@ -13,9 +13,11 @@
 import { json } from '../lib/html.js';
 import { readJson } from '../lib/body.js';
 import { poolCounts, thin } from './focuses.js';
+import { kindKnobs } from './layouts.js';
+import { KIND_NAMES, readSpec, pickSpec } from '../lib/worksheet.js';
 
 export async function apiLibrary(request, env) {
-  const [people, focuses, projectTypes, tasks, weights, draws, countries] = await Promise.all([
+  const [people, focuses, projectTypes, tasks, weights, draws, countries, layouts] = await Promise.all([
     env.DB.prepare('SELECT id, name, color FROM people ORDER BY sort_order, id').all(),
     env.DB.prepare('SELECT id, slug, name, blurb, archived, origin FROM focuses ORDER BY id').all(),
     env.DB.prepare(`
@@ -32,7 +34,8 @@ export async function apiLibrary(request, env) {
     `).all(),
     env.DB.prepare(`
       SELECT id, slug, title, prompt, week_theme, workbook_page, tier,
-             project_type_id, position, archived, origin, updated_at
+             project_type_id, position, archived, origin, updated_at,
+             worksheet_layout_id, worksheet_spec
       FROM task_templates
       ORDER BY week_theme, project_type_id, position, id
     `).all(),
@@ -55,6 +58,21 @@ export async function apiLibrary(request, env) {
                WHERE country_focus_affinity.country_id = countries.id) AS affinities
       FROM countries ORDER BY countries.name
     `).all(),
+    // The bound count is the column that makes this tab worth opening: editing
+    // a layout changes every task under it, and how many that is decides
+    // whether a change is a nudge or a rewrite of the binder (§12).
+    env.DB.prepare(`
+      SELECT worksheet_layouts.id, worksheet_layouts.slug, worksheet_layouts.name,
+             worksheet_layouts.kind, worksheet_layouts.height_thirds,
+             worksheet_layouts.spec, worksheet_layouts.archived, worksheet_layouts.origin,
+             COUNT(task_templates.id) AS bound
+      FROM worksheet_layouts
+      LEFT JOIN task_templates
+        ON task_templates.worksheet_layout_id = worksheet_layouts.id
+       AND task_templates.archived = 0
+      GROUP BY worksheet_layouts.id
+      ORDER BY worksheet_layouts.id
+    `).all(),
   ]);
 
   const pools = await poolCounts(env.DB);
@@ -71,6 +89,10 @@ export async function apiLibrary(request, env) {
     weights: weights.results,
     draws: draws.results,
     countries: countries.results,
+    layouts: layouts.results,
+    // Which knobs each kind has. Sent with the payload so the form the editor
+    // draws and the keys the server keeps cannot drift (§16).
+    kind_knobs: kindKnobs(),
   });
 }
 
@@ -86,14 +108,16 @@ export async function apiLibrary(request, env) {
 export const EXPORT_VERSION = 1;
 
 export async function libraryExport(db) {
-  const [focuses, projectTypes, tasks, weights, hooks, affinities] = await Promise.all([
+  const [focuses, projectTypes, tasks, weights, hooks, affinities, layouts] = await Promise.all([
     db.prepare('SELECT slug, name, blurb, archived, origin FROM focuses ORDER BY slug').all(),
     db.prepare('SELECT slug, name, materials, archived, origin FROM project_types ORDER BY slug').all(),
     db.prepare(`
       SELECT t.slug, t.title, t.prompt, t.week_theme, t.workbook_page, t.tier,
-             p.slug AS project_type, t.position, t.archived, t.origin
+             p.slug AS project_type, t.position, t.archived, t.origin,
+             w.slug AS worksheet_layout, t.worksheet_spec
       FROM task_templates t
       LEFT JOIN project_types p ON p.id = t.project_type_id
+      LEFT JOIN worksheet_layouts w ON w.id = t.worksheet_layout_id
       ORDER BY t.slug
     `).all(),
     db.prepare(`
@@ -115,6 +139,10 @@ export async function libraryExport(db) {
       JOIN focuses f ON f.id = a.focus_id
       ORDER BY c.iso3, f.slug
     `).all(),
+    db.prepare(`
+      SELECT slug, name, kind, height_thirds, spec, archived, origin
+      FROM worksheet_layouts ORDER BY slug
+    `).all(),
   ]);
 
   return {
@@ -126,6 +154,7 @@ export async function libraryExport(db) {
     weights: weights.results,
     hooks: hooks.results,
     affinities: affinities.results,
+    layouts: layouts.results,
   };
 }
 
@@ -224,14 +253,60 @@ async function importProjectTypes(im, rows) {
   }
 }
 
+// Layouts come in before tasks, because a task's binding is resolved against
+// them. Keyed on slug like everything else in the file: a layout retuned this
+// year has to land in next year's database without carrying this one's ids.
+const LAYOUT_COLUMNS = ['name', 'kind', 'height_thirds', 'spec', 'archived', 'origin'];
+
+async function importLayouts(im, rows) {
+  const existing = await im.index(`
+    SELECT id, slug, name, kind, height_thirds, spec, archived, origin FROM worksheet_layouts
+  `);
+  for (const row of rows) {
+    const slug = clean(row.slug);
+    const kind = clean(row.kind);
+    const thirds = Number(row.height_thirds);
+    // A kind with no renderer, or a height a sheet cannot hold, is a row that
+    // would print as a hole. Skipped and counted, like every other bad anchor.
+    if (!slug || !clean(row.name) || !KIND_NAMES.includes(kind)
+        || !(thirds >= 1 && thirds <= 3)) {
+      im.count('layouts', 'skipped');
+      continue;
+    }
+    const wanted = {
+      name: clean(row.name), kind, height_thirds: Math.round(thirds),
+      spec: JSON.stringify(readSpec(kind, row.spec)),
+      archived: flag(row.archived), origin: clean(row.origin) || 'seed',
+    };
+    const found = existing.get(slug);
+    if (!found) {
+      await im.db.prepare(`
+        INSERT INTO worksheet_layouts (slug, name, kind, height_thirds, spec, archived, origin)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `).bind(slug, ...LAYOUT_COLUMNS.map((c) => wanted[c])).run();
+      im.count('layouts', 'inserted');
+    } else if (differs(found, wanted, LAYOUT_COLUMNS)) {
+      await im.db.prepare(`
+        UPDATE worksheet_layouts SET
+          name = ?, kind = ?, height_thirds = ?, spec = ?, archived = ?, origin = ?
+        WHERE id = ?
+      `).bind(...LAYOUT_COLUMNS.map((c) => wanted[c]), found.id).run();
+      im.count('layouts', 'updated');
+    }
+  }
+}
+
 const TASK_COLUMNS = ['title', 'prompt', 'week_theme', 'workbook_page', 'tier',
-                      'project_type_id', 'position', 'archived', 'origin'];
+                      'project_type_id', 'position', 'archived', 'origin',
+                      'worksheet_layout_id', 'worksheet_spec'];
 
 async function importTasks(im, rows) {
   const projectTypes = await im.index('SELECT id, slug FROM project_types');
+  const layouts = await im.index('SELECT id, slug, kind FROM worksheet_layouts');
   const existing = await im.index(`
     SELECT id, slug, title, prompt, week_theme, workbook_page, tier,
-           project_type_id, position, archived, origin
+           project_type_id, position, archived, origin,
+           worksheet_layout_id, worksheet_spec
     FROM task_templates
   `);
 
@@ -248,27 +323,36 @@ async function importTasks(im, rows) {
       im.count('tasks', 'skipped');
       continue;
     }
+    // A task naming a layout this database does not have keeps everything else
+    // and loses only the binding, which prints as ruled lines. That is a
+    // complete page; skipping the task the way a dangling project type does
+    // would leave the week short one.
+    const layout = layouts.get(clean(row.worksheet_layout)) || null;
     const wanted = {
       title: clean(row.title), prompt: clean(row.prompt), week_theme: week,
       workbook_page: clean(row.workbook_page), tier: clean(row.tier) || 'focus',
       project_type_id: project ? project.id : null,
       position: row.position == null ? null : Number(row.position),
       archived: flag(row.archived), origin: clean(row.origin) || 'seed',
+      worksheet_layout_id: layout ? layout.id : null,
+      worksheet_spec: layout && row.worksheet_spec
+        ? JSON.stringify(pickSpec(layout.kind, row.worksheet_spec)) : null,
     };
     const found = existing.get(slug);
     if (!found) {
       await im.db.prepare(`
         INSERT INTO task_templates
           (slug, title, prompt, week_theme, workbook_page, tier, project_type_id,
-           position, archived, origin)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+           position, archived, origin, worksheet_layout_id, worksheet_spec)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).bind(slug, ...TASK_COLUMNS.map((c) => wanted[c])).run();
       im.count('tasks', 'inserted');
     } else if (differs(found, wanted, TASK_COLUMNS)) {
       await im.db.prepare(`
         UPDATE task_templates SET
           title = ?, prompt = ?, week_theme = ?, workbook_page = ?, tier = ?,
-          project_type_id = ?, position = ?, archived = ?, origin = ?, updated_at = ?
+          project_type_id = ?, position = ?, archived = ?, origin = ?,
+          worksheet_layout_id = ?, worksheet_spec = ?, updated_at = ?
         WHERE id = ?
       `).bind(...TASK_COLUMNS.map((c) => wanted[c]), new Date().toISOString(), found.id).run();
       im.count('tasks', 'updated');
@@ -360,7 +444,7 @@ async function importAffinities(im, rows) {
   }
 }
 
-const KINDS = ['focuses', 'project_types', 'tasks', 'weights', 'hooks', 'affinities'];
+const KINDS = ['focuses', 'project_types', 'layouts', 'tasks', 'weights', 'hooks', 'affinities'];
 
 // Order matters: tasks reference project types, weights reference both tasks
 // and focuses, affinities reference focuses. Import in dependency order and a
@@ -372,6 +456,7 @@ export async function libraryImport(db, file) {
   const list = (key) => (Array.isArray(file?.[key]) ? file[key] : []);
   await importFocuses(im, list('focuses'));
   await importProjectTypes(im, list('project_types'));
+  await importLayouts(im, list('layouts'));
   await importTasks(im, list('tasks'));
   await importWeights(im, list('weights'));
   await importHooks(im, list('hooks'));

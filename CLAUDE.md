@@ -22,13 +22,15 @@ docs/
 
 src/
   index.js                    Worker entry, routing
+  print.js                    /print/:planId — the worksheet document
   api/                        /api/* handlers
   admin/                      /admin/* pages and /admin/api/* handlers
-  lib/                        draw engine, auth, migration runner, splitter
+  lib/                        draw engine, auth, migration runner, splitter,
+                              worksheet packer and renderers
   migrations/*.sql            append-only, zero-padded ids
   migrations/index.js         the ordered list; the only .sql imports
 test/                         node --test test/*.test.js, no dependencies
-public/                       static assets: fonts, css, js, wall
+public/                       static assets: fonts, css (app and print), js, wall
 wrangler.toml                 must sit at the repo root: the git-connected
                               build looks for it there
 ```

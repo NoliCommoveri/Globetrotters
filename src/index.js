@@ -24,6 +24,7 @@ import { apiLibrary, apiLibraryExport, apiLibraryImport } from './admin/library-
 import { apiCreateTask, apiPatchTask as apiAdminPatchTask } from './admin/tasks.js';
 import { apiCreateFocus, apiPatchFocus, apiPutFocusWeights } from './admin/focuses.js';
 import { apiCreateProjectType, apiPatchProjectType } from './admin/project-types.js';
+import { apiCreateLayout, apiPatchLayout } from './admin/layouts.js';
 import {
   apiCountry, apiCreateHook, apiPatchHook, apiDeleteHook, apiPutAffinities,
 } from './admin/countries.js';
@@ -38,6 +39,7 @@ import { apiPatchTask, apiSwapTask } from './api/tasks.js';
 import { apiCreateSession } from './api/sessions.js';
 import { apiStats } from './api/stats.js';
 import { apiWall, apiWallVersion } from './api/wall.js';
+import { printPlan, printProblem } from './print.js';
 
 function notFound() {
   return new Response('Not found', {
@@ -73,6 +75,7 @@ const API = {
   'POST /admin/api/tasks': apiCreateTask,
   'POST /admin/api/focuses': apiCreateFocus,
   'POST /admin/api/project-types': apiCreateProjectType,
+  'POST /admin/api/layouts': apiCreateLayout,
 };
 
 // Routes carrying an id, matched after the exact tables miss. A regex list
@@ -84,6 +87,7 @@ const API_PATTERNS = [
   { method: 'PATCH', pattern: /^\/admin\/api\/focuses\/(?<id>\d+)$/, handler: apiPatchFocus },
   { method: 'PUT', pattern: /^\/admin\/api\/focuses\/(?<id>\d+)\/weights$/, handler: apiPutFocusWeights },
   { method: 'PATCH', pattern: /^\/admin\/api\/project-types\/(?<id>\d+)$/, handler: apiPatchProjectType },
+  { method: 'PATCH', pattern: /^\/admin\/api\/layouts\/(?<id>\d+)$/, handler: apiPatchLayout },
   { method: 'GET', pattern: /^\/admin\/api\/countries\/(?<id>\d+)$/, handler: apiCountry },
   { method: 'POST', pattern: /^\/admin\/api\/countries\/(?<id>\d+)\/hooks$/, handler: apiCreateHook },
   { method: 'PUT', pattern: /^\/admin\/api\/countries\/(?<id>\d+)\/affinities$/, handler: apiPutAffinities },
@@ -266,6 +270,34 @@ async function api(request, env, url) {
   return exists ? methodNotAllowed() : notFound();
 }
 
+// GET /print/:planId — the month's pages (DESIGN.md §16). Behind the family
+// cookie and outside /api/, so it gets its own gate rather than a table entry:
+// it answers with a document, and the two tables above answer with JSON.
+//
+// A family cookie with no person still prints. The plan carries whose month it
+// is; picking a person is what the shell needs to know which board to open, and
+// a parent who has never picked one is exactly the person standing at the
+// printer (Q-12).
+//
+// The wall's cookie is refused and gets no exception. Nothing on the kitchen
+// tablet opens a print dialog (§8), and a 401 rather than a 403 is the honest
+// answer: the family passcode is what is missing.
+const PRINT_PATTERN = /^\/print\/(?<id>\d+)$/;
+
+async function print(request, env, url) {
+  const match = PRINT_PATTERN.exec(url.pathname);
+  if (!match) return notFound();
+  if (request.method !== 'GET' && request.method !== 'HEAD') return methodNotAllowed();
+
+  const session = await readSession(request, env);
+  if (!session) {
+    return printProblem(401, 'Sign in on this device first, then open this page again.');
+  }
+
+  const response = await printPlan(request, env, session, match.groups);
+  return withCookie(response, await issueSessionCookie(env, session.personId));
+}
+
 // The app is one static document that routes client-side. Assets are served
 // before the Worker, so `/` never arrives here in production — but `/settings`
 // does, and it has to come back as the same document rather than a 404.
@@ -312,6 +344,10 @@ export default {
     }
 
     if (url.pathname === '/wall') return wallPage(request, env, url);
+
+    if (url.pathname === '/print' || url.pathname.startsWith('/print/')) {
+      return print(request, env, url);
+    }
 
     if (isShellPath(url.pathname)) return shell(request, env, url);
 

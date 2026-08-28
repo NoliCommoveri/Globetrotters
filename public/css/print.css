@@ -1,0 +1,239 @@
+/* The printed worksheets (DESIGN.md §16).
+ *
+ * Its own stylesheet, sharing nothing with app.css but the type scale. The
+ * app's deep navy ground does not follow the page: a full-bleed dark
+ * background is a print job nobody would run twice.
+ *
+ * The two page numbers are D-13 — US Letter, 0.5in margins, a 7.5 x 10in
+ * printable area. They are declared here and in app.css's print block, which
+ * lays out the passport against the same paper; the two must agree, and a
+ * printer with a wider unprintable margin moves --page-margin in both.
+ *
+ * A sheet is a fixed-height block and its segments are sized in thirds of what
+ * is left under the header band, so a segment can never cross a page break and
+ * a layout that declares two thirds occupies exactly two. */
+
+:root {
+  --page-margin: .5in;
+  --page-width: calc(8.5in - 2 * var(--page-margin));
+  --page-height: calc(11in - 2 * var(--page-margin));
+
+  /* The header band, and what is left for segments underneath it. Three thirds
+   * of the remainder, not of the paper: the band is real height and a third
+   * measured against the full page would push the last segment off the sheet. */
+  --band: .62in;
+  --segment-area: calc(var(--page-height) - var(--band));
+  --third: calc(var(--segment-area) / 3);
+
+  --rule: #1a1a1a;
+  --faint: #8a8a8a;
+  --ink: #000;
+
+  --font-body: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* `margin` inside @page is the printer's unprintable-area allowance and is not
+ * the same box the layout is measured against, so the value is typed here and
+ * mirrored into --page-margin above rather than read from it. */
+@page {
+  size: letter;
+  margin: .5in;
+}
+
+* { box-sizing: border-box; }
+
+html { font-size: 12pt; }
+
+body {
+  margin: 0;
+  background: #fff;
+  color: #111;
+  font-family: var(--font-body);
+  line-height: 1.35;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* ------------------------------------------------------------------ sheets */
+
+.sheet {
+  width: var(--page-width);
+  height: var(--page-height);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  break-after: page;
+  page-break-after: always;
+}
+
+.sheet:last-child { break-after: auto; page-break-after: auto; }
+
+.band {
+  flex: 0 0 var(--band);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: .5rem;
+  border-bottom: 3px solid var(--ink);
+  padding-bottom: .1in;
+  font-size: .9rem;
+}
+
+.band .who { font-weight: 700; letter-spacing: .01em; }
+.band .where { color: #333; white-space: nowrap; }
+.band .dot { padding: 0 .35em; color: var(--faint); }
+
+.segments {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* ---------------------------------------------------------------- segments */
+
+.segment {
+  flex: 0 0 calc(var(--third) * var(--thirds, 1));
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: .12in 0 .16in;
+  border-bottom: 1px dashed var(--faint);
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.segments > .segment:last-child { border-bottom: 0; }
+
+.seg-head {
+  display: flex;
+  align-items: baseline;
+  gap: .4rem;
+}
+
+.seg-head h2 { font-size: 1rem; margin: 0; font-weight: 700; }
+
+.seg-page {
+  font-size: .7rem;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: #444;
+  border: 1px solid var(--faint);
+  border-radius: .6rem;
+  padding: 0 .4em;
+  white-space: nowrap;
+}
+
+.seg-prompt { margin: .04in 0 .08in; font-size: .82rem; color: #222; }
+
+.seg-form { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+
+/* ------------------------------------------------------------------- forms */
+
+/* Ruled lines fill whatever height the segment has, so eight lines in one third
+ * and eight in two are both evenly spaced rather than both 0.3in apart with a
+ * field of white under one of them. */
+.rules { flex: 1 1 auto; display: flex; flex-direction: column; }
+.rules i { flex: 1 1 0; border-bottom: 1px solid var(--rule); min-height: .22in; }
+
+.box { flex: 1 1 auto; margin: 0; display: flex; flex-direction: column; min-height: 0; }
+.box .ink { flex: 1 1 auto; border: 1.5px solid var(--rule); border-radius: .06in; }
+.box figcaption { font-size: .72rem; color: #444; padding-top: .04in; }
+
+.beside { flex: 1 1 auto; display: flex; gap: .18in; min-height: 0; }
+.beside .box { flex: 1 1 45%; }
+/* The notes end level with the box, not with its caption: the caption sits
+ * under the box and the rules would otherwise run a line past it. */
+.beside-notes { flex: 1 1 55%; display: flex; padding-bottom: 1.03em; }
+.beside-notes .rules { flex: 1 1 auto; }
+
+.callouts { flex: 1 1 55%; margin: 0; padding: 0 0 0 1.1em; display: flex;
+            flex-direction: column; }
+.callouts li { flex: 1 1 0; display: flex; align-items: center; }
+.callouts .lead { flex: 1 1 auto; border-bottom: 1px solid var(--rule); }
+
+.grid { flex: 1 1 auto; width: 100%; border-collapse: collapse; table-layout: fixed; }
+.grid th {
+  font-size: .78rem;
+  text-align: left;
+  padding: .03in .06in;
+  border: 1px solid var(--rule);
+  background: #f2f2f2;
+}
+.grid td { border: 1px solid var(--rule); }
+
+.timeline { flex: 1 1 auto; display: flex; align-items: center; }
+.timeline ol {
+  flex: 1 1 auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  border-top: 1.5px solid var(--rule);
+  padding-top: 0;
+}
+.timeline li { flex: 1 1 0; display: flex; flex-direction: column; align-items: center; }
+.timeline .tick { width: 1px; height: .16in; background: var(--rule); }
+.timeline .slot { margin-top: .04in; width: 84%; height: .5in; border: 1px solid var(--faint); }
+
+.figures { flex: 1 1 auto; margin: 0; padding: 0; list-style: none; display: flex; gap: .18in; }
+.figures li { flex: 1 1 0; display: flex; flex-direction: column; min-width: 0; }
+.figures .ink { flex: 1 1 auto; border: 1.5px solid var(--rule); border-radius: .06in; }
+.figures span { font-size: .72rem; color: #444; padding-top: .04in; }
+
+.checklist { flex: 1 1 auto; margin: 0; padding: 0; list-style: none;
+             display: flex; flex-direction: column; }
+.checklist li { flex: 1 1 0; display: flex; align-items: center; gap: .1in;
+                border-bottom: 1px solid var(--rule); min-height: .24in; }
+.checklist .tick-box { flex: 0 0 .16in; height: .16in; border: 1.5px solid var(--rule); }
+.checklist .label { font-size: .8rem; }
+.checklist .steps .label b { font-weight: 700; }
+
+.storyboard { flex: 1 1 auto; margin: 0; padding: 0; list-style: none;
+              display: grid; grid-template-columns: repeat(3, 1fr);
+              grid-auto-rows: 1fr; gap: .12in; }
+.storyboard li { border: 1.5px solid var(--rule); border-radius: .06in; position: relative; }
+.storyboard .panel-no { position: absolute; top: .04in; left: .06in;
+                        font-size: .7rem; color: var(--faint); }
+
+/* Week 4's one sheet is composed, not packed: the materials and the five steps
+ * take the height they need and the storyboard absorbs the rest, so the sheet
+ * is exactly one page whatever the project type's sequence says. */
+.make-materials { flex: 0 0 auto; }
+.make-materials .checklist li { min-height: .26in; }
+/* A step's prompt is a full sentence and wraps, so its row is sized by its
+ * content rather than shared evenly — even rows would run the second line
+ * through the rule under it. */
+.make-steps { flex: 0 0 auto; }
+.make-steps .checklist { flex: 0 0 auto; }
+.make-steps .checklist li {
+  flex: 0 0 auto;
+  align-items: flex-start;
+  padding: .05in 0;
+  min-height: 0;
+}
+.make-steps .checklist .tick-box { margin-top: .03in; }
+.make-plan { flex: 1 1 auto; }
+
+/* ------------------------------------------------------------- on a screen */
+
+/* The page is looked at before it is printed, often on the phone that opened
+ * it. Screen gets the sheets as cards on grey; print gets nothing of this. */
+@media screen {
+  body { background: #e9e9ec; padding: .4in 0; }
+  .sheet {
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .25);
+    padding: .5in;
+    width: 8.5in;
+    height: 11in;
+    margin: 0 auto .3in;
+    max-width: 100%;
+  }
+}
+
+@media print {
+  body { padding: 0; }
+}

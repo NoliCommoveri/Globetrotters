@@ -11,6 +11,7 @@
 import { json } from '../lib/html.js';
 import { readJson } from '../lib/body.js';
 import { Fields, slugify, uniqueSlug, nowIso } from './fields.js';
+import { pickSpec } from '../lib/worksheet.js';
 
 const TIERS = ['core', 'focus', 'wild'];
 const MAX_TITLE = 80;
@@ -18,7 +19,8 @@ const MAX_PROMPT = 600;
 const MAX_PAGE = 32;
 
 const COLUMNS = `id, slug, title, prompt, week_theme, workbook_page, tier,
-                 project_type_id, position, archived, origin, updated_at`;
+                 project_type_id, position, archived, origin, updated_at,
+                 worksheet_layout_id, worksheet_spec`;
 
 const load = (env, id) =>
   env.DB.prepare(`SELECT ${COLUMNS} FROM task_templates WHERE id = ?`).bind(id).first();
@@ -39,6 +41,46 @@ async function checkProjectType(env, week, projectTypeId) {
   if (projectTypeId != null) {
     return 'Only week 4 tasks belong to a project type.';
   }
+  return null;
+}
+
+// The printed segment (§16). The layout is what form the task prints under; the
+// spec is that layout's own knobs, overridden for this one task and read
+// through the layout's kind so a key it does not have never reaches a page.
+//
+// Both are nullable and both clear on null: a task with no layout prints its
+// prompt over ruled lines, which is a complete page and not a missing one.
+async function readWorksheet(env, body, fields, existingLayoutId) {
+  let layoutId = existingLayoutId ?? null;
+  let kind = null;
+
+  if (body.worksheet_layout_id !== undefined) {
+    layoutId = body.worksheet_layout_id == null || body.worksheet_layout_id === ''
+      ? null : Number(body.worksheet_layout_id);
+    if (layoutId !== null && !Number.isInteger(layoutId)) return 'That is not a layout.';
+    fields.set('worksheet_layout_id', layoutId);
+  }
+
+  if (layoutId !== null) {
+    const layout = await env.DB.prepare('SELECT id, kind FROM worksheet_layouts WHERE id = ?')
+      .bind(layoutId).first();
+    if (!layout) return 'No such worksheet layout';
+    kind = layout.kind;
+  }
+
+  if (body.worksheet_spec !== undefined) {
+    const raw = body.worksheet_spec;
+    if (raw == null || raw === '') {
+      fields.set('worksheet_spec', null);
+    } else if (!kind) {
+      return 'Give the task a layout before overriding its fields.';
+    } else if (typeof raw !== 'object' && typeof raw !== 'string') {
+      return 'Worksheet fields must be a set of named values.';
+    } else {
+      fields.set('worksheet_spec', JSON.stringify(pickSpec(kind, raw)));
+    }
+  }
+
   return null;
 }
 
@@ -68,18 +110,22 @@ export async function apiCreateTask(request, env) {
   const problem = await checkProjectType(env, fields.value('week_theme'), projectTypeId);
   if (problem) return json({ ok: false, error: problem }, { status: 400 });
 
+  const worksheet = await readWorksheet(env, body, fields, null);
+  if (worksheet) return json({ ok: false, error: worksheet }, { status: 400 });
+
   const title = fields.value('title');
   const slug = await uniqueSlug(env.DB, 'task_templates', slugify(body.slug || title));
 
   const res = await env.DB.prepare(`
     INSERT INTO task_templates
       (slug, title, prompt, week_theme, workbook_page, tier, project_type_id,
-       position, archived, origin, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 'custom', ?)
+       position, archived, origin, updated_at, worksheet_layout_id, worksheet_spec)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 'custom', ?, ?, ?)
   `).bind(
     slug, title, fields.value('prompt'), fields.value('week_theme'),
     fields.value('workbook_page') ?? null, fields.value('tier'),
-    projectTypeId, fields.value('position') ?? null, nowIso()
+    projectTypeId, fields.value('position') ?? null, nowIso(),
+    fields.value('worksheet_layout_id') ?? null, fields.value('worksheet_spec') ?? null,
   ).run();
 
   return json({ ok: true, task: await load(env, res.meta.last_row_id) }, { status: 201 });
@@ -110,6 +156,9 @@ export async function apiPatchTask(request, env, params) {
 
   const problem = await checkProjectType(env, week, projectTypeId);
   if (problem) return json({ ok: false, error: problem }, { status: 400 });
+
+  const worksheet = await readWorksheet(env, body, fields, existing.worksheet_layout_id);
+  if (worksheet) return json({ ok: false, error: worksheet }, { status: 400 });
 
   if (fields.empty) return json({ ok: false, error: 'Nothing to change' }, { status: 400 });
 
