@@ -266,6 +266,27 @@ test('an id route reached with the wrong method is 405, not 404', async () => {
   assert.equal(res.status, 405);
 });
 
+// Both admin documents ship their behaviour as one inline script built inside a
+// template literal in the module, so an escape that is right in the module is
+// not necessarily right in what reaches the browser: a lone `\'` inside a
+// template literal collapses to a bare quote and ends the client string early.
+// That is a parse error, and a script that does not parse does not run at all — the page
+// still renders its shell, so nothing looks wrong until every button on it is
+// dead. Compiling the emitted script is the only thing that catches it.
+test('every inline admin script parses in the browser, not just in the module', async () => {
+  const e = await env({ seeded: true });
+
+  for (const path of ['/admin', '/admin/library']) {
+    const html = await (await asAdmin(e, path)).text();
+    const scripts = [...html.matchAll(/<script>([^]*?)<\/script>/g)].map((m) => m[1]);
+    assert.ok(scripts.length, `${path} has no inline script`);
+    for (const src of scripts) {
+      // Compiles without running: a SyntaxError here is exactly the dead page.
+      assert.doesNotThrow(() => new Function(src), `${path} ships a script that does not parse`);
+    }
+  }
+});
+
 test('the library editor answers on every one of its routes', async () => {
   const e = await env({ seeded: true });
 
