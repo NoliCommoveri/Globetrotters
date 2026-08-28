@@ -50,6 +50,14 @@ const STYLE = `
 // one in this module, and client code that has to count escapes is client code
 // nobody edits. The one interpolation is POOL_FLOOR, so the warning the page
 // prints and the threshold the server applies cannot drift apart.
+//
+// Every backslash meant for the browser is doubled here, because this literal
+// eats the first one: `\\n` to emit a newline escape, `\\'` to emit an escaped
+// quote. A single `\'` reaches the browser as a bare quote, ends the string it
+// sits in, and the whole script fails to parse — which shows up as a page that
+// still renders its shell with every button on it dead. Prefer a double-quoted
+// client string over escaping an apostrophe at all. `routes.test.js` compiles
+// what this emits, so a miscount fails there rather than in a browser.
 const SCRIPT = `
 var state = { data: null, focusId: null, countryId: null };
 
@@ -791,7 +799,7 @@ function newLayoutForm() {
     try {
       await send('POST', '/admin/api/layouts', { name: name.value, kind: kindSel.value,
         height_thirds: Number(thirds.value) });
-      say('Created with that kind\'s default fields. Tune them, then bind tasks to it'
+      say("Created with that kind's default fields. Tune them, then bind tasks to it"
         + ' from the task list.');
       await load();
     } catch (err) { say(String(err.message), true); }
