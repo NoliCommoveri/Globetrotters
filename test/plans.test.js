@@ -26,6 +26,7 @@ const { applyPending } = await import('../src/lib/migrations.js');
 const { MIGRATIONS, SEEDS } = await import('../src/migrations/index.js');
 const { runSeed } = await import('../src/lib/seed.js');
 const { issueSessionCookie } = await import('../src/lib/auth.js');
+const { drawInputs } = await import('../src/api/plans.js');
 const { mondayOf, firstMondayOf, todayIn, monthOf, addMonths } = await import('../src/lib/dates.js');
 
 const ADMIN_TOKEN = 'test-token';
@@ -256,22 +257,28 @@ test('one person’s history does not weigh on another’s draw', async () => {
   assert.equal(body.total, 20);
 });
 
-test('a focus never draws a task it has weighted to zero', async () => {
+test('a focus favours without excluding: every prompt stays reachable', async () => {
+  // There is no weight-0 any more. `fw = 1 + 2 * SUM` floors at 1, so a focus
+  // says what it is about and never what the library may not offer — which is
+  // the property that lets the merged pool draw eight from 49 at all.
   const e = await env();
-  const excluded = await e.DB.prepare(
-    'SELECT focus_id, task_template_id FROM task_focus_weights WHERE weight = 0'
+  const { results: pool } = await e.DB.prepare(
+    "SELECT id FROM task_templates WHERE week_theme IN (2, 3) AND tier != 'fixed'"
   ).all();
-  assert.ok(excluded.results.length > 0, 'the seed has no exclusions to test');
 
-  for (const row of excluded.results) {
-    const e2 = await env();
-    const { body } = await call(e2, 1, '/api/plans', {
-      method: 'POST', body: setup({ focus_id: row.focus_id }),
-    });
-    const all = body.weeks.flatMap((w) => w.tasks.map((t) => t.task_template_id));
-    assert.ok(!all.includes(row.task_template_id),
-      `focus ${row.focus_id} drew ${row.task_template_id}, which it excludes`);
+  for (const focus of [1, 5, 9]) {
+    const inputs = await drawInputs(e, { personId: 1, month: '2099-01', focusId: focus });
+    for (const template of pool) {
+      assert.ok(inputs.focusWeight(template.id) >= 1,
+        `focus ${focus} scored template ${template.id} below the baseline`);
+    }
   }
+
+  // And it does favour: the heaviest prompt is several times the baseline, or
+  // picking a focus changes nothing that a kid could see.
+  const inputs = await drawInputs(e, { personId: 1, month: '2099-01', focusId: 1 });
+  const weights = pool.map((t) => inputs.focusWeight(t.id));
+  assert.ok(Math.max(...weights) >= 7, `heaviest prompt is only ${Math.max(...weights)}`);
 });
 
 // ------------------------------------------------------------------ reveal --
@@ -430,7 +437,7 @@ test('a plan that does not exist is 404, not a blank screen', async () => {
 
 // ------------------------------------------------------- setup’s two feeds --
 
-test('a focus previews three titles, from its weight-3 rows and across both weeks', async () => {
+test('a focus previews its three heaviest titles, across both natural halves', async () => {
   const e = await env();
   const { res, body } = await call(e, 1, '/api/focuses/2/samples');
 
@@ -438,16 +445,29 @@ test('a focus previews three titles, from its weight-3 rows and across both week
   assert.equal(body.samples.length, 3);
   assert.ok(body.focus.name);
 
-  // Across weeks 2 and 3 rather than three from whichever sorts first: a preview
-  // that shows half the month is a preview of half the consequence.
+  // Across weeks 2 and 3 rather than three from whichever half this focus
+  // leans to: a preview that shows half the month is half the consequence.
   assert.ok(new Set(body.samples.map((s) => s.week_theme)).size > 1);
 
-  // Every title is one this focus actually favors.
-  const favored = await e.DB.prepare(
-    'SELECT task_template_id FROM task_focus_weights WHERE focus_id = 2 AND weight = 3'
-  ).all();
-  const ids = favored.results.map((r) => r.task_template_id);
-  for (const sample of body.samples) assert.ok(ids.includes(sample.id));
+  // Every title is one this focus actually lifts, and the heaviest of its half.
+  const { results: lifted } = await e.DB.prepare(`
+    SELECT t.id, t.week_theme, 1 + 2 * SUM(ft.weight) AS fw
+    FROM prompt_tags p
+    JOIN focus_tags ft ON ft.tag = p.tag AND ft.focus_id = 2
+    JOIN task_templates t ON t.id = p.task_template_id
+    WHERE p.namespace = 'topic' AND t.week_theme IN (2, 3) AND t.tier != 'fixed'
+    GROUP BY t.id
+  `).all();
+  const byId = new Map(lifted.map((r) => [r.id, r]));
+
+  for (const sample of body.samples) {
+    const row = byId.get(sample.id);
+    assert.ok(row, `${sample.id} is not a prompt this focus reaches`);
+    const rivals = lifted.filter((r) => r.week_theme === row.week_theme);
+    assert.equal(row.fw, Math.max(...rivals.map((r) => r.fw)),
+      'a sample is not the heaviest of its half');
+  }
+  assert.ok(body.above_baseline > 0);
 });
 
 test('every seeded focus has something to preview', async () => {

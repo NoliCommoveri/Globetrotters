@@ -7,6 +7,8 @@ import { splitStatements } from '../src/lib/sql.js';
 import {
   migrationStatus, applyPending, eraseAll, resetMonth, resetStatements, SCHEMA_TABLES,
 } from '../src/lib/migrations.js';
+import { runSeed } from '../src/lib/seed.js';
+import { drawPlan } from '../src/lib/draw.js';
 
 const SCHEMA = readFileSync(new URL('../src/migrations/001_schema.sql', import.meta.url), 'utf8');
 const LIST = [{ id: '001', name: '001_schema.sql', sql: SCHEMA }];
@@ -161,7 +163,7 @@ test('any other delete order hits a foreign key error', async () => {
 });
 
 // A statement may open with the comment block that precedes it — the file's own
-// header, and the note above task_focus_weights. SQLite accepts that, and the
+// header, and the notes above the two tag tables. SQLite accepts that, and the
 // splitter is right not to strip it: the checksum is over the file as written.
 test('the schema file is one statement per table and index, and splits cleanly', () => {
   const statements = splitStatements(SCHEMA);
@@ -171,7 +173,7 @@ test('the schema file is one statement per table and index, and splits cleanly',
   const indexes = statements.filter((s) => /CREATE INDEX/i.test(s));
 
   assert.deepEqual([...created].sort(), [...SCHEMA_TABLES].sort());
-  assert.equal(indexes.length, 5);
+  assert.equal(indexes.length, 6);
   assert.equal(statements.length, created.length + indexes.length);
 });
 
@@ -211,6 +213,56 @@ test('erase drops every table, the ledger included, and apply pending runs again
 
 // D1 enforces foreign keys and DROP TABLE does an implicit DELETE, so a parent
 // with live children refuses to drop. The order is discovered, not declared.
+// The whole browser-only rebuild, end to end and in the order the buttons sit
+// on the page. It is the assertion that makes editing 001 and 002 in place a
+// real workflow rather than a claim in a comment: a schema change is an edit
+// and three presses (§3), and what comes out the other side draws a month.
+test('erase everything, apply pending, run seed rebuilds a database that draws', async () => {
+  const read = (name) => readFileSync(new URL(`../src/migrations/${name}`, import.meta.url), 'utf8');
+  const migrations = ['001_schema.sql', '004_worksheets.sql']
+    .map((name) => ({ id: name.slice(0, 3), name, sql: read(name) }));
+  const seeds = ['002_seed.sql', '003_country_data.sql', '005_worksheet_layouts.sql']
+    .map((name) => ({ id: name.slice(0, 3), name, sql: read(name) }));
+
+  const db = new FakeD1();
+  await applyPending(db, migrations);
+  await runSeed(db, seeds);
+
+  const drew = async () => {
+    const templates = db.prepare(`
+      SELECT t.id, t.slug, t.week_theme, t.tier, t.project_type_id, t.position,
+             t.worksheet_layout_id AS form, COALESCE(w.height_thirds, 1) AS thirds
+      FROM task_templates t
+      LEFT JOIN worksheet_layouts w ON w.id = t.worksheet_layout_id
+      WHERE t.archived = 0
+    `).all().results.map((t) => ({ ...t, modes: [] }));
+    const project = db.prepare('SELECT id FROM project_types LIMIT 1').all().results[0];
+    return drawPlan({
+      templates,
+      projectTypeId: project.id,
+      focusWeight: () => 1,
+      monthsSince: () => null,
+      random: Math.random,
+    });
+  };
+  assert.equal((await drew()).length, 20);
+
+  const erased = await eraseAll(db);
+  assert.equal(erased.ok, true, erased.error);
+
+  const applied = await applyPending(db, migrations);
+  assert.equal(applied.ok, true, JSON.stringify(applied.failure));
+  const seeded = await runSeed(db, seeds);
+  assert.equal(seeded.ok, true, JSON.stringify(seeded.failure));
+
+  // Everything is back, including the two tables and the tier the append-only
+  // rule could never have added to 001.
+  assert.equal(seeded.inserted.focuses.rows, 9);
+  assert.ok(seeded.inserted.focus_tags.rows > 0);
+  assert.ok(seeded.inserted.prompt_tags.rows > 0);
+  assert.equal((await drew()).length, 20);
+});
+
 test('erase drops a parent whose children hold rows', async () => {
   const db = new FakeD1();
   await applyPending(db, LIST);

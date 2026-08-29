@@ -16,7 +16,6 @@
 // that names every admin route would be the link.
 
 import { page } from '../lib/html.js';
-import { POOL_FLOOR } from './focuses.js';
 
 const STYLE = `
   body { max-width: 68rem; }
@@ -28,9 +27,10 @@ const STYLE = `
   td.narrow, th.narrow { width: 1%; white-space: nowrap; }
   tr.archived td { opacity: .5; }
   tr.dirty td:first-child { box-shadow: inset .2rem 0 0 #a00; }
-  .w0 { background: #fdd; }
-  .w3 { background: #dfd; font-weight: 700; }
-  .w1 { background: #f4f4f4; color: #555; }
+  .w0 { background: #f4f4f4; color: #555; }
+  .w1 { background: #eef6ee; }
+  .w2 { background: #dfd; }
+  .w3 { background: #cfc; font-weight: 700; }
   .cell { width: 2.6rem; text-align: center; }
   .pill { display: inline-block; padding: 0 .35rem; border: 1px solid #ccc; border-radius: .6rem;
           font-size: .8125rem; margin-right: .25rem; }
@@ -48,8 +48,7 @@ const STYLE = `
 
 // Written without template literals of its own: the whole block lives inside
 // one in this module, and client code that has to count escapes is client code
-// nobody edits. The one interpolation is POOL_FLOOR, so the warning the page
-// prints and the threshold the server applies cannot drift apart.
+// nobody edits, and there is nothing interpolated into it at all.
 //
 // Every backslash meant for the browser is doubled here, because this literal
 // eats the first one: `\\n` to emit a newline escape, `\\'` to emit an escaped
@@ -108,11 +107,34 @@ async function load() {
 
 // ---------------------------------------------------------------- tasks
 
-function weightOf(taskId, focusId) {
-  var rows = state.data.weights.filter(function (w) {
-    return w.task_template_id === taskId && w.focus_id === focusId;
+// A prompt's own tags, split by namespace. Built once per render rather than
+// filtered per row: 177 tag rows against 91 templates is a nested scan the
+// task list would run ninety times.
+function tagIndex() {
+  var index = {};
+  state.data.prompt_tags.forEach(function (row) {
+    var found = index[row.task_template_id]
+      || (index[row.task_template_id] = { topic: [], mode: [] });
+    found[row.namespace].push(row.tag);
   });
-  return rows.length ? rows[0].weight : 1;
+  return index;
+}
+
+function focusWeights(focusId) {
+  var weights = {};
+  state.data.focus_tags.forEach(function (row) {
+    if (row.focus_id === focusId) weights[row.tag] = row.weight;
+  });
+  return weights;
+}
+
+// The same fw the draw computes: 1 + 2 * the sum of this focus's weights over
+// the prompt's shared topic tags. Shown so that "why did this never come up"
+// has an answer on the screen the answer lives on.
+function fwOf(tags, weights) {
+  var total = 0;
+  (tags ? tags.topic : []).forEach(function (t) { total += weights[t] || 0; });
+  return 1 + 2 * total;
 }
 
 function drawsOf(taskId) {
@@ -125,19 +147,26 @@ function taskFilters() {
     tier: document.getElementById('f-tier').value,
     page: document.getElementById('f-page').value,
     focus: document.getElementById('f-focus').value,
-    weight: document.getElementById('f-weight').value,
+    lift: document.getElementById('f-lift').value,
+    tag: document.getElementById('f-tag').value.trim().toLowerCase(),
     archived: document.getElementById('f-archived').checked,
     text: document.getElementById('f-text').value.trim().toLowerCase(),
   };
 }
 
-function matches(task, f) {
+function matches(task, f, tags, weights) {
   if (!f.archived && task.archived) return false;
   if (f.week && String(task.week_theme) !== f.week) return false;
   if (f.tier && task.tier !== f.tier) return false;
   if (f.page && (task.workbook_page || '') !== f.page) return false;
-  if (f.focus && f.weight !== '') {
-    if (String(weightOf(task.id, Number(f.focus))) !== f.weight) return false;
+  if (f.tag) {
+    var own = tags[task.id];
+    var all = own ? own.topic.concat(own.mode) : [];
+    if (all.indexOf(f.tag) === -1) return false;
+  }
+  if (f.focus && f.lift) {
+    var lifted = fwOf(tags[task.id], weights) > 1;
+    if (f.lift === 'up' ? !lifted : lifted) return false;
   }
   if (f.text) {
     var hay = (task.title + ' ' + task.prompt + ' ' + task.slug).toLowerCase();
@@ -169,7 +198,7 @@ function projectSelect(value, onchange) {
   return sel;
 }
 
-function taskRow(task) {
+function taskRow(task, tags) {
   var edits = {};
   var row = el('tr', { class: task.archived ? 'archived' : '' });
   var mark = function () { row.classList.add('dirty'); };
@@ -184,7 +213,7 @@ function taskRow(task) {
     [1, 2, 3, 4].map(function (n) { return option(String(n), String(n), n === task.week_theme); }));
 
   var tier = el('select', { onchange: function () { edits.tier = tier.value; mark(); } },
-    ['core', 'focus', 'wild'].map(function (t) { return option(t, t, t === task.tier); }));
+    ['core', 'focus', 'wild', 'fixed'].map(function (t) { return option(t, t, t === task.tier); }));
 
   var pageInput = el('input', { type: 'text', value: task.workbook_page || '', maxlength: '32',
     oninput: function () { edits.workbook_page = pageInput.value; mark(); } });
@@ -239,9 +268,18 @@ function taskRow(task) {
       } catch (err) { say(String(err.message), true); archive.disabled = false; }
     } });
 
+  // The tags are read-only here and that is deliberate: a prompt and its tags
+  // are written together, and a tag typed into a row nobody looks at again is
+  // how a prompt ends up drawn at baseline forever. Showing them is what makes
+  // a missing or mistyped one visible.
+  var own = tags[task.id] || { topic: [], mode: [] };
+  var tagLine = own.topic.join(', ') + (own.mode.length ? ' · mode: ' + own.mode.join(', ') : '');
+
   row.appendChild(el('td', {}, [title, prompt,
     el('div', { class: 'note', text: task.slug + ' · ' + task.origin
-      + (task.updated_at ? ' · edited ' + task.updated_at.slice(0, 10) : '') })]));
+      + (task.updated_at ? ' · edited ' + task.updated_at.slice(0, 10) : '') }),
+    el('div', { class: own.topic.length ? 'note' : 'warn',
+      text: own.topic.length ? tagLine : 'no tags — this one draws at baseline forever' })]));
   row.appendChild(el('td', { class: 'narrow' }, [week]));
   row.appendChild(el('td', { class: 'narrow' }, [tier]));
   row.appendChild(el('td', { class: 'narrow' }, [pageInput]));
@@ -254,7 +292,9 @@ function taskRow(task) {
 
 function renderTasks() {
   var f = taskFilters();
-  var shown = state.data.tasks.filter(function (t) { return matches(t, f); });
+  var tags = tagIndex();
+  var weights = f.focus ? focusWeights(Number(f.focus)) : {};
+  var shown = state.data.tasks.filter(function (t) { return matches(t, f, tags, weights); });
   var table = el('table', {}, [el('tr', {}, [
     el('th', { text: 'Task' }), el('th', { class: 'narrow', text: 'Week' }),
     el('th', { class: 'narrow', text: 'Tier' }), el('th', { class: 'narrow', text: 'Page' }),
@@ -263,7 +303,7 @@ function renderTasks() {
     el('th', { class: 'narrow', text: 'Drawn' }),
     el('th', { class: 'narrow', text: '' }),
   ])]);
-  shown.forEach(function (t) { table.appendChild(taskRow(t)); });
+  shown.forEach(function (t) { table.appendChild(taskRow(t, tags)); });
   fill('task-table', [
     el('p', { class: 'note', text: shown.length + ' of ' + state.data.tasks.length + ' templates' }),
     table,
@@ -286,12 +326,13 @@ function renderTaskFilters() {
 
 // ---------------------------------------------------------------- focuses
 
-function poolLine(focus) {
-  var line = 'week 2: ' + focus.pool.week2 + ' · week 3: ' + focus.pool.week3 + ' tasks at 1 or more';
+function reachLine(focus) {
+  var line = 'lifts ' + (focus.reach.week2 + focus.reach.week3) + ' prompts above baseline'
+    + ' — ' + focus.reach.week2 + ' natural week 2, ' + focus.reach.week3 + ' natural week 3';
   return el('div', { class: focus.thin ? 'warn' : 'note',
     text: focus.thin
-      ? line + ' — thin. The draw takes five from each week, so under ${POOL_FLOOR}'
-        + ' is the same month twice.'
+      ? 'This focus reaches no prompt at all. It draws, and it draws exactly what'
+        + ' picking nothing would. Check the tags below against the ones on the tasks.'
       : line });
 }
 
@@ -322,12 +363,12 @@ function focusPanel(focus) {
     } });
 
   var grid = el('div', {});
-  var open = el('button', { text: 'Weights', onclick: function () {
+  var open = el('button', { text: 'Tags', onclick: function () {
     state.focusId = state.focusId === focus.id ? null : focus.id;
     renderFocuses();
   } });
 
-  if (state.focusId === focus.id) grid.appendChild(weightGrid(focus));
+  if (state.focusId === focus.id) grid.appendChild(tagGrid(focus));
 
   return el('div', { class: focus.archived ? 'archived' : '' }, [
     el('div', { class: 'bar' }, [
@@ -335,65 +376,97 @@ function focusPanel(focus) {
       el('label', { style: 'flex:1' }, [el('span', { text: 'Blurb' }), blurb]),
       save, archive, open,
     ]),
-    poolLine(focus),
+    reachLine(focus),
     grid,
   ]);
 }
 
-// The grid: this focus against every week 2-3 task, each cell cycling off/1/3.
-// Weight 1 is the absence of an opinion and stores no row, which is why the
-// save sends every cell and the server deletes the ones that came back to 1.
-function weightGrid(focus) {
-  var tasks = state.data.tasks.filter(function (t) {
-    return (t.week_theme === 2 || t.week_theme === 3) && !t.archived;
+// The grid: this focus against the topic vocabulary, each cell cycling
+// 0/1/2/3. Weight 0 is the absence of an opinion and stores no row, which is
+// why the save sends every cell and the server deletes the ones that came back
+// to 0.
+//
+// The rows are every topic tag any prompt carries, plus any this focus already
+// weights — so a weight left on a tag the library no longer uses is visible and
+// removable rather than silently doing nothing. A tag typed into the box at the
+// bottom joins the list, which is what makes a new tag reachable without a
+// deploy: weight it here, tag a prompt with it on the task tab, and the next
+// draw sees it.
+function tagGrid(focus) {
+  var vocabulary = {};
+  state.data.prompt_tags.forEach(function (row) {
+    if (row.namespace === 'topic') vocabulary[row.tag] = (vocabulary[row.tag] || 0) + 1;
   });
-  var cells = {};
-  tasks.forEach(function (t) { cells[t.id] = weightOf(t.id, focus.id); });
+
+  var cells = focusWeights(focus.id);
+  Object.keys(cells).forEach(function (t) { vocabulary[t] = vocabulary[t] || 0; });
 
   var table = el('table', {}, [el('tr', {}, [
-    el('th', { class: 'narrow', text: 'Wk' }), el('th', { text: 'Task' }),
+    el('th', { text: 'Tag' }), el('th', { class: 'narrow', text: 'Prompts' }),
     el('th', { class: 'narrow', text: 'Weight' }),
   ])]);
 
-  tasks.forEach(function (t) {
-    var button = el('button', { class: 'cell w' + cells[t.id], text: String(cells[t.id]) });
+  function tagRow(tag) {
+    var weight = cells[tag] || 0;
+    var button = el('button', { class: 'cell w' + weight, text: String(weight) });
     button.addEventListener('click', function () {
-      cells[t.id] = cells[t.id] === 0 ? 1 : (cells[t.id] === 1 ? 3 : 0);
-      button.textContent = String(cells[t.id]);
-      button.className = 'cell w' + cells[t.id];
+      weight = weight === 3 ? 0 : weight + 1;
+      cells[tag] = weight;
+      button.textContent = String(weight);
+      button.className = 'cell w' + weight;
     });
-    table.appendChild(el('tr', {}, [
-      el('td', { class: 'narrow', text: String(t.week_theme) }),
-      el('td', { text: t.title }),
+    return el('tr', {}, [
+      el('td', { text: tag }),
+      el('td', { class: vocabulary[tag] ? 'narrow' : 'narrow warn', text: String(vocabulary[tag]) }),
       el('td', { class: 'narrow' }, [button]),
-    ]));
-  });
+    ]);
+  }
 
-  var save = el('button', { text: 'Save weights', onclick: async function () {
+  Object.keys(vocabulary).sort().forEach(function (tag) { table.appendChild(tagRow(tag)); });
+
+  var fresh = el('input', { type: 'text', maxlength: '40', placeholder: 'new-tag' });
+  var add = el('button', { text: 'Add tag', onclick: function () {
+    var tag = fresh.value.trim().toLowerCase();
+    if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(tag)) {
+      say('A tag is lowercase words joined by hyphens', true);
+      return;
+    }
+    if (vocabulary[tag] === undefined) {
+      vocabulary[tag] = 0;
+      cells[tag] = 1;
+      table.appendChild(tagRow(tag));
+    }
+    fresh.value = '';
+  } });
+
+  var save = el('button', { text: 'Save tags', onclick: async function () {
     save.disabled = true;
     try {
-      var payload = Object.keys(cells).map(function (id) {
-        return { task_template_id: Number(id), weight: cells[id] };
+      var payload = Object.keys(cells).map(function (tag) {
+        return { tag: tag, weight: cells[tag] };
       });
-      var data = await send('PUT', '/admin/api/focuses/' + focus.id + '/weights',
-        { weights: payload });
-      state.data.weights = state.data.weights
-        .filter(function (w) { return w.focus_id !== focus.id; })
-        .concat(data.weights.map(function (w) {
-          return { task_template_id: w.task_template_id, focus_id: focus.id, weight: w.weight };
+      var data = await send('PUT', '/admin/api/focuses/' + focus.id + '/tags', { tags: payload });
+      state.data.focus_tags = state.data.focus_tags
+        .filter(function (row) { return row.focus_id !== focus.id; })
+        .concat(data.tags.map(function (row) {
+          return { focus_id: focus.id, tag: row.tag, weight: row.weight };
         }));
-      focus.pool = data.pool;
+      focus.reach = data.reach;
       focus.thin = data.thin;
-      say('Saved. ' + data.weights.length + ' opinions stored; the rest are at 1 and store nothing.');
+      say('Saved. ' + data.tags.length + ' tags weighted; the rest are at 0 and store nothing.'
+        + ' The next draw reads it — no deploy.');
       renderFocuses();
     } catch (err) { say(String(err.message), true); }
     save.disabled = false;
   } });
 
   return el('div', {}, [
-    el('p', { class: 'note', text: '0 excludes the task from this focus, 1 is no opinion and'
-      + ' stores no row, 3 favors it. Click a cell to cycle.' }),
-    table, save,
+    el('p', { class: 'note', text: '0 is no opinion and stores no row; 1, 2 and 3 are how much'
+      + ' this focus is about that tag. A prompt is drawn at 1 + 2x the sum of the weights it'
+      + ' shares, so a prompt no tag reaches is still drawn. Click a cell to cycle.' }),
+    table,
+    el('div', { class: 'bar' }, [fresh, add]),
+    save,
   ]);
 }
 
@@ -627,17 +700,15 @@ function newFocusForm() {
   var create = el('button', { text: 'Create focus', onclick: async function () {
     try {
       var data = await send('POST', '/admin/api/focuses', { name: name.value, blurb: blurb.value });
-      say(data.focus.thin
-        ? 'Created, and it draws already — every task is at 1 until you say otherwise.'
-          + ' The pool is thin though: see the warning under it.'
-        : 'Created. It draws already — every task is at 1 until you say otherwise.');
+      say('Created. It draws already — every prompt is at the baseline 1 until you'
+        + ' weight a tag. Press Tags to say what it is about.');
       await load();
     } catch (err) { say(String(err.message), true); }
   } });
   return el('details', {}, [
     el('summary', { text: 'New focus' }),
-    el('p', { class: 'note', text: 'A new focus is valid with no weights at all: a missing'
-      + ' row means 1. Tune it afterwards.' }),
+    el('p', { class: 'note', text: 'A new focus is valid with no tags at all: every prompt'
+      + ' sits at the baseline 1. Weight a few tags afterwards.' }),
     el('div', { class: 'bar' }, [name, blurb, create]),
   ]);
 }
@@ -862,7 +933,7 @@ function renderAll() {
   fill('new-project', [newProjectForm()]);
 }
 
-['f-week', 'f-tier', 'f-page', 'f-focus', 'f-weight', 'f-archived', 'f-text'].forEach(function (id) {
+['f-week', 'f-tier', 'f-page', 'f-tag', 'f-focus', 'f-lift', 'f-archived', 'f-text'].forEach(function (id) {
   document.getElementById(id).addEventListener('input', function () {
     if (state.data) renderTasks();
   });
@@ -913,12 +984,15 @@ rather than copying it.</p>
     <label>Tier <select id="f-tier">
       <option value="">any</option><option value="core">core</option>
       <option value="focus">focus</option><option value="wild">wild</option>
+      <option value="fixed">fixed</option>
     </select></label>
     <label>Page <select id="f-page"></select></label>
+    <label>Tag <input type="text" id="f-tag" style="width:9rem"></label>
     <label>Focus <select id="f-focus"></select>
-      <select id="f-weight">
-        <option value="">any weight</option><option value="0">0</option>
-        <option value="1">1</option><option value="3">3</option>
+      <select id="f-lift">
+        <option value="">any lift</option>
+        <option value="up">above baseline</option>
+        <option value="flat">at baseline</option>
       </select></label>
     <label><input type="checkbox" id="f-archived"> show archived</label>
     <label>Find <input type="text" id="f-text" style="width:10rem"></label>

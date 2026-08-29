@@ -22,7 +22,7 @@ import { apiPeople, apiPatchPerson } from './admin/people.js';
 import { libraryPage } from './admin/library.js';
 import { apiLibrary, apiLibraryExport, apiLibraryImport } from './admin/library-api.js';
 import { apiCreateTask, apiPatchTask as apiAdminPatchTask } from './admin/tasks.js';
-import { apiCreateFocus, apiPatchFocus, apiPutFocusWeights } from './admin/focuses.js';
+import { apiCreateFocus, apiPatchFocus, apiPutFocusTags } from './admin/focuses.js';
 import { apiCreateProjectType, apiPatchProjectType } from './admin/project-types.js';
 import { apiCreateLayout, apiPatchLayout } from './admin/layouts.js';
 import {
@@ -86,7 +86,7 @@ const API_PATTERNS = [
   { method: 'PATCH', pattern: /^\/admin\/api\/people\/(?<id>\d+)$/, handler: apiPatchPerson },
   { method: 'PATCH', pattern: /^\/admin\/api\/tasks\/(?<id>\d+)$/, handler: apiAdminPatchTask },
   { method: 'PATCH', pattern: /^\/admin\/api\/focuses\/(?<id>\d+)$/, handler: apiPatchFocus },
-  { method: 'PUT', pattern: /^\/admin\/api\/focuses\/(?<id>\d+)\/weights$/, handler: apiPutFocusWeights },
+  { method: 'PUT', pattern: /^\/admin\/api\/focuses\/(?<id>\d+)\/tags$/, handler: apiPutFocusTags },
   { method: 'PATCH', pattern: /^\/admin\/api\/project-types\/(?<id>\d+)$/, handler: apiPatchProjectType },
   { method: 'PATCH', pattern: /^\/admin\/api\/layouts\/(?<id>\d+)$/, handler: apiPatchLayout },
   { method: 'GET', pattern: /^\/admin\/api\/countries\/(?<id>\d+)$/, handler: apiCountry },

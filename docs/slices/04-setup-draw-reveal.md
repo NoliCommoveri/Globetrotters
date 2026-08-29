@@ -42,13 +42,9 @@ week 1:
   1 more drawn from the remaining week-1 pool by the rule below
 
 weeks 2 and 3:
-  pool = task_templates where week_theme = week and archived = 0
-  fw       = COALESCE(task_focus_weights.weight, 1)   // sparse; missing = 1
-  fw = 0   -> excluded
-  m        = months since THIS PERSON last drew t     // null if never
-  recency  = (m is null) ? 1.0 : m / (m + 1)
-  weight   = fw * recency
-  draw 5 by weighted random selection without replacement
+  one merged pool, eight drawn and dealt four and four, each week joined
+  by its pinned task. Slice 11 owns it — see 11-merged-draw.md and
+  DESIGN.md §4 for the algorithm this slice's two per-week draws became.
 
 week 4:
   task_templates where project_type_id = chosen, ordered by position

@@ -38,8 +38,8 @@ Both answered, and written into `DESIGN.md`.
   - ~195 countries with continent, region, and `research_depth`
   - 3 placeholder people
   - **37 task templates** — see the sizing note
-  - `task_focus_weights` rows only where a focus has an opinion (3 on-theme,
-    0 to exclude). Neutral tasks get no row.
+  - a focus weight for every template a focus has an opinion about. Slice 11
+    replaced this with `focus_tags` and `prompt_tags`; see 11-merged-draw.md.
 - `POST /admin/api/seed` — idempotent, reports counts inserted
 - `GET /admin/api/people`, `PATCH /admin/api/people/:id` — name, ink color,
   sort order

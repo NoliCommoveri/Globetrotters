@@ -33,7 +33,7 @@ test('run seed before apply pending says so rather than failing on the first ins
 test('the first run inserts the fixed rows', async () => {
   const { result } = await seeded();
   assert.equal(result.inserted.people.inserted, 3);
-  assert.equal(result.inserted.focuses.inserted, 6);
+  assert.equal(result.inserted.focuses.inserted, 9);
   assert.equal(result.inserted.project_types.inserted, 6);
 });
 

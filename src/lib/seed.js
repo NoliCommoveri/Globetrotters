@@ -18,7 +18,7 @@ import { runChunked } from './migrations.js';
 // expected result of every press after the first.
 export const SEEDED_TABLES = [
   'people', 'focuses', 'project_types', 'countries',
-  'task_templates', 'task_focus_weights', 'country_hooks', 'country_focus_affinity',
+  'task_templates', 'prompt_tags', 'focus_tags', 'country_hooks', 'country_focus_affinity',
   'worksheet_layouts',
 ];
 

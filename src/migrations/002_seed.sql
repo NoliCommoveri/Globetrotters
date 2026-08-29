@@ -1,13 +1,15 @@
 -- 002_seed.sql — the library, and the three people.
 --
--- Append-only like every migration, with one extra rule of its own: every
--- insert here is ON CONFLICT DO NOTHING, so this file is also safe to re-run
--- from Run seed on /admin. Once a row exists the seed never touches it again —
--- a title corrected in the library editor survives every future seed run.
+-- Every insert here is ON CONFLICT DO NOTHING, so Run seed can press this file
+-- as many times as it likes. Once a row exists the seed never touches it again
+-- — a title corrected in the library editor survives every future seed run.
 --
--- That cuts both ways. Correcting a row that has already been seeded means a
--- new migration file or the editor. Editing this file after it has been applied
--- changes nothing in the database and shows up on /admin as drift.
+-- That cuts both ways, and it is why this file is rewritten rather than grown.
+-- Correcting a row that has already been seeded changes nothing in a database
+-- that already holds it. The fix is Erase everything, Apply pending, Run seed
+-- (§3): every table is dropped and rebuilt from these files, so a wrong prompt
+-- is an edit here and three button presses rather than a second row somewhere
+-- else saying the opposite.
 --
 -- The conflict key is the slug (iso3 for countries), never the id: ids are
 -- assigned by SQLite and a row the editor created must not collide with one
@@ -33,9 +35,14 @@ INSERT INTO people (id, name, color, sort_order, created_at) VALUES
 ON CONFLICT (id) DO NOTHING;
 
 -- ---------------------------------------------------------------------------
--- Focuses (§4). Six, fixed. The blurb is what the setup screen shows under the
+-- Focuses (§4). Nine, fixed. The blurb is what the setup screen shows under the
 -- name, so it is written to a 5th grader and says what the month will feel
 -- like, not what the category is called.
+--
+-- The last three have no `country_focus_affinity` rows, so they are pickable
+-- from the list and never recommended on a country card until D-15 lands. That
+-- is a gap in the recommendation and not in the draw: the draw never reads
+-- affinity.
 -- ---------------------------------------------------------------------------
 INSERT INTO focuses (slug, name, blurb) VALUES
   ('ancient-world', 'Ancient World',
@@ -49,7 +56,13 @@ INSERT INTO focuses (slug, name, blurb) VALUES
   ('conflict-and-change', 'Conflict and Change',
    'The moments the country was one thing on Monday and another by Friday.'),
   ('land-and-sky', 'Land and Sky',
-   'Mountains, rivers, volcanoes, seasons — the ground itself and what it does.')
+   'Mountains, rivers, volcanoes, seasons — the ground itself and what it does.'),
+  ('who-lives-here', 'Who Lives Here',
+   'Whose house, whose school, whose Tuesday — the ordinary day nobody puts in a book.'),
+  ('who-gets-what', 'Who Gets What',
+   'Who has less of it, who took it, and who is getting paid.'),
+  ('stories-and-spirits', 'Stories and Spirits',
+   'What they tell each other, what they are called, and what they think is out there.')
 ON CONFLICT (slug) DO NOTHING;
 
 -- ---------------------------------------------------------------------------
@@ -288,23 +301,25 @@ INSERT INTO countries (name, iso3, continent, region, research_depth) VALUES
 ON CONFLICT (iso3) DO NOTHING;
 
 -- ---------------------------------------------------------------------------
--- Task templates — 37 rows. 6 in week 1 (4 core + 2 competing for the fifth
--- slot), 13 in week 2, 13 in week 3, 5 in week 4 for trifold-board only.
+-- Task templates — 91 rows. 10 in week 1 (4 core + 6 competing for the fifth
+-- slot), 26 in week 2, 25 in week 3, and 30 in week 4: five steps each for all
+-- six project types.
 --
--- Not the twenty in §14: a 5-template week draws all of itself, which leaves
--- Swap with no candidate, and one project type's week 4 is 5 rows on its own.
--- That floor is 27, and it sizes the pool for the draw and nothing else.
+-- Weeks 2 and 3 are one pool of 51, of which 49 are drawable and two are
+-- pinned. LIBRARY_v3.md §2 holds 167 week 1-3 prompts and these are the 61 of
+-- them that are written; slice 12 lands the other 106 with their forms and
+-- renderers. Until it does, the five-month cooldown is sized for a pool three
+-- times this one and a learner nine months deep runs on the stalest-back
+-- fallback.
 --
--- Thirteen is what the focuses need rather than what the draw needs. Five
--- tasks are drawn a week whatever the pool holds, so depth costs the kid
--- nothing; a focus with two on-theme tasks, though, draws both of them every
--- month it is chosen, and these are picked nine times each. Three on-theme
--- tasks per focus per week is the floor, and thirteen is what it takes to
--- give all six of them that in both weeks.
+-- Tier says how a row is chosen, not how hard it is. `core` is always included
+-- — week 1's four and every week-4 row. `focus` is the merged weeks 2-3 pool
+-- the draw weights. `wild` is week 1's fifth-slot candidates. `fixed` is the
+-- two pinned prompts, `wow-fact` in week 2 and `cook-it` in week 3: never
+-- weighted, never cooled down, never swapped (§4).
 --
--- Tier says what is drawn, not how hard it is. `core` is fixed and always
--- included — week 1's four and all five week-4 rows. `focus` is the
--- focus-weighted pool, weeks 2 and 3. `wild` is week 1's fifth-slot candidates.
+-- `week_theme` on a weeks 2-3 row is the prompt's natural half, read only by
+-- the deal's arc preference. Nothing in the draw sees it.
 --
 -- The project type is named by slug and resolved by the LEFT JOIN, so these
 -- rows do not depend on an id this file cannot know. A row with NULL there gets
@@ -508,7 +523,7 @@ FROM (
 
   ('wow-fact', 'Find one wow fact',
    'Dig until you find one fact about this country that makes you say "wow." Write it in your own words.',
-   3, 'culture', 'focus', NULL, NULL),
+   2, 'culture', 'fixed', NULL, NULL),
 
   ('landmark-to-see', 'Pick a landmark to visit',
    'Find one famous place in this country you''d want to visit. Draw it and write one sentence about what makes it special.',
@@ -560,6 +575,10 @@ FROM (
   ('market-day', 'Walk through their market',
    'Find a photo of a market in this country. List five things being sold in it, and circle the one you have never seen for sale where you live.',
    3, 'food', 'focus', NULL, NULL),
+
+  ('cook-it', 'Cook one thing from your country',
+   'Pick one dish from anything you found this month and find a real recipe for it. Copy it onto your recipe page in your own handwriting, then make it with a grown-up. Write down what you''d change next time.',
+   3, 'food', 'fixed', NULL, NULL),
 
   ('trifold-choose', 'Plan your three panels',
    'Your board has three panels. Decide what goes on each one and sketch the plan on a scrap of paper first.',
@@ -685,122 +704,331 @@ LEFT JOIN project_types p ON p.slug = v.project_type
 WHERE true
 ON CONFLICT (slug) DO NOTHING;
 
+
 -- ---------------------------------------------------------------------------
--- Focus weights — sparse. A missing row means weight 1, so only an opinion is
--- stored: 3 for on-theme, 0 to exclude, nothing in between. Every focus needs
--- at least one 3 in week 2 *and* one in week 3, or picking it leaves that week
--- identical to picking nothing; and at most one 0 per focus per week, or a
--- 5-of-8 draw leaves Swap with no candidate. Both are asserted in
--- test/seed-content.test.js.
+-- Prompt tags — what a prompt is about, and how the answer gets produced.
 --
--- Every focus holds three weight-3 rows in week 2 and three in week 3. Two is
--- not enough: both get drawn every month that focus is chosen, and the focus a
--- kid picks nine times has to have nine months in it. wild-places is the one
--- that gets picked, and it is the one this was sized around.
+-- Two namespaces and never one vocabulary. `topic` is what the prompt is about
+-- and is the only thing a focus can weight; `mode` is how the kid produces the
+-- answer and carries no weight at all. `us-contrast` reaches a quarter of the
+-- finished library, so a focus allowed to weight it at 3 would pull a quarter
+-- of the pool in one move (LIBRARY_v3.md §3).
 --
--- Joined on slugs, same as above. The join is inner: a slug that matches
--- nothing contributes no row and raises no error, so the row count is checked
--- against this block in the tests rather than trusted.
+-- Mode tags do two jobs instead. No two prompts sharing one land in the same
+-- month, which is what stops a month printing three sheets that all say *and
+-- now write ours next to it*; and every month holds at least one `hands-on`
+-- and one `personal-voice` prompt, which is the only mechanism guaranteeing a
+-- month in which somebody from the country actually speaks.
+--
+-- 177 rows over the 61 week 1-3 prompts that are seeded — 145 topic, 32 mode.
+-- A prompt and its tags are never separated: an untagged prompt draws at
+-- baseline forever and nothing reports it, so slice 12 adds tags in the same
+-- edit that adds the prompts they belong to.
+--
+-- No `personal-voice` row is here, because none of the eight prompts carrying
+-- it is written yet. The repair budget in the draw falls back to an ordinary
+-- wildcard when a mode has no candidate, so the month rule is satisfied by
+-- `cook-it` alone until slice 12 lands the voices.
+--
+-- Joined on slugs like everything else. A slug matching nothing contributes no
+-- row and raises no error, so the count is asserted in the tests rather than
+-- trusted.
 -- ---------------------------------------------------------------------------
-INSERT INTO task_focus_weights (task_template_id, focus_id, weight)
-SELECT t.id, f.id, v.weight
+INSERT INTO prompt_tags (task_template_id, namespace, tag)
+SELECT t.id, v.namespace, v.tag
 FROM (
-  SELECT NULL AS task, NULL AS focus, NULL AS weight
+  SELECT NULL AS task, NULL AS namespace, NULL AS tag
   WHERE 0
   UNION ALL VALUES
--- BEGIN task_focus_weights
-  ('first-people',        'ancient-world',       3),
-  ('ancient-site',        'ancient-world',       3),
-  ('wild-animal',         'wild-places',         3),
-  ('who-leads',           'people-and-power',    3),
-  ('law-you-notice',      'conflict-and-change', 3),
-  ('landforms',           'land-and-sky',        3),
-  ('landforms',           'food-and-craft',      3),
-  ('weather-there-now',   'land-and-sky',        3),
-  ('before-history',      'ancient-world',       3),
-  ('animal-in-trouble',   'wild-places',         3),
-  ('wild-place-protected','wild-places',         3),
-  ('law-you-notice',      'people-and-power',    3),
-  ('animal-in-trouble',   'conflict-and-change', 3),
-  ('what-they-grow',      'food-and-craft',      3),
-  ('what-they-grow',      'land-and-sky',        3),
-  ('made-here',           'food-and-craft',      3),
-  ('made-here',           'people-and-power',    3),
-  ('border-that-moved',   'conflict-and-change', 3),
-  ('who-leads',           'wild-places',         0),
-  ('wild-animal',         'food-and-craft',      0),
-  ('weather-there-now',   'ancient-world',       0),
-
-  ('kid-life',             'people-and-power',    3),
-  ('tonights-dinner',      'food-and-craft',      3),
-  ('craft-of-the-land',    'food-and-craft',      3),
-  ('what-people-believe',  'conflict-and-change', 3),
-  ('animals-on-the-menu',  'food-and-craft',      3),
-  ('life-outdoors',        'wild-places',         3),
-  ('life-outdoors',        'land-and-sky',        3),
-  ('animals-on-the-menu',  'wild-places',         3),
-  ('landmark-to-see',      'ancient-world',       3),
-  ('craft-of-the-land',    'ancient-world',       3),
-  ('story-they-tell',      'ancient-world',       3),
-  ('who-is-famous',        'people-and-power',    3),
-  ('who-is-famous',        'conflict-and-change', 3),
-  ('holiday-they-mark',    'people-and-power',    3),
-  ('holiday-they-mark',    'conflict-and-change', 3),
-  ('the-sport-they-love',  'land-and-sky',        3),
-  ('landmark-to-see',      'wild-places',         3),
-  ('landmark-to-see',      'land-and-sky',        3),
-  ('craft-of-the-land',    'people-and-power',    0),
-  ('sound-of-the-country', 'conflict-and-change', 0),
-  ('wow-fact',             'land-and-sky',        0),
-  ('who-ruled-before',      'ancient-world',       3),
-  ('war-that-changed',      'ancient-world',       3),
-  ('oldest-thing-here',     'ancient-world',       3),
-  ('oldest-thing-here',     'food-and-craft',      3),
-  ('river-that-matters',    'wild-places',         3),
-  ('highest-point',         'wild-places',         3),
-  ('tree-that-grows',       'wild-places',         3),
-  ('desert-shall-blossom',  'wild-places',         3),
-  ('independence-day',      'people-and-power',    3),
-  ('who-can-vote',          'people-and-power',    3),
-  ('kingdom-over-this-place','people-and-power',   3),
-  ('tree-that-grows',       'food-and-craft',      3),
-  ('under-the-ground',      'food-and-craft',      3),
-  ('independence-day',      'conflict-and-change', 3),
-  ('war-that-changed',      'conflict-and-change', 3),
-  ('kingdom-over-this-place','conflict-and-change',3),
-  ('river-that-matters',    'land-and-sky',        3),
-  ('highest-point',         'land-and-sky',        3),
-  ('weather-that-hits',     'land-and-sky',        3),
-  ('desert-shall-blossom',  'land-and-sky',        3),
-  ('who-can-vote',          'land-and-sky',        0),
-  ('tree-that-grows',       'people-and-power',    0),
-  ('highest-point',         'conflict-and-change', 0),
-
-  ('place-of-worship',      'ancient-world',       3),
-  ('sabbath-keepers-there', 'ancient-world',       3),
-  ('feast-they-keep',       'ancient-world',       3),
-  ('city-and-country',      'wild-places',         3),
-  ('getting-around',        'wild-places',         3),
-  ('house-they-live-in',    'wild-places',         3),
-  ('girls-and-women',       'people-and-power',    3),
-  ('city-and-country',      'people-and-power',    3),
-  ('their-rest-day',        'people-and-power',    3),
-  ('breakfast-there',       'food-and-craft',      3),
-  ('market-day',            'food-and-craft',      3),
-  ('what-they-wear',        'food-and-craft',      3),
-  ('feast-they-keep',       'food-and-craft',      3),
-  ('girls-and-women',       'conflict-and-change', 3),
-  ('city-and-country',      'conflict-and-change', 3),
-  ('sabbath-keepers-there', 'conflict-and-change', 3),
-  ('getting-around',        'land-and-sky',        3),
-  ('house-they-live-in',    'land-and-sky',        3),
-  ('city-and-country',      'land-and-sky',        3),
-  ('getting-around',        'ancient-world',       0),
-  ('market-day',            'wild-places',         0),
-  ('place-of-worship',      'food-and-craft',      0)
--- END task_focus_weights
+-- BEGIN prompt_tags
+  ('flag-draw',               'topic', 'emblems'),
+  ('flag-draw',               'topic', 'crafts'),
+  ('map-outline',             'topic', 'landform'),
+  ('map-outline',             'topic', 'city-life'),
+  ('map-outline',             'mode', 'map-work'),
+  ('neighbors-list',          'topic', 'landform'),
+  ('neighbors-list',          'topic', 'conflict-history'),
+  ('neighbors-list',          'mode', 'map-work'),
+  ('language-hello',          'topic', 'language'),
+  ('language-hello',          'mode', 'hands-on'),
+  ('currency-animal',         'topic', 'emblems'),
+  ('currency-animal',         'topic', 'public-money'),
+  ('national-symbol',         'topic', 'emblems'),
+  ('national-symbol',         'topic', 'wildlife'),
+  ('how-many-people',         'topic', 'city-life'),
+  ('how-many-people',         'mode', 'demographics-stat'),
+  ('how-many-people',         'mode', 'us-contrast'),
+  ('time-there-now',          'topic', 'sun-and-seasons'),
+  ('time-there-now',          'topic', 'daily-life'),
+  ('time-there-now',          'mode', 'measurement'),
+  ('time-there-now',          'mode', 'us-contrast'),
+  ('size-next-to-yours',      'topic', 'landform'),
+  ('size-next-to-yours',      'mode', 'measurement'),
+  ('size-next-to-yours',      'mode', 'us-contrast'),
+  ('anthem-listen',           'topic', 'emblems'),
+  ('anthem-listen',           'topic', 'music-and-art'),
+  ('anthem-listen',           'mode', 'hands-on'),
+  ('first-people',            'topic', 'deep-time'),
+  ('first-people',            'topic', 'empire-and-rule'),
+  ('ancient-site',            'topic', 'crafts'),
+  ('ancient-site',            'topic', 'empire-and-rule'),
+  ('who-leads',               'topic', 'governance'),
+  ('who-leads',               'topic', 'civic-process'),
+  ('law-you-notice',          'topic', 'governance'),
+  ('law-you-notice',          'topic', 'daily-life'),
+  ('law-you-notice',          'mode', 'us-contrast'),
+  ('landforms',               'topic', 'landform'),
+  ('landforms',               'topic', 'city-life'),
+  ('landforms',               'mode', 'map-work'),
+  ('weather-there-now',       'topic', 'weather-pattern'),
+  ('weather-there-now',       'mode', 'measurement'),
+  ('weather-there-now',       'mode', 'us-contrast'),
+  ('wild-animal',             'topic', 'wildlife'),
+  ('wild-animal',             'topic', 'landform'),
+  ('animal-in-trouble',       'topic', 'extinction'),
+  ('animal-in-trouble',       'topic', 'wildlife'),
+  ('animal-in-trouble',       'topic', 'damage-and-repair'),
+  ('wild-place-protected',    'topic', 'wildlife'),
+  ('wild-place-protected',    'topic', 'damage-and-repair'),
+  ('wild-place-protected',    'topic', 'landform'),
+  ('what-they-grow',          'topic', 'agriculture'),
+  ('what-they-grow',          'topic', 'everyday-food'),
+  ('what-they-grow',          'topic', 'trade'),
+  ('made-here',               'topic', 'trade'),
+  ('made-here',               'topic', 'work-and-money'),
+  ('made-here',               'mode', 'hands-on'),
+  ('border-that-moved',       'topic', 'conflict-history'),
+  ('border-that-moved',       'topic', 'empire-and-rule'),
+  ('border-that-moved',       'topic', 'landform'),
+  ('border-that-moved',       'mode', 'map-work'),
+  ('before-history',          'topic', 'deep-time'),
+  ('before-history',          'topic', 'folklore-belief'),
+  ('before-history',          'topic', 'crafts'),
+  ('who-ruled-before',        'topic', 'empire-and-rule'),
+  ('who-ruled-before',        'topic', 'governance'),
+  ('independence-day',        'topic', 'empire-and-rule'),
+  ('independence-day',        'topic', 'milestone'),
+  ('independence-day',        'topic', 'holiday-calendar'),
+  ('war-that-changed',        'topic', 'conflict-history'),
+  ('war-that-changed',        'topic', 'empire-and-rule'),
+  ('who-can-vote',            'topic', 'governance'),
+  ('who-can-vote',            'topic', 'civic-process'),
+  ('who-can-vote',            'topic', 'who-gets-less'),
+  ('who-can-vote',            'mode', 'us-contrast'),
+  ('kingdom-over-this-place', 'topic', 'religion'),
+  ('kingdom-over-this-place', 'topic', 'governance'),
+  ('kingdom-over-this-place', 'topic', 'who-gets-less'),
+  ('kingdom-over-this-place', 'mode', 'scripture-read'),
+  ('river-that-matters',      'topic', 'water'),
+  ('river-that-matters',      'topic', 'landform'),
+  ('river-that-matters',      'topic', 'city-life'),
+  ('river-that-matters',      'mode', 'map-work'),
+  ('highest-point',           'topic', 'altitude'),
+  ('highest-point',           'topic', 'landform'),
+  ('highest-point',           'mode', 'measurement'),
+  ('under-the-ground',        'topic', 'who-owns-it'),
+  ('under-the-ground',        'topic', 'trade'),
+  ('under-the-ground',        'topic', 'landform'),
+  ('desert-shall-blossom',    'topic', 'damage-and-repair'),
+  ('desert-shall-blossom',    'topic', 'water'),
+  ('desert-shall-blossom',    'topic', 'landform'),
+  ('desert-shall-blossom',    'mode', 'scripture-read'),
+  ('weather-that-hits',       'topic', 'weather-pattern'),
+  ('weather-that-hits',       'topic', 'damage-and-repair'),
+  ('weather-that-hits',       'topic', 'sun-and-seasons'),
+  ('tree-that-grows',         'topic', 'wildlife'),
+  ('tree-that-grows',         'topic', 'agriculture'),
+  ('tree-that-grows',         'topic', 'everyday-food'),
+  ('oldest-thing-here',       'topic', 'deep-time'),
+  ('oldest-thing-here',       'topic', 'crafts'),
+  ('kid-life',                'topic', 'daily-life'),
+  ('kid-life',                'topic', 'schooling'),
+  ('kid-life',                'topic', 'family'),
+  ('life-outdoors',           'topic', 'play-and-sport'),
+  ('life-outdoors',           'topic', 'landform'),
+  ('life-outdoors',           'topic', 'daily-life'),
+  ('what-people-believe',     'topic', 'religion'),
+  ('what-people-believe',     'topic', 'migration'),
+  ('what-people-believe',     'topic', 'holiday-calendar'),
+  ('tonights-dinner',         'topic', 'everyday-food'),
+  ('tonights-dinner',         'topic', 'daily-life'),
+  ('animals-on-the-menu',     'topic', 'everyday-food'),
+  ('animals-on-the-menu',     'topic', 'animals-with-people'),
+  ('animals-on-the-menu',     'topic', 'agriculture'),
+  ('animals-on-the-menu',     'mode', 'us-contrast'),
+  ('story-they-tell',         'topic', 'folklore-belief'),
+  ('story-they-tell',         'topic', 'story-telling'),
+  ('who-is-famous',           'topic', 'music-and-art'),
+  ('who-is-famous',           'topic', 'play-and-sport'),
+  ('who-is-famous',           'topic', 'story-telling'),
+  ('holiday-they-mark',       'topic', 'holiday-calendar'),
+  ('holiday-they-mark',       'topic', 'story-telling'),
+  ('craft-of-the-land',       'topic', 'crafts'),
+  ('craft-of-the-land',       'topic', 'music-and-art'),
+  ('sound-of-the-country',    'topic', 'music-and-art'),
+  ('sound-of-the-country',    'topic', 'crafts'),
+  ('sound-of-the-country',    'mode', 'hands-on'),
+  ('the-sport-they-love',     'topic', 'play-and-sport'),
+  ('the-sport-they-love',     'topic', 'daily-life'),
+  ('the-sport-they-love',     'mode', 'us-contrast'),
+  ('wow-fact',                'topic', 'story-telling'),
+  ('landmark-to-see',         'topic', 'crafts'),
+  ('landmark-to-see',         'topic', 'travel'),
+  ('landmark-to-see',         'topic', 'city-life'),
+  ('girls-and-women',         'topic', 'who-gets-less'),
+  ('girls-and-women',         'topic', 'schooling'),
+  ('girls-and-women',         'topic', 'work-and-money'),
+  ('girls-and-women',         'mode', 'us-contrast'),
+  ('city-and-country',        'topic', 'city-life'),
+  ('city-and-country',        'topic', 'agriculture'),
+  ('city-and-country',        'mode', 'demographics-stat'),
+  ('getting-around',          'topic', 'travel'),
+  ('getting-around',          'topic', 'infrastructure'),
+  ('getting-around',          'topic', 'daily-life'),
+  ('getting-around',          'mode', 'measurement'),
+  ('getting-around',          'mode', 'us-contrast'),
+  ('house-they-live-in',      'topic', 'housing'),
+  ('house-they-live-in',      'topic', 'weather-pattern'),
+  ('house-they-live-in',      'topic', 'crafts'),
+  ('game-kids-play',          'topic', 'play-and-sport'),
+  ('game-kids-play',          'topic', 'daily-life'),
+  ('game-kids-play',          'mode', 'hands-on'),
+  ('their-rest-day',          'topic', 'sabbath'),
+  ('their-rest-day',          'topic', 'daily-life'),
+  ('their-rest-day',          'topic', 'religion'),
+  ('sabbath-keepers-there',   'topic', 'sabbath'),
+  ('sabbath-keepers-there',   'topic', 'religion'),
+  ('sabbath-keepers-there',   'topic', 'christian-history'),
+  ('feast-they-keep',         'topic', 'holiday-calendar'),
+  ('feast-they-keep',         'topic', 'religion'),
+  ('feast-they-keep',         'topic', 'agriculture'),
+  ('feast-they-keep',         'mode', 'scripture-read'),
+  ('place-of-worship',        'topic', 'religion'),
+  ('place-of-worship',        'topic', 'crafts'),
+  ('what-they-wear',          'topic', 'clothing'),
+  ('what-they-wear',          'topic', 'crafts'),
+  ('what-they-wear',          'topic', 'holiday-calendar'),
+  ('breakfast-there',         'topic', 'everyday-food'),
+  ('breakfast-there',         'topic', 'daily-life'),
+  ('breakfast-there',         'mode', 'us-contrast'),
+  ('market-day',              'topic', 'everyday-food'),
+  ('market-day',              'topic', 'city-life'),
+  ('market-day',              'topic', 'trade'),
+  ('cook-it',                 'topic', 'everyday-food'),
+  ('cook-it',                 'topic', 'celebration-food'),
+  ('cook-it',                 'topic', 'crafts'),
+  ('cook-it',                 'mode', 'hands-on')
+-- END prompt_tags
 ) v
 JOIN task_templates t ON t.slug = v.task
+WHERE true
+ON CONFLICT DO NOTHING;
+
+-- ---------------------------------------------------------------------------
+-- Focus tags — what a focus favours, over tags rather than over prompts.
+--
+-- 65 rows over nine focuses, from LIBRARY_v3.md §3's focus table. A focus
+-- declares an affinity once and every prompt carrying a matching topic tag is
+-- drawn correctly from then on, including prompts written afterwards. That is
+-- the whole reason this replaced a hand-typed weight per prompt: 167 prompts
+-- against nine focuses is 1,503 opinions nobody will maintain, and the tag
+-- table is 65 rows that self-onboard the next 107 prompts.
+--
+-- Sparse: an absent tag is no opinion. The draw's floor is `1 + 2 * SUM(weight)`
+-- over shared topic tags, so a prompt no focus reaches is still drawn at 1 and
+-- the heaviest single prompt stays under 5% of pool weight (§4).
+--
+-- People and Power does not weight `civic-process`. All four of its prompts
+-- carry `governance` too, so weighting both pays twice for the same four rows.
+-- The tag stays on those prompts as documentation of what they are.
+--
+-- Seven topic tags carry no weight from any focus — `clothing`, `emblems`,
+-- `future-plans`, `holiday-calendar`, `infrastructure`, `sabbath`,
+-- `science-research`. That is deliberate: they describe prompts no focus is
+-- about, and the `1 +` floor keeps every one of them reachable.
+-- ---------------------------------------------------------------------------
+INSERT INTO focus_tags (focus_id, tag, weight)
+SELECT f.id, v.tag, v.weight
+FROM (
+  SELECT NULL AS focus, NULL AS tag, NULL AS weight
+  WHERE 0
+  UNION ALL VALUES
+-- BEGIN focus_tags
+  ('ancient-world',       'deep-time',           3),
+  ('ancient-world',       'empire-and-rule',     3),
+  ('ancient-world',       'crafts',              3),
+  ('ancient-world',       'folklore-belief',     2),
+  ('ancient-world',       'christian-history',   2),
+  ('ancient-world',       'story-telling',       2),
+  ('ancient-world',       'extinction',          1),
+
+  ('wild-places',         'wildlife',            3),
+  ('wild-places',         'extinction',          3),
+  ('wild-places',         'landform',            3),
+  ('wild-places',         'damage-and-repair',   2),
+  ('wild-places',         'water',               2),
+  ('wild-places',         'animals-with-people', 2),
+  ('wild-places',         'play-and-sport',      2),
+  ('wild-places',         'agriculture',         1),
+
+  ('people-and-power',    'governance',          3),
+  ('people-and-power',    'advocacy',            2),
+  ('people-and-power',    'public-services',     2),
+  ('people-and-power',    'public-money',        2),
+  ('people-and-power',    'schooling',           2),
+  ('people-and-power',    'who-gets-less',       2),
+  ('people-and-power',    'conflict-history',    1),
+
+  ('food-and-craft',      'everyday-food',       3),
+  ('food-and-craft',      'celebration-food',    3),
+  ('food-and-craft',      'agriculture',         3),
+  ('food-and-craft',      'crafts',              2),
+  ('food-and-craft',      'trade',               2),
+  ('food-and-craft',      'animals-with-people', 1),
+
+  ('conflict-and-change', 'conflict-history',    3),
+  ('conflict-and-change', 'empire-and-rule',     3),
+  ('conflict-and-change', 'forced-movement',     3),
+  ('conflict-and-change', 'migration',           2),
+  ('conflict-and-change', 'milestone',           2),
+  ('conflict-and-change', 'who-gets-less',       2),
+  ('conflict-and-change', 'damage-and-repair',   1),
+
+  ('land-and-sky',        'landform',            3),
+  ('land-and-sky',        'weather-pattern',     3),
+  ('land-and-sky',        'sun-and-seasons',     3),
+  ('land-and-sky',        'altitude',            2),
+  ('land-and-sky',        'water',               2),
+  ('land-and-sky',        'agriculture',         2),
+  ('land-and-sky',        'travel',              1),
+
+  ('who-lives-here',      'family',              3),
+  ('who-lives-here',      'daily-life',          3),
+  ('who-lives-here',      'schooling',           2),
+  ('who-lives-here',      'housing',             2),
+  ('who-lives-here',      'names',               2),
+  ('who-lives-here',      'health',              2),
+  ('who-lives-here',      'city-life',           2),
+  ('who-lives-here',      'migration',           1),
+
+  ('who-gets-what',       'who-gets-less',       3),
+  ('who-gets-what',       'who-owns-it',         3),
+  ('who-gets-what',       'forced-movement',     3),
+  ('who-gets-what',       'advocacy',            2),
+  ('who-gets-what',       'empire-and-rule',     2),
+  ('who-gets-what',       'public-money',        2),
+  ('who-gets-what',       'work-and-money',      2),
+  ('who-gets-what',       'health',              1),
+
+  ('stories-and-spirits', 'folklore-belief',     3),
+  ('stories-and-spirits', 'story-telling',       3),
+  ('stories-and-spirits', 'names',               3),
+  ('stories-and-spirits', 'religion',            2),
+  ('stories-and-spirits', 'music-and-art',       2),
+  ('stories-and-spirits', 'christian-history',   2),
+  ('stories-and-spirits', 'language',            1)
+-- END focus_tags
+) v
 JOIN focuses f ON f.slug = v.focus
 WHERE true
 ON CONFLICT DO NOTHING;

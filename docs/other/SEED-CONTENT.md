@@ -1,10 +1,11 @@
 # Seed content
 
-The five hand-written lists in the seed files — countries, task templates and
-focus weights in `002_seed.sql`, hooks and focus affinities in
-`003_country_data.sql` — and the rules a row has to satisfy. All five are
-complete: 195 countries, 90 templates, 87 weights, and 222 hooks and 200
-affinities across 100 countries. This is the reference for **adding** to them.
+The six hand-written lists in the seed files — countries, task templates, prompt tags
+and focus tags in `002_seed.sql`, hooks and focus affinities in
+`003_country_data.sql` — and the rules a row has to satisfy. All six are
+seeded: 195 countries, 91 templates, 177 prompt tags, 65 focus tags, and 222 hooks and
+200 affinities across 100 countries. This is the reference for **adding** to them, which
+is what slice 12 does 106 more times.
 
 Each list sits between a `-- BEGIN x` / `-- END x` pair in its file. Rows go
 inside the markers in the form below and nothing else changes. Nothing here
@@ -53,32 +54,38 @@ order, and a build session turns it into the rows above.
 
 ## Task templates
 
-**90 rows**, distributed exactly.
+**91 rows**, distributed exactly.
 
 | Week | Rows | What they are |
 |---|---|---|
 | 1 | 10 | 4 `core` — flag, map, location/borders, language & writing system — always drawn. Plus 6 that compete for the 5th slot: stats, symbols, currency, time, size, anthem. |
-| 2 | 25 | History, government, law, land, climate, ecology, farming, trade, prehistory. Five are drawn; the twenty spare are what makes Swap and a nine-month year work. |
-| 3 | 25 | People, religion, daily life for kids and women, food, art, music, sport, wow facts, landmarks. Same: five drawn, twenty spare. |
+| 2 | 26 | History, government, law, land, climate, ecology, farming, trade, prehistory, plus the pinned `wow-fact`. |
+| 3 | 25 | People, religion, daily life for kids and women, food, art, music, sport, landmarks, plus the pinned `cook-it`. |
 | 4 | 30 | Five for each of the six project types, in order: choose · gather · build · build · rehearse & present. |
+
+**The week column is the prompt's natural half, not a draw pool.** Weeks 2 and 3 are
+one pool of 51 — 49 drawable and the two pins — and eight come out of it and are dealt
+four and four. Nothing in the draw reads `week_theme`; only the deal's arc preference
+does, which leans a natural week 2 toward the earlier week when nothing more important
+is at stake (DESIGN.md §4).
 
 All six project types carry a full sequence, so setup offers all six. A project
 type created in the editor stays hidden until its five week-4 rows are written.
 
-Twenty-seven is the smallest seed that lets weeks 2 and 3 be drawn *and*
-swapped — but that number sizes the pool for the **draw**, and the draw is not
-what runs out. Five tasks come out of a week however many are in it, so a
-deeper pool costs the kid nothing at all and only buys variety.
+Eight drawable prompts is the smallest pool the merged draw will take, and one project
+type's five is the other floor — but those numbers size the pool for the **draw**, and
+the draw is not what runs out. Ten tasks come out of the merged pool however many are
+in it, so a deeper pool costs the kid nothing and only buys variety.
 
-What runs out is a **focus**. A focus with two on-theme tasks in a week draws
-both of them every month it is chosen, and these get chosen nine times. Against
-a 25-task week the floor is **six** on-theme tasks per focus per week: three
-would put barely one of them in a draw of five, while six put two or three.
-`test/seed-content.test.js` asserts it.
+What runs out is the **cooldown**. A prompt drawn for a learner rests five months, and
+eight a month against 49 drawable blocks forty by month six — at which point the
+stalest-back fallback stops being a safety valve and becomes the mechanism. The number
+is sized for the 153 `LIBRARY_v3.md` §2 specifies, and closing that gap is the whole of
+slice 12.
 
 **Five templates carry the family's Sabbath and Kingdom lens** — two in week 2,
 three in week 3 (DESIGN.md §13). A new one is written the same way the other
-eighty-five are: one action, ten minutes, second person, and it has to work in
+eighty-six are: one action, ten minutes, second person, and it has to work in
 Peru and in Japan. A scripture reference is the one thing a prompt may assert,
 because a citation can be checked; whatever the kid is asked to find stays a
 lead.
@@ -90,7 +97,7 @@ lead.
 | `prompt` | **The whole point.** Second person, to a 5th grader, one clear action, finishable in ten minutes. `Find out which animal is on their money and draw it` — never `Research national symbolism`. It must work in Peru and in Japan without editing: no task is country-specific. |
 | `week_theme` | `1`–`4`. |
 | `workbook_page` | Which physical page this feeds: `flag` `map` `language` `symbols` `money` `history` `government` `land` `ecology` `people` `food` `culture` `project`. Invent one if a task needs it; reuse the spelling. Nullable. |
-| `tier` | `core` fixed and always included (week 1's four, and all five week-4 rows) · `focus` the weighted draw pool (weeks 2 and 3) · `wild` eligible but off the main line (week 1's fifth-slot candidates). |
+| `tier` | `core` always included (week 1's four, and all five week-4 rows) · `focus` the merged weeks 2–3 pool the draw weights · `wild` eligible but off the main line (week 1's fifth-slot candidates) · `fixed` a pinned prompt, never weighted, cooled down or swapped. Only `wow-fact` and `cook-it` are `fixed`, and a third would make a week six tasks. |
 | `project_type` | The project type's **slug** on week-4 rows, `NULL` on every other row. A `LEFT JOIN` in the file resolves it to an id, so a row never names an id this file cannot know. A slug that matches nothing silently yields `NULL` — `test/seed-content.test.js` catches that. |
 | `position` | `1`–`5` on week-4 rows, `NULL` elsewhere. This is the sequence order. |
 
@@ -114,45 +121,81 @@ Paste-ready form:
 
 ---
 
-## Focus weights
+## Prompt tags
 
-87 rows. Sparse: a task with no row for a focus is neutral. Only write a row where a
-focus has an opinion.
+177 rows over the 61 seeded week 1–3 prompts — 145 `topic` and 32 `mode`. **A prompt
+and its tags are written in the same edit, always.** An untagged prompt is drawn at
+baseline forever and nothing reports it, so `test/seed-content.test.js` fails on one
+rather than letting it through.
 
-- `3` — on theme. This focus should reach for this task.
-- `0` — excluded. This focus should never draw it.
+`topic` is what the prompt is about, and it is the only namespace a focus can weight.
+Two to four a prompt. The vocabulary is the fifty tags in `../design/LIBRARY_v3.md` §3,
+and a new one is legitimate — weight it on the focus tab and it is live on the next
+draw, with no deploy.
 
-**Every one of the six focuses needs at least six `3`s in week 2 and six in
-week 3.** Per week, because the draw runs per week: a focus with an opinion
-about week 2 and none about week 3 leaves week 3 exactly as it would be with no
-focus chosen. Six rather than three, because three on-theme tasks in a 25-task
-pool put barely one of them in a draw of five — and the whole point of a focus
-is that the five tasks feel like the thing you picked.
+`mode` is how the kid produces the answer, and it carries no weight at all. Zero to two
+a prompt, from seven fixed names: `us-contrast`, `demographics-stat`, `measurement`,
+`hands-on`, `map-work`, `personal-voice`, `scripture-read`. They do two jobs the topic
+tags cannot — no month draws two prompts sharing one, and every month holds at least
+one `hands-on` and one `personal-voice`. **An eighth name is not a new mode, it is a
+rule that silently stops applying**, so the test refuses one.
 
-A task can carry a `3` for more than one focus, and many do: `landforms` is
-on theme for both `land-and-sky` and `food-and-craft`. That is how fifty tasks
-cover seventy-two focus-weeks.
+The two namespaces must never share a vocabulary. `us-contrast` reaches a quarter of the
+finished library; a focus allowed to weight it at 3 would pull a quarter of the pool in
+one move.
 
-**At most one `0` per focus per week.** Exclusions eat the spare that swap draws
-from. The rule held when the weeks were 8, and again at 13, and it stays at one
-now they are 25 — a bigger pool is headroom for content, not for exclusions.
-
-Paste-ready form — task slug, focus slug, weight:
+Paste-ready form — task slug, namespace, tag:
 
 ```sql
--- BEGIN task_focus_weights
-  ('ancient-ruins',  'ancient-world',       3),
-  ('wild-animal',    'wild-places',         3),
-  ('who-decides',    'people-and-power',    3),
-  ('dinner-tonight', 'food-and-craft',      3),
-  ('map-of-then',    'conflict-and-change', 3),
-  ('landforms',      'land-and-sky',        3),
-  ('who-decides',    'food-and-craft',      0)
--- END task_focus_weights
+-- BEGIN prompt_tags
+  ('first-people',      'topic', 'deep-time'),
+  ('first-people',      'topic', 'empire-and-rule'),
+  ('how-many-people',   'topic', 'city-life'),
+  ('how-many-people',   'mode',  'demographics-stat'),
+  ('how-many-people',   'mode',  'us-contrast')
+-- END prompt_tags
 ```
 
-The six focus slugs, fixed: `ancient-world` `wild-places` `people-and-power`
-`food-and-craft` `conflict-and-change` `land-and-sky`
+---
+
+## Focus tags
+
+65 rows over nine focuses, from `../design/LIBRARY_v3.md` §3's focus table. Sparse: a
+tag with no row is no opinion. A focus declares which **tags** it cares about, never
+which prompts, which is what lets a prompt written next year self-onboard — tag it once
+and every focus with a matching affinity draws it correctly.
+
+- `3` — this focus is about that tag.
+- `2` — it reaches for it.
+- `1` — it will take it.
+- no row — no opinion.
+
+**There is no `0` and no way to exclude.** The draw scores a prompt at
+`fw = 1 + 2 × SUM(weight)` over the tags it shares, so every prompt is reachable by
+every focus and nothing typed here can starve the pool. What can go wrong is the
+opposite: a focus whose tags match no prompt draws exactly what picking nothing would.
+`test/seed-content.test.js` holds a floor of six prompts lifted above baseline per
+focus, which is a smoke check against a mistyped tag set rather than a target — the
+target is `LIBRARY_v3.md` §3's ten on-theme prompts, and that is slice 12's to reach.
+
+**People and Power does not weight `civic-process`.** All four of its prompts carry
+`governance` too, so weighting both pays twice for the same four rows. The tag stays on
+those prompts as documentation of what they are.
+
+Paste-ready form — focus slug, tag, weight:
+
+```sql
+-- BEGIN focus_tags
+  ('ancient-world',     'deep-time',           3),
+  ('ancient-world',     'empire-and-rule',     3),
+  ('ancient-world',     'extinction',          1),
+  ('wild-places',       'wildlife',            3)
+-- END focus_tags
+```
+
+The nine focus slugs, fixed: `ancient-world` `wild-places` `people-and-power`
+`food-and-craft` `conflict-and-change` `land-and-sky` `who-lives-here`
+`who-gets-what` `stories-and-spirits`
 
 The six project type slugs, fixed: `trifold-board` `model-or-diorama` `video`
 `skit` `museum-box` `illustrated-zine`
@@ -233,9 +276,9 @@ an 11-year-old will hit twenty dead ends must not carry that promise.
 
 ## How the blocks are wired
 
-Both the templates and the weights blocks are joined to their lookup tables on a
-slug, so a row names `trifold-board` rather than an id. Two mechanics in the
-file make that work, and neither affects how a row is written:
+Every block is joined to its lookup table on a slug, so a row names `trifold-board` or
+`first-people` rather than an id. Two mechanics in the file make that work, and neither
+affects how a row is written:
 
 - A header row — `SELECT NULL AS slug, ... WHERE 0` — names the columns. SQLite
   has no `AS v(a, b, c)` syntax, and without the header the join would have to
@@ -243,14 +286,24 @@ file make that work, and neither affects how a row is written:
 - `WHERE true` sits before `ON CONFLICT`. On an `INSERT ... SELECT` the parser
   otherwise reads `ON` as the start of another join constraint.
 
-The weights block uses an inner join, so a mistyped task or focus slug
-contributes no row and raises no error. That is the one silent failure mode
-here, and it is why `test/seed-content.test.js` counts the rows in each block
-against the rows that landed.
+The joins are inner, so a mistyped task or focus slug contributes no row and raises no
+error. That is the one silent failure mode here, and it is why
+`test/seed-content.test.js` counts the rows in each block against the rows that landed.
+
+A **tag** is not a slug and is not resolved against anything: it is a value, and a
+misspelled one is a real tag with one member. The tests catch the shape — lowercase
+words joined by hyphens, a mode name from the seven — and the focus tab shows how many
+prompts carry each tag, which is where a typo is visible.
 
 ## Changing a row that is already seeded
 
-You can't, from this file — a press will not touch it. Use the library editor
-(slice 08), or add a new seed file. That is the deliberate trade: the same rule
-that lets these blocks grow is the rule that protects an edit you made in the
-app.
+A press will not touch it — the inserts are `ON CONFLICT DO NOTHING`, and that is what
+protects an edit you made in the app. Two ways round it, and both are browser-only:
+
+- **The library editor** (slice 08), for one row. This is the right tool for a typo
+  found in a month already running.
+- **Erase everything, Apply pending, Run seed** on `/admin`, for a correction to the
+  file itself. Every table drops and both files are re-read, so the edit lands as
+  written. There is no data in this database worth protecting from that, which is why
+  `001_schema.sql` and `002_seed.sql` are rewritten in place rather than appended to —
+  and it is what let the tag tables replace the weights table at all.

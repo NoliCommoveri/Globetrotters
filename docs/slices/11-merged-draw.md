@@ -1,6 +1,6 @@
 # Slice 11 — The merged draw
 
-**Status:** not started
+**Status:** built
 **Band:** L
 **Implements:** §4, §5 (two tables and a tier), §13 (nine focuses and their tag sets)
 **Depends on:** 04, 09
@@ -9,15 +9,15 @@
 tag weights, dealt four and four into the two weeks, and joined by the two pinned tasks —
 so a month is twenty again and a focus is never absent from a whole week of paper.
 
-This slice is the draw engine, its schema, and everything else that reads the weights it
+This slice is the draw engine, its schema, and everything else that read the weights it
 replaces. It is **not** the library it was designed for: `LIBRARY_v3.md` §2 holds 167
-week 1–3 prompts and 60 of them are seeded. Slice 12 lands the other 113 with their forms
+week 1–3 prompts and 61 of them are seeded. Slice 12 lands the other 106 with their forms
 and renderers.
 
-**So half of this slice's behaviour cannot be measured until 12.** That is not a reason to
-wait — the engine is pure, and a pool is a pool — but it decides how it is tested. The
-exit criteria below are in two lists: what a synthetic 153-row fixture proves here, and
-what only the real library proves, in 12.
+**So half of this slice's behaviour cannot be measured until 12.** That was not a reason
+to wait — the engine is pure, and a pool is a pool — but it decided how it is tested. The
+exit criteria below are in two lists: what a synthetic 153-row fixture proved here, and
+what only the real library can prove, in 12.
 
 ---
 
@@ -93,13 +93,17 @@ one join; if it ever shows up hot, it is an index.
 `DESIGN.md` §4 and was simply never seeded, and like the other two it has no
 `country_focus_affinity` rows, which is why D-15 is three focuses and not two.
 
-**`focus_tags`** — the nine tag sets from `LIBRARY_v3.md` §3's focus table, ~62 rows, less
+**`focus_tags`** — the nine tag sets from `LIBRARY_v3.md` §3's focus table, 65 rows, less
 `civic-process` from People and Power.
 
-**`prompt_tags`** — the `tags:` and `mode:` lines from `LIBRARY_v3.md` §2 for the 60 week
-1–3 prompts that are seeded today. Roughly 170 topic rows and 30 mode rows. Slice 12 adds
-the rest as it adds the prompts they belong to; a prompt and its tags are never separated,
-because an untagged prompt is drawn at baseline forever and nothing reports it.
+**`prompt_tags`** — the `tags:` and `mode:` lines from `LIBRARY_v3.md` §2 for the 61 week
+1–3 prompts seeded, 145 topic rows and 32 mode rows. Slice 12 adds the rest as it adds the
+prompts they belong to; a prompt and its tags are never separated, because an untagged
+prompt is drawn at baseline forever and nothing reports it.
+
+No `personal-voice` row is among them: all eight prompts carrying that mode are slice 12's.
+The repair budget falls back to an ordinary wildcard when a mode has no candidate, so the
+month rule is satisfied by `cook-it`'s `hands-on` alone until the voices land.
 
 **Two pins.** `wow-fact` becomes tier `fixed`. **`cook-it` is seeded here** — the one
 prompt this slice writes, and it is structural rather than content: without it week 3 has
@@ -149,40 +153,48 @@ country shuffle, and two files called deal is one too many.
 downstream of the draw changes: This week, Plan, Passport, the wall and the worksheet
 route all read the same rows.
 
-### Everything else that reads the weights
+### Everything else that read the weights
 
-The draw is not the only consumer, and this is the half that sets the band. Six modules
-read `task_focus_weights` and all of them move to the tag join:
+The draw is not the only consumer, and this is the half that set the band. Six modules
+read `task_focus_weights` and all of them moved to the tag join:
 
 - `src/api/plans.js` — `drawInputs`'s weight lookup becomes the tag join; the focus-change
   path in `apiPatchPlan` redraws weeks 2 and 3 as **one** draw instead of two.
 - `src/api/tasks.js` — the swap pool, below.
-- `src/api/focuses.js` — `GET /api/focuses/:id/samples` returns three `weight = 3` titles
-  today. It becomes the three highest `fw`, still alternating natural week 2 and week 3 so
-  the preview shows both halves of a month (Q-06).
-- `src/admin/focuses.js` — the library editor's focus tab. This is the largest of the five:
-  it edits a focus's opinion of individual templates today, and a focus's opinion is now a
-  set of weighted tags. The grid is 50 topic tags with a 0–3 weight, not 155 prompts, which
-  is a smaller and more honest screen — and it is the screen that makes a new tag reachable
-  without a deploy.
-- `src/admin/library-api.js` — the backup export and import carry weights; they carry tags
-  instead. `test/library-backup.test.js` moves with it.
+- `src/api/focuses.js` — `GET /api/focuses/:id/samples` returns the three highest `fw`,
+  alternating natural week 2 and week 3 so the preview shows both halves of a month
+  (Q-06), and the count beside them is named `above_baseline`, which is what it is.
+- `src/admin/focuses.js` — the library editor's focus tab, the largest of the five. The
+  grid is the topic vocabulary at a 0–3 weight, not 153 prompts, which is a smaller and
+  more honest screen — and it is the screen that makes a new tag reachable without a
+  deploy. `POOL_FLOOR` went with the weights: there is no weight-0 any more, so nothing
+  on this screen can shrink the pool, and the one warning left is a focus whose tags
+  match no prompt at all.
+- `src/admin/library-api.js` — the backup export and import carry the two tag lists
+  instead of weights, at file version 2, and the version check refuses a version 1 file
+  rather than restoring a library with no focus opinions in it.
 - `src/lib/seed.js`, `src/lib/migrations.js` — the two hand-maintained table lists.
 
 ### Swap
 
-The swap pool for a week-2 or week-3 task becomes the whole merged pool rather than that
-task's week. It must respect the form cap against the nine tasks still on the plan, and it
-is refused on tier `fixed` — `swappable()` in `src/api/tasks.js` already refuses week 4
-and week 1's four `core`, and `fixed` joins them.
+The swap pool for a week-2 or week-3 task is the whole merged pool rather than that task's
+week. It respects the form cap against the nine tasks still on the plan, and it will not
+put a second copy of a form into the week it is swapping inside — §4 forbids that outright
+and a swap is a draw. It is refused on tier `fixed`: `swappable()` in `src/api/plans.js`
+already refused week 4 and week 1's four `core`, and `fixed` joins them.
+
+Mode tags are **not** checked on swap. The anti-monotony rule is scoped to the draw, and
+refusing one of a parent's three swaps over a second `us-contrast` costs more than the
+repeat does.
 
 ## Exit criteria
 
 ### Proved here
 
-Against a synthetic fixture that mirrors `LIBRARY_v3.md`'s shape — 153 rows, the same form
-distribution, the same 50 topic and 7 mode tags — plus the real seeded library where the
-number does not depend on the library's size.
+All of these pass. They run against a synthetic fixture in `test/draw.test.js` that mirrors
+`LIBRARY_v3.md`'s shape — 153 drawable rows, the same twenty-seven forms in the same
+proportions, 50 topic and 7 mode tags — plus the real seeded library where the number does
+not depend on the library's size. The suite is 296 tests.
 
 - A drawn month has twenty tasks: 5 / 5 / 5 / 5.
 - Week 2 contains `wow-fact`, week 3 contains `cook-it`, and neither is swappable.
@@ -190,6 +202,9 @@ number does not depend on the library's size.
   ten, in a thousand consecutive drawn months.
 - No mode tag appears twice in one month's weeks 2–3.
 - Every month holds at least one `hands-on` and at least one `personal-voice` prompt.
+  Against the synthetic fixture, where both modes have members. The seeded library has no
+  `personal-voice` prompt to draw until slice 12, and the repair falls back rather than
+  failing the draw.
 - A template drawn by a person in month *m* is not drawn for that person again before
   month *m+6*, and is still available to a sibling in month *m+1*.
 - Swap on a week-2 task can return a template whose `week_theme` is 3.

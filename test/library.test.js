@@ -12,11 +12,11 @@ import { applyPending } from '../src/lib/migrations.js';
 import { runSeed } from '../src/lib/seed.js';
 import { apiLibrary } from '../src/admin/library-api.js';
 import { apiCreateTask, apiPatchTask } from '../src/admin/tasks.js';
-import { apiCreateFocus, apiPatchFocus, apiPutFocusWeights, POOL_FLOOR, thin } from '../src/admin/focuses.js';
+import { apiCreateFocus, apiPatchFocus, apiPutFocusTags, thin } from '../src/admin/focuses.js';
 import { apiCreateProjectType, apiPatchProjectType } from '../src/admin/project-types.js';
 import { apiCountry, apiCreateHook, apiPatchHook, apiDeleteHook, apiPutAffinities }
   from '../src/admin/countries.js';
-import { apiCreatePlan, apiGetPlan } from '../src/api/plans.js';
+import { apiCreatePlan, apiGetPlan, drawInputs } from '../src/api/plans.js';
 
 const read = (name) => readFileSync(new URL(`../src/migrations/${name}`, import.meta.url), 'utf8');
 const MIGRATIONS = [
@@ -67,16 +67,18 @@ async function plan(e) {
   return res.json();
 }
 
-test('the read route carries every template, its weights and its draw counts', async () => {
+test('the read route carries every template, its tags and its draw counts', async () => {
   const e = await env();
   const p = await plan(e);
   const data = await body(await apiLibrary(req('GET'), e));
 
-  assert.equal(data.tasks.length, 90);
-  assert.equal(data.focuses.length, 6);
+  assert.equal(data.tasks.length, 91);
+  assert.equal(data.focuses.length, 9);
   assert.equal(data.project_types.length, 6);
   assert.equal(data.countries.length, 195);
-  assert.ok(data.weights.length > 0);
+  assert.ok(data.focus_tags.length > 0);
+  assert.ok(data.prompt_tags.some((t) => t.namespace === 'mode'));
+  assert.ok(data.focuses.every((f) => f.reach));
 
   // Twenty tasks were drawn for one person, so twenty draw rows all naming them.
   const drawn = data.draws.reduce((n, d) => n + d.n, 0);
@@ -119,27 +121,27 @@ test('archiving a template leaves the month it is already in alone', async () =>
 
 test('an archived template is out of the next draw', async () => {
   const e = await env();
-  // Archive every week 2 template the focus can draw but five, and the next
-  // draw must be exactly the five left. The focus's own weight-0 rows are
-  // excluded from the keep set: a task at 0 is not a candidate either way, and
-  // this test is about archived, not about weights.
+  // Archive the whole merged pool but eight, and the ten dealt across weeks 2
+  // and 3 must be exactly those eight plus the two pins. Archiving is the one
+  // thing that takes a prompt out of the draw — a focus can no longer exclude.
   const { results } = e.DB.prepare(`
-    SELECT task_templates.id FROM task_templates
-    LEFT JOIN task_focus_weights
-      ON task_focus_weights.task_template_id = task_templates.id
-     AND task_focus_weights.focus_id = (SELECT id FROM focuses WHERE slug = 'wild-places')
-    WHERE task_templates.week_theme = 2 AND COALESCE(task_focus_weights.weight, 1) > 0
-    ORDER BY task_templates.id
+    SELECT id FROM task_templates
+    WHERE week_theme IN (2, 3) AND tier != 'fixed' ORDER BY id
   `).all();
-  const keep = results.slice(0, 5).map((r) => r.id);
-  for (const row of results.slice(5)) {
+  const keep = results.slice(0, 8).map((r) => r.id);
+  for (const row of results.slice(8)) {
     await apiPatchTask(req('PATCH', { archived: 1 }), e, { id: String(row.id) });
   }
 
+  const pins = e.DB.prepare("SELECT id FROM task_templates WHERE tier = 'fixed'")
+    .all().results.map((r) => r.id);
+
   const p = await plan(e);
-  const week2 = allTasks(p).filter((t) => t.week_no === 2)
-    .map((t) => t.task_template_id).sort();
-  assert.deepEqual(week2, keep.slice().sort());
+  const deep = allTasks(p).filter((t) => t.week_no === 2 || t.week_no === 3)
+    .map((t) => t.task_template_id);
+  assert.equal(deep.length, 10);
+  assert.deepEqual(deep.slice().sort((a, b) => a - b),
+    [...keep, ...pins].sort((a, b) => a - b));
 });
 
 test('a new task is custom, gets a slug of its own, and validates its week', async () => {
@@ -197,49 +199,71 @@ test('moving a task off week 4 takes its project type with it', async () => {
   assert.equal(task.project_type_id, null);
 });
 
-test('the weight grid round-trips and a cell back at 1 stores no row', async () => {
+test('the tag grid round-trips and a cell back at 0 stores no row', async () => {
   const e = await env();
   const focus = idOf(e, "SELECT id FROM focuses WHERE slug = 'wild-places'");
-  const stored = idOf(e, `
-    SELECT task_template_id FROM task_focus_weights WHERE focus_id = ${focus.id} AND weight = 3 LIMIT 1
-  `);
+  const stored = idOf(e, `SELECT tag FROM focus_tags WHERE focus_id = ${focus.id} AND weight = 3 LIMIT 1`);
 
-  const res = await apiPutFocusWeights(req('PUT', {
-    weights: [{ task_template_id: stored.task_template_id, weight: 1 }],
+  const res = await apiPutFocusTags(req('PUT', {
+    tags: [{ tag: stored.tag, weight: 0 }],
   }), e, { id: String(focus.id) });
   assert.equal(res.status, 200);
 
-  const gone = idOf(e, `
-    SELECT 1 AS hit FROM task_focus_weights
-    WHERE focus_id = ${focus.id} AND task_template_id = ${stored.task_template_id}
-  `);
+  const gone = idOf(e,
+    `SELECT 1 AS hit FROM focus_tags WHERE focus_id = ${focus.id} AND tag = '${stored.tag}'`);
   assert.equal(gone, null);
 
   // And back to 3 writes the row again.
-  await apiPutFocusWeights(req('PUT', {
-    weights: [{ task_template_id: stored.task_template_id, weight: 3 }],
-  }), e, { id: String(focus.id) });
-  const again = idOf(e, `
-    SELECT weight FROM task_focus_weights
-    WHERE focus_id = ${focus.id} AND task_template_id = ${stored.task_template_id}
-  `);
+  await apiPutFocusTags(req('PUT', { tags: [{ tag: stored.tag, weight: 3 }] }),
+    e, { id: String(focus.id) });
+  const again = idOf(e,
+    `SELECT weight FROM focus_tags WHERE focus_id = ${focus.id} AND tag = '${stored.tag}'`);
   assert.equal(again.weight, 3);
 });
 
-test('the grid refuses a weight that is not off, 1 or 3', async () => {
+test('a tag the library has never seen is weightable, and the next draw reads it', async () => {
+  // This is what makes a new tag reachable with no deploy: weight it here, tag
+  // a prompt with it on the task tab, and the draw sees it on the next month.
   const e = await env();
-  for (const weight of [2, 0.5, -1, 'three']) {
-    const res = await apiPutFocusWeights(req('PUT', {
-      weights: [{ task_template_id: 1, weight }],
-    }), e, { id: '1' });
+  const focus = idOf(e, "SELECT id FROM focuses WHERE slug = 'wild-places'");
+  const task = idOf(e,
+    "SELECT id FROM task_templates WHERE week_theme = 2 AND tier = 'focus' ORDER BY id LIMIT 1");
+
+  const before = await drawInputs(e, { personId: 1, month: '2026-10', focusId: focus.id });
+  const was = before.focusWeight(task.id);
+
+  const res = await apiPutFocusTags(req('PUT', { tags: [{ tag: 'tidepools', weight: 3 }] }),
+    e, { id: String(focus.id) });
+  assert.equal(res.status, 200);
+  e.DB.prepare(
+    `INSERT INTO prompt_tags (task_template_id, namespace, tag) VALUES (${task.id}, 'topic', 'tidepools')`
+  ).run();
+
+  const after = await drawInputs(e, { personId: 1, month: '2026-10', focusId: focus.id });
+  assert.equal(after.focusWeight(task.id), was + 6);
+});
+
+test('the grid refuses a weight outside 0-3 and a tag that is not a tag', async () => {
+  const e = await env();
+  for (const weight of [4, 0.5, -1, 'three']) {
+    const res = await apiPutFocusTags(req('PUT', { tags: [{ tag: 'wildlife', weight }] }),
+      e, { id: '1' });
     assert.equal(res.status, 400, String(weight));
   }
-  assert.equal((await apiPutFocusWeights(req('PUT', {}), e, { id: '1' })).status, 400);
-  assert.equal(
-    (await apiPutFocusWeights(req('PUT', { weights: [{ task_template_id: 9999, weight: 3 }] }), e,
-      { id: '1' })).status,
-    400
-  );
+  for (const tag of ['wild life', '-wild', 'wild--life', '', 'x'.repeat(41)]) {
+    const res = await apiPutFocusTags(req('PUT', { tags: [{ tag, weight: 3 }] }), e, { id: '1' });
+    assert.equal(res.status, 400, tag);
+  }
+
+  // Case and surrounding space are normalised rather than refused: the tag is a
+  // join key, and `Wildlife` typed into the box has to mean `wildlife` or the
+  // grid mints a second tag nothing carries.
+  const cased = await apiPutFocusTags(req('PUT', { tags: [{ tag: '  Wildlife ', weight: 2 }] }),
+    e, { id: '1' });
+  assert.equal(cased.status, 200);
+  assert.ok((await cased.json()).tags.some((t) => t.tag === 'wildlife' && t.weight === 2));
+  assert.equal((await apiPutFocusTags(req('PUT', {}), e, { id: '1' })).status, 400);
+  assert.equal((await apiPutFocusTags(req('PUT', { tags: [] }), e, { id: '999' })).status, 404);
 });
 
 test('a focus created with zero weight rows draws against the full pool', async () => {
@@ -253,21 +277,16 @@ test('a focus created with zero weight rows draws against the full pool', async 
   assert.equal(focus.slug, 'money-and-trade');
 
   const rows = e.DB.prepare(
-    `SELECT COUNT(*) AS n FROM task_focus_weights WHERE focus_id = ${focus.id}`
+    `SELECT COUNT(*) AS n FROM focus_tags WHERE focus_id = ${focus.id}`
   ).first();
   assert.equal(rows.n, 0);
 
-  // The library carries 25 week-2 and 25 week-3 templates. Every one of them
-  // sits at an effective weight of 1 for a focus with no rows, so a focus with
-  // no opinions at all still draws a full month — it just draws the same month
-  // as picking nothing.
-  assert.deepEqual(focus.pool, { week2: 25, week3: 25 });
-  assert.equal(focus.thin, false);
-
-  // The warning is still live, and still measured per week: it fires on the
-  // week that is short, not on the total.
-  assert.equal(thin({ week2: POOL_FLOOR - 1, week3: 25 }), true);
-  assert.equal(thin({ week2: 25, week3: 25 }), false);
+  // Every prompt sits at the baseline 1 for a focus with no tags, so a focus
+  // with no opinions still draws a full month — it just draws the same month
+  // as picking nothing, which is exactly what the warning says.
+  assert.deepEqual(focus.reach, { week2: 0, week3: 0 });
+  assert.equal(focus.thin, true);
+  assert.equal(thin({ week2: 0, week3: 1 }), false);
 
   // The draw is the proof the warning is advice and not a gate.
   const country = idOf(e, "SELECT id FROM countries WHERE iso3 = 'PER'");
@@ -283,20 +302,22 @@ test('a focus created with zero weight rows draws against the full pool', async 
   assert.equal(allTasks(await drawn.json()).length, 20);
 });
 
-test('zeroing a focus down to four week-2 tasks is refused by the draw, not by the grid', async () => {
+test('emptying a focus of every tag still draws a month, because nothing can be excluded', async () => {
+  // The failure this replaces cannot happen any more. A focus used to be able
+  // to zero a week down below what the draw needed; a tag set is only ever a
+  // preference, so the worst a parent can do is make a focus mean nothing.
   const e = await env();
   const focus = idOf(e, "SELECT id FROM focuses WHERE slug = 'wild-places'");
   const { results } = e.DB.prepare(
-    'SELECT id FROM task_templates WHERE week_theme = 2 ORDER BY id'
+    `SELECT tag FROM focus_tags WHERE focus_id = ${focus.id}`
   ).all();
 
-  // Every cell stated, so the pool is four whatever the seed already said.
-  const res = await apiPutFocusWeights(req('PUT', {
-    weights: results.map((r, i) => ({ task_template_id: r.id, weight: i < 4 ? 3 : 0 })),
+  const res = await apiPutFocusTags(req('PUT', {
+    tags: results.map((r) => ({ tag: r.tag, weight: 0 })),
   }), e, { id: String(focus.id) });
   assert.equal(res.status, 200);
   const saved = await res.json();
-  assert.equal(saved.pool.week2, 4);
+  assert.deepEqual(saved.tags, []);
   assert.equal(saved.thin, true);
 
   const country = idOf(e, "SELECT id FROM countries WHERE iso3 = 'KEN'");
@@ -308,7 +329,8 @@ test('zeroing a focus down to four week-2 tasks is refused by the draw, not by t
       month: '2026-11', country_id: country.id, focus_id: focus.id, project_type_id: project.id,
     }),
   }), e, { personId: 3 });
-  assert.equal(drawn.status, 409);
+  assert.equal(drawn.status, 201, await drawn.clone().text());
+  assert.equal(allTasks(await drawn.json()).length, 20);
 });
 
 test('a focus is archived, never deleted', async () => {
