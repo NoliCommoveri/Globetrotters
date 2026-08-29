@@ -1,6 +1,6 @@
 # Slice 13 — Forms: pair, flow, grid, clocks
 
-**Status:** not started
+**Status:** built
 **Band:** L
 **Implements:** §16 (eight of the nineteen forms), §13 (the bindings they take)
 **Depends on:** 12

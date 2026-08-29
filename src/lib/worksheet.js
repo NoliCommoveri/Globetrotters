@@ -82,6 +82,10 @@ export const KINDS = {
   checklist: {
     items: int(1, 16, 8),
     labels: strings(0, 16, []),
+    marker: choice(['box', 'number', 'bullet'], 'box'),
+    circle_one: bool(false),
+    orient: choice(['list', 'across'], 'list'),
+    caption: text(80, ''),
   },
   storyboard: { panels: int(2, 8, 6) },
   boxes: {
@@ -114,6 +118,43 @@ export const KINDS = {
     // Never 1 — a numbered key with one entry is a caption wearing a costume
     // (LIBRARY_v3.md §1).
     pins: int(2, 6, 5),
+  },
+  // Two panels joined by an arrow: draw it then, draw it now. MIDDLE is a
+  // captioned write-in slot on the hinge itself, skipped when the string is
+  // empty (LIBRARY_v3.md §1).
+  pair: {
+    captions: strings(2, 2, ['Before', 'After']),
+    lines_each: int(0, 6, 2),
+    middle: text(30, ''),
+  },
+  // Boxes joined by arrows: this causes the next thing. CAPTION is the axis
+  // the steps run along — the line that keeps two flow-steps sheets from
+  // reading as the same page (LIBRARY_v3.md §1).
+  flow: {
+    steps: int(2, 6, 4),
+    orient: choice(['across', 'down'], 'across'),
+    caption: text(80, ''),
+  },
+  // Rows of small figures a kid colors in, ROWS x PER_ROW to the whole KEY
+  // describes. KEY_ROWS is blank ruled lines for a key the kid writes
+  // themselves; KEY is one printed line for a key that is already known
+  // (LIBRARY_v3.md §1).
+  grid: {
+    rows: int(1, 12, 2),
+    per_row: int(1, 12, 10),
+    key_rows: int(0, 6, 0),
+    key: text(60, ''),
+    caption: text(80, ''),
+    label_lines: bool(false),
+  },
+  // Two empty clock faces, twelve ticks each and no hands — the kid draws
+  // those. DIGITAL_LINE is a short line under each face for writing the time
+  // in digits; LINES is ruled lines across the foot.
+  clocks: {
+    faces: int(1, 4, 2),
+    captions: strings(1, 4, ['Their clock', 'Our clock']),
+    digital_line: bool(true),
+    lines: int(0, 8, 2),
   },
 };
 
@@ -212,14 +253,25 @@ const RENDER = {
 
   // `labels` names the items — week 4's materials arrive this way. `items` is
   // how many lines there are in total, so a list of three named materials on an
-  // eight-item form still leaves five blanks to add to.
+  // eight-item form still leaves five blanks to add to. ORIENT `across` is the
+  // exception: a week strip prints exactly the days it is given, never padded
+  // with a blank eighth column.
   checklist: (spec) => {
-    const count = Math.max(spec.items, spec.labels.length);
+    const count = spec.orient === 'across' && spec.labels.length
+      ? spec.labels.length
+      : Math.max(spec.items, spec.labels.length);
+    const marker = (i) => {
+      if (spec.marker === 'number') return `<span class="tick-number">${i + 1}.</span>`;
+      if (spec.marker === 'bullet') return '<span class="tick-bullet"></span>';
+      return '<span class="tick-box"></span>';
+    };
     const rows = Array.from({ length: count }, (_, i) => {
       const label = spec.labels[i] ? escapeHtml(spec.labels[i]) : '';
-      return `<li><span class="tick-box"></span><span class="label">${label}</span></li>`;
+      return `<li>${marker(i)}<span class="label">${label}</span></li>`;
     }).join('');
-    return `<ul class="checklist">${rows}</ul>`;
+    const caption = spec.caption ? `<p class="checklist-caption">${escapeHtml(spec.caption)}</p>` : '';
+    const hint = spec.circle_one ? '<p class="checklist-hint">Circle the one that&hellip;</p>' : '';
+    return `<div class="checklist-form checklist-${spec.orient}">${caption}<ul class="checklist">${rows}</ul>${hint}</div>`;
   },
 
   storyboard: (spec) => {
@@ -296,6 +348,63 @@ ${axis}${caption}</div>`;
       (_, i) => `<li><span class="pin">${i + 1}</span><span class="lead"></span></li>`,
     ).join('');
     return `<div class="beside map">${box}<ol class="callouts map-pins">${pins}</ol></div>`;
+  },
+
+  // Two panels with an arrow between them: draw it then, draw it now.
+  pair: (spec) => {
+    const panel = (caption) => `<div class="pair-panel">
+<div class="ink"></div>
+<span class="pair-caption">${escapeHtml(caption)}</span>
+${rules(spec.lines_each)}
+</div>`;
+    const shaft = '<span class="pair-shaft"><span class="pair-line"></span><span class="pair-head"></span></span>';
+    const hinge = spec.middle
+      ? `<div class="pair-hinge"><span class="pair-hinge-label">${escapeHtml(spec.middle)}</span>${shaft}<span class="pair-hinge-rule"></span></div>`
+      : `<div class="pair-hinge">${shaft}</div>`;
+    return `<div class="pair">${panel(spec.captions[0])}${hinge}${panel(spec.captions[1])}</div>`;
+  },
+
+  // Boxes joined by arrows, across or down.
+  flow: (spec) => {
+    const cells = Array.from({ length: spec.steps }, (_, i) => {
+      const arrow = i < spec.steps - 1 ? '<li class="flow-arrow"><span class="flow-head"></span></li>' : '';
+      return `<li class="flow-step"><span class="flow-no">${i + 1}</span><div class="ink"></div></li>${arrow}`;
+    }).join('');
+    const caption = spec.caption ? `<p class="flow-caption">${escapeHtml(spec.caption)}</p>` : '';
+    return `<div class="flow flow-${spec.orient}"><ol class="flow-row">${cells}</ol>${caption}</div>`;
+  },
+
+  // Icon arrays: ROWS of PER_ROW small figures a kid colors in.
+  grid: (spec) => {
+    const rowsHtml = Array.from({ length: spec.rows }, () => {
+      const dots = '<i></i>'.repeat(spec.per_row);
+      const label = spec.label_lines ? '<span class="grid-row-label"></span>' : '';
+      return `<li class="grid-row"><span class="grid-dots">${dots}</span>${label}</li>`;
+    }).join('');
+    const caption = spec.caption ? `<p class="grid-caption">${escapeHtml(spec.caption)}</p>` : '';
+    const key = spec.key ? `<p class="grid-key">${escapeHtml(spec.key)}</p>` : '';
+    const keyRows = spec.key_rows > 0
+      ? `<ul class="grid-key-rows">${'<li><span class="grid-swatch"></span><span class="grid-key-rule"></span></li>'.repeat(spec.key_rows)}</ul>`
+      : '';
+    return `<div class="grid-form">${caption}<ol class="grid-rows">${rowsHtml}</ol>${key}${keyRows}</div>`;
+  },
+
+  // Two empty clock faces, twelve ticks each, no hands — the kid draws those.
+  clocks: (spec) => {
+    const ticks = Array.from({ length: 12 }, (_, i) => {
+      const angle = (i * 30 - 90) * (Math.PI / 180);
+      const x = (50 + 42 * Math.cos(angle)).toFixed(1);
+      const y = (50 + 42 * Math.sin(angle)).toFixed(1);
+      return `<i style="left:${x}%;top:${y}%"></i>`;
+    }).join('');
+    const face = (caption) => `<div class="clock">
+<div class="clock-face">${ticks}</div>
+<span class="clock-caption">${escapeHtml(caption)}</span>
+${spec.digital_line ? '<span class="clock-digital"></span>' : ''}
+</div>`;
+    const faces = Array.from({ length: spec.faces }, (_, i) => face(spec.captions[i] || '')).join('');
+    const foot = spec.lines > 0 ? `<div class="clock-foot">${rules(spec.lines)}</div>` : '';
+    return `<div class="clocks"><div class="clock-row">${faces}</div>${foot}</div>`;
   },
 };
 

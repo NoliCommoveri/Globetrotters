@@ -4,9 +4,9 @@ Twenty-three slices against `../design/DESIGN.md`. Each ends at a state you can 
 browser and judge.
 
 A build session takes the first slice not marked `built` and reads its file.
-**Slices 00–12 are built.** What remains is the library the draw engine was measured
-against — 106 new prompts, 14 forms, 6 renderers, and the fifty of the sixty-one seeded
-prompts that `LIBRARY_v3.md` still rewrites — split into ten slices, none of them larger
+**Slices 00–13 are built.** What remains is the library the draw engine was measured
+against — 106 new prompts, 6 forms, 2 renderers, and the forty of the sixty-one seeded
+prompts that `LIBRARY_v3.md` still rewrites — split into eight slices, none of them larger
 than L. Also outstanding are due-outs D-10 and D-14, neither of them code, and D-15, which
 is the whole of slice 22.
 
@@ -25,7 +25,7 @@ is the whole of slice 22.
 | 10 | [Printed worksheets](10-worksheets.md) | built | L | 05 | §16 |
 | 11 | [The merged draw](11-merged-draw.md) | built | L | 04, 09 | §4, §5, §13 |
 | 12 | [Forms: boxes, venn, chart, map](12-forms-boxes-venn-chart-map.md) | built | L | 11 | §16, §13 |
-| 13 | [Forms: pair, flow, grid, clocks](13-forms-pair-flow-grid-clocks.md) | not started | L | 12 | §16, §13 |
+| 13 | [Forms: pair, flow, grid, clocks](13-forms-pair-flow-grid-clocks.md) | built | L | 12 | §16, §13 |
 | 14 | [Forms: fields and the box knobs](14-forms-fields-and-the-box-knobs.md) | not started | L | 13 | §16, §13 |
 | 15 | [Forms: figures, recipe, text sweep](15-forms-figures-recipe-and-the-text-sweep.md) | not started | L | 14 | §16, §13 |
 | 16 | [Prompts: deep time to government](16-prompts-deep-time-to-government.md) | not started | L | 15 | §13 |
@@ -116,7 +116,10 @@ slices name their prompts individually and slice 15 exits on a diff of all sixty
 against the document rather than on the markers. **Slice 12 corrected the first ten** —
 `under-the-ground`, `tree-that-grows`, `craft-of-the-land`, `market-day`, `breakfast-there`,
 `animals-on-the-menu`, `highest-point`, `weather-there-now`, `map-outline`,
-`river-that-matters` — so fifty of the sixty-one still need work, in slices 13–15.
+`river-that-matters`. **Slice 13 corrected ten more** — `border-that-moved`,
+`independence-day`, `desert-shall-blossom`, `who-leads`, `made-here`, `city-and-country`,
+`time-there-now`, `neighbors-list`, `their-rest-day`, `game-kids-play` — so forty of the
+sixty-one still need work, in slices 14–15.
 
 **A rebind and a rewrite are one edit.** A form carries a slot for every thing its prompt
 asks for and asks for every slot it carries (§1), so the new wording is *why* the new form
@@ -138,6 +141,10 @@ each slice ends at a printed sheet visibly better than the one before it, and af
 15 the seeded library says and prints what §2 says it does. **Slice 12 is built**: `boxes`,
 `venn`, `chart` and `map` render, five layout rows carry them, and the ten prompts they
 move off `table-3`, `box-beside` and `figures` print on the form they were written for.
+**Slice 13 is built too**: `pair`, `flow`, `grid` and `clocks` render, eight layout rows
+carry them, `who-lives-there` and `how-they-learn` seed the two forms with no prompt to
+bind, and the ten prompts that move off `lines-4`, `box-beside`, `compare` and `timeline`
+print on the form they were written for — 52 prompts are drawable now.
 
 **Slices 16–20 are the 106 new prompts**, in batches of twelve to twenty-seven. The boundaries
 are `LIBRARY_v3.md` §2's own subject headings — already ordered by subject, already sized
@@ -166,8 +173,8 @@ in 12–21 reports the drawable count it ended at**:
 | After slice | Drawable |
 |---|---|
 | 11 | 49 |
-| 12 (today) | 50 |
-| 13 | 52 |
+| 12 | 50 |
+| 13 (today) | 52 |
 | 14–15 | 52 — the forms slices correct rows rather than adding them |
 | 16 | 74 |
 | 17 | 93 |

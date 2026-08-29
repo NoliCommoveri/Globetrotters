@@ -72,7 +72,7 @@ test('the read route carries every template, its tags and its draw counts', asyn
   const p = await plan(e);
   const data = await body(await apiLibrary(req('GET'), e));
 
-  assert.equal(data.tasks.length, 92);
+  assert.equal(data.tasks.length, 94);
   assert.equal(data.focuses.length, 9);
   assert.equal(data.project_types.length, 6);
   assert.equal(data.countries.length, 195);

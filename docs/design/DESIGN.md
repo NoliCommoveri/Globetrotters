@@ -1286,12 +1286,12 @@ skipping the task would leave the week one short.
 ## 13. Seed data
 
 **Status:** partial · the runner, 3 people, 9 focuses, 6 project types, 195
-countries, **92 task templates**, 65 focus tags and 180 prompt tags,
+countries, **94 task templates**, 65 focus tags and 186 prompt tags,
 `003_country_data.sql`'s 222 hooks and 200 affinities across 100 countries
-(slices 02, 09 and 11), and `005_worksheet_layouts.sql`'s seventeen printed
+(slices 02, 09 and 11), and `005_worksheet_layouts.sql`'s twenty-five printed
 forms with a binding on every week 1–3 template and on each project type's
-planning step (slices 10 and 12). What remains is slices 13 to 22: the 106
-prompts and 14 forms `LIBRARY_v3.md` §2 still holds only as a document, fifty
+planning step (slices 10, 12 and 13). What remains is slices 14 to 22: the 106
+prompts and six forms `LIBRARY_v3.md` §2 still holds only as a document, forty
 of the sixty-one seeded week 1–3 prompts still to correct, the twelve prompts
 Ancient World and Conflict and Change are owed, and the three new focuses'
 `country_focus_affinity` rows (D-15).
@@ -1319,7 +1319,7 @@ in place rather than appended to.
   because a hook has no natural key and a deleted one must stay deleted (§9).
 - `004_worksheets.sql` — the `worksheet_layouts` table and the two columns it
   hangs off `task_templates` (§16). A migration: DDL, applied once, never edited.
-- `005_worksheet_layouts.sql` — the seventeen layouts and the binding for every
+- `005_worksheet_layouts.sql` — the twenty-five layouts and the binding for every
   week 1–3 template. A seed: the layouts upsert on `slug` like every other
   seeded row, and each binding is written only where the column is still empty,
   so a task rebound in the library editor keeps what was chosen there.
@@ -1625,8 +1625,10 @@ the code that depends on them is written, never guessed.
 
 **Status:** partial · slice 10 built the route, the packer, the twelve forms and the
 layout editor; slice 12 added the `boxes`, `venn`, `chart` and `map` renderers and their
-five layout rows. `LIBRARY_v3.md` needs twenty-seven forms in all, so slices 13 to 15 add
-the remaining fourteen layout rows and six renderer branches, and retire three forms.
+five layout rows; slice 13 added the `pair`, `flow`, `grid` and `clocks` renderers and
+their eight layout rows. `LIBRARY_v3.md` needs twenty-eight forms in all, so slices 14
+and 15 add the remaining six layout rows and two renderer branches (`fields`, `recipe`),
+and retire three forms.
 
 The physical looseleaf workbook is the point of the project (§1, §7). Twenty
 tasks a month arrive as prompts on a phone and land on paper the kid has to
@@ -1642,8 +1644,9 @@ is the sheet, composed of segments.
 ### Three parts
 
 - A **layout** is a reusable printed form — ruled lines, a drawing box with a
-  caption, two labeled columns, a six-panel storyboard. There are about twelve
-  and they live in the library alongside tasks and focuses.
+  caption, two labeled columns, a six-panel storyboard. There are
+  twenty-five, headed for twenty-eight, and they live in the library
+  alongside tasks and focuses.
 - A **segment** is one task's slot on paper: its title, its `workbook_page`
   label, its prompt in full, and the layout under it. Bound at the template, so
   a task says which form it wants.
@@ -1653,9 +1656,9 @@ is the sheet, composed of segments.
 **Layouts are a library, not one worksheet per task.** A bespoke worksheet per
 task is another ninety pieces of content on top of §13, and most of them the same
 box twice. "Copy the flag" and "trace the outline and star the capital" want the
-identical form. Twelve layouts plus one binding per template is the same result
-for a twelfth of the writing, and it is the version the parent can keep tuning
-in §12 without designing anything.
+identical form. Twenty-five layouts plus one binding per template is the same
+result for a quarter of the writing, and it is the version the parent can keep
+tuning in §12 without designing anything.
 
 **`workbook_page` stays a label, not the unit.** It is what prints in the
 segment's corner so the page has a name — the same string the task card shows on
