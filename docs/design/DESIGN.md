@@ -514,7 +514,8 @@ CREATE TABLE worksheet_layouts (
   name          TEXT NOT NULL,          -- 'Drawing box with caption'
   kind          TEXT NOT NULL           -- decides which renderer, and which spec keys
     CHECK (kind IN ('lines','box','split','table','timeline','figures',
-                    'checklist','storyboard')),
+                    'checklist','storyboard','boxes','venn','chart','map',
+                    'pair','flow','grid','clocks','fields','recipe')),
   height_thirds INTEGER NOT NULL CHECK (height_thirds BETWEEN 1 AND 3),
   spec          TEXT NOT NULL,          -- JSON. Named knobs only, never markup.
   archived      INTEGER NOT NULL DEFAULT 0,
@@ -1628,10 +1629,13 @@ the code that depends on them is written, never guessed.
 layout editor; slice 12 added the `boxes`, `venn`, `chart` and `map` renderers and their
 five layout rows; slice 13 added the `pair`, `flow`, `grid` and `clocks` renderers and
 their eight layout rows; slice 14 added the `fields` renderer, the `below` knob on `box`
-and the `shared` knob on `split`, and their four layout rows, and retired `box-caption`.
-`LIBRARY_v3.md` needs twenty-eight forms in all, which is where the library now stands;
-what remains is slice 15's `figures`/`figure-anchor` split, the `recipe` renderer, and
-retiring `compare` and `figures`.
+and the `shared` knob on `split`, and their four layout rows, and retired `box-caption`;
+slice 15 rewrote `figures` into `figure-anchor`, added the `recipe` renderer and its
+`recipe-card` form, gave `timeline` its UNIT and ENDS knobs and `storyboard` its CAPTION
+knob, and retired `compare` and the old three-box `figures` form. All nineteen forms on
+ten renderers `LIBRARY_v3.md` calls for now exist, and every seeded week 1–3 prompt prints
+on the form it was written for; what remains is the paper numbers, which need the full
+153-prompt pool slice 20 finishes.
 
 The physical looseleaf workbook is the point of the project (§1, §7). Twenty
 tasks a month arrive as prompts on a phone and land on paper the kid has to

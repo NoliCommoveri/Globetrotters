@@ -4,11 +4,11 @@ Twenty-three slices against `../design/DESIGN.md`. Each ends at a state you can 
 browser and judge.
 
 A build session takes the first slice not marked `built` and reads its file.
-**Slices 00–14 are built.** What remains is the library the draw engine was measured
-against — 106 new prompts, 2 forms, 1 renderer, and the twenty-one of the sixty-one seeded
-prompts that `LIBRARY_v3.md` still rewrites — split into seven slices, none of them larger
-than L. Also outstanding are due-outs D-10 and D-14, neither of them code, and D-15, which
-is the whole of slice 22.
+**Slices 00–15 are built.** The nineteen forms and ten renderers `LIBRARY_v3.md` calls for
+all exist, and every one of the sixty-one seeded week 1–3 prompts says and prints what §2
+says it does. What remains is the library the draw engine was measured against — 106 new
+prompts — split into six slices, none of them larger than L. Also outstanding are due-outs
+D-10 and D-14, neither of them code, and D-15, which is the whole of slice 22.
 
 | # | Slice | Status | Band | Depends on | Design sections |
 |---|---|---|---|---|---|
@@ -27,7 +27,7 @@ is the whole of slice 22.
 | 12 | [Forms: boxes, venn, chart, map](12-forms-boxes-venn-chart-map.md) | built | L | 11 | §16, §13 |
 | 13 | [Forms: pair, flow, grid, clocks](13-forms-pair-flow-grid-clocks.md) | built | L | 12 | §16, §13 |
 | 14 | [Forms: fields and the box knobs](14-forms-fields-and-the-box-knobs.md) | built | L | 13 | §16, §13 |
-| 15 | [Forms: figures, recipe, text sweep](15-forms-figures-recipe-and-the-text-sweep.md) | not started | L | 14 | §16, §13 |
+| 15 | [Forms: figures, recipe, text sweep](15-forms-figures-recipe-and-the-text-sweep.md) | built | L | 14 | §16, §13 |
 | 16 | [Prompts: deep time to government](16-prompts-deep-time-to-government.md) | not started | L | 15 | §13 |
 | 17 | [Prompts: money, land, weather](17-prompts-money-land-weather.md) | not started | M | 16 | §13 |
 | 18 | [Prompts: people and daily life](18-prompts-people-and-daily-life.md) | not started | L | 17 | §13 |
@@ -123,8 +123,14 @@ corrected nineteen more** — `oldest-thing-here`, `first-people`, `what-they-gr
 `weather-that-hits`, `animal-in-trouble`, `sabbath-keepers-there`, `holiday-they-mark`,
 `sound-of-the-country`, `national-symbol`, `ancient-site`, `wild-animal`,
 `wild-place-protected`, `place-of-worship`, `house-they-live-in`, `what-they-wear`,
-`law-you-notice`, `who-can-vote`, `girls-and-women`, `the-sport-they-love` — so
-twenty-one of the sixty-one still need work, in slice 15.
+`law-you-notice`, `who-can-vote`, `girls-and-women`, `the-sport-they-love`. **Slice 15
+corrected the last twenty-one** — the seven rebound (`how-many-people`,
+`size-next-to-yours`, `getting-around`, `what-people-believe`, `feast-they-keep`,
+`tonights-dinner`, `cook-it`), the twelve rewritten with no rebind (`anthem-listen`,
+`before-history`, `currency-animal`, `kid-life`, `kingdom-over-this-place`, `landforms`,
+`language-hello`, `life-outdoors`, `story-they-tell`, `war-that-changed`, `who-is-famous`,
+`who-ruled-before`), and the two spec-only fixes (`flag-draw`, `landmark-to-see`) — so
+every one of the sixty-one now says and prints what §2 says it does.
 
 **A rebind and a rewrite are one edit.** A form carries a slot for every thing its prompt
 asks for and asks for every slot it carries (§1), so the new wording is *why* the new form
@@ -153,7 +159,13 @@ print on the form they were written for — 52 prompts are drawable now. **Slice
 built too**: `fields` renders, `box` gains BELOW and `split` gains SHARED, four layout
 rows carry them, `box-caption` is gone, and the nineteen prompts that move off `lines-4`,
 `box-beside` and `box-caption` print on the form they were written for — 52 prompts are
-still drawable, since this slice corrects rows rather than adding them.
+still drawable, since this slice corrects rows rather than adding them. **Slice 15 is
+built too, and it is the last of the four**: `figures` is rewritten into `figure-anchor`,
+`recipe` renders `recipe-card`, `timeline` gains UNIT and ENDS, `storyboard` gains CAPTION
+(Q-18), `compare` and the old three-box `figures` form are gone, and the last
+twenty-one seeded prompts print on the form they were written for — 52 prompts are still
+drawable, and every one of the sixty-one seeded week 1–3 prompts now says and prints what
+§2 says it does.
 
 **Slices 16–20 are the 106 new prompts**, in batches of twelve to twenty-seven. The boundaries
 are `LIBRARY_v3.md` §2's own subject headings — already ordered by subject, already sized
@@ -184,7 +196,7 @@ in 12–21 reports the drawable count it ended at**:
 | 11 | 49 |
 | 12 | 50 |
 | 13 | 52 |
-| 14–15 (14 today) | 52 — the forms slices correct rows rather than adding them |
+| 14–15 | 52 — the forms slices correct rows rather than adding them |
 | 16 | 74 |
 | 17 | 93 |
 | 18 | 114 |
@@ -198,10 +210,11 @@ in 12–21 reports the drawable count it ended at**:
 one thing, or nothing exercises the renderer. The batches that own those three subject
 headings skip those rows.
 
-**Three questions are open and each is asked in the slice whose code depends on it.**
-Whether `storyboard` gains a CAPTION knob and whether *who published this* becomes a
-stretch line: slice 15, the last slice that touches a renderer. Whether `emblems` exists at
-all: slice 16, which is the first slice writing at that end of the tag vocabulary.
+**Three questions were open, one each asked in the slice whose code depended on it.**
+Slice 15, the last slice that touched a renderer, settled two: `storyboard` gains a
+CAPTION knob, and *who published this* stays a footer — no stretch-line mechanism is
+built. One remains, asked in slice 16, the first slice writing at that end of the tag
+vocabulary: whether `emblems` should exist at all.
 `civic-process` was a fourth and slice 11 settled it — the tag stays, the weight goes.
 
 ---
@@ -257,4 +270,4 @@ Every section of `DESIGN.md` and the slice that finishes it.
 | §13 Seed data | 11 — nine focuses and their tags; 12–15 — the seeded sixty-one corrected; 16–20 — the 106 prompts; 21 — the twelve owed |
 | §14 Build order | — (superseded by this index) |
 | §15 Decisions | — (tracked in ../other/OPEN-QUESTIONS.md) |
-| §16 Printed worksheets | 10 — built; 12–15 — the nineteen forms and ten renderers; 20 — the paper numbers |
+| §16 Printed worksheets | 10, 12–15 — built (the nineteen forms and ten renderers); 20 — the paper numbers |

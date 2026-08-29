@@ -351,19 +351,19 @@ FROM (
    'Look at the map and list every country that shares a border with yours, going clockwise from the top. If there are more than eight, list the eight with the longest borders. If it''s an island with no land borders, write down the nearest country across the water instead.',
    1, 'map', 'core', NULL, NULL),
 
-  ('language-hello', 'Say hello and write it',
-   'Find out what language people speak there and how to say "hello." Write it in your workbook twice: once copied the way they spell it, and once the way it sounds out loud.',
+  ('language-hello', 'Say hello and thank you',
+   'Find out what language people speak there and how to say "hello" and "thank you." Write each one twice: once copied the way they spell it, and once the way it sounds out loud.',
    1, 'language', 'core', NULL, NULL),
 
   ('currency-animal', 'What is on their money?',
-   'Find a picture of their money. Which animal, plant or person is on it? Draw it, and write who they are.',
+   'Find a picture of their money. Which animal, plant or person is on it? Draw it, then write who or what it is and why a country would choose to put that on its money.',
    1, 'money', 'wild', NULL, NULL),
 
   ('national-symbol', 'Draw the national symbol',
    'Find the country''s coat of arms, national animal, or national flower. Draw it and write one sentence about why you think it was chosen.',
    1, 'symbols', 'wild', NULL, NULL),
   ('how-many-people', 'How many people live there?',
-   'Find out how many people live in your country. Write the number down, then find a US state with about the same number so you know what it feels like.',
+   'Find out how many people live in your country. Write the number in the box, then find a US state — or a whole country you already know — with about the same number, so the number means something.',
    1, 'people', 'wild', NULL, NULL),
 
   ('time-there-now', 'Find out what time it is there',
@@ -371,11 +371,11 @@ FROM (
    1, 'map', 'wild', NULL, NULL),
 
   ('size-next-to-yours', 'How big is it really?',
-   'Find out how much land the country covers. Then find a state or a country you already know that is about the same size, and write the comparison down.',
+   'Find out how much land the country covers. Write it in the box, then find a state or a country you already know that is about the same size.',
    1, 'map', 'wild', NULL, NULL),
 
   ('anthem-listen', 'Listen to their anthem',
-   'Find their national anthem and listen to the first thirty seconds. Write one word for how it sounds, and one line about what it is asking for.',
+   'Find their national anthem and listen to the first thirty seconds. Write one word for how it sounds, and one line about what it says the country is, or hopes it will be.',
    1, 'symbols', 'wild', NULL, NULL),
 
   ('first-people', 'Find the first known people',
@@ -395,7 +395,7 @@ FROM (
    2, 'government', 'focus', NULL, NULL),
 
   ('landforms', 'Describe the land',
-   'Look at the land: mountains, desert, coastline, or plains. Pick the one word that describes most of it and draw a small sketch.',
+   'Look at the land: mountains, desert, coastline, plains. Draw the whole country big enough to fill the page, then label six things on it — the highest part, the driest part, where the water is, where nobody lives, where most people do live, and the edge you would notice first if you arrived.',
    2, 'land', 'focus', NULL, NULL),
 
   ('weather-there-now', 'Check the weather there today',
@@ -431,10 +431,10 @@ FROM (
    2, 'history', 'focus', NULL, NULL),
 
   ('before-history', 'Find something from before writing',
-   'Find one fossil, cave painting, or prehistoric find from this country. Draw it and write how long ago it was made.',
+   'Find one fossil, cave painting or prehistoric find from this country that is still in the place it was found. Draw it, then write how long ago it got there and how anyone knows that.',
    2, 'prehistory', 'focus', NULL, NULL),
   ('who-ruled-before', 'Find out who ruled before',
-   'Find out who was in charge of this land five hundred years ago — a king, an empire, a set of villages that ran themselves. Write two sentences about them.',
+   'Start in 1500 and work forward to now. Mark up to five times this land changed hands — a king, an empire, a set of villages that ran themselves, a country that took over. Write who was in charge at each mark.',
    2, 'history', 'focus', NULL, NULL),
 
   ('independence-day', 'Find the day they became a country',
@@ -442,7 +442,7 @@ FROM (
    2, 'history', 'focus', NULL, NULL),
 
   ('war-that-changed', 'Find a fight that changed things',
-   'Find one war or uprising that changed this country. Write down who was fighting, and one thing that was different afterwards.',
+   'Find one war or uprising that changed this country. Mark three moments on the line — when it started, the moment it turned, and when it ended — and write what happened at each one.',
    2, 'history', 'focus', NULL, NULL),
 
   ('who-can-vote', 'Find out who gets a say',
@@ -450,7 +450,7 @@ FROM (
    2, 'government', 'focus', NULL, NULL),
 
   ('kingdom-over-this-place', 'What the Kingdom fixes here',
-   'Find one thing this country is struggling with right now: war, hunger, drought, a ruler nobody chose. Read Micah 4:1-4, then write two lines about what will be different here when the Kingdom comes.',
+   'Find one thing this country is struggling with right now: war, hunger, drought, a ruler nobody chose. Read Micah 4:1-4. Then write five or six lines: what the struggle actually looks like for a family living in it, which verse speaks to it most directly, and what will be different in this place when the Kingdom comes.',
    2, 'government', 'focus', NULL, NULL),
 
   ('river-that-matters', 'Follow their biggest river',
@@ -490,19 +490,19 @@ FROM (
    2, 'people', 'focus', NULL, NULL),
 
   ('kid-life', 'A day in their life',
-   'Find out what a school day looks like for a kid your age in this country. Write three ways it is different from your day.',
+   'Walk through an ordinary day for a kid your age there, from waking up to going to bed. Mark five moments on the line and write what is happening at each one.',
    3, 'people', 'focus', NULL, NULL),
 
   ('life-outdoors', 'Find what they do outside',
-   'Find out what people there do outdoors: hiking, fishing, herding, surfing, skiing. Pick one, write where in the country people do it, and why the land there suits it.',
+   'Find out what people there do outdoors: hiking, fishing, herding, surfing, skiing. Pick one and draw somebody doing it, then write where in the country people do it and why the land there suits it.',
    3, 'people', 'focus', NULL, NULL),
 
   ('what-people-believe', 'Find the main religion',
-   'Find out what religion or religions most people practice there. Find one holiday or celebration that goes with it and write what happens.',
+   'Find three faiths people keep in this country — or, if there is really only one, the one they keep and two they used to. For each, write when it first arrived there and name one day it keeps.',
    3, 'culture', 'focus', NULL, NULL),
 
   ('tonights-dinner', 'Plan tonight''s dinner there',
-   'Find a dish people eat there for dinner. Write down what''s in it and draw your plate the way it would look.',
+   'Find a dish people eat there on an ordinary weeknight, not a feast day. Draw the plate the way it would come to the table, write what''s on it, and write the one thing you would have to go looking for to make it at your house.',
    3, 'food', 'focus', NULL, NULL),
 
   ('animals-on-the-menu', 'Find the animals they eat',
@@ -510,11 +510,11 @@ FROM (
    3, 'food', 'focus', NULL, NULL),
 
   ('story-they-tell', 'Find a story they tell',
-   'Find a folk tale, legend, or myth from this country. Write one line about who is in it, and draw the part you would most want to see.',
+   'Find a folk tale, legend, or myth from this country. Tell the whole thing in six pictures, start to finish. If a panel needs a word to make sense, write it inside the panel.',
    3, 'culture', 'focus', NULL, NULL),
 
   ('who-is-famous', 'Find someone everyone knows',
-   'Find one person from this country that almost everyone there would recognize. Write down who they are and what they did to become known.',
+   'Find one person from this country that almost everyone there would recognize. Draw the thing they are known for — the ball, the instrument, the book, the medal — then write who they are and what they did.',
    3, 'people', 'focus', NULL, NULL),
 
   ('holiday-they-mark', 'Find their biggest holiday',
@@ -549,7 +549,7 @@ FROM (
    3, 'people', 'focus', NULL, NULL),
 
   ('getting-around', 'Find out how they get around',
-   'Find out how people there get to school and to work: bus, train, boat, motorbike, walking. Draw the one you would take and write how long it would take you.',
+   'Find out how people there travel to work, to market and to school. Find out how long an ordinary kid''s trip takes and write it in the box, then write the longest trip anyone in our house makes in a week.',
    3, 'people', 'focus', NULL, NULL),
 
   ('house-they-live-in', 'Draw an ordinary house',
@@ -569,7 +569,7 @@ FROM (
    3, 'culture', 'focus', NULL, NULL),
 
   ('feast-they-keep', 'Find their harvest feast',
-   'Find the biggest harvest or thanksgiving festival in this country and what happens at it. Read Zechariah 14:16, then write one line about the part of it that could still be kept when all nations come up to keep the Feast.',
+   'Find the biggest harvest or thanksgiving festival in this country and what happens at it — what is cooked, what is carried, who comes. Read Zechariah 14:16. Then write five or six lines: what the feast is for now, which parts of it are about the harvest and which are about something else, and the part of it that could still be kept when all nations come up to keep the Feast.',
    3, 'culture', 'focus', NULL, NULL),
 
   ('place-of-worship', 'Draw where they worship',

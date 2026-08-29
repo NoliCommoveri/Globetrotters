@@ -189,8 +189,11 @@ body {
 .split-shared-label { font-size: .72rem; font-weight: 700; color: #222; margin-right: .12in; white-space: nowrap; }
 .split-shared-line { display: inline-block; width: calc(100% - 1.3in); border-bottom: 1px solid var(--rule); height: .2in; vertical-align: bottom; }
 
-.timeline { flex: 1 1 auto; display: flex; align-items: center; }
-.timeline ol {
+/* ENDS flanks the ticks with the two endpoint labels; UNIT prints under the
+ * line, naming what it measures. Both skipped when blank. */
+.timeline { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center; min-height: 0; }
+.timeline-strip { flex: 0 0 auto; display: flex; align-items: center; gap: .12in; }
+.timeline-strip ol {
   flex: 1 1 auto;
   margin: 0;
   padding: 0;
@@ -203,11 +206,20 @@ body {
 .timeline li { flex: 1 1 0; display: flex; flex-direction: column; align-items: center; }
 .timeline .tick { width: 1px; height: .16in; background: var(--rule); }
 .timeline .slot { margin-top: .04in; width: 84%; height: .5in; border: 1px solid var(--faint); }
+.timeline-end { flex: 0 0 auto; font-size: .68rem; color: #444; white-space: nowrap; }
+.timeline-unit { flex: 0 0 auto; margin: .05in 0 0; font-size: .68rem; color: #444; text-align: center; }
 
-.figures { flex: 1 1 auto; margin: 0; padding: 0; list-style: none; display: flex; gap: .18in; }
-.figures li { flex: 1 1 0; display: flex; flex-direction: column; min-width: 0; }
-.figures .ink { flex: 1 1 auto; border: 1.5px solid var(--rule); border-radius: .06in; }
-.figures span { font-size: .72rem; color: #444; padding-top: .04in; }
+/* One large boxed number with its unit and a ruled anchor line beneath —
+ * never a second unrelated fact, always something the kid already knows
+ * that is about the same size (kind `figures`, form `figure-anchor`). */
+.figure-anchor { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; }
+.figure-caption { margin: 0 0 .05in; font-size: .78rem; color: #222; }
+.figure-box { flex: 1 1 auto; min-height: 0; position: relative; display: flex; align-items: flex-end; justify-content: center; }
+.figure-box .ink { position: absolute; inset: 0; border: 1.5px solid var(--rule); border-radius: .06in; }
+.figure-unit { position: relative; margin-bottom: .08in; font-size: .74rem; color: #444; background: #fff; padding: 0 .08in; }
+.figure-anchor-line { flex: 0 0 auto; display: flex; align-items: baseline; gap: .1in; margin-top: .08in; }
+.figure-anchor-prompt { font-size: .72rem; color: #444; white-space: nowrap; }
+.figure-anchor-rule { flex: 1 1 auto; border-bottom: 1px solid var(--rule); height: .22in; }
 
 .checklist { flex: 1 1 auto; margin: 0; padding: 0; list-style: none;
              display: flex; flex-direction: column; }
@@ -235,7 +247,11 @@ body {
 .checklist-across .checklist li:last-child { border-right: 0; }
 .checklist-across .label { font-size: .72rem; text-align: center; }
 
-.storyboard { flex: 1 1 auto; margin: 0; padding: 0; list-style: none;
+/* CAPTION names what the six panels are of — a legend, a Bible account, a
+ * process — printed above them and skipped when empty. */
+.storyboard-form { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; }
+.storyboard-caption { margin: 0 0 .06in; font-size: .78rem; color: #222; }
+.storyboard { flex: 1 1 auto; min-height: 0; margin: 0; padding: 0; list-style: none;
               display: grid; grid-template-columns: repeat(3, 1fr);
               grid-auto-rows: 1fr; gap: .12in; }
 .storyboard li { border: 1.5px solid var(--rule); border-radius: .06in; position: relative; }
@@ -397,6 +413,31 @@ body {
 .clock-caption { margin-top: .05in; font-size: .72rem; color: #444; }
 .clock-digital { display: block; width: 1in; margin-top: .04in; border-bottom: 1px solid var(--rule); height: .2in; }
 .clock-foot { margin-top: .08in; }
+
+/* The recipe page: a dish name and a Serves line, a narrow amount column
+ * beside the ingredient lines, numbered steps, and a sketch box captioned
+ * "How it actually turned out." Three thirds, so it always lands on a clean
+ * sheet that can come out of the binder and go on the counter. */
+.recipe { flex: 1 1 auto; display: flex; flex-direction: column; gap: .14in; min-height: 0; }
+.recipe-head { flex: 0 0 auto; display: flex; gap: .3in; }
+.recipe-field { display: flex; align-items: baseline; gap: .08in; font-size: .84rem; font-weight: 700; }
+.recipe-write { flex: 1 1 auto; min-width: 1.6in; border-bottom: 1px solid var(--rule); height: .24in; }
+.recipe-write.short { flex: 0 0 auto; min-width: .9in; }
+.recipe-body { flex: 1 1 auto; display: flex; gap: .26in; min-height: 0; }
+.recipe-ingredients { flex: 0 0 34%; margin: 0; padding: 0; list-style: none;
+                       display: flex; flex-direction: column; min-height: 0; }
+.recipe-ingredients li { flex: 1 1 0; display: flex; align-items: flex-end; gap: .08in;
+                          border-bottom: 1px solid var(--rule); min-height: .24in; }
+.recipe-amount { flex: 0 0 .7in; align-self: stretch; border-right: 1px solid var(--faint); }
+.recipe-ingredient { flex: 1 1 auto; }
+.recipe-steps { flex: 1 1 auto; margin: 0; padding: 0; list-style: none;
+                display: flex; flex-direction: column; min-height: 0; }
+.recipe-steps li { flex: 1 1 0; display: flex; align-items: flex-end; gap: .1in;
+                    border-bottom: 1px solid var(--rule); min-height: .28in; }
+.recipe-step-no { flex: 0 0 auto; font-size: .82rem; font-weight: 700; }
+.recipe-step-line { flex: 1 1 auto; }
+.recipe-sketch { flex: 0 0 1.7in; }
+.recipe-sketch figcaption { text-align: center; }
 
 /* Week 4's one sheet is composed, not packed: the materials and the five steps
  * take the height they need and the storyboard absorbs the rest, so the sheet
