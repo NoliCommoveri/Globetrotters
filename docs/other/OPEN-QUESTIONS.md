@@ -10,7 +10,7 @@ moved to the answered list at the bottom of this file.
 
 ## Open
 
-Nothing blocking slice 13. Every question raised against a slice has been answered
+Nothing blocking slice 14. Every question raised against a slice has been answered
 and written into `../design/DESIGN.md`.
 
 Three are raised against `../design/LIBRARY_v3.md` §7 and are listed there and in the slice

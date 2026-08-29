@@ -67,7 +67,7 @@ test('an out-of-range or unparseable value falls back to the kind default', () =
 
 test('a template spec overrides the layout key by key, and only those keys', () => {
   const merged = readSpec('box', '{"caption":"Draw it here","lines":4}', { caption: 'The flag' });
-  assert.deepEqual(merged, { caption: 'The flag', lines: 4, callouts: 0 });
+  assert.deepEqual(merged, { caption: 'The flag', lines: 4, callouts: 0, below: false });
 });
 
 // ---------------------------------------------------------- the four new kinds --
@@ -183,6 +183,53 @@ test('clocks draws twelve ticks a face and a digital line only when asked', () =
   assert.ok(!off.includes('clock-digital'));
 });
 
+// ------------------------------------------------------ the slice 14 kinds --
+
+test('fields keeps its own keys and drops one belonging to another kind', () => {
+  const spec = readSpec('fields', {
+    captions: ['What it is', 'How old it is', 'Where it was dug up'], lines_each: 1, boxes: 4,
+  });
+  assert.deepEqual(spec, {
+    captions: ['What it is', 'How old it is', 'Where it was dug up'], lines_each: 1,
+  });
+});
+
+test('fields falls back to three blank captions when fewer than two are given', () => {
+  assert.deepEqual(readSpec('fields', { captions: ['Only one'] }).captions, ['', '', '']);
+  assert.deepEqual(readSpec('fields', {}).captions, ['', '', '']);
+});
+
+test('fields draws one slot per caption, however many there are', () => {
+  const html = renderForm('fields', readSpec('fields', { captions: ['A', 'B', 'C', 'D'] }));
+  assert.equal((html.match(/<li>/g) || []).length, 4);
+  assert.equal((html.match(/field-caption/g) || []).length, 4);
+});
+
+test('box below stacks the notes under the box instead of beside it', () => {
+  const beside = renderForm('box', readSpec('box', { lines: 2 }));
+  assert.match(beside, /class="beside"/);
+  assert.ok(!beside.includes('class="stacked"'));
+
+  const below = renderForm('box', readSpec('box', { lines: 2, below: true }));
+  assert.match(below, /class="stacked"/);
+  assert.ok(!below.includes('class="beside"'));
+});
+
+test('split shared prints a row spanning every column only when asked', () => {
+  const bare = renderForm('split', readSpec('split', { columns: ['There', 'Here'], rows: 3 }));
+  assert.ok(!bare.includes('split-shared'));
+
+  const shared = renderForm('split', readSpec('split', { columns: ['There', 'Here'], rows: 3, shared: 1 }));
+  assert.match(shared, /split-shared/);
+  assert.match(shared, /But the same:/);
+  assert.match(shared, /colspan="2"/);
+});
+
+test('table never gains the shared row split has, even asked for one', () => {
+  const html = renderForm('table', readSpec('table', { shared: 1 }));
+  assert.ok(!html.includes('split-shared'));
+});
+
 test('checklist gains a marker, an orient and a caption', () => {
   const spec = readSpec('checklist', {
     items: 5, marker: 'bullet', circle_one: true, orient: 'across', caption: 'Five things',
@@ -279,6 +326,51 @@ test('who-lives-there and how-they-learn are seeded on the two forms with no pri
   assert.equal(bullets.kind, 'checklist');
   assert.equal(bullets.spec.marker, 'bullet');
   assert.equal(bullets.spec.caption, 'Five things about how kids there learn');
+});
+
+test('oldest-thing-here prints three fields slots matching its three findings', () => {
+  const segment = segmentFor(seededRow(seededDb(), 'oldest-thing-here'));
+  assert.equal(segment.kind, 'fields');
+  assert.deepEqual(segment.spec.captions, ['What it is', 'How old it is', 'Where it was dug up']);
+  assert.equal((renderForm(segment.kind, segment.spec).match(/<li>/g) || []).length, 3);
+});
+
+test('wild-animal prints a box with its notes below, not beside', () => {
+  const segment = segmentFor(seededRow(seededDb(), 'wild-animal'));
+  assert.equal(segment.kind, 'box');
+  assert.equal(segment.spec.below, true);
+  assert.match(renderForm(segment.kind, segment.spec), /class="stacked"/);
+});
+
+test('house-they-live-in prints a box with three callout labels and no beside notes', () => {
+  const segment = segmentFor(seededRow(seededDb(), 'house-they-live-in'));
+  assert.equal(segment.kind, 'box');
+  assert.equal(segment.spec.callouts, 3);
+  assert.equal(segment.spec.lines, 0);
+  assert.match(renderForm(segment.kind, segment.spec), /class="callouts"/);
+});
+
+test('law-you-notice prints the shared row its closing sentence asks for', () => {
+  const segment = segmentFor(seededRow(seededDb(), 'law-you-notice'));
+  assert.equal(segment.kind, 'split');
+  assert.equal(segment.spec.shared, 1);
+  assert.match(renderForm(segment.kind, segment.spec), /But the same:/);
+});
+
+test('no two differences bindings share a closing sentence', () => {
+  const db = seededDb();
+  const closers = ['law-you-notice', 'who-can-vote', 'girls-and-women', 'the-sport-they-love']
+    .map((slug) => db.prepare('SELECT prompt FROM task_templates WHERE slug = ?').get(slug).prompt
+      .split(/(?<=[.!?])\s+/).pop());
+  assert.equal(new Set(closers).size, closers.length, closers.join(' | '));
+});
+
+test('box-caption is gone and nothing is bound to it', () => {
+  const db = seededDb();
+  assert.equal(
+    db.prepare("SELECT COUNT(*) AS n FROM worksheet_layouts WHERE slug = 'box-caption'").get().n,
+    0,
+  );
 });
 
 test('every kind reads at least one knob and renders without one', () => {

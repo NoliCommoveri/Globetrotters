@@ -137,6 +137,15 @@ body {
 .rules { flex: 1 1 auto; display: flex; flex-direction: column; }
 .rules i { flex: 1 1 0; border-bottom: 1px solid var(--rule); min-height: .22in; }
 
+/* Stacked caption-and-lines slots (kind `fields`). Each slot divides the
+ * segment evenly; CAPTIONS decides how many there are. */
+.fields { flex: 1 1 auto; margin: 0; padding: 0; list-style: none;
+          display: flex; flex-direction: column; min-height: 0; }
+.fields li { flex: 1 1 0; display: flex; flex-direction: column; min-height: 0;
+             padding-bottom: .05in; }
+.field-caption { flex: 0 0 auto; font-size: .72rem; color: #444; margin-bottom: .02in; }
+.fields .rules { flex: 1 1 auto; }
+
 .box { flex: 1 1 auto; margin: 0; display: flex; flex-direction: column; min-height: 0; }
 .box .ink { flex: 1 1 auto; border: 1.5px solid var(--rule); border-radius: .06in; }
 .box figcaption { font-size: .72rem; color: #444; padding-top: .04in; }
@@ -147,6 +156,16 @@ body {
  * under the box and the rules would otherwise run a line past it. */
 .beside-notes { flex: 1 1 55%; display: flex; padding-bottom: 1.03em; }
 .beside-notes .rules { flex: 1 1 auto; }
+
+/* BELOW on `box`: the notes stack under the box instead of sitting beside
+ * it, for a box too tall to share a row with its writing room. The box takes
+ * whatever height is left after a fixed few ruled lines, rather than an even
+ * split — a box `below` is still the point of the form. */
+.stacked { flex: 1 1 auto; display: flex; flex-direction: column; gap: .08in; min-height: 0; }
+.stacked .box { flex: 1 1 auto; min-height: 0; }
+.stacked-notes { flex: 0 0 auto; }
+.stacked-notes .rules { flex: 0 0 auto; }
+.stacked-notes .rules i { flex: 0 0 auto; min-height: .22in; }
 
 .callouts { flex: 1 1 55%; margin: 0; padding: 0 0 0 1.1em; display: flex;
             flex-direction: column; }
@@ -162,6 +181,13 @@ body {
   background: #f2f2f2;
 }
 .grid td { border: 1px solid var(--rule); }
+
+/* SHARED on `split`/`differences`: a row spanning every column for the one
+ * rule that holds in both places, set off with a heavier top rule so it
+ * reads as outside the compare rather than a fourth row of it. */
+.split-shared td { border-top: 2px solid var(--rule); padding: .05in .08in; }
+.split-shared-label { font-size: .72rem; font-weight: 700; color: #222; margin-right: .12in; white-space: nowrap; }
+.split-shared-line { display: inline-block; width: calc(100% - 1.3in); border-bottom: 1px solid var(--rule); height: .2in; vertical-align: bottom; }
 
 .timeline { flex: 1 1 auto; display: flex; align-items: center; }
 .timeline ol {

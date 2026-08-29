@@ -4,9 +4,9 @@ Twenty-three slices against `../design/DESIGN.md`. Each ends at a state you can 
 browser and judge.
 
 A build session takes the first slice not marked `built` and reads its file.
-**Slices 00–13 are built.** What remains is the library the draw engine was measured
-against — 106 new prompts, 6 forms, 2 renderers, and the forty of the sixty-one seeded
-prompts that `LIBRARY_v3.md` still rewrites — split into eight slices, none of them larger
+**Slices 00–14 are built.** What remains is the library the draw engine was measured
+against — 106 new prompts, 2 forms, 1 renderer, and the twenty-one of the sixty-one seeded
+prompts that `LIBRARY_v3.md` still rewrites — split into seven slices, none of them larger
 than L. Also outstanding are due-outs D-10 and D-14, neither of them code, and D-15, which
 is the whole of slice 22.
 
@@ -26,7 +26,7 @@ is the whole of slice 22.
 | 11 | [The merged draw](11-merged-draw.md) | built | L | 04, 09 | §4, §5, §13 |
 | 12 | [Forms: boxes, venn, chart, map](12-forms-boxes-venn-chart-map.md) | built | L | 11 | §16, §13 |
 | 13 | [Forms: pair, flow, grid, clocks](13-forms-pair-flow-grid-clocks.md) | built | L | 12 | §16, §13 |
-| 14 | [Forms: fields and the box knobs](14-forms-fields-and-the-box-knobs.md) | not started | L | 13 | §16, §13 |
+| 14 | [Forms: fields and the box knobs](14-forms-fields-and-the-box-knobs.md) | built | L | 13 | §16, §13 |
 | 15 | [Forms: figures, recipe, text sweep](15-forms-figures-recipe-and-the-text-sweep.md) | not started | L | 14 | §16, §13 |
 | 16 | [Prompts: deep time to government](16-prompts-deep-time-to-government.md) | not started | L | 15 | §13 |
 | 17 | [Prompts: money, land, weather](17-prompts-money-land-weather.md) | not started | M | 16 | §13 |
@@ -118,8 +118,13 @@ against the document rather than on the markers. **Slice 12 corrected the first 
 `animals-on-the-menu`, `highest-point`, `weather-there-now`, `map-outline`,
 `river-that-matters`. **Slice 13 corrected ten more** — `border-that-moved`,
 `independence-day`, `desert-shall-blossom`, `who-leads`, `made-here`, `city-and-country`,
-`time-there-now`, `neighbors-list`, `their-rest-day`, `game-kids-play` — so forty of the
-sixty-one still need work, in slices 14–15.
+`time-there-now`, `neighbors-list`, `their-rest-day`, `game-kids-play`. **Slice 14
+corrected nineteen more** — `oldest-thing-here`, `first-people`, `what-they-grow`,
+`weather-that-hits`, `animal-in-trouble`, `sabbath-keepers-there`, `holiday-they-mark`,
+`sound-of-the-country`, `national-symbol`, `ancient-site`, `wild-animal`,
+`wild-place-protected`, `place-of-worship`, `house-they-live-in`, `what-they-wear`,
+`law-you-notice`, `who-can-vote`, `girls-and-women`, `the-sport-they-love` — so
+twenty-one of the sixty-one still need work, in slice 15.
 
 **A rebind and a rewrite are one edit.** A form carries a slot for every thing its prompt
 asks for and asks for every slot it carries (§1), so the new wording is *why* the new form
@@ -144,7 +149,11 @@ move off `table-3`, `box-beside` and `figures` print on the form they were writt
 **Slice 13 is built too**: `pair`, `flow`, `grid` and `clocks` render, eight layout rows
 carry them, `who-lives-there` and `how-they-learn` seed the two forms with no prompt to
 bind, and the ten prompts that move off `lines-4`, `box-beside`, `compare` and `timeline`
-print on the form they were written for — 52 prompts are drawable now.
+print on the form they were written for — 52 prompts are drawable now. **Slice 14 is
+built too**: `fields` renders, `box` gains BELOW and `split` gains SHARED, four layout
+rows carry them, `box-caption` is gone, and the nineteen prompts that move off `lines-4`,
+`box-beside` and `box-caption` print on the form they were written for — 52 prompts are
+still drawable, since this slice corrects rows rather than adding them.
 
 **Slices 16–20 are the 106 new prompts**, in batches of twelve to twenty-seven. The boundaries
 are `LIBRARY_v3.md` §2's own subject headings — already ordered by subject, already sized
@@ -174,8 +183,8 @@ in 12–21 reports the drawable count it ended at**:
 |---|---|
 | 11 | 49 |
 | 12 | 50 |
-| 13 (today) | 52 |
-| 14–15 | 52 — the forms slices correct rows rather than adding them |
+| 13 | 52 |
+| 14–15 (14 today) | 52 — the forms slices correct rows rather than adding them |
 | 16 | 74 |
 | 17 | 93 |
 | 18 | 114 |

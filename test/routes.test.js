@@ -301,7 +301,7 @@ test('the library editor answers on every one of its routes', async () => {
   const data = await library.json();
   assert.equal(data.tasks.length, 94);
   assert.equal(data.focuses.length, 9);
-  assert.equal(data.layouts.length, 25);
+  assert.equal(data.layouts.length, 28);
   // Every layout's form is drawn from the knobs the server sends, so the two
   // cannot drift into a field the renderer would drop.
   assert.ok(Object.keys(data.kind_knobs).length >= 12);

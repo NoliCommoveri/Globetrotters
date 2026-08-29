@@ -232,7 +232,7 @@ test('binding a layout to one template changes that segment and nothing else', a
   const before = (await printed(e, `/print/${id}?week=1`, cookie)).html;
 
   const flag = e.DB.prepare("SELECT id FROM task_templates WHERE slug = 'flag-draw'").bind().first();
-  const box = layoutId(e, 'box-caption');
+  const box = layoutId(e, 'box-note');
   const patched = await asAdmin(e, `/admin/api/tasks/${flag.id}`, {
     method: 'PATCH',
     body: JSON.stringify({ worksheet_layout_id: box.id }),
@@ -278,7 +278,7 @@ test('editing a layout changes every task bound to it', async () => {
 test('a spec typed into the editor containing a tag prints as visible text', async () => {
   const e = await env();
   const { cookie, id } = await plan(e);
-  const box = layoutId(e, 'box-caption');
+  const box = layoutId(e, 'box-note');
   const flag = e.DB.prepare("SELECT id FROM task_templates WHERE slug = 'flag-draw'")
     .bind().first();
   // The seed gives this template its own caption, and a template override beats
