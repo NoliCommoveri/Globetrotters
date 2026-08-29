@@ -237,7 +237,8 @@ dashboard, because a secret value must not be committed to git.
 
 ## 4. The task model
 
-**Status:** built · slice 04
+**Status:** partial · slice 04 built the two-pool draw; the merged pool, the deal and the
+tag weighting are slice 11
 
 This is the core idea. Three layers:
 
@@ -258,9 +259,17 @@ task from the same week and focus.
 | Week | Theme | Tasks | Character |
 |---|---|---|---|
 | 1 | Foundations | 5 | 4 fixed `core` + 1 drawn. Flag, map, location, language. These anchor the workbook pages and are meant to repeat. |
-| 2 | Deep Dive | 5 | Focus-weighted draw. History, government, land, ecology, prehistory. |
-| 3 | Deep Dive | 5 | Focus-weighted draw. People, culture, food, daily life, wow facts. |
+| 2 | Deep Dive | 5 | Pinned `wow-fact` + 4 dealt from the weeks 2–3 draw. |
+| 3 | Deep Dive | 5 | Pinned `cook-it` + 4 dealt from the same draw. |
 | 4 | Make & Present | 5 | The chosen project type's fixed sequence. No new research. |
+
+**Weeks 2 and 3 are one pool and one draw.** Eight are drawn from every weeks 2–3
+template at once and then dealt four and four into the two weeks, each week joined by its
+pinned task. Two separate per-week draws made a focus's opinion about one week decide
+nothing about the other: five of nine focuses had three or fewer genuinely on-theme
+prompts on one side of the line, which put a whole week of five sheets that ignored the
+chosen focus at 20–90% of months. One pool and a deal takes that to 1–20% for seven of
+the nine. `../design/LIBRARY_v3.md` §3 and `../other/FOCUS-AUDIT.md` carry the measurement.
 
 **Twenty tasks, twenty weekdays, one a day.** The rhythm is 10 minutes a day, five
 days a week — so five tasks a week means the day-to-task mapping is 1:1 and never
@@ -274,7 +283,16 @@ artifact, gather materials, two build sessions, rehearse, present.
 ### Focuses (seed these)
 
 `ancient-world`, `wild-places`, `people-and-power`, `food-and-craft`,
-`conflict-and-change`, `land-and-sky`
+`conflict-and-change`, `land-and-sky`, `who-lives-here`, `who-gets-what`,
+`stories-and-spirits`
+
+A focus is a set of weighted **tags**, not a list of templates (`focus_tags`), so a new
+prompt self-onboards: tag it once at authoring time and every focus with a matching
+affinity draws it correctly. The nine tag sets are in `../design/LIBRARY_v3.md` §3.
+
+`who-gets-what` and `stories-and-spirits` are new and neither can ship without
+`country_focus_affinity` rows — a focus with none is never recommended for any country on
+any country card, forever (D-15).
 
 ### Project types (seed these)
 
@@ -288,43 +306,62 @@ week 1:
   always include the 4 tier='core' week-1 templates
   draw 1 more from the remaining week-1 pool by the rule below
 
-weeks 2 and 3:
-  pool = task_templates where week_theme = week and archived = 0
+weeks 2 and 3 — one draw, then a deal:
+  pool = task_templates where week_theme in (2,3) and tier <> 'fixed'
+                          and archived = 0                      // 153
   for each template t:
-    fw = COALESCE(task_focus_weights.weight, 1)   // sparse table; missing = 1
-    if fw = 0: exclude
-    m  = months since THIS PERSON last drew t     // null if never drawn
-    recency = (m is null) ? 1.0 : m / (m + 1)
+    fw      = 1 + 2 * SUM(focus_tags.weight) over t's shared topic tags
+    m       = months since THIS PERSON last drew t   // null if never drawn
+    recency = (m is null or m > 5) ? 1 : 0
     weight  = fw * recency
-  draw 5 by weighted random selection without replacement
+  draw 6 by weighted random selection without replacement, skipping any
+    template whose worksheet form already holds 2 of the ten seats
+    (the 2 pinned tasks count) or whose mode tag is already taken this month
+  draw 2 wildcards: uniformly from the bottom quarter of the remaining
+    eligible pool by fw, same form cap
+  deal the 8 into two lists of 4, choosing among the 70 splits by, in order:
+    1. no worksheet form appears twice inside one week
+    2. the two weeks hold as near the same SUM of fw  -- not a count of them
+    3. natural week_theme 2 leans to week 2, 3 to week 3
+    4. the two weeks hold as near the same number of thirds
+  week 2 = wow-fact + its four; week 3 = cook-it + its four
+  nations-before-the-throne and hear-from-a-kid may not land in week 2
 
 week 4:
   task_templates where project_type_id = chosen type, ordered by position
   — a sequence, not a draw
 ```
 
-**Why recency and not exclusion.** A hard "never repeat what this person has drawn"
-rule sounds like it produces variance, but the arithmetic doesn't work: 5 draws ×
-9 months = 45 selections against a pool of 25 per week theme. It exhausts in month
-five and every draw after that falls through to an unordered fallback, which
-clusters repeats badly.
+**Twenty tasks again.** Five, five, five, five. `cook-it` appended on top of a full week
+made twenty-one, which is the one number this section says a kid cannot hold.
 
-Recency weighting degrades gracefully instead. Never-drawn scores 1.0, drawn last
-month scores 0.5, three months ago 0.75 — so fresh tasks are strongly favored and
-old ones rehabilitate over time, with no cliff and no fallback branch.
+**Why a five-month cooldown and not a decay.** A decay was right against a 25-template
+week, where a hard exclusion exhausted the pool by month five and fell through to an
+unordered fallback. Against 153 it is not: eight draws × five months blocks forty, leaving
+113 eligible, and the cliff never arrives. The cooldown is scoped per learner, so a prompt
+stays available to a sibling while it rests for one child. If it ever did empty the pool,
+drop the single stalest cooldown prompt back in rather than erroring.
 
-And repetition is genuinely fine here, which the original framing missed: **no task
-is country-specific.** "Find out which animal is on their money and draw it" is a
-completely different task in Peru than in Japan. Week 1 already treats repetition as
-a feature. Weeks 2–3 should treat it as a mild preference, not a prohibition.
+Repetition across *months* is genuinely fine, which the original framing got right:
+**no task is country-specific.** "Find out which animal is on their money and draw it" is
+a completely different task in Peru than in Japan. Week 1 treats that as a feature.
 
-**Swap** redraws a single task from the same week and focus, excluding every
-template already in this plan. `UNIQUE (plan_id, task_template_id)` enforces that
-at the database level.
+**Repetition of *form* inside one week is not fine, and is the one thing the draw
+forbids outright.** Five draws against twenty-seven worksheet forms collide about 40% of
+weeks by arithmetic alone — even a perfectly even library floors at 32.5% — so no library
+rebalancing fixes it. Capping a form at two of the ten and letting the deal separate the
+pair takes it to zero.
+
+**Swap** redraws a single task from the same focus, excluding every template already in
+this plan. `UNIQUE (plan_id, task_template_id)` enforces that at the database level. For
+weeks 2 and 3 the swap pool is the whole merged 153, not the week the task sits in, and
+the replacement respects the same per-form cap against the nine tasks still on the plan.
 
 **Where swap is offered.** Week 1's fifth slot, and weeks 2 and 3. It is disabled
 on the four week-1 `core` tasks, which anchor workbook pages and are meant to
-repeat — swapping one leaves a physical page with nothing feeding it. It is
+repeat — swapping one leaves a physical page with nothing feeding it. It is disabled on
+the two `fixed` tasks, `wow-fact` and `cook-it`, for the same reason: they are pinned
+because a draw is the wrong instrument for them, and a swap is a draw. It is
 disabled on all of week 4, which is an ordered sequence rather than a draw. And it
 is refused on a task already marked `done`.
 
@@ -1241,9 +1278,12 @@ Contents of `002_seed.sql`:
 | Week | Templates | Note |
 |---|---|---|
 | 1 | 10 | 4 `core` — flag, map, location/borders, language & writing system — plus 6 competing for the 5th slot |
-| 2 | 25 | five drawn; the twenty spare are what makes Swap and nine months work |
+| 2 | 25 | one pool with week 3; five drawn per week, the spare is what makes Swap and nine months work |
 | 3 | 25 | same |
 | 4 | 30 | five for each of the six project types, as ordered sequences |
+
+`LIBRARY_v3.md` takes weeks 1–3 to 12 / 86 / 69 and the focuses to nine. Until it lands
+these are the seeded numbers.
 
 All six project types carry a full week-4 sequence, so setup offers all six.
 
@@ -1253,8 +1293,10 @@ focus-weighted pool, weeks 2 and 3. `wild` is eligible but off the main line:
 week 1's fifth-slot candidates.
 
 `task_focus_weights` stores only an opinion: 3 for on-theme, 0 to exclude,
-nothing in between, and no row at all for neutral. Two constraints the draw
-cannot report on its own, so they are asserted in the tests instead: every focus
+nothing in between, and no row at all for neutral. `LIBRARY_v3.md` replaces it with
+`focus_tags` × `prompt_tags`, at which point the per-week assertion below goes away with
+the per-week draw (§4) and is replaced by one on the merged pool: every focus holds at
+least ten prompts the focus audit calls on-theme. Until then: every focus
 holds **six** weight-3 tasks in week 2 **and** six in week 3 — per week, because
 the draw is per week, so a focus with an opinion about only one of them leaves
 the other identical to picking no focus at all; and six rather than three
