@@ -1990,7 +1990,7 @@ it, which is why the focus table below lists seven tags for it and not eight. Th
 tables under *What each focus actually reaches* and *What the shape delivers* were measured
 with it weighted: People and Power's reach is unchanged, since `governance` covers the same
 four prompts, but those four fall from ×13 to ×7 and its measured columns move a little.
-Slice 19 re-measures against the finished library.
+Slice 20 re-measures against the finished library.
 
 **Seven topic tags carry no weight from any focus** — `clothing`, `emblems`,
 `future-plans`, `holiday-calendar` (10 members), `infrastructure` (10), `sabbath`,
@@ -2289,7 +2289,7 @@ just what a page looks like.
 
 1. **`country_focus_affinity` rows for Who Lives Here, Who Gets What and Stories and
    Spirits.** Twenty countries each, one line of reason apiece. Without them the app never
-   recommends any of the three. D-15, and it is the whole of slice 21.
+   recommends any of the three. D-15, and it is the whole of slice 22.
 2. **Sourcing on the six hardest prompts** — `the-group-that-gets-less`, `who-can-read`,
    `what-their-money-goes-to`, `is-the-law-kept`, `can-they-worship-freely`,
    `the-company-that-got-caught`. All have sources with a position. The sourcing footer

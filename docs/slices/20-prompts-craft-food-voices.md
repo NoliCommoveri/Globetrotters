@@ -1,9 +1,9 @@
-# Slice 19 — Prompts: craft, food, voices — and the numbers
+# Slice 20 — Prompts: craft, food, voices — and the numbers
 
 **Status:** not started
 **Band:** L
 **Implements:** §13 (the last 12 of the 106 prompts), §16 (the paper numbers)
-**Depends on:** 18
+**Depends on:** 19
 
 **Goal.** The last twelve prompts, and then the measurement the whole split has been
 building toward. This is the first slice that can run the numbers `LIBRARY_v3.md` §3
@@ -37,7 +37,7 @@ third and last storyboard.
 
 ## Due-outs
 
-None. D-15 is slice 21 and blocks only the last exit criterion below, which is why that
+None. D-15 is slice 22 and blocks only the last exit criterion below, which is why that
 one is stated there rather than here.
 
 ## Open questions
@@ -46,13 +46,13 @@ None.
 
 ## Build
 
-**Part one — the twelve prompts.** As slice 15: row, binding, spec, tags, between the
+**Part one — the twelve prompts.** As slice 16: row, binding, spec, tags, between the
 markers.
 
 **Part two — the measurement.** Everything `LIBRARY_v3.md` §3 claims, run against the real
 seeded library rather than the synthetic pool slice 11 used. `test/draw.test.js` already
 holds the synthetic version of most of these; the work is to point them at the seed and
-delete the comments that say the real run is slice 12's.
+delete the comments that say the real run is slice 20's.
 
 - Nine months back to back for one learner, per focus, 2,500 simulated months.
 - The paper table: thirds per week, sheets per month, the fourth-sheet spill rate.
@@ -84,6 +84,6 @@ The whole of `LIBRARY_v3.md` §3, and this is the slice that owns them.
 
 ## Do not build
 
-The twelve owed to Ancient World and Conflict and Change — slice 20. They are writing, and
+The twelve owed to Ancient World and Conflict and Change — slice 21. They are writing, and
 the numbers above are the measurement of the library as specified, which is the thing to
 have before deciding the twelve are still needed and still the right twelve.

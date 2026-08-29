@@ -5,7 +5,7 @@ and focus tags in `002_seed.sql`, hooks and focus affinities in
 `003_country_data.sql` — and the rules a row has to satisfy. All six are
 seeded: 195 countries, 91 templates, 177 prompt tags, 65 focus tags, and 222 hooks and
 200 affinities across 100 countries. This is the reference for **adding** to them, which
-is what slices 15 to 19 do 106 more times.
+is what slices 16 to 20 do 106 more times.
 
 Each list sits between a `-- BEGIN x` / `-- END x` pair in its file. Rows go
 inside the markers in the form below and nothing else changes. Nothing here
@@ -81,7 +81,7 @@ What runs out is the **cooldown**. A prompt drawn for a learner rests five month
 eight a month against 49 drawable blocks forty by month six — at which point the
 stalest-back fallback stops being a safety valve and becomes the mechanism. The number
 is sized for the 153 `LIBRARY_v3.md` §2 specifies, and closing that gap is the whole of
-slices 12 to 19.
+slices 12 to 20.
 
 **Five templates carry the family's Sabbath and Kingdom lens** — two in week 2,
 three in week 3 (DESIGN.md §13). A new one is written the same way the other
@@ -176,7 +176,7 @@ every focus and nothing typed here can starve the pool. What can go wrong is the
 opposite: a focus whose tags match no prompt draws exactly what picking nothing would.
 `test/seed-content.test.js` holds a floor of six prompts lifted above baseline per
 focus, which is a smoke check against a mistyped tag set rather than a target — the
-target is `LIBRARY_v3.md` §3's ten on-theme prompts, and slices 15 to 20 reach it.
+target is `LIBRARY_v3.md` §3's ten on-theme prompts, and slices 16 to 21 reach it.
 
 **People and Power does not weight `civic-process`.** All four of its prompts carry
 `governance` too, so weighting both pays twice for the same four rows. The tag stays on

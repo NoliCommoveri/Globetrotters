@@ -1,9 +1,9 @@
-# Slice 18 — Prompts: school, names, belief
+# Slice 19 — Prompts: school, names, belief
 
 **Status:** not started
 **Band:** L
 **Implements:** §13 (27 of the 106 prompts)
-**Depends on:** 17
+**Depends on:** 18
 
 **Goal.** The fourth and largest prompt batch: the three week-3 subject headings that
 carry Stories and Spirits, the deepest focus in the library.
@@ -28,7 +28,7 @@ carry Stories and Spirits, the deepest focus in the library.
 and with `time-there-now` in week 1 and `their-working-day` in week 2 that is the form's
 full four, split two and two across weeks 2 and 3 so no month can draw three of them.
 
-**`bible-happened-here` is the second of the three storyboards.** Whatever slice 14
+**`bible-happened-here` is the second of the three storyboards.** Whatever slice 15
 settled about a CAPTION knob applies to it here.
 
 ## Due-outs
@@ -41,7 +41,7 @@ None.
 
 ## Build
 
-As slice 15. Row, binding, spec, tags, between the markers.
+As slice 16. Row, binding, spec, tags, between the markers.
 
 **Five of the family's Sabbath and Kingdom prompts are now in the library** — two in week
 2, three in week 3 (`DESIGN.md` §13). `nations-before-the-throne` and `when-sabbath-starts`
@@ -65,5 +65,5 @@ stop, and a session that stops there says so and reports the drawable count it r
 
 ## Do not build
 
-The last 12 prompts of the 106 — slice 19, which also carries the whole-library exit
+The last 12 prompts of the 106 — slice 20, which also carries the whole-library exit
 criteria and needs the pool complete to claim them.

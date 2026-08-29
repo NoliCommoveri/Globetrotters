@@ -1,9 +1,9 @@
-# Slice 17 — Prompts: who the people are, an ordinary day
+# Slice 18 — Prompts: who the people are, an ordinary day
 
 **Status:** not started
 **Band:** L
 **Implements:** §13 (21 of the 106 prompts)
-**Depends on:** 16
+**Depends on:** 17
 
 **Goal.** The third prompt batch, and the one that fills Who Lives Here and Who Gets What.
 *Who the people are* is the largest subject heading in the library and the whole of it is
@@ -40,11 +40,11 @@ None.
 ## Open questions
 
 None. Two of the stretch-line six land here — `the-group-that-gets-less` and
-`who-can-read` — under whatever slice 14 settled.
+`who-can-read` — under whatever slice 15 settled.
 
 ## Build
 
-As slice 15. Row, binding, spec, tags, between the markers.
+As slice 16. Row, binding, spec, tags, between the markers.
 
 **Two `differences` bindings land here** — `family-size` and `when-you-are-old-enough` —
 with two of the nine distinct closers, and `family-size` sets `shared: 1` and asks for it.

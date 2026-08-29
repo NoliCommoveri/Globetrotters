@@ -1,9 +1,9 @@
-# Slice 20 — The twelve owed prompts
+# Slice 21 — The twelve owed prompts
 
 **Status:** not started
 **Band:** M
 **Implements:** §13 (twelve prompts beyond the 167)
-**Depends on:** 19
+**Depends on:** 20
 
 **Goal.** Ancient World and Conflict and Change reach twelve and ten on-theme prompts
 against a 153 pool, and every other focus is at seventeen or better. That is what leaves
@@ -50,7 +50,7 @@ vocabulary and zero to two mode tags from the seven. A form binding and a spec t
 matches the prompt count for count — a slot for every thing the prompt asks for, and an
 ask for every slot it carries.
 
-**The caps decide which forms are available.** After slice 19 the library is at its
+**The caps decide which forms are available.** After slice 20 the library is at its
 measured shape: `box-beside` is at thirteen and `fields` at twelve, so neither takes a new
 prompt. Twelve new prompts go on forms that make the answer visible, and the cap table in
 §3 is what says which.
@@ -66,7 +66,7 @@ rewritten to include them. §7 item 5 comes out — it is no longer open.
 
 - 12 prompts seeded, bound and tagged; `test/seed-content.test.js` green.
 - Nine months back to back for a learner on Ancient World, and again on Conflict and
-  Change: *a week with none of it* is below where slice 19 measured it, and reported.
+  Change: *a week with none of it* is below where slice 20 measured it, and reported.
 - The three caps still hold.
 - A month prints at about 8.3 sheets, unchanged.
 - `LIBRARY_v3.md` §2 and §3 describe the library that exists.

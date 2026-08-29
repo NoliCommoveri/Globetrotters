@@ -1,11 +1,11 @@
-# Slice 15 — Prompts: deep time, empire, the Book, government
+# Slice 16 — Prompts: deep time, empire, the Book, government
 
 **Status:** not started
 **Band:** L
 **Implements:** §13 (24 of the 106 prompts)
-**Depends on:** 14
+**Depends on:** 15
 
-**Goal.** The first prompt batch. Every form these prompts bind to exists after slice 14,
+**Goal.** The first prompt batch. Every form these prompts bind to exists after slice 15,
 which is what makes a prompt slice a transcription job rather than a build.
 
 The batch boundary is `LIBRARY_v3.md` §2's own subject headings, so a later session can
@@ -88,5 +88,5 @@ never a date. Three `timeline` bindings land here.
 
 ## Do not build
 
-The other 82 prompts. The twelve owed to Ancient World and Conflict and Change — slice 20;
+The other 82 prompts. The twelve owed to Ancient World and Conflict and Change — slice 21;
 they are writing, not transcription, and mixing them in hides which is which.

@@ -1,4 +1,4 @@
-# Slice 21 — The affinities
+# Slice 22 — The affinities
 
 **Status:** not started — blocked on D-15
 **Band:** S
@@ -10,7 +10,7 @@ and drawn correctly, and no country card has ever recommended one of them. This 
 sixty rows that fix that.
 
 **It is independent of every other slice in the split** and needs nothing from slices
-12–20. It sits last because it is blocked on the owner, not because anything waits on it.
+12–21. It sits last because it is blocked on the owner, not because anything waits on it.
 Take it the day the rows exist.
 
 ---

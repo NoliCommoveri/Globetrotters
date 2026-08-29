@@ -307,8 +307,8 @@ ON CONFLICT (iso3) DO NOTHING;
 --
 -- Weeks 2 and 3 are one pool of 51, of which 49 are drawable and two are
 -- pinned. LIBRARY_v3.md §2 holds 167 week 1-3 prompts and these are the 61 of
--- them that are written; slices 15 to 19 land the other 106, onto the forms and
--- renderers slices 12 to 14 build first. Until they do, the five-month cooldown
+-- them that are written; slices 16 to 20 land the other 106, onto the forms and
+-- renderers slices 12 to 15 build first. Until they do, the five-month cooldown
 -- is sized for a pool three times this one and a learner nine months deep runs
 -- on the stalest-back fallback.
 --
@@ -728,7 +728,7 @@ ON CONFLICT (slug) DO NOTHING;
 -- No `personal-voice` row is here, because none of the eight prompts carrying
 -- it is written yet. The repair budget in the draw falls back to an ordinary
 -- wildcard when a mode has no candidate, so the month rule is satisfied by
--- `cook-it` alone until slice 19 lands the voices.
+-- `cook-it` alone until slice 20 lands the voices.
 --
 -- Joined on slugs like everything else. A slug matching nothing contributes no
 -- row and raises no error, so the count is asserted in the tests rather than

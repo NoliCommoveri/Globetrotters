@@ -19,6 +19,7 @@ renderer and only knobs on `checklist`.
 | Knobs added to `checklist` | MARKER, CIRCLE_ONE, ORIENT, CAPTION |
 | New `worksheet_layouts` rows | 8 |
 | Seeded prompts rebound | 10 |
+| …of which need rewritten prompt text | 9 |
 | Prompts seeded early, with their tags | 2 |
 | Drawable prompts at the end | 52 |
 
@@ -41,7 +42,9 @@ skipped when the string is empty. LINES on `clocks` is the rule `lines` already 
 `checklist` also gains CIRCLE_ONE, ORIENT and CAPTION, which §6's count missed and
 `list-n` and `week-strip` both need.
 
-**The ten rebindings**, each with the spec its §2 entry declares:
+**The ten rebindings.** Nine of the ten also need their prompt text replaced from §2 —
+`game-kids-play` is the one whose words are already right. Binding, spec and text are one
+edit, for the reason slice 12 gives:
 
 | Form | Seeded prompts |
 |---|---|
@@ -55,9 +58,6 @@ skipped when the string is empty. LINES on `clocks` is the rule `lines` already 
 **`hundred-people` and `bullets` have no seeded prompt, so each seeds one.**
 `who-lives-there` and `how-they-learn`, both from §2 *Who the people are*, land here with
 their tags. Slice 17 owns that subject heading and skips those two rows.
-
-**`their-rest-day` absorbs the first-day-of-the-week question** (§5, *Fixed in place*).
-That rewrite lands with this binding, not later.
 
 ## Due-outs
 
@@ -76,7 +76,8 @@ None. See slices 14 and 15.
    gains `pair`, `flow`, `grid`, `clocks`. Rebuild through **Erase everything · Apply
    pending · Run seed**.
 4. Measure every height against real paper.
-5. Rebind the ten with their specs; rewrite `their-rest-day`.
+5. Rebind the ten: binding, spec and §2 prompt text together. `their-rest-day` absorbs
+   the first-day-of-the-week question here (§5) and is one of the nine, not an extra.
 6. `who-lives-there` and `how-they-learn`, with bindings, specs and tags.
 
 **Three rules ride with these forms.**

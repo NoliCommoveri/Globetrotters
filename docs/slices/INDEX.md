@@ -1,13 +1,14 @@
 # Slice index
 
-Twenty-two slices against `../design/DESIGN.md`. Each ends at a state you can open in a
+Twenty-three slices against `../design/DESIGN.md`. Each ends at a state you can open in a
 browser and judge.
 
 A build session takes the first slice not marked `built` and reads its file.
 **Slices 00–11 are built.** What remains is the library the draw engine was measured
-against — 106 prompts, 19 forms and 10 renderers — split into ten slices, none of them
-larger than L. Also outstanding are due-outs D-10 and D-14, neither of them code, and D-15,
-which is the whole of slice 21.
+against — 106 new prompts, 19 forms, 10 renderers, and the sixty of the sixty-one seeded
+prompts that `LIBRARY_v3.md` rewrote — split into eleven slices, none of them larger than
+L. Also outstanding are due-outs D-10 and D-14, neither of them code, and D-15, which is
+the whole of slice 22.
 
 | # | Slice | Status | Band | Depends on | Design sections |
 |---|---|---|---|---|---|
@@ -25,14 +26,15 @@ which is the whole of slice 21.
 | 11 | [The merged draw](11-merged-draw.md) | built | L | 04, 09 | §4, §5, §13 |
 | 12 | [Forms: boxes, venn, chart, map](12-forms-boxes-venn-chart-map.md) | not started | L | 11 | §16, §13 |
 | 13 | [Forms: pair, flow, grid, clocks](13-forms-pair-flow-grid-clocks.md) | not started | L | 12 | §16, §13 |
-| 14 | [Forms: fields, recipe, retirements](14-forms-fields-recipe-retirements.md) | not started | L | 13 | §16, §13 |
-| 15 | [Prompts: deep time to government](15-prompts-deep-time-to-government.md) | not started | L | 14 | §13 |
-| 16 | [Prompts: money, land, weather](16-prompts-money-land-weather.md) | not started | M | 15 | §13 |
-| 17 | [Prompts: people and daily life](17-prompts-people-and-daily-life.md) | not started | L | 16 | §13 |
-| 18 | [Prompts: school, names, belief](18-prompts-school-names-belief.md) | not started | L | 17 | §13 |
-| 19 | [Prompts: craft, food, voices](19-prompts-craft-food-voices.md) | not started | L | 18 | §13, §16 |
-| 20 | [The twelve owed](20-the-twelve-owed.md) | not started | M | 19 | §13 |
-| 21 | [The affinities](21-affinities.md) | not started | S | 11 | §9 |
+| 14 | [Forms: fields and the box knobs](14-forms-fields-and-the-box-knobs.md) | not started | L | 13 | §16, §13 |
+| 15 | [Forms: figures, recipe, text sweep](15-forms-figures-recipe-and-the-text-sweep.md) | not started | L | 14 | §16, §13 |
+| 16 | [Prompts: deep time to government](16-prompts-deep-time-to-government.md) | not started | L | 15 | §13 |
+| 17 | [Prompts: money, land, weather](17-prompts-money-land-weather.md) | not started | M | 16 | §13 |
+| 18 | [Prompts: people and daily life](18-prompts-people-and-daily-life.md) | not started | L | 17 | §13 |
+| 19 | [Prompts: school, names, belief](19-prompts-school-names-belief.md) | not started | L | 18 | §13 |
+| 20 | [Prompts: craft, food, voices](20-prompts-craft-food-voices.md) | not started | L | 19 | §13, §16 |
+| 21 | [The twelve owed](21-the-twelve-owed.md) | not started | M | 20 | §13 |
+| 22 | [The affinities](22-affinities.md) | not started | S | 11 | §9 |
 
 Statuses: `not started` · `in progress` · `built`.
 
@@ -80,7 +82,7 @@ runs feature-detected on any tablet; what is unresolved is whether the owner has
 to set display sleep and Guided Access by hand, which depends on a device nobody
 has named.
 
-**Slice 11 built the engine and slices 12–20 write the content it was measured against.**
+**Slice 11 built the engine and slices 12–21 write the content it was measured against.**
 `LIBRARY_v3.md` specifies both: a draw over one merged pool of 153 tagged prompts, and the
 167 prompts that pool is made of. **Slice 11 is built**: the engine draws eight from one
 pool against tag weights, deals them four and four, and joins the two pinned tasks, and it
@@ -94,43 +96,59 @@ Every table can be dropped from `/admin` and rebuilt from the files, so `001_sch
 is edited in place rather than appended to and `002_seed.sql` is rewritten rather than
 grown. `task_focus_weights` was deleted outright rather than kept in parallel, and the
 tier CHECK gained a value SQLite will not ALTER into one. There is no data in this
-database worth protecting from a migration — which is also why slices 12–14 edit
-`004_worksheets.sql`'s `kind` CHECK and `005_worksheet_layouts.sql`'s twelve rows in place
-rather than writing a migration to correct them.
+database worth protecting from a migration — which is also why slices 12–15 edit
+`004_worksheets.sql`'s `kind` CHECK, `005_worksheet_layouts.sql`'s twelve rows and
+`002_seed.sql`'s prompt text in place rather than writing migrations to correct them.
 
 ---
 
-## How slices 12–21 divide the library
+## How slices 12–22 divide the library
 
-The old slice 12 was one XL file. It is now ten, and the seams are the ones it named:
+The old slice 12 was one XL file. It is now eleven, and the seams are the ones it named:
 forms, then prompts, then the writing, then the affinities.
+
+**The seeded sixty-one are not a fixed point, and that is the thing the old file missed.**
+`LIBRARY_v3.md` §2 rewrote the prompt text of **54 of the 61** seeded week 1–3 prompts,
+rebound 46 of them, and changed the spec of two more. Sixty of the sixty-one need work;
+`wow-fact` alone comes through untouched. Its `KEEP` / `UPDATE` markers do not find them —
+39 prompts marked `KEEP` have different text and 3 marked `UPDATE` are identical — so the
+slices name their prompts individually and slice 15 exits on a diff of all sixty-one
+against the document rather than on the markers.
+
+**A rebind and a rewrite are one edit.** A form carries a slot for every thing its prompt
+asks for and asks for every slot it carries (§1), so the new wording is *why* the new form
+is correct. `law-you-notice` moves to `differences` and goes from one law to three laws
+plus the rule that is the same in both places; `breakfast-there` moves to `venn` and goes
+from *draw the plate* to their side, your side, and the middle. Rebinding without
+rewriting prints an empty form.
 
 **Forms lead prompts, always.** `worksheet_layouts.kind` is a CHECK and a binding points
 at a layout row, so a prompt cannot be seeded before its form exists. That is the one
 forced ordering in the whole split. Everything else is free.
 
-**Slices 12–14 are the nineteen forms and the ten renderers**, grouped the way
-`LIBRARY_v3.md` §6 orders them: the four that move the most prompts off a shape that
-fights them, then the four that show sequence, cause, quantity and time, then the
-retirements and the two that change what a month is. Forty-six of the sixty-one seeded
-prompts are rebound across the three, so each one ends at a printed sheet that is visibly
-better than the one before it.
+**Slices 12–15 are the nineteen forms, the ten renderers and the seeded library's
+correction**, grouped the way `LIBRARY_v3.md` §6 orders them: the four that move the most
+prompts off a shape that fights them, then the four that show sequence, cause, quantity and
+time, then `fields` and the missing knobs, then the two that change what a month is. The
+sixty seeded prompts that changed are distributed across the four — 10, 10, 19 and 21 — so
+each slice ends at a printed sheet visibly better than the one before it, and after slice
+15 the seeded library says and prints what §2 says it does.
 
-**Slices 15–19 are the 106 prompts**, in batches of twelve to twenty-seven. The boundaries
+**Slices 16–20 are the 106 new prompts**, in batches of twelve to twenty-seven. The boundaries
 are `LIBRARY_v3.md` §2's own subject headings — already ordered by subject, already sized
 right, and findable again without a note. A prompt and its tags land in the same edit,
 always: an untagged prompt draws at baseline forever and nothing in the app reports it.
 
-**Slice 19 owns the numbers.** Everything §3 claims — the nine-month run, the paper table,
-the form caps, the fallback that never fires — needs 153 drawable prompts, and slice 19 is
+**Slice 20 owns the numbers.** Everything §3 claims — the nine-month run, the paper table,
+the form caps, the fallback that never fires — needs 153 drawable prompts, and slice 20 is
 the first slice at which they exist.
 
-**Slice 20 is the only writing.** Six week-3-flavoured prompts each for Ancient World and
+**Slice 21 is the only writing.** Six week-3-flavoured prompts each for Ancient World and
 Conflict and Change, which are at twelve and ten on-theme prompts where every other focus
 is at seventeen or better. It comes after the measurement, so it is written against a
 number rather than a guess.
 
-**Slice 21 is D-15 and depends on nothing.** Sixty affinity rows for the three focuses
+**Slice 22 is D-15 and depends on nothing.** Sixty affinity rows for the three focuses
 that have none. It sits last because it is blocked on the owner; it can be taken the day
 the rows exist.
 
@@ -138,20 +156,20 @@ the rows exist.
 The draw does not care how big the pool is: 61 prompts draws a month, 100 draws a better
 one, 167 draws the one that was measured. Nothing breaks at an intermediate size and no
 screen shows a gap. The one number that degrades quietly is the cooldown, so **every slice
-in 12–20 reports the drawable count it ended at**:
+in 12–21 reports the drawable count it ended at**:
 
 | After slice | Drawable |
 |---|---|
 | 11 (today) | 49 |
 | 12 | 50 |
 | 13 | 52 |
-| 14 | 52 |
-| 15 | 74 |
-| 16 | 93 |
-| 17 | 114 |
-| 18 | 141 |
-| 19 | **153** |
-| 20 | 165 |
+| 14–15 | 52 — the forms slices correct rows rather than adding them |
+| 16 | 74 |
+| 17 | 93 |
+| 18 | 114 |
+| 19 | 141 |
+| 20 | **153** |
+| 21 | 165 |
 
 **Three forms have no seeded prompt to bind**, so three prompts land early with them:
 `what-work-pays` with `bar-graph` in slice 12, `who-lives-there` with `hundred-people` and
@@ -161,8 +179,8 @@ headings skip those rows.
 
 **Three questions are open and each is asked in the slice whose code depends on it.**
 Whether `storyboard` gains a CAPTION knob and whether *who published this* becomes a
-stretch line: slice 14, because both are renderer changes. Whether `emblems` exists at
-all: slice 15, which is the first slice writing at that end of the tag vocabulary.
+stretch line: slice 15, the last slice that touches a renderer. Whether `emblems` exists at
+all: slice 16, which is the first slice writing at that end of the tag vocabulary.
 `civic-process` was a fourth and slice 11 settled it — the tag stays, the weight goes.
 
 ---
@@ -211,11 +229,11 @@ Every section of `DESIGN.md` and the slice that finishes it.
 | §7 Passport | 06 — built |
 | §7 Plan | 05 — built |
 | §8 The wall tablet | 07 — built |
-| §9 Country data | 09 — built; 21 — the three new focuses' affinities (D-15) |
+| §9 Country data | 09 — built; 22 — the three new focuses' affinities (D-15) |
 | §10 Progress | 05 — built |
 | §11 Design direction | 07 — built but for the fonts (D-10) |
 | §12 Library editor | 11 — built |
-| §13 Seed data | 11 — nine focuses and their tags; 15–19 — the 106 prompts; 20 — the twelve owed |
+| §13 Seed data | 11 — nine focuses and their tags; 12–15 — the seeded sixty-one corrected; 16–20 — the 106 prompts; 21 — the twelve owed |
 | §14 Build order | — (superseded by this index) |
 | §15 Decisions | — (tracked in ../other/OPEN-QUESTIONS.md) |
-| §16 Printed worksheets | 10 — built; 12–14 — the nineteen forms and ten renderers; 19 — the paper numbers |
+| §16 Printed worksheets | 10 — built; 12–15 — the nineteen forms and ten renderers; 20 — the paper numbers |

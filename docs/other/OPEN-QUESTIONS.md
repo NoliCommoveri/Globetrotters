@@ -14,9 +14,9 @@ Nothing blocking slices 12 and 13. Every question raised against a slice has bee
 and written into `../design/DESIGN.md`.
 
 Three are raised against `../design/LIBRARY_v3.md` §7 and are listed there and in the slice
-that builds the code depending on them rather than here. Two block slice 14, which builds
+that builds the code depending on them rather than here. Two block slice 15, which builds
 the renderers they change: whether *who published this* becomes a stretch line on the six
-hardest prompts, and whether `storyboard` gains a CAPTION knob. One blocks slice 15:
+hardest prompts, and whether `storyboard` gains a CAPTION knob. One blocks slice 16:
 whether `emblems` should exist at all.
 `civic-process` was the fourth and slice 11 settles it — the tag stays on its four prompts
 and People and Power stops weighting it, because all four carry `governance` too and

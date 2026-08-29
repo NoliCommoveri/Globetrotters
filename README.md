@@ -241,7 +241,7 @@ five draws against twenty-seven forms would otherwise do about 40% of the time b
 arithmetic alone.
 
 **Slices 00 to 11 are built and the app does the whole nine-month job.** Ten
-remain: slices 12 to 21 write the 106 prompts, 19 forms and 10 renderers the draw
+remain: slices 12 to 22 write the 106 prompts, 19 forms and 10 renderers the draw
 was measured against, plus the twelve prompts two focuses are still owed and the
 affinities for the three that have none. Until they land the pool is 49 rather
 than 153, so the five-month cooldown blocks most of it by month six — expected,
@@ -255,10 +255,10 @@ no code: the fonts (D-10) — the shell, the stamp and the wall run on a system
 stack — and which tablet the wall runs on (D-14), where the wake lock is
 feature-detected either way and what is unresolved is whether the owner has to
 set display sleep by hand. The third is D-15, twenty countries of affinity apiece
-for the three focuses that have none, and it is the whole of slice 21.
+for the three focuses that have none, and it is the whole of slice 22.
 
-Three questions are open: two in slice 14, which builds the renderers they
-change, and one in slice 15.
+Three questions are open: two in slice 15, which builds the renderers they
+change, and one in slice 16.
 
 The Worker's own tests run with `node --test test/*.test.js` and need nothing
 installed. They are a build-session tool, not something the owner ever runs —

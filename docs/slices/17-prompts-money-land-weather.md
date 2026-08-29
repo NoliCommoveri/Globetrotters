@@ -1,9 +1,9 @@
-# Slice 16 — Prompts: money, land, weather, living things
+# Slice 17 — Prompts: money, land, weather, living things
 
 **Status:** not started
 **Band:** M
 **Implements:** §13 (19 of the 106 prompts)
-**Depends on:** 15
+**Depends on:** 16
 
 **Goal.** The second prompt batch: the four subject headings that carry the physical
 country and who is paid for it.
@@ -39,18 +39,18 @@ None.
 
 ## Open questions
 
-None. If slice 14 answered the stretch-line question as a line, two of the six prompts it
+None. If slice 15 answered the stretch-line question as a line, two of the six prompts it
 covers land here — `the-company-that-got-caught` and `what-their-money-goes-to` — and
 carry it as data.
 
 ## Build
 
-As slice 15: row, binding, spec, topic tags, mode tags, between the markers in
+As slice 16: row, binding, spec, topic tags, mode tags, between the markers in
 `002_seed.sql` and `005_worksheet_layouts.sql`, in the paste-ready forms
 `SEED-CONTENT.md` gives.
 
 **Two `flow-steps` bindings land here** — `water-to-the-tap` and `where-the-trash-goes` —
-and neither may open with the sentence the other does, or the one in slice 15 does.
+and neither may open with the sentence the other does, or the one in slice 16 does.
 
 **Three `map-marks` bindings land here**, and every pin on each is a place inside the
 country or on its edge (§4 rule 6). PINS is never 1.

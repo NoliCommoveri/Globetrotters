@@ -19,6 +19,7 @@ for.
 | New renderer kinds | 4 — `boxes`, `venn`, `chart`, `map` |
 | New `worksheet_layouts` rows | 5 |
 | Seeded prompts rebound | 10 |
+| …of which need rewritten prompt text | 10 |
 | Prompts seeded early, with their tags | 1 |
 | Drawable prompts at the end | 50, from 49 |
 
@@ -34,7 +35,8 @@ for.
 
 `bar-graph` and `scale-strip` are one renderer with a MODE knob and two heights.
 
-**The ten rebindings**, each with the per-template spec its §2 entry declares:
+**The ten rebindings.** Every one of them also needs its prompt text replaced from §2 —
+all ten, not the two `LIBRARY_v3.md` marks `UPDATE`. Binding, spec and text are one edit:
 
 | Form | Seeded prompts |
 |---|---|
@@ -66,7 +68,12 @@ code that depends on them.
    CHECK gains `boxes`, `venn`, `chart`, `map` — an edit in place, with **Erase
    everything · Apply pending · Run seed** to rebuild (`DESIGN.md` §3).
 4. **Measure each height against real paper** before the row is trusted.
-5. **Rebind the ten**, and set each one's spec from its §2 entry.
+5. **Rebind the ten**: the binding, the spec from its §2 entry, and its §2 prompt text
+   into `002_seed.sql`, all three in the same edit. The rewrite is what makes the rebind
+   correct — a form carries a slot for every thing its prompt asks for and asks for every
+   slot it carries (§1). `breakfast-there` today says *draw the plate*; on `venn` its §2
+   text asks for their side, your side, and what turns up on both. `highest-point` absorbs
+   `lowest-place` and asks for two marks and sea level between them.
 6. **`what-work-pays`**, its binding, its spec, its tags.
 
 **Heights are measured, never guessed.** A layout row whose height was guessed is worse
@@ -86,6 +93,8 @@ place inside the country or on its edge (§4 rule 6). The key and the row length
 - `map-outline` prints a traced country with three numbered pins rather than a captioned
   box; `highest-point` prints one vertical scale at three marks rather than three number
   boxes.
+- Each of the ten reads slot for slot against its printed form: no slot the prompt does
+  not ask for, no ask with nowhere to go.
 - `test/worksheet.test.js` covers the four new kinds' spec readers, including a spec key
   the kind does not have.
 - Drawable count reported: 50.
