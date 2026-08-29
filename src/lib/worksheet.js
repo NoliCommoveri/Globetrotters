@@ -61,14 +61,28 @@ const choice = (options, fallback) => tag(
 // reach a page.
 export const KINDS = {
   lines: { lines: int(1, 24, 8) },
+  // Two to four stacked slots, each a small caption over one or two ruled
+  // lines. CAPTIONS decides how many slots there are — this form only works
+  // if every binding sets it, or it becomes the new ruled lines inside a
+  // month (LIBRARY_v3.md §1).
+  fields: {
+    captions: strings(2, 4, ['', '', '']),
+    lines_each: int(1, 2, 1),
+  },
   box: {
     caption: text(80, 'Draw it here'),
     lines: int(0, 12, 0),
     callouts: int(0, 8, 0),
+    // Puts the notes under the box instead of beside it — `box-note`'s knob,
+    // for a box too tall to sit side by side with its writing room.
+    below: bool(false),
   },
   split: {
     columns: strings(2, 4, ['There', 'Here']),
     rows: int(1, 16, 5),
+    // A fourth row spanning both columns, captioned "But the same:" — only
+    // for a prompt that actually asks for it (LIBRARY_v3.md §4 rule 2).
+    shared: int(0, 1, 0),
   },
   table: {
     columns: strings(2, 5, ['What', 'Where', 'Why it matters']),
@@ -211,12 +225,24 @@ const rules = (n) => `<div class="rules">${'<i></i>'.repeat(n)}</div>`;
 const RENDER = {
   lines: (spec) => rules(spec.lines),
 
-  // One box. `lines` puts writing room beside it and `callouts` puts labelled
-  // leader lines down the side; a layout uses one or the other or neither.
+  // Stacked caption-and-lines slots, one per entry in CAPTIONS.
+  fields: (spec) => {
+    const slots = spec.captions.map((caption) =>
+      `<li><span class="field-caption">${escapeHtml(caption)}</span>${rules(spec.lines_each)}</li>`).join('');
+    return `<ul class="fields">${slots}</ul>`;
+  },
+
+  // One box. `lines` puts writing room beside it, or below it when BELOW is
+  // set; `callouts` puts labelled leader lines down the side. A layout uses
+  // one of the three or neither.
   box: (spec) => {
     const caption = `<figcaption>${escapeHtml(spec.caption)}</figcaption>`;
     const box = `<figure class="box"><div class="ink"></div>${caption}</figure>`;
-    if (spec.lines > 0) return `<div class="beside">${box}<div class="beside-notes">${rules(spec.lines)}</div></div>`;
+    if (spec.lines > 0) {
+      const notes = rules(spec.lines);
+      if (spec.below) return `<div class="stacked">${box}<div class="stacked-notes">${notes}</div></div>`;
+      return `<div class="beside">${box}<div class="beside-notes">${notes}</div></div>`;
+    }
     if (spec.callouts > 0) {
       const tags = Array.from({ length: spec.callouts }, () => '<li><span class="lead"></span></li>').join('');
       return `<div class="beside">${box}<ol class="callouts">${tags}</ol></div>`;
@@ -230,7 +256,12 @@ const RENDER = {
       { length: spec.rows },
       () => `<tr>${spec.columns.map(() => '<td></td>').join('')}</tr>`,
     ).join('');
-    return `<table class="grid"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
+    // SHARED: a row spanning every column, captioned "But the same:" — only
+    // for a binding whose prompt asks for it (LIBRARY_v3.md §4 rule 2).
+    const shared = spec.shared
+      ? `<tr class="split-shared"><td colspan="${spec.columns.length}"><span class="split-shared-label">But the same:</span><span class="split-shared-line"></span></td></tr>`
+      : '';
+    return `<table class="grid"><thead><tr>${head}</tr></thead><tbody>${body}${shared}</tbody></table>`;
   },
 
   table: (spec) => RENDER.split(spec),

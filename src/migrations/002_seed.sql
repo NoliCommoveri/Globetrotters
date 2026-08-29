@@ -379,19 +379,19 @@ FROM (
    1, 'symbols', 'wild', NULL, NULL),
 
   ('first-people', 'Find the first known people',
-   'Find out who the earliest known people living in this land were and about when they were there. Write two sentences about them.',
+   'Find out who the earliest known people living in this land were and roughly when they were here. Find one thing they left behind that people can still see or dig up.',
    2, 'history', 'focus', NULL, NULL),
 
   ('ancient-site', 'Find an ancient site',
-   'Find one ancient building, ruin, or site in this country that is hundreds or thousands of years old. Draw it and write how old it is.',
+   'Find one ancient building, ruin, or site in this country that is hundreds or thousands of years old. Draw it, then write how old it is and how people know that.',
    2, 'history', 'focus', NULL, NULL),
 
   ('who-leads', 'Find out who leads the country',
    'Find out what this country''s leader is called and how a person gets that job. Write the steps in order, from ordinary person to running the country.',
    2, 'government', 'focus', NULL, NULL),
 
-  ('law-you-notice', 'Find a surprising law',
-   'Find one law or rule in this country that is different from where you live. Write what it is and why you think it exists.',
+  ('law-you-notice', 'Find three surprising rules',
+   'Find three laws in this country that are different from where you live, and write each one next to how it works where you live. Then find one rule that is the same in both places.',
    2, 'government', 'focus', NULL, NULL),
 
   ('landforms', 'Describe the land',
@@ -403,19 +403,19 @@ FROM (
    2, 'climate', 'focus', NULL, NULL),
 
   ('wild-animal', 'Draw a wild animal',
-   'Find one wild animal that lives in this country and nowhere else nearby. Draw it and write one fact about where it lives.',
+   'Find one wild animal that lives in this country but not where you live. Draw it and write one fact about where it lives.',
    2, 'ecology', 'focus', NULL, NULL),
 
   ('animal-in-trouble', 'Find an animal in trouble',
-   'Find one animal from this country that scientists say is endangered. Write down one reason it is disappearing, and how many are left if you can find a number.',
+   'Find one animal from this country that scientists say is endangered. Find out one reason it is disappearing and roughly how many are left.',
    2, 'ecology', 'focus', NULL, NULL),
 
   ('wild-place-protected', 'Find their biggest wild place',
-   'Find the biggest national park or nature reserve in this country. Write down its name and one animal that is safer because that place is protected.',
+   'Find the biggest national park or nature reserve in this country. Draw what it looks like, then name one animal that is safer because the park is there and write what it was in danger from.',
    2, 'ecology', 'focus', NULL, NULL),
 
   ('what-they-grow', 'Find out what they grow',
-   'Find the crop this country grows the most of. Write down what it is, and one thing people there make or cook with it.',
+   'Find the crop this country grows the most of. Find out which part of the country grows it, and one thing people there make or cook with it.',
    2, 'land', 'focus', NULL, NULL),
 
   ('made-here', 'Find something made there',
@@ -446,7 +446,7 @@ FROM (
    2, 'history', 'focus', NULL, NULL),
 
   ('who-can-vote', 'Find out who gets a say',
-   'Find out who is allowed to vote there and how old you have to be. Write down one way that is different from where you live.',
+   'Find three things about voting there: who is allowed to, how old you have to be, and how often they vote. Write each one next to how it works where you live. Then find the one thing about voting that has not changed between them.',
    2, 'government', 'focus', NULL, NULL),
 
   ('kingdom-over-this-place', 'What the Kingdom fixes here',
@@ -470,7 +470,7 @@ FROM (
    2, 'land', 'focus', NULL, NULL),
 
   ('weather-that-hits', 'Find the weather they brace for',
-   'Find out what kind of big weather this country gets: hurricanes, monsoons, drought, blizzards, or none worth naming. Write down one way people get ready for it.',
+   'Find out what kind of big weather this country gets: hurricanes, monsoons, drought, blizzards, floods. Find what time of year it comes and one way people get ready.',
    2, 'climate', 'focus', NULL, NULL),
 
   ('tree-that-grows', 'Find a tree that grows there',
@@ -478,7 +478,7 @@ FROM (
    2, 'ecology', 'focus', NULL, NULL),
 
   ('oldest-thing-here', 'Find the oldest thing they keep',
-   'Find the oldest object in one of this country''s museums. Write down what it is, how old it is, and where it was dug up.',
+   'Find the oldest object kept in one of this country''s museums. Find out how old it is and where it was dug up.',
    2, 'prehistory', 'focus', NULL, NULL),
 
   ('who-lives-there', 'Who lives there?',
@@ -518,7 +518,7 @@ FROM (
    3, 'people', 'focus', NULL, NULL),
 
   ('holiday-they-mark', 'Find their biggest holiday',
-   'Find the one day of the year this whole country celebrates. Write down what it remembers and one thing people do on it.',
+   'Find the one day of the year this whole country celebrates. Find what it remembers and one thing people do on it.',
    3, 'culture', 'focus', NULL, NULL),
 
   ('craft-of-the-land', 'Find their craft or art',
@@ -526,11 +526,11 @@ FROM (
    3, 'culture', 'focus', NULL, NULL),
 
   ('sound-of-the-country', 'Listen to their music',
-   'Find one traditional instrument or style of music from this country. Write its name and one word for what it sounds like.',
+   'Find one traditional instrument or style of music from this country and listen to a minute of it. Find out what the instrument is made of, and write one word for how it sounds.',
    3, 'culture', 'focus', NULL, NULL),
 
   ('the-sport-they-love', 'Find their favorite sport',
-   'Find the most popular sport in this country. Write one rule that is different from a sport you play.',
+   'Find the most popular sport in this country. Write three of its rules next to the rules of a game you play. Then write the one rule both games share.',
    3, 'culture', 'focus', NULL, NULL),
 
   ('wow-fact', 'Find one wow fact',
@@ -541,7 +541,7 @@ FROM (
    'Find one famous place in this country you''d want to visit. Draw it and write one sentence about what makes it special.',
    3, 'landmarks', 'focus', NULL, NULL),
   ('girls-and-women', 'Find out how girls grow up there',
-   'Find out what school and work look like for girls and women in this country. Write down two things that are different from your house.',
+   'Find out what learning and work look like for girls and women in this country. Write three things next to how they are where you live. Then write the one thing that is no different at all.',
    3, 'people', 'focus', NULL, NULL),
 
   ('city-and-country', 'City or countryside?',
@@ -553,7 +553,7 @@ FROM (
    3, 'people', 'focus', NULL, NULL),
 
   ('house-they-live-in', 'Draw an ordinary house',
-   'Find a picture of an ordinary home in this country — not a palace. Draw it, and label two things about it that the weather or the land made necessary.',
+   'Find a picture of an ordinary home in this country, not a palace. Draw it and label three things the weather or the land made necessary.',
    3, 'people', 'focus', NULL, NULL),
 
   ('game-kids-play', 'Learn a game kids play there',
@@ -565,7 +565,7 @@ FROM (
    3, 'people', 'focus', NULL, NULL),
 
   ('sabbath-keepers-there', 'Find who keeps the seventh day',
-   'Find out whether anyone in this country keeps a seventh-day Sabbath — Adventists, a Church of God, Jewish or Messianic congregations. Write down what they are called there and roughly how many there are.',
+   'Find out whether anyone in this country keeps a seventh-day Sabbath — Adventists, a Church of God, Jewish or Messianic congregations. Find what they are called there, roughly how many there are, and when and where they meet.',
    3, 'culture', 'focus', NULL, NULL),
 
   ('feast-they-keep', 'Find their harvest feast',
@@ -577,7 +577,7 @@ FROM (
    3, 'culture', 'focus', NULL, NULL),
 
   ('what-they-wear', 'Draw what they wear',
-   'Find what people there wear for a wedding, a holiday or a festival. Draw one outfit and label the part that would tell someone where it is from.',
+   'Find what people there wear for a wedding, a holiday or a festival. Draw one outfit and label three parts: the one that says where it''s from, the one made by hand, and the one you''d wear yourself.',
    3, 'culture', 'focus', NULL, NULL),
 
   ('breakfast-there', 'Eat their breakfast',

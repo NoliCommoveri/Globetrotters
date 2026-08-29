@@ -1,8 +1,8 @@
 -- 004_worksheets.sql — the printed worksheet schema (DESIGN.md §5, §16).
 --
 -- A migration, and only a migration: it is checksummed, it applies once, and it
--- is never edited afterwards. The twelve layout rows and the bindings that hang
--- off them live next door in 005_worksheet_layouts.sql, which is a seed.
+-- is never edited afterwards. The layout rows and the bindings that hang off
+-- them live next door in 005_worksheet_layouts.sql, which is a seed.
 --
 -- The split is forced and it is the right shape anyway. SQLite has no
 -- ADD COLUMN IF NOT EXISTS, so a file carrying these two ALTERs cannot be
@@ -22,7 +22,7 @@ CREATE TABLE worksheet_layouts (
   kind          TEXT NOT NULL
     CHECK (kind IN ('lines','box','split','table','timeline','figures',
                     'checklist','storyboard','boxes','venn','chart','map',
-                    'pair','flow','grid','clocks')),
+                    'pair','flow','grid','clocks','fields')),
   height_thirds INTEGER NOT NULL CHECK (height_thirds BETWEEN 1 AND 3),
   spec          TEXT NOT NULL,
   archived      INTEGER NOT NULL DEFAULT 0,
