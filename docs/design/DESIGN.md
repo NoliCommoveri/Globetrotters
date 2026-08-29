@@ -1286,13 +1286,14 @@ skipping the task would leave the week one short.
 ## 13. Seed data
 
 **Status:** partial · the runner, 3 people, 9 focuses, 6 project types, 195
-countries, **91 task templates**, 65 focus tags and 177 prompt tags,
+countries, **92 task templates**, 65 focus tags and 180 prompt tags,
 `003_country_data.sql`'s 222 hooks and 200 affinities across 100 countries
-(slices 02, 09 and 11), and `005_worksheet_layouts.sql`'s twelve printed forms
-with a binding on every week 1–3 template and on each project type's planning
-step (slice 10). What remains is slices 12 to 22: the 106 prompts and 19 forms
-`LIBRARY_v3.md` §2 still holds only as a document, the twelve prompts Ancient
-World and Conflict and Change are owed, and the three new focuses'
+(slices 02, 09 and 11), and `005_worksheet_layouts.sql`'s seventeen printed
+forms with a binding on every week 1–3 template and on each project type's
+planning step (slices 10 and 12). What remains is slices 13 to 22: the 106
+prompts and 14 forms `LIBRARY_v3.md` §2 still holds only as a document, fifty
+of the sixty-one seeded week 1–3 prompts still to correct, the twelve prompts
+Ancient World and Conflict and Change are owed, and the three new focuses'
 `country_focus_affinity` rows (D-15).
 
 Seed files are not migrations (§3). They live beside them in `/src/migrations/`
@@ -1318,7 +1319,7 @@ in place rather than appended to.
   because a hook has no natural key and a deleted one must stay deleted (§9).
 - `004_worksheets.sql` — the `worksheet_layouts` table and the two columns it
   hangs off `task_templates` (§16). A migration: DDL, applied once, never edited.
-- `005_worksheet_layouts.sql` — the twelve layouts and the binding for every
+- `005_worksheet_layouts.sql` — the seventeen layouts and the binding for every
   week 1–3 template. A seed: the layouts upsert on `slug` like every other
   seeded row, and each binding is written only where the column is still empty,
   so a task rebound in the library editor keeps what was chosen there.
@@ -1340,7 +1341,7 @@ Contents of `002_seed.sql`:
   hooks and affinities are `003`, which also corrects the adventure level on the
   countries whose hooks proved the first pass wrong. The conflict key is `iso3`,
   so a name can be corrected without minting a second row for the same country.
-- **91 task templates**, **177 prompt tags** and **65 focus tags**. The floor that
+- **92 task templates**, **180 prompt tags** and **65 focus tags**. The floor that
   makes the draw work at all is eight drawable prompts across weeks 2 and 3 plus
   one project type's five. The library is far past that floor because the floor
   sizes the pool for the **draw**, and the draw is not what runs out. Ten tasks
@@ -1351,14 +1352,14 @@ Contents of `002_seed.sql`:
 | Week | Templates | Note |
 |---|---|---|
 | 1 | 10 | 4 `core` — flag, map, location/borders, language & writing system — plus 6 competing for the 5th slot |
-| 2 | 26 | 25 drawable plus the pinned `wow-fact`; one merged pool with week 3 |
+| 2 | 27 | 26 drawable plus the pinned `wow-fact`; one merged pool with week 3 |
 | 3 | 25 | 24 drawable plus the pinned `cook-it`; eight are drawn across the two and dealt |
 | 4 | 30 | five for each of the six project types, as ordered sequences |
 
 The week column is the prompt's **natural half**, not a draw pool: nothing in the
 draw reads it and only the deal's arc preference does (§4). `LIBRARY_v3.md` takes
 weeks 1–3 to 12 / 86 / 69 — 106 prompts still to write, and that is slices 16 to 20.
-Against the 49 drawable seeded today the cooldown blocks 40 by month six and the
+Against the 50 drawable seeded today the cooldown blocks 40 by month six and the
 stalest-back fallback becomes the mechanism, which is a reason to finish the
 library rather than to soften the number.
 
@@ -1381,11 +1382,11 @@ mistyped tag set, which is this seed's one silent failure. The target is
 `LIBRARY_v3.md` §3's ten on-theme prompts per focus, and slices 16 to 21 reach
 it.
 
-**Every week 1–3 template is bound to one of the twelve layouts**, in
+**Every week 1–3 template is bound to one of the seventeen layouts**, in
 `005_worksheet_layouts.sql` (§16). The heights are the load-bearing half: a
-sheet holds three thirds, so the mix decides how much paper a month is. Twenty-
-one templates rule four lines, seventeen sketch beside notes, and only nine take
-two thirds or three — which puts a drawn month at seven to nine sheets rather
+sheet holds three thirds, so the mix decides how much paper a month is. Twenty
+templates rule four lines, thirteen sketch beside notes, and twenty take two
+thirds or three — which puts a drawn month at seven to nine sheets rather
 than the twelve a library of drawing boxes would print.
 
 Week 4 is bound differently, because its sheet is composed rather than packed:
@@ -1623,8 +1624,9 @@ the code that depends on them is written, never guessed.
 ## 16. Printed worksheets
 
 **Status:** partial · slice 10 built the route, the packer, the twelve forms and the
-layout editor. `LIBRARY_v3.md` needs twenty-seven, so slices 12 to 15 add nineteen layout
-rows and ten renderer branches, and retire three forms.
+layout editor; slice 12 added the `boxes`, `venn`, `chart` and `map` renderers and their
+five layout rows. `LIBRARY_v3.md` needs twenty-seven forms in all, so slices 13 to 15 add
+the remaining fourteen layout rows and six renderer branches, and retire three forms.
 
 The physical looseleaf workbook is the point of the project (§1, §7). Twenty
 tasks a month arrive as prompts on a phone and land on paper the kid has to

@@ -162,7 +162,7 @@ export function pinsBy(templates) {
 }
 
 // The eligible pool, and the one place the cooldown gives way. Against 153 this
-// never fires; against the 49 prompts seeded today it is the mechanism by month
+// never fires; against the 50 prompts seeded today it is the mechanism by month
 // six, which is a reason to finish the library rather than to soften the number.
 // The stalest go back first, one at a time, and only as far as eight.
 function eligiblePool(pool, monthsSince) {
@@ -177,7 +177,7 @@ function eligiblePool(pool, monthsSince) {
 
 // The strictest non-empty candidate set. Both rules hold at 153 — zero form
 // collisions in 22,500 simulated months, zero mode fallbacks in 40,000 draws —
-// but at 49 they can meet, and something has to give in a stated order rather
+// but at 50 they can meet, and something has to give in a stated order rather
 // than whichever the loop happens to hit. The mode rule gives way first: it is
 // anti-monotony, a month that says *and now write ours next to it* twice. The
 // form cap is what keeps two of the same worksheet off one week's paper, which

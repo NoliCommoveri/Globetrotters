@@ -21,7 +21,7 @@ CREATE TABLE worksheet_layouts (
   name          TEXT NOT NULL,
   kind          TEXT NOT NULL
     CHECK (kind IN ('lines','box','split','table','timeline','figures',
-                    'checklist','storyboard')),
+                    'checklist','storyboard','boxes','venn','chart','map')),
   height_thirds INTEGER NOT NULL CHECK (height_thirds BETWEEN 1 AND 3),
   spec          TEXT NOT NULL,
   archived      INTEGER NOT NULL DEFAULT 0,

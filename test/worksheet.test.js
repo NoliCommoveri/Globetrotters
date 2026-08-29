@@ -68,6 +68,49 @@ test('a template spec overrides the layout key by key, and only those keys', () 
   assert.deepEqual(merged, { caption: 'The flag', lines: 4, callouts: 0 });
 });
 
+// ---------------------------------------------------------- the four new kinds --
+
+test('boxes keeps its own keys and drops one belonging to another kind', () => {
+  const spec = readSpec('boxes', { boxes: 3, caption: 'Four things', circle_one: true, lines: 6 });
+  assert.deepEqual(spec, { boxes: 3, caption: 'Four things', label_lines: 1, circle_one: true });
+});
+
+test('boxes falls back on an out-of-range count', () => {
+  assert.equal(readSpec('boxes', { boxes: 9 }).boxes, 4);
+  assert.equal(readSpec('boxes', {}).boxes, 4);
+});
+
+test('venn keeps its own keys and drops one belonging to another kind', () => {
+  const spec = readSpec('venn', { labels: ['They eat', 'We eat'], shared: 'Both', panels: 6 });
+  assert.deepEqual(spec, { labels: ['They eat', 'We eat'], shared: 'Both', lines_each: 3 });
+});
+
+test('venn falls back to two labels when fewer are given', () => {
+  assert.deepEqual(readSpec('venn', { labels: ['Only one'] }).labels, ['There', 'Here']);
+});
+
+test('chart keeps its own keys and drops one belonging to another kind', () => {
+  const spec = readSpec('chart', { mode: 'scale', marks: 3, unit: '°F', boxes: 4 });
+  assert.equal(spec.mode, 'scale');
+  assert.equal(spec.marks, 3);
+  assert.equal(spec.unit, '°F');
+  assert.ok(!('boxes' in spec));
+});
+
+test('chart falls back to bars mode on an unrecognized value', () => {
+  assert.equal(readSpec('chart', { mode: 'pie' }).mode, 'bars');
+  assert.equal(readSpec('chart', {}).orient, 'vertical');
+});
+
+test('map keeps its own keys and drops one belonging to another kind', () => {
+  const spec = readSpec('map', { caption: 'Their biggest river', pins: 3, lines: 4 });
+  assert.deepEqual(spec, { caption: 'Their biggest river', pins: 3 });
+});
+
+test('map pins is never 1', () => {
+  assert.equal(readSpec('map', { pins: 1 }).pins, 5);
+});
+
 test('every kind reads at least one knob and renders without one', () => {
   for (const kind of Object.keys(KINDS)) {
     const spec = readSpec(kind, {});

@@ -198,6 +198,90 @@ body {
 .storyboard .panel-no { position: absolute; top: .04in; left: .06in;
                         font-size: .7rem; color: var(--faint); }
 
+/* Several small boxes in a row (or, past four, a 2x2 block), one ruled label
+ * line under each. */
+.boxes { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; }
+.boxes-caption { margin: 0 0 .06in; font-size: .78rem; color: #222; }
+.boxes-grid { flex: 1 1 auto; margin: 0; padding: 0; list-style: none; min-height: 0;
+              display: flex; flex-wrap: wrap; gap: .16in; }
+.boxes-grid li { flex: 1 1 calc(25% - .16in); min-width: 1in; display: flex;
+                  flex-direction: column; min-height: 0; }
+.boxes-grid .ink { flex: 1 1 auto; border: 1.5px solid var(--rule); border-radius: .06in; }
+.boxes-label { flex: 0 0 auto; display: flex; flex-direction: column; margin-top: .04in; }
+.boxes-label i { border-bottom: 1px solid var(--rule); height: .18in; }
+.boxes-hint { flex: 0 0 auto; margin: .06in 0 0; font-size: .72rem; color: #444; font-style: italic; }
+
+/* Two overlapping circles, a label on each lobe and on the overlap, three
+ * ruled zones so an answer lands where it belongs rather than in one shared
+ * column. */
+.venn { flex: 1 1 auto; min-height: 0; }
+.venn-diagram { position: relative; height: 100%; }
+.venn-circle {
+  position: absolute; top: 6%; width: 58%; aspect-ratio: 1 / 1;
+  border: 1.5px solid var(--rule); border-radius: 50%;
+}
+.venn-circle.left { left: 0; }
+.venn-circle.right { right: 0; }
+.venn-label { position: absolute; top: 2%; font-size: .72rem; color: #444; }
+.venn-label.left { left: 4%; }
+.venn-label.right { right: 4%; }
+.venn-label.shared { left: 50%; transform: translateX(-50%); }
+.venn-zone { position: absolute; top: 36%; bottom: 4%; display: flex;
+             flex-direction: column; justify-content: space-between; }
+.venn-zone i { border-bottom: 1px solid var(--rule); height: 1px; }
+.venn-zone.left { left: 6%; width: 24%; }
+.venn-zone.shared { left: 38%; width: 24%; }
+.venn-zone.right { right: 6%; width: 24%; }
+
+/* Bars against a scale, or a single scale strip with write-in markers — one
+ * renderer, two heights (kind `chart`). */
+.chart { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+.chart-plot { flex: 1 1 auto; position: relative; min-height: 0; }
+.chart-grid { position: absolute; inset: 0; display: flex; flex-direction: column-reverse;
+              justify-content: space-between; }
+.chart-grid i { border-top: 1px solid var(--faint); height: 1px; }
+/* Each bar is a column standing on a baseline, open at the top: the kid draws
+ * or colors the bar up to their number, so there is no top edge to draw over. */
+.chart-bars-row { position: relative; height: 100%; margin: 0; padding: 0; list-style: none;
+                   display: flex; gap: .18in; }
+.chart-bars-row li { flex: 1 1 0; height: 100%; }
+.chart-bar { width: 100%; height: 100%; border-left: 1px solid var(--rule);
+             border-right: 1px solid var(--rule); border-bottom: 1.5px solid var(--rule); }
+.chart-horizontal .chart-bars-row { flex-direction: column; }
+.chart-horizontal .chart-bars-row li { flex: 1 1 0; height: auto; }
+.chart-horizontal .chart-bar {
+  height: 100%; width: 100%; border-left: 1.5px solid var(--rule);
+  border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); border-right: none;
+}
+.chart-horizontal .chart-grid { flex-direction: row; }
+.chart-horizontal .chart-grid i { border-top: none; border-left: 1px solid var(--faint); width: 1px; height: auto; }
+.chart-axis-label { margin: .06in 0 0; font-size: .72rem; color: #444; }
+.chart-caption { margin: .02in 0 0; font-size: .72rem; color: #444; }
+
+/* Column, not column-reverse: the first mark is the first thing the prompt
+ * names — `highest-point` puts its highest mark first — so it belongs at the
+ * top of a vertical strip, read top to bottom like the prompt above it. */
+.scale-marks { flex: 1 1 auto; margin: 0; padding: 0; list-style: none; min-height: 0;
+                display: flex; flex-direction: column; justify-content: space-between; }
+.chart-scale.chart-horizontal .scale-marks { flex-direction: row; }
+.scale-marks li { display: flex; align-items: center; gap: .1in; }
+.scale-tick { flex: 0 0 .3in; height: 1px; background: var(--rule); }
+.scale-write { flex: 0 0 1in; border-bottom: 1px solid var(--rule); height: .2in; }
+.scale-caption { font-size: .72rem; color: #444; white-space: nowrap; }
+.chart-unit { margin: .06in 0 0; font-size: .72rem; color: #444; }
+
+/* A large box framed as the country, with numbered pin circles down the side
+ * and one ruled line each — the same shape as `.beside`/`.callouts`, with a
+ * number instead of a blank leader. */
+.beside.map .box { flex: 1 1 62%; }
+.beside.map .map-pins { flex: 1 1 38%; }
+.map-pins .pin {
+  flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center;
+  width: .22in; height: .22in; margin-right: .08in;
+  border: 1.5px solid var(--rule); border-radius: 50%;
+  font-size: .68rem; color: #222;
+}
+
 /* Week 4's one sheet is composed, not packed: the materials and the five steps
  * take the height they need and the storyboard absorbs the rest, so the sheet
  * is exactly one page whatever the project type's sequence says. */

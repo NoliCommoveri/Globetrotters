@@ -18,7 +18,7 @@ terminal — if something appears to, it is specced wrong (§3).
 | D-12 | The month the school year starts | 04 | done — September through May |
 | D-13 | Paper size, for the passport and the worksheets | 06, 10 | done — US Letter |
 | D-14 | Which tablet and browser the wall runs on | 07 | outstanding |
-| D-15 | `country_focus_affinity` rows for the three unaffiliated focuses | 12 | outstanding |
+| D-15 | `country_focus_affinity` rows for the three unaffiliated focuses | 22 | outstanding |
 
 ---
 

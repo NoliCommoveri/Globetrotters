@@ -4,11 +4,11 @@ Twenty-three slices against `../design/DESIGN.md`. Each ends at a state you can 
 browser and judge.
 
 A build session takes the first slice not marked `built` and reads its file.
-**Slices 00–11 are built.** What remains is the library the draw engine was measured
-against — 106 new prompts, 19 forms, 10 renderers, and the sixty of the sixty-one seeded
-prompts that `LIBRARY_v3.md` rewrote — split into eleven slices, none of them larger than
-L. Also outstanding are due-outs D-10 and D-14, neither of them code, and D-15, which is
-the whole of slice 22.
+**Slices 00–12 are built.** What remains is the library the draw engine was measured
+against — 106 new prompts, 14 forms, 6 renderers, and the fifty of the sixty-one seeded
+prompts that `LIBRARY_v3.md` still rewrites — split into ten slices, none of them larger
+than L. Also outstanding are due-outs D-10 and D-14, neither of them code, and D-15, which
+is the whole of slice 22.
 
 | # | Slice | Status | Band | Depends on | Design sections |
 |---|---|---|---|---|---|
@@ -24,7 +24,7 @@ the whole of slice 22.
 | 09 | [Content fill](09-content-fill.md) | built | L | 04 | §9, §13 |
 | 10 | [Printed worksheets](10-worksheets.md) | built | L | 05 | §16 |
 | 11 | [The merged draw](11-merged-draw.md) | built | L | 04, 09 | §4, §5, §13 |
-| 12 | [Forms: boxes, venn, chart, map](12-forms-boxes-venn-chart-map.md) | not started | L | 11 | §16, §13 |
+| 12 | [Forms: boxes, venn, chart, map](12-forms-boxes-venn-chart-map.md) | built | L | 11 | §16, §13 |
 | 13 | [Forms: pair, flow, grid, clocks](13-forms-pair-flow-grid-clocks.md) | not started | L | 12 | §16, §13 |
 | 14 | [Forms: fields and the box knobs](14-forms-fields-and-the-box-knobs.md) | not started | L | 13 | §16, §13 |
 | 15 | [Forms: figures, recipe, text sweep](15-forms-figures-recipe-and-the-text-sweep.md) | not started | L | 14 | §16, §13 |
@@ -86,9 +86,9 @@ has named.
 `LIBRARY_v3.md` specifies both: a draw over one merged pool of 153 tagged prompts, and the
 167 prompts that pool is made of. **Slice 11 is built**: the engine draws eight from one
 pool against tag weights, deals them four and four, and joins the two pinned tasks, and it
-is proved against a synthetic pool of the right shape. Sixty-one prompts are seeded, so the
+is proved against a synthetic pool of the right shape. Sixty-two prompts are seeded, so the
 app draws correctly from a pool a third of the intended size — with one number to watch,
-the five-month cooldown, which is sized for 153 and exhausts by month six against the 49
+the five-month cooldown, which is sized for 153 and exhausts by month six against the 50
 that are drawable today.
 
 **Erase everything changed what a schema slice costs, and slice 11 is what spent it.**
@@ -97,7 +97,7 @@ is edited in place rather than appended to and `002_seed.sql` is rewritten rathe
 grown. `task_focus_weights` was deleted outright rather than kept in parallel, and the
 tier CHECK gained a value SQLite will not ALTER into one. There is no data in this
 database worth protecting from a migration — which is also why slices 12–15 edit
-`004_worksheets.sql`'s `kind` CHECK, `005_worksheet_layouts.sql`'s twelve rows and
+`004_worksheets.sql`'s `kind` CHECK, `005_worksheet_layouts.sql`'s layout rows and
 `002_seed.sql`'s prompt text in place rather than writing migrations to correct them.
 
 ---
@@ -109,11 +109,14 @@ forms, then prompts, then the writing, then the affinities.
 
 **The seeded sixty-one are not a fixed point, and that is the thing the old file missed.**
 `LIBRARY_v3.md` §2 rewrote the prompt text of **54 of the 61** seeded week 1–3 prompts,
-rebound 46 of them, and changed the spec of two more. Sixty of the sixty-one need work;
+rebound 46 of them, and changed the spec of two more. Sixty of the sixty-one needed work;
 `wow-fact` alone comes through untouched. Its `KEEP` / `UPDATE` markers do not find them —
 39 prompts marked `KEEP` have different text and 3 marked `UPDATE` are identical — so the
 slices name their prompts individually and slice 15 exits on a diff of all sixty-one
-against the document rather than on the markers.
+against the document rather than on the markers. **Slice 12 corrected the first ten** —
+`under-the-ground`, `tree-that-grows`, `craft-of-the-land`, `market-day`, `breakfast-there`,
+`animals-on-the-menu`, `highest-point`, `weather-there-now`, `map-outline`,
+`river-that-matters` — so fifty of the sixty-one still need work, in slices 13–15.
 
 **A rebind and a rewrite are one edit.** A form carries a slot for every thing its prompt
 asks for and asks for every slot it carries (§1), so the new wording is *why* the new form
@@ -132,7 +135,9 @@ prompts off a shape that fights them, then the four that show sequence, cause, q
 time, then `fields` and the missing knobs, then the two that change what a month is. The
 sixty seeded prompts that changed are distributed across the four — 10, 10, 19 and 21 — so
 each slice ends at a printed sheet visibly better than the one before it, and after slice
-15 the seeded library says and prints what §2 says it does.
+15 the seeded library says and prints what §2 says it does. **Slice 12 is built**: `boxes`,
+`venn`, `chart` and `map` render, five layout rows carry them, and the ten prompts they
+move off `table-3`, `box-beside` and `figures` print on the form they were written for.
 
 **Slices 16–20 are the 106 new prompts**, in batches of twelve to twenty-seven. The boundaries
 are `LIBRARY_v3.md` §2's own subject headings — already ordered by subject, already sized
@@ -160,8 +165,8 @@ in 12–21 reports the drawable count it ended at**:
 
 | After slice | Drawable |
 |---|---|
-| 11 (today) | 49 |
-| 12 | 50 |
+| 11 | 49 |
+| 12 (today) | 50 |
 | 13 | 52 |
 | 14–15 | 52 — the forms slices correct rows rather than adding them |
 | 16 | 74 |

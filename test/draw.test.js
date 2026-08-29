@@ -492,7 +492,7 @@ test('the stalest goes back rather than erroring when a cooldown empties the poo
 
 // ------------------------------------------------------- the real library --
 
-// The draw against the seeded library rather than a fixture. Forty-nine
+// The draw against the seeded library rather than a fixture. Fifty
 // drawable prompts is a third of what the cooldown is sized for, so this asserts
 // what does not depend on the library's size: a month is twenty, no prompt is
 // drawn twice, and the pins are where they belong. The nine-month run is

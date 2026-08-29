@@ -260,7 +260,7 @@ test('one person’s history does not weigh on another’s draw', async () => {
 test('a focus favours without excluding: every prompt stays reachable', async () => {
   // There is no weight-0 any more. `fw = 1 + 2 * SUM` floors at 1, so a focus
   // says what it is about and never what the library may not offer — which is
-  // the property that lets the merged pool draw eight from 49 at all.
+  // the property that lets the merged pool draw eight from 50 at all.
   const e = await env();
   const { results: pool } = await e.DB.prepare(
     "SELECT id FROM task_templates WHERE week_theme IN (2, 3) AND tier != 'fixed'"
