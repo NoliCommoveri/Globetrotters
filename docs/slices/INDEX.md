@@ -1,12 +1,13 @@
 # Slice index
 
-Twelve slices against `../design/DESIGN.md`. Each ends at a state you can open
+Thirteen slices against `../design/DESIGN.md`. Each ends at a state you can open
 in a browser and judge.
 
 A build session takes the first slice not marked `built` and reads its file.
 **Slices 00–10 are built.** Slice 11 is the first not started: it is the draw engine
-`LIBRARY_v3.md` specifies, and it is the only one of the v3 slices that is not content.
-Also outstanding are due-outs D-10, D-14 and D-15, none of them code.
+`LIBRARY_v3.md` specifies. Slice 12 is the library that engine was measured against — 106
+prompts, 19 forms and 10 renderers — and it is XL, so it is split before it is started
+rather than after. Also outstanding are due-outs D-10, D-14 and D-15, none of them code.
 
 | # | Slice | Status | Band | Depends on | Design sections |
 |---|---|---|---|---|---|
@@ -22,6 +23,7 @@ Also outstanding are due-outs D-10, D-14 and D-15, none of them code.
 | 09 | [Content fill](09-content-fill.md) | built | L | 04 | §9, §13 |
 | 10 | [Printed worksheets](10-worksheets.md) | built | L | 05 | §16 |
 | 11 | [The merged draw](11-merged-draw.md) | not started | L | 04, 09 | §4, §5, §13 |
+| 12 | [The library](12-the-library.md) | not started | XL — split it | 11 | §9, §13, §16 |
 
 Statuses: `not started` · `in progress` · `built`.
 
@@ -69,6 +71,23 @@ runs feature-detected on any tablet; what is unresolved is whether the owner has
 to set display sleep and Guided Access by hand, which depends on a device nobody
 has named.
 
+**Slices 11 and 12 are one design landed as two, and the split is the engine from the
+content.** `LIBRARY_v3.md` specifies both: a draw over one merged pool of 153 tagged
+prompts, and the 167 prompts that pool is made of. Sixty of them are seeded. Slice 11
+builds the engine and proves it against a synthetic pool of the right shape; slice 12
+writes the library and is the only thing that can prove the numbers `LIBRARY_v3.md` §3
+reports. Building 11 alone is worth doing and leaves the app drawing correctly from a
+smaller pool — with one number to watch, the five-month cooldown, which is sized for 153
+and exhausts by month six against the 49 that are drawable today.
+
+**Erase everything changed what a schema slice costs.** Every table can be dropped from
+`/admin` and rebuilt from the files, so `001_schema.sql` is edited in place rather than
+appended to, and `002_seed.sql` is rewritten rather than grown. The workarounds that
+shaped slice 11's first draft — a `fixed` column standing in for a tier SQLite will not
+add to a CHECK, a superseded weights table kept alive because a drawn month could not be
+re-derived — are gone with it. There is no data in this database worth protecting from a
+migration.
+
 ---
 
 ## Why this order
@@ -108,18 +127,18 @@ Every section of `DESIGN.md` and the slice that finishes it.
 | §2 Stack | 03 — built but for the fonts (D-10) |
 | §3 Migrations | 02 — built |
 | §4 The task model | 04 — built; 11 — the merged draw |
-| §5 Schema | 10 — built; 11 — three tables and a column |
+| §5 Schema | 10 — built; 11 — two tables and a tier |
 | §6 API | 10 — built |
 | §7 This week | 05 — built |
 | §7 Month setup | 04 — built |
 | §7 Passport | 06 — built |
 | §7 Plan | 05 — built |
 | §8 The wall tablet | 07 — built |
-| §9 Country data | 09 — built |
+| §9 Country data | 09 — built; 12 — the three new focuses' affinities (D-15) |
 | §10 Progress | 05 — built |
 | §11 Design direction | 07 — built but for the fonts (D-10) |
-| §12 Library editor | 10 — built |
-| §13 Seed data | 10 — built; 11 — nine focuses |
+| §12 Library editor | 10 — built; 11 — the focus tab moves to tags |
+| §13 Seed data | 10 — built; 11 — nine focuses and their tags; 12 — the 106 prompts |
 | §14 Build order | — (superseded by this index) |
 | §15 Decisions | — (tracked in ../other/OPEN-QUESTIONS.md) |
-| §16 Printed worksheets | 10 — built |
+| §16 Printed worksheets | 10 — built; 12 — the nineteen forms and ten renderers |

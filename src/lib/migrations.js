@@ -185,3 +185,53 @@ export const SCHEMA_TABLES = [
   'country_focus_affinity', 'task_templates', 'task_focus_weights',
   'month_plans', 'plan_tasks', 'sessions', 'stamps', 'media',
 ];
+
+// Erase everything. Drops every table in the database, `_migrations` included,
+// which puts the database back to the state it was in before the first Apply
+// pending — so the next Apply pending runs 001 again and the next Run seed
+// refills it.
+//
+// This is what makes the schema files editable in place. Append-only exists to
+// protect data that cannot be got back; there is none here, so a schema change
+// is an edit to 001 followed by three button presses rather than a new file
+// carrying an ALTER for every column SQLite will not let a CHECK constraint
+// have (§3).
+//
+// Drop order is discovered rather than declared. D1 enforces foreign keys and
+// DROP TABLE does an implicit DELETE, so a parent whose children still exist
+// refuses to drop — the loop retries until a pass drops nothing new, which
+// takes the tables leaves-first without this file having to know the shape of a
+// schema it will outlive.
+export async function eraseAll(db) {
+  const { results } = await db.prepare(
+    "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'"
+  ).all();
+
+  const remaining = new Set(results.map((r) => r.name));
+  const dropped = [];
+  let error = null;
+
+  while (remaining.size > 0) {
+    let progress = false;
+    for (const name of [...remaining]) {
+      try {
+        // The name comes from sqlite_master, not from the request. Quoted
+        // anyway: `_migrations` needs no quoting and a future table might.
+        await db.prepare(`DROP TABLE "${name.replace(/"/g, '""')}"`).run();
+        remaining.delete(name);
+        dropped.push(name);
+        progress = true;
+      } catch (err) {
+        error = err.message;
+      }
+    }
+    if (!progress) break;
+  }
+
+  return {
+    ok: remaining.size === 0,
+    dropped: dropped.sort(),
+    remaining: [...remaining].sort(),
+    error: remaining.size === 0 ? null : error,
+  };
+}

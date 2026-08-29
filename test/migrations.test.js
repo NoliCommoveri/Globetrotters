@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 import { FakeD1 } from './d1.js';
 import { splitStatements } from '../src/lib/sql.js';
 import {
-  migrationStatus, applyPending, resetMonth, resetStatements, SCHEMA_TABLES,
+  migrationStatus, applyPending, eraseAll, resetMonth, resetStatements, SCHEMA_TABLES,
 } from '../src/lib/migrations.js';
 
 const SCHEMA = readFileSync(new URL('../src/migrations/001_schema.sql', import.meta.url), 'utf8');
@@ -187,4 +187,47 @@ test('a batch call that fails on statements that each succeed is not a halt', as
   assert.equal(result.ok, true, JSON.stringify(result.failure));
   assert.equal(result.applied.length, 1);
   for (const table of SCHEMA_TABLES) assert.ok(tables(db).includes(table), `missing ${table}`);
+});
+
+// Erase everything. The point of it is that the schema files stop being
+// append-only: 001 can be edited and the database rebuilt from it (§3).
+test('erase drops every table, the ledger included, and apply pending runs again', async () => {
+  const db = new FakeD1();
+  await applyPending(db, LIST);
+  assert.ok(tables(db).includes('_migrations'));
+
+  const erased = await eraseAll(db);
+  assert.equal(erased.ok, true, erased.error);
+  assert.deepEqual(erased.remaining, []);
+  for (const table of SCHEMA_TABLES) assert.ok(erased.dropped.includes(table), `kept ${table}`);
+  assert.ok(erased.dropped.includes('_migrations'));
+  assert.deepEqual(tables(db).filter((t) => !t.startsWith('sqlite_')), []);
+
+  const again = await applyPending(db, LIST);
+  assert.equal(again.ok, true, JSON.stringify(again.failure));
+  assert.equal(again.applied.length, 1);
+  for (const table of SCHEMA_TABLES) assert.ok(tables(db).includes(table), `missing ${table}`);
+});
+
+// D1 enforces foreign keys and DROP TABLE does an implicit DELETE, so a parent
+// with live children refuses to drop. The order is discovered, not declared.
+test('erase drops a parent whose children hold rows', async () => {
+  const db = new FakeD1();
+  await applyPending(db, LIST);
+
+  await db.prepare(
+    "INSERT INTO people (id, name, color, sort_order, created_at) VALUES (1, 'A', '#000000', 0, '2026-09-01')"
+  ).run();
+  await db.prepare(
+    "INSERT INTO countries (id, name, iso3, continent) VALUES (1, 'Peru', 'PER', 'South America')"
+  ).run();
+  await db.prepare("INSERT INTO focuses (id, slug, name) VALUES (1, 'f', 'F')").run();
+  await db.prepare("INSERT INTO project_types (id, slug, name) VALUES (1, 'p', 'P')").run();
+  await db.prepare(`INSERT INTO month_plans
+    (id, person_id, month, start_date, country_id, focus_id, project_type_id, status, created_at)
+    VALUES (1, 1, '2026-09', '2026-09-01', 1, 1, 1, 'active', '2026-09-01')`).run();
+
+  const erased = await eraseAll(db);
+  assert.equal(erased.ok, true, erased.error);
+  assert.deepEqual(tables(db).filter((t) => !t.startsWith('sqlite_')), []);
 });

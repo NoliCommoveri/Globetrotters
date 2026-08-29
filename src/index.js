@@ -17,7 +17,7 @@ import { isAdmin, readSession, issueSessionCookie, isWall, issueWallCookie } fro
 import { json } from './lib/html.js';
 import { adminPage, adminLogin, adminLogout, tokenForm } from './admin/index.js';
 import { adminHealth } from './admin/health.js';
-import { apiMigrate, apiResetMonth, apiSeed } from './admin/api.js';
+import { apiEraseAll, apiMigrate, apiResetMonth, apiSeed } from './admin/api.js';
 import { apiPeople, apiPatchPerson } from './admin/people.js';
 import { libraryPage } from './admin/library.js';
 import { apiLibrary, apiLibraryExport, apiLibraryImport } from './admin/library-api.js';
@@ -66,6 +66,7 @@ const API = {
   'POST /admin/api/migrate': apiMigrate,
   'POST /admin/api/seed': apiSeed,
   'POST /admin/api/reset-month': apiResetMonth,
+  'POST /admin/api/erase': apiEraseAll,
   'GET /admin/api/people': apiPeople,
   'GET /admin/api/library': apiLibrary,
   // The export and the import share a path and differ by verb: it is one file,

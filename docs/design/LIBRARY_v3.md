@@ -1912,10 +1912,13 @@ one and two — so the rule is scoped to the month or it forces a repeat. A mont
 nobody from the country speaking in it is the failure this library is actually trying to
 avoid, and this is the only mechanism that guarantees against it.
 
-**Job two — anti-monotony.** *Never draw two prompts sharing a mode tag into the same
-week.* Nineteen of week 2's prompts and eighteen of week 3's are `us-contrast`; without
-this rule a week can print three sheets that all say *and now write ours next to it*. The
-form counts will report no repeat.
+**Job two — anti-monotony.** *Never draw two prompts sharing a mode tag into one month's
+weeks 2–3.* Nineteen of week 2's prompts and eighteen of week 3's are `us-contrast`;
+without this rule a week can print three sheets that all say *and now write ours next to
+it*. The form counts will report no repeat. Scoped to the month rather than the week
+because the deal, not the draw, decides which week a prompt lands in — a week-scoped rule
+would have to be a fifth key on the deal instead of a constraint on the draw, and at seven
+mode tags against 153 prompts the month scope costs nothing it buys.
 
 ### The focus table
 
@@ -1943,7 +1946,7 @@ sits.
 |---|---|
 | **Ancient World** | `deep-time 3 · empire-and-rule 3 · crafts 3 · folklore-belief 2 · christian-history 2 · story-telling 2 · extinction 1` |
 | **Wild Places** | `wildlife 3 · extinction 3 · landform 3 · damage-and-repair 2 · water 2 · animals-with-people 2 · play-and-sport 2 · agriculture 1` |
-| **People and Power** | `governance 3 · civic-process 3 · advocacy 2 · public-services 2 · public-money 2 · schooling 2 · who-gets-less 2 · conflict-history 1` |
+| **People and Power** | `governance 3 · advocacy 2 · public-services 2 · public-money 2 · schooling 2 · who-gets-less 2 · conflict-history 1` |
 | **Food and Craft** | `everyday-food 3 · celebration-food 3 · agriculture 3 · crafts 2 · trade 2 · animals-with-people 1` |
 | **Conflict and Change** | `conflict-history 3 · empire-and-rule 3 · forced-movement 3 · migration 2 · milestone 2 · who-gets-less 2 · damage-and-repair 1` |
 | **Land and Sky** | `landform 3 · weather-pattern 3 · sun-and-seasons 3 · altitude 2 · water 2 · agriculture 2 · travel 1` |
@@ -1980,12 +1983,20 @@ focuses have three or fewer on-theme prompts on one side of the old week line, a
 World and Conflict and Change have one each. That gap is what the merged pool in *The
 draw* exists to survive and what the six-prompts-each writing job exists to close.
 
-**`civic-process` is a strict subset of `governance`**, so People and Power weighting both
-at 3 pays twice for the same four prompts. Drop the tag or stop weighting both.
+**`civic-process` is a strict subset of `governance`** — all four of its prompts carry
+both — so People and Power weighting both at 3 pays twice for the same four rows. The tag
+stays as documentation of what those four prompts are and People and Power does not weight
+it, which is why the focus table below lists seven tags for it and not eight. The two
+tables under *What each focus actually reaches* and *What the shape delivers* were measured
+with it weighted: People and Power's reach is unchanged, since `governance` covers the same
+four prompts, but those four fall from ×13 to ×7 and its measured columns move a little.
+Slice 12 re-measures against the finished library.
 
 **Seven topic tags carry no weight from any focus** — `clothing`, `emblems`,
 `future-plans`, `holiday-calendar` (10 members), `infrastructure` (10), `sabbath`,
 `science-research`. Twenty-odd prompts no focus can ever pull above baseline.
+`civic-process` is an eighth unweighted tag and does not join them: its four prompts all
+carry `governance`, so People and Power still reaches every one of them.
 
 **Two focuses are new.** Both come out of the tag work rather than the other way round.
 
@@ -2224,15 +2235,18 @@ new `pair` branch draws a captioned write-in line on the arrow, skipped when the
 empty — four bindings use it. LINES on the new `clocks` branch is the rule `lines` already
 uses.
 
-**Two schema facts decide sequencing.** `worksheet_layouts.kind` and `task_templates.tier`
-are CHECK constraints inside migrations that have already applied, and SQLite cannot alter
-a CHECK — the new kinds and the `fixed` tier both need a table rebuild before a single new
-form row will insert. A `fixed` column on `task_templates` is one `ALTER TABLE ADD COLUMN`
-and does the same job as the tier.
+**One schema fact decides sequencing, and it is not the CHECK constraints.**
+`worksheet_layouts.kind` and `task_templates.tier` are CHECKs inside migrations that have
+already applied and SQLite cannot alter a CHECK — but **Erase everything** on `/admin`
+drops every table and the migration ledger with them, so both files are edited in place
+and the database rebuilt (`DESIGN.md` §3). The ordering that remains is the real one: a
+form row must exist before a prompt can bind to it.
 
-**Three new tables**, all additive: `prompt_tags (prompt_key, namespace, tag)`,
-`focus_tags (focus, tag, weight)`, `learner_prompt_log (learner_id, prompt_key, drawn_on)`.
-The `namespace` column is the `topic` / `mode` split; add it now or re-tag 167 rows later.
+**Two new tables**, `prompt_tags (task_template_id, namespace, tag)` and
+`focus_tags (focus_id, tag, weight)`. The `namespace` column is the `topic` / `mode` split.
+`learner_prompt_log` is not one of them: `plan_tasks` joined to `month_plans` already
+answers when a learner last drew a prompt, and a log written at draw time would record
+prompts a redraw threw away and cool them down for nothing.
 
 **The draw engine changes shape, and it is the largest code change in v3.** Today
 `src/lib/draw.js` runs twice, once per week, over `task_focus_weights`. It becomes one
@@ -2263,8 +2277,9 @@ just what a page looks like.
 
 ## 7. Still open
 
-1. **`country_focus_affinity` rows for Who Gets What and Stories and Spirits.** Twenty
-   countries each, one line of reason apiece. Without them the app never recommends either.
+1. **`country_focus_affinity` rows for Who Lives Here, Who Gets What and Stories and
+   Spirits.** Twenty countries each, one line of reason apiece. Without them the app never
+   recommends any of the three. D-15, and slice 12 waits on it.
 2. **Sourcing on the six hardest prompts** — `the-group-that-gets-less`, `who-can-read`,
    `what-their-money-goes-to`, `is-the-law-kept`, `can-they-worship-freely`,
    `the-company-that-got-caught`. All have sources with a position. The sourcing footer
@@ -2279,8 +2294,6 @@ just what a page looks like.
    which would be the one new knob in v3.
 4. **Whether `emblems` should exist at all.** Four members, all in week 1, never drawn
    against. It is honest documentation and dead weight in the same row.
-5. **Whether `civic-process` should exist at all.** Its four prompts are a strict subset of
-   `governance`'s fifteen, so it adds no reach and only double-pays People and Power.
-6. **Twelve week-3-flavoured prompts, six each for Ancient World and Conflict and
+5. **Twelve week-3-flavoured prompts, six each for Ancient World and Conflict and
    Change.** The one piece of writing v3 still owes. Everything else in this document is a
    draw change or a seed.

@@ -6,7 +6,7 @@
 
 import { json } from '../lib/html.js';
 import { readJson } from '../lib/body.js';
-import { applyPending, resetMonth } from '../lib/migrations.js';
+import { applyPending, eraseAll, resetMonth } from '../lib/migrations.js';
 import { runSeed } from '../lib/seed.js';
 import { MIGRATIONS, SEEDS } from '../migrations/index.js';
 
@@ -50,5 +50,30 @@ export async function apiSeed(request, env) {
     return json(result, { status: result.ok ? 200 : 500 });
   } catch (err) {
     return json({ ok: false, files: [], inserted: {}, error: err.message }, { status: 500 });
+  }
+}
+
+export const ERASE_PHRASE = 'erase everything';
+
+// Erase everything (§3). Drops every table, `_migrations` included, so Apply
+// pending starts from nothing again.
+//
+// The typed confirmation is a fixed phrase and not the name of the thing being
+// destroyed, which is the opposite of Reset month above. The argument there —
+// a word you type every time stops being a confirmation — holds for a control
+// pressed against one of several plans while the others must survive. This one
+// takes the whole database or none of it, there is nothing to name, and it is
+// pressed while rebuilding the schema rather than during a month.
+export async function apiEraseAll(request, env) {
+  const body = await readJson(request);
+  if (String(body.confirm ?? '').trim().toLowerCase() !== ERASE_PHRASE) {
+    return json({ ok: false, error: `Type ${ERASE_PHRASE} to confirm.` }, { status: 400 });
+  }
+
+  try {
+    const result = await eraseAll(env.DB);
+    return json(result, { status: result.ok ? 200 : 500 });
+  } catch (err) {
+    return json({ ok: false, dropped: [], remaining: [], error: err.message }, { status: 500 });
   }
 }

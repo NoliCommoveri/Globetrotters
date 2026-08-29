@@ -13,10 +13,13 @@ moved to the answered list at the bottom of this file.
 Nothing blocking slice 11. Every question raised against a slice has been answered and
 written into `../design/DESIGN.md`.
 
-Four questions are raised against `../design/LIBRARY_v3.md` §7 and are listed there rather
-than here, because none of them blocks a slice that exists yet: whether *who published
-this* becomes a stretch line on the six hardest prompts, whether `storyboard` gains a
-CAPTION knob, and whether `emblems` and `civic-process` should exist at all.
+Three are raised against `../design/LIBRARY_v3.md` §7 and are listed there and in
+`../slices/12-the-library.md` rather than here, because they block slice 12 and nothing
+before it: whether *who published this* becomes a stretch line on the six hardest prompts,
+whether `storyboard` gains a CAPTION knob, and whether `emblems` should exist at all.
+`civic-process` was the fourth and slice 11 settles it — the tag stays on its four prompts
+and People and Power stops weighting it, because all four carry `governance` too and
+weighting both pays twice for the same rows.
 
 ---
 
