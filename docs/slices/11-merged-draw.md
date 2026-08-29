@@ -11,20 +11,20 @@ so a month is twenty again and a focus is never absent from a whole week of pape
 
 This slice is the draw engine, its schema, and everything else that read the weights it
 replaces. It is **not** the library it was designed for: `LIBRARY_v3.md` §2 holds 167
-week 1–3 prompts and 61 of them are seeded. Slice 12 lands the other 106 with their forms
-and renderers.
+week 1–3 prompts and 61 of them are seeded. Slices 12 to 20 land the other 106 — the forms
+and renderers first, because a binding points at a layout row that has to exist.
 
-**So half of this slice's behaviour cannot be measured until 12.** That was not a reason
+**So half of this slice's behaviour cannot be measured until 20.** That was not a reason
 to wait — the engine is pure, and a pool is a pool — but it decided how it is tested. The
 exit criteria below are in two lists: what a synthetic 153-row fixture proved here, and
-what only the real library can prove, in 12.
+what only the real library can prove, in 20.
 
 ---
 
 ## Due-outs
 
 None. The draw never reads `country_focus_affinity`; the country card's recommendation
-does, which is why **D-15 belongs to slice 12** and blocks nothing here. The three focuses
+does, which is why **D-15 belongs to slice 22** and blocks nothing here. The three focuses
 this slice seeds are pickable the day it lands and recommended when D-15 arrives.
 
 ## Open questions
@@ -97,18 +97,19 @@ one join; if it ever shows up hot, it is an index.
 `civic-process` from People and Power.
 
 **`prompt_tags`** — the `tags:` and `mode:` lines from `LIBRARY_v3.md` §2 for the 61 week
-1–3 prompts seeded, 145 topic rows and 32 mode rows. Slice 12 adds the rest as it adds the
-prompts they belong to; a prompt and its tags are never separated, because an untagged
+1–3 prompts seeded, 145 topic rows and 32 mode rows. Slices 16 to 20 add the rest as they
+add the prompts they belong to; a prompt and its tags are never separated, because an untagged
 prompt is drawn at baseline forever and nothing reports it.
 
-No `personal-voice` row is among them: all eight prompts carrying that mode are slice 12's.
+No `personal-voice` row is among them: all eight prompts carrying that mode are in slices
+16 to 20, and the two Voices prompts land in 20.
 The repair budget falls back to an ordinary wildcard when a mode has no candidate, so the
 month rule is satisfied by `cook-it`'s `hands-on` alone until the voices land.
 
 **Two pins.** `wow-fact` becomes tier `fixed`. **`cook-it` is seeded here** — the one
 prompt this slice writes, and it is structural rather than content: without it week 3 has
 no pin and the deal has no four-and-four to make. It lands with no worksheet binding, so
-it prints its prompt over ruled lines (`FALLBACK_LAYOUT`) until slice 12 writes the
+it prints its prompt over ruled lines (`FALLBACK_LAYOUT`) until slice 15 writes the
 `recipe` renderer. That is the state `004_worksheets.sql` was designed for.
 
 `workbook_page` stays on the row and is not read by the draw.
@@ -146,8 +147,8 @@ country shuffle, and two files called deal is one too many.
    count of the prompts above baseline — a count treats one weight-1 tag as worth a ×9 and
    gives back a third of what the merged pool buys. `wow-fact` joins week 2's four,
    `cook-it` week 3's. `nations-before-the-throne` and `hear-from-a-kid` are barred from
-   week 2 — both say *this month* in their wording. Neither is seeded until slice 12, so
-   the rule matches nothing until then and is written against the slug either way.
+   week 2 — both say *this month* in their wording. Neither is seeded until slices 19 and
+   20, so the rule matches nothing until then and is written against the slug either way.
 
 `plan_tasks.week_no` still holds 2 or 3 and `position` still orders within a week. Nothing
 downstream of the draw changes: This week, Plan, Passport, the wall and the worksheet
@@ -203,7 +204,7 @@ not depend on the library's size. The suite is 296 tests.
 - No mode tag appears twice in one month's weeks 2–3.
 - Every month holds at least one `hands-on` and at least one `personal-voice` prompt.
   Against the synthetic fixture, where both modes have members. The seeded library has no
-  `personal-voice` prompt to draw until slice 12, and the repair falls back rather than
+  `personal-voice` prompt to draw until slice 20, and the repair falls back rather than
   failing the draw.
 - A template drawn by a person in month *m* is not drawn for that person again before
   month *m+6*, and is still available to a sibling in month *m+1*.
@@ -211,10 +212,10 @@ not depend on the library's size. The suite is 296 tests.
 - The focus tab writes a tag weight, and the next draw reflects it with no deploy.
 - Erase everything, Apply pending, Run seed rebuilds the database and a month draws.
 
-### Proved in slice 12
+### Proved in slice 20
 
 Not soft-pedalled versions of the above — the same assertions against the real library,
-which is 49 drawable prompts until 12 lands and 153 after it.
+which is 49 drawable prompts today and 153 once slices 12 to 20 have landed.
 
 - **Nine months back to back for one person.** Against 49 drawable, the five-month cooldown
   blocks 40 by month six and leaves nine for a draw of eight: the stalest-back fallback
@@ -230,4 +231,4 @@ which is 49 drawable prompts until 12 lands and 153 after it.
 
 New prompts other than `cook-it`. New forms, new renderers, the `recipe` renderer,
 `country_focus_affinity` rows, and the twelve prompts Ancient World and Conflict and
-Change still owe. All of it is slice 12. This slice makes the draw able to use it.
+Change still owe. All of it is slices 12 to 22. This slice makes the draw able to use it.

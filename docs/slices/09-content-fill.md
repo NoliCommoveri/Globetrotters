@@ -130,7 +130,7 @@ assertion rather than a claim — the test that holds it is named.
   how many prompts a focus lifts above baseline, and it is one number over the
   merged pool rather than two over two weeks.
 - ✅ Every focus draws a whole month from the real seeded library —
-  `test/draw.test.js`. Slice 11's cooldown made a nine-month run a slice 12
+  `test/draw.test.js`. Slice 11's cooldown made a nine-month run a slice 20
   assertion: against 49 drawable it blocks forty by month six, which is a library
   size to fix and not a draw to weaken.
 - ✅ All six project types are selectable with a full week-4 sequence —

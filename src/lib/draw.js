@@ -58,8 +58,8 @@ export const BALANCE_MODES = ['hands-on', 'personal-voice'];
 
 // Both say "this month" in their wording, so they read wrong dealt into the
 // earlier week. They are ordinary drawn prompts — the constraint is on the
-// deal, not the draw. Neither is seeded until slice 12; the rule is written
-// against the slug and matches nothing until then.
+// deal, not the draw. Neither is seeded until slices 19 and 20; the rule is
+// written against the slug and matches nothing until then.
 export const LATE_ONLY = new Set(['nations-before-the-throne', 'hear-from-a-kid']);
 
 const modesOf = (t) => t.modes ?? [];
@@ -240,7 +240,7 @@ export function drawMerged({ pool, pins, focusWeight, monthsSince, random = Math
   // first draws from `hands-on` candidates only, and the second does the same
   // for `personal-voice`. A mode already taken is a prompt already carrying it,
   // so a repair the pins have already made is skipped. A mode nothing in the
-  // pool carries — `personal-voice`, until slice 12 writes the voices — falls
+  // pool carries — `personal-voice`, until slice 20 writes the voices — falls
   // back to an ordinary wildcard rather than failing the draw.
   for (let n = 0; n < WILDCARDS; n += 1) {
     let candidates = allowed(remaining, seats, taken);

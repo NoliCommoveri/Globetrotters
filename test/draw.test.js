@@ -10,7 +10,7 @@
 // seed is used for the numbers that do not depend on the library's size.
 //
 // The rest of it — nine months back to back, the on-theme coverage, the paper
-// numbers — is slice 12's, and it is not soft-pedalled here. Against the 49
+// numbers — is slice 20's, and it is not soft-pedalled here. Against the 49
 // drawable prompts seeded today the five-month cooldown blocks 40 by month six
 // and the stalest-back fallback stops being a safety valve, which is a reason to
 // finish the library rather than to assert a weaker version of the number.
@@ -496,7 +496,7 @@ test('the stalest goes back rather than erroring when a cooldown empties the poo
 // drawable prompts is a third of what the cooldown is sized for, so this asserts
 // what does not depend on the library's size: a month is twenty, no prompt is
 // drawn twice, and the pins are where they belong. The nine-month run is
-// slice 12's, against the library it was measured for.
+// slice 20's, against the library it was measured for.
 test('every focus draws a whole month from the real seeded library', () => {
   const db = new DatabaseSync(':memory:');
   for (const file of ['001_schema.sql', '002_seed.sql', '004_worksheets.sql',

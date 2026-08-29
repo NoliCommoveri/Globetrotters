@@ -1061,7 +1061,7 @@ response cannot be rendered by a later change to the client that forgot why.
 
 **Status:** partial · slice 09 built all of it. The three focuses with no
 `country_focus_affinity` rows — `who-lives-here`, `who-gets-what`,
-`stories-and-spirits` — are recommended on no country card until D-15 lands in slice 12.
+`stories-and-spirits` — are recommended on no country card until D-15 lands in slice 22.
 
 The picker is only as good as what it can tell you about a country. This does not
 require a recommendation engine — it requires a column. All of it is generated once,
@@ -1290,8 +1290,9 @@ countries, **91 task templates**, 65 focus tags and 177 prompt tags,
 `003_country_data.sql`'s 222 hooks and 200 affinities across 100 countries
 (slices 02, 09 and 11), and `005_worksheet_layouts.sql`'s twelve printed forms
 with a binding on every week 1–3 template and on each project type's planning
-step (slice 10). What remains is slice 12: the 106 prompts and 19 forms
-`LIBRARY_v3.md` §2 still holds only as a document, and the three new focuses'
+step (slice 10). What remains is slices 12 to 22: the 106 prompts and 19 forms
+`LIBRARY_v3.md` §2 still holds only as a document, the twelve prompts Ancient
+World and Conflict and Change are owed, and the three new focuses'
 `country_focus_affinity` rows (D-15).
 
 Seed files are not migrations (§3). They live beside them in `/src/migrations/`
@@ -1334,7 +1335,7 @@ Contents of `002_seed.sql`:
   grader; each project type a freeform "what you'll need" the week-4 gather task
   points at. `who-lives-here`, `who-gets-what` and `stories-and-spirits` have no
   `country_focus_affinity` rows yet (D-15): pickable from the list, never
-  recommended on a country card until slice 12 writes them.
+  recommended on a country card until slice 22 writes them.
 - **195 countries** with continent, region and `research_depth`, unadorned here —
   hooks and affinities are `003`, which also corrects the adventure level on the
   countries whose hooks proved the first pass wrong. The conflict key is `iso3`,
@@ -1356,7 +1357,7 @@ Contents of `002_seed.sql`:
 
 The week column is the prompt's **natural half**, not a draw pool: nothing in the
 draw reads it and only the deal's arc preference does (§4). `LIBRARY_v3.md` takes
-weeks 1–3 to 12 / 86 / 69 — 106 prompts still to write, and that is slice 12.
+weeks 1–3 to 12 / 86 / 69 — 106 prompts still to write, and that is slices 16 to 20.
 Against the 49 drawable seeded today the cooldown blocks 40 by month six and the
 stalest-back fallback becomes the mechanism, which is a reason to finish the
 library rather than to soften the number.
@@ -1377,8 +1378,8 @@ no weight-0 and no way to exclude: the assertion the per-week draw needed is gon
 with it, and what replaces it is one on the merged pool. Every focus lifts at
 least six of the drawable prompts above baseline — a smoke floor against a
 mistyped tag set, which is this seed's one silent failure. The target is
-`LIBRARY_v3.md` §3's ten on-theme prompts per focus, and it is slice 12's to
-reach.
+`LIBRARY_v3.md` §3's ten on-theme prompts per focus, and slices 16 to 21 reach
+it.
 
 **Every week 1–3 template is bound to one of the twelve layouts**, in
 `005_worksheet_layouts.sql` (§16). The heights are the load-bearing half: a
@@ -1622,8 +1623,8 @@ the code that depends on them is written, never guessed.
 ## 16. Printed worksheets
 
 **Status:** partial · slice 10 built the route, the packer, the twelve forms and the
-layout editor. `LIBRARY_v3.md` needs twenty-seven, so slice 12 adds nineteen layout rows
-and ten renderer branches.
+layout editor. `LIBRARY_v3.md` needs twenty-seven, so slices 12 to 15 add nineteen layout
+rows and ten renderer branches, and retire three forms.
 
 The physical looseleaf workbook is the point of the project (§1, §7). Twenty
 tasks a month arrive as prompts on a phone and land on paper the kid has to
