@@ -1,6 +1,6 @@
 # Slice 12 — Forms: boxes, venn, chart, map
 
-**Status:** not started
+**Status:** built
 **Band:** L
 **Implements:** §16 (five of the nineteen forms), §13 (the bindings they take)
 **Depends on:** 11
@@ -52,7 +52,7 @@ one mode tag. Slice 16 owns that subject heading and skips this one row.
 
 ## Due-outs
 
-None. D-15 belongs to slice 21 and blocks nothing here.
+None. D-15 belongs to slice 22 and blocks nothing here.
 
 ## Open questions
 

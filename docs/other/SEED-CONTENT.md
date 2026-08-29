@@ -3,7 +3,7 @@
 The six hand-written lists in the seed files — countries, task templates, prompt tags
 and focus tags in `002_seed.sql`, hooks and focus affinities in
 `003_country_data.sql` — and the rules a row has to satisfy. All six are
-seeded: 195 countries, 91 templates, 177 prompt tags, 65 focus tags, and 222 hooks and
+seeded: 195 countries, 92 templates, 180 prompt tags, 65 focus tags, and 222 hooks and
 200 affinities across 100 countries. This is the reference for **adding** to them, which
 is what slices 16 to 20 do 106 more times.
 
@@ -54,17 +54,17 @@ order, and a build session turns it into the rows above.
 
 ## Task templates
 
-**91 rows**, distributed exactly.
+**92 rows**, distributed exactly.
 
 | Week | Rows | What they are |
 |---|---|---|
 | 1 | 10 | 4 `core` — flag, map, location/borders, language & writing system — always drawn. Plus 6 that compete for the 5th slot: stats, symbols, currency, time, size, anthem. |
-| 2 | 26 | History, government, law, land, climate, ecology, farming, trade, prehistory, plus the pinned `wow-fact`. |
+| 2 | 27 | History, government, law, land, climate, ecology, farming, trade, prehistory, plus the pinned `wow-fact`. |
 | 3 | 25 | People, religion, daily life for kids and women, food, art, music, sport, landmarks, plus the pinned `cook-it`. |
 | 4 | 30 | Five for each of the six project types, in order: choose · gather · build · build · rehearse & present. |
 
 **The week column is the prompt's natural half, not a draw pool.** Weeks 2 and 3 are
-one pool of 51 — 49 drawable and the two pins — and eight come out of it and are dealt
+one pool of 52 — 50 drawable and the two pins — and eight come out of it and are dealt
 four and four. Nothing in the draw reads `week_theme`; only the deal's arc preference
 does, which leans a natural week 2 toward the earlier week when nothing more important
 is at stake (DESIGN.md §4).
@@ -78,10 +78,10 @@ the draw is not what runs out. Ten tasks come out of the merged pool however man
 in it, so a deeper pool costs the kid nothing and only buys variety.
 
 What runs out is the **cooldown**. A prompt drawn for a learner rests five months, and
-eight a month against 49 drawable blocks forty by month six — at which point the
+eight a month against 50 drawable blocks forty by month six — at which point the
 stalest-back fallback stops being a safety valve and becomes the mechanism. The number
 is sized for the 153 `LIBRARY_v3.md` §2 specifies, and closing that gap is the whole of
-slices 12 to 20.
+slices 13 to 20.
 
 **Five templates carry the family's Sabbath and Kingdom lens** — two in week 2,
 three in week 3 (DESIGN.md §13). A new one is written the same way the other
@@ -123,7 +123,7 @@ Paste-ready form:
 
 ## Prompt tags
 
-177 rows over the 61 seeded week 1–3 prompts — 145 `topic` and 32 `mode`. **A prompt
+180 rows over the 62 seeded week 1–3 prompts — 147 `topic` and 33 `mode`. **A prompt
 and its tags are written in the same edit, always.** An untagged prompt is drawn at
 baseline forever and nothing reports it, so `test/seed-content.test.js` fails on one
 rather than letting it through.

@@ -50,6 +50,13 @@ const text = (max, fallback) => tag((raw) => {
   return value || fallback;
 }, { type: 'text', max });
 
+const bool = (fallback) => tag((raw) => (typeof raw === 'boolean' ? raw : fallback), { type: 'bool' });
+
+const choice = (options, fallback) => tag(
+  (raw) => (typeof raw === 'string' && options.includes(raw) ? raw : fallback),
+  { type: 'choice', options },
+);
+
 // Every knob every kind has, and the whole of it. A key not named here does not
 // reach a page.
 export const KINDS = {
@@ -77,6 +84,37 @@ export const KINDS = {
     labels: strings(0, 16, []),
   },
   storyboard: { panels: int(2, 8, 6) },
+  boxes: {
+    boxes: int(2, 6, 4),
+    caption: text(80, ''),
+    label_lines: int(0, 3, 1),
+    circle_one: bool(false),
+  },
+  venn: {
+    labels: strings(2, 2, ['There', 'Here']),
+    shared: text(40, 'Both'),
+    lines_each: int(1, 6, 3),
+  },
+  // Shared by `bar-graph` (mode: bars) and `scale-strip` (mode: scale) — one
+  // renderer, two heights, because a bar chart and a scale strip are the same
+  // idea at different sizes rather than two things (LIBRARY_v3.md §1).
+  chart: {
+    mode: choice(['bars', 'scale'], 'bars'),
+    orient: choice(['vertical', 'horizontal'], 'vertical'),
+    bars: int(2, 8, 5),
+    scale_marks: int(2, 8, 5),
+    marks: int(2, 5, 2),
+    unit: text(30, ''),
+    axis_label: text(60, ''),
+    caption: text(120, ''),
+    captions: strings(2, 4, ['', '']),
+  },
+  map: {
+    caption: text(80, ''),
+    // Never 1 — a numbered key with one entry is a caption wearing a costume
+    // (LIBRARY_v3.md §1).
+    pins: int(2, 6, 5),
+  },
 };
 
 export const KIND_NAMES = Object.keys(KINDS);
@@ -190,6 +228,74 @@ const RENDER = {
       (_, i) => `<li><span class="panel-no">${i + 1}</span></li>`,
     ).join('');
     return `<ol class="storyboard">${panels}</ol>`;
+  },
+
+  // Several small drawing boxes, one ruled label line under each. CIRCLE_ONE
+  // adds a foot instruction rather than deciding which box it points at — the
+  // prompt above the segment says which one (LIBRARY_v3.md §1).
+  boxes: (spec) => {
+    const caption = spec.caption ? `<p class="boxes-caption">${escapeHtml(spec.caption)}</p>` : '';
+    const cells = Array.from({ length: spec.boxes }, () => {
+      const label = spec.label_lines > 0
+        ? `<div class="boxes-label">${'<i></i>'.repeat(spec.label_lines)}</div>` : '';
+      return `<li><div class="ink"></div>${label}</li>`;
+    }).join('');
+    const hint = spec.circle_one ? '<p class="boxes-hint">Circle the one that&hellip;</p>' : '';
+    return `<div class="boxes">${caption}<ul class="boxes-grid">${cells}</ul>${hint}</div>`;
+  },
+
+  // Two overlapping circles: a labelled lobe each and a labelled overlap, three
+  // ruled zones so the answer lands in the zone it belongs to rather than in
+  // one shared column (LIBRARY_v3.md §1).
+  venn: (spec) => {
+    const zone = (cls, n) => `<div class="venn-zone ${cls}">${'<i></i>'.repeat(n)}</div>`;
+    return `<div class="venn">
+<div class="venn-diagram">
+<div class="venn-circle left"></div>
+<div class="venn-circle right"></div>
+<span class="venn-label left">${escapeHtml(spec.labels[0])}</span>
+<span class="venn-label right">${escapeHtml(spec.labels[1])}</span>
+<span class="venn-label shared">${escapeHtml(spec.shared)}</span>
+${zone('left', spec.lines_each)}
+${zone('shared', spec.lines_each)}
+${zone('right', spec.lines_each)}
+</div>
+</div>`;
+  },
+
+  // `mode: "bars"` draws n empty bars against a scale; `mode: "scale"` draws
+  // one strip with write-in markers. One renderer, because a bar chart and a
+  // scale strip are the same idea at two sizes (LIBRARY_v3.md §1).
+  chart: (spec) => {
+    if (spec.mode === 'scale') {
+      const marks = Array.from({ length: spec.marks }, (_, i) => {
+        const caption = spec.captions[i] ? escapeHtml(spec.captions[i]) : '';
+        return `<li><span class="scale-tick"></span><span class="scale-write"></span><span class="scale-caption">${caption}</span></li>`;
+      }).join('');
+      const unit = spec.unit ? `<p class="chart-unit">${escapeHtml(spec.unit)}</p>` : '';
+      return `<div class="chart chart-scale chart-${spec.orient}"><ol class="scale-marks">${marks}</ol>${unit}</div>`;
+    }
+    const grid = '<i></i>'.repeat(spec.scale_marks);
+    const bars = Array.from({ length: spec.bars }, () => '<li><div class="chart-bar"></div></li>').join('');
+    const axis = spec.axis_label ? `<p class="chart-axis-label">${escapeHtml(spec.axis_label)}</p>` : '';
+    const caption = spec.caption ? `<p class="chart-caption">${escapeHtml(spec.caption)}</p>` : '';
+    return `<div class="chart chart-bars chart-${spec.orient}">
+<div class="chart-plot"><div class="chart-grid">${grid}</div><ul class="chart-bars-row">${bars}</ul></div>
+${axis}${caption}</div>`;
+  },
+
+  // A large box framed as the country, with numbered pin circles down the side
+  // and one ruled line each — the same shape as `box` with `callouts`, but
+  // numbered rather than blank, because every pin is a place to name
+  // (LIBRARY_v3.md §1).
+  map: (spec) => {
+    const caption = spec.caption ? `<figcaption>${escapeHtml(spec.caption)}</figcaption>` : '';
+    const box = `<figure class="box map-box"><div class="ink"></div>${caption}</figure>`;
+    const pins = Array.from(
+      { length: spec.pins },
+      (_, i) => `<li><span class="pin">${i + 1}</span><span class="lead"></span></li>`,
+    ).join('');
+    return `<div class="beside map">${box}<ol class="callouts map-pins">${pins}</ol></div>`;
   },
 };
 

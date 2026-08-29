@@ -19,15 +19,15 @@ const SEEDS = [{ id: '002', name: '002_seed.sql', sql: read('002_seed.sql') }];
 
 const CONTINENTS = ['Africa', 'Asia', 'Europe', 'North America', 'South America', 'Oceania'];
 
-// Week 1 draws 4 core + 1 from the other six. Weeks 2 and 3 are one pool of 51
-// — 49 drawable and two pinned — and eight come out of it. Week 4 is one
+// Week 1 draws 4 core + 1 from the other six. Weeks 2 and 3 are one pool of 52
+// — 50 drawable and two pinned — and eight come out of it. Week 4 is one
 // project type's five, in order, and all six are filled.
 //
 // The counts by natural half are lopsided by one because `wow-fact` is pinned
 // to week 2 and `cook-it` to week 3, and `week_theme` is the prompt's natural
 // half rather than a draw pool. Nothing in the draw reads these numbers; the
 // deal's arc preference is the only thing that does.
-const WEEK_SIZES = { 1: 10, 2: 26, 3: 25, 4: 30 };
+const WEEK_SIZES = { 1: 10, 2: 27, 3: 25, 4: 30 };
 
 // The seven mode tags. A month draws at most one prompt carrying each, and it
 // draws at least one `hands-on` and one `personal-voice` — so a mode tag
@@ -36,7 +36,7 @@ const MODE_TAGS = ['us-contrast', 'demographics-stat', 'measurement', 'hands-on'
                    'map-work', 'personal-voice', 'scripture-read'];
 
 // A smoke floor, not the target. LIBRARY_v3.md §3 puts a finished focus at
-// 41-66 prompts above baseline and 10-40 on-theme; against the 49 drawable
+// 41-66 prompts above baseline and 10-40 on-theme; against the 50 drawable
 // prompts seeded today the thinnest lifts nine. Six is low enough to have
 // headroom and high enough that a mistyped tag set — the one silent failure in
 // this file — fails here rather than three months into a school year.
@@ -78,7 +78,7 @@ test('195 countries, each with a real continent and an adventure level', () => {
   assert.equal(new Set(countries.map((c) => c.iso3)).size, countries.length, 'duplicate iso3');
 });
 
-test('91 task templates, distributed 10 / 26 / 25 / 30', () => {
+test('92 task templates, distributed 10 / 27 / 25 / 30', () => {
   const counts = Object.fromEntries(
     rows('SELECT week_theme, COUNT(*) AS n FROM task_templates GROUP BY week_theme')
       .map((r) => [r.week_theme, r.n]),
@@ -179,7 +179,7 @@ test('every focus weights its tags 1 to 3 and reaches enough of the pool to matt
   for (const focus of focuses) {
     const got = reach.get(focus.id) ?? 0;
     assert.ok(got >= MIN_REACH,
-      `${focus.slug} lifts ${got} of the 49 drawable prompts above baseline, needs ${MIN_REACH}` +
+      `${focus.slug} lifts ${got} of the 50 drawable prompts above baseline, needs ${MIN_REACH}` +
       ' — below that, picking it is much the same as picking nothing');
   }
 

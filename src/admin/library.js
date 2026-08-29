@@ -757,6 +757,15 @@ function knobField(kind, key, meta, spec, onchange) {
       onchange(key, input.value.split(',').map(function (v) { return v.trim(); })
         .filter(function (v) { return v.length; }));
     });
+  } else if (meta.type === 'bool') {
+    input = el('input', { type: 'checkbox' });
+    input.checked = value === true;
+    input.addEventListener('change', function () { onchange(key, input.checked); });
+  } else if (meta.type === 'choice') {
+    input = el('select', {}, (meta.options || []).map(function (o) {
+      return option(o, o, o === value);
+    }));
+    input.addEventListener('change', function () { onchange(key, input.value); });
   } else {
     input = el('input', { type: 'text', style: 'width:16rem',
       value: value === undefined || value === null ? '' : String(value) });

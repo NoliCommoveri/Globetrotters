@@ -32,7 +32,7 @@ const load = (env, id) =>
 export const kindKnobs = () => Object.fromEntries(
   Object.entries(KINDS).map(([kind, schema]) => [kind, Object.fromEntries(
     Object.entries(schema).map(([key, read]) => [key, {
-      type: read.type, min: read.min, max: read.max,
+      type: read.type, min: read.min, max: read.max, options: read.options,
     }])
   )])
 );

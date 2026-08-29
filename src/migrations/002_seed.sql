@@ -344,7 +344,7 @@ FROM (
    1, 'flag', 'core', NULL, NULL),
 
   ('map-outline', 'Trace the map and capital',
-   'Find a map of your country and trace its outline into your workbook. Mark a star where the capital city is and write its name next to it.',
+   'Find a map of your country and trace its outline big enough to fill the box. Then mark three places on it and number them: the capital, the biggest city that isn''t the capital, and one edge — a coast, a mountain range, a border you''d notice.',
    1, 'map', 'core', NULL, NULL),
 
   ('neighbors-list', 'Find who your country borders',
@@ -399,7 +399,7 @@ FROM (
    2, 'land', 'focus', NULL, NULL),
 
   ('weather-there-now', 'Check the weather there today',
-   'Look up the weather in the capital city right now. Write the temperature and compare it to your own weather today.',
+   'Look up the temperature in their capital city right now and the temperature where you are. Mark both on the thermometer and label each mark.',
    2, 'climate', 'focus', NULL, NULL),
 
   ('wild-animal', 'Draw a wild animal',
@@ -420,6 +420,10 @@ FROM (
 
   ('made-here', 'Find something made there',
    'Find one thing this country makes and sells to the rest of the world. Write down what it is, then check your own house for anything made there.',
+   2, 'money', 'focus', NULL, NULL),
+
+  ('what-work-pays', 'What a week of work buys',
+   'Find out what an ordinary job there pays in a week. Then find what bread, a bus ride and a pair of shoes cost there. Work out how many of each a week''s pay buys, and draw a bar for each one.',
    2, 'money', 'focus', NULL, NULL),
 
   ('border-that-moved', 'Find a border that moved',
@@ -450,15 +454,15 @@ FROM (
    2, 'government', 'focus', NULL, NULL),
 
   ('river-that-matters', 'Follow their biggest river',
-   'Find the biggest river or lake in the country. Trace where it starts and where it ends, and write down one town that sits on it.',
+   'Find the longest river in the country. Draw its whole path on the map, then number and name three places on it: where it starts, where it ends, and one town that sits on it. If the country''s biggest water is a lake instead, draw the lake and the rivers that feed it.',
    2, 'land', 'focus', NULL, NULL),
 
-  ('highest-point', 'Find the highest place',
-   'Find the highest mountain or hill in the country and how high it is. Then write down something near you that is about that tall, so you can picture it.',
+  ('highest-point', 'How far from the bottom to the top',
+   'Find the highest point in this country and the lowest — some countries have ground that sits below the sea. Mark both on the scale, and mark sea level between them. Then write which of the two more people live near, and why.',
    2, 'land', 'focus', NULL, NULL),
 
   ('under-the-ground', 'Find out what they dig up',
-   'Find out what people take out of the ground there: oil, copper, salt, diamonds, or not much at all. Write down what it gets used for.',
+   'Find out what people take out of the ground there: oil, copper, salt, diamonds, stone, sand. Draw four of them and write what each one gets used for. If they only dig up one or two, fill the empty boxes with what they have to buy from somewhere else instead.',
    2, 'land', 'focus', NULL, NULL),
 
   ('desert-shall-blossom', 'Find the land that needs healing',
@@ -470,7 +474,7 @@ FROM (
    2, 'climate', 'focus', NULL, NULL),
 
   ('tree-that-grows', 'Find a tree that grows there',
-   'Find one tree or plant that grows well in this country. Draw a leaf from it, and write one thing people there make or eat from it.',
+   'Find one tree or plant that grows well in this country. Draw a leaf from it, draw its fruit or its seed, and draw one thing people there make or eat from it.',
    2, 'ecology', 'focus', NULL, NULL),
 
   ('oldest-thing-here', 'Find the oldest thing they keep',
@@ -494,7 +498,7 @@ FROM (
    3, 'food', 'focus', NULL, NULL),
 
   ('animals-on-the-menu', 'Find the animals they eat',
-   'Find out which animals people raise or catch for food in this country. Write down one that people where you live eat too, and one that they don''t. Different isn''t gross, just different.',
+   'Find out which animals people raise or catch for food in this country. Write the ones only they eat on their side, the ones only you eat on yours, and the ones both of you eat in the middle. Different isn''t gross, just different.',
    3, 'food', 'focus', NULL, NULL),
 
   ('story-they-tell', 'Find a story they tell',
@@ -510,7 +514,7 @@ FROM (
    3, 'culture', 'focus', NULL, NULL),
 
   ('craft-of-the-land', 'Find their craft or art',
-   'Find one traditional art or craft from this country: weaving, pottery, painting, carving. Find a picture and draw your own version of the pattern.',
+   'Find one traditional art or craft from this country: weaving, pottery, painting, carving. Find a picture of the pattern and draw it four times, the way it would repeat across a real rug, pot or cloth. Label the colors.',
    3, 'culture', 'focus', NULL, NULL),
 
   ('sound-of-the-country', 'Listen to their music',
@@ -569,11 +573,11 @@ FROM (
    3, 'culture', 'focus', NULL, NULL),
 
   ('breakfast-there', 'Eat their breakfast',
-   'Find out what people eat for breakfast in this country. Draw the plate, and write down whether you would eat it.',
+   'Find out what people eat for breakfast in this country. Write what is on their plate on their side, what is on yours on yours, and anything that turns up on both in the middle.',
    3, 'food', 'focus', NULL, NULL),
 
   ('market-day', 'Walk through their market',
-   'Find a photo of a market in this country. List five things being sold in it, and circle the one you have never seen for sale where you live.',
+   'Find a photo of a market in this country. Draw four things being sold in it and label each one, then circle the one you have never seen for sale where you live.',
    3, 'food', 'focus', NULL, NULL),
 
   ('cook-it', 'Cook one thing from your country',
@@ -797,6 +801,9 @@ FROM (
   ('made-here',               'topic', 'trade'),
   ('made-here',               'topic', 'work-and-money'),
   ('made-here',               'mode', 'hands-on'),
+  ('what-work-pays',          'topic', 'work-and-money'),
+  ('what-work-pays',          'topic', 'public-money'),
+  ('what-work-pays',          'mode', 'us-contrast'),
   ('border-that-moved',       'topic', 'conflict-history'),
   ('border-that-moved',       'topic', 'empire-and-rule'),
   ('border-that-moved',       'topic', 'landform'),

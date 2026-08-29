@@ -1,11 +1,11 @@
--- 005_worksheet_layouts.sql — the twelve printed forms, and which task wants
+-- 005_worksheet_layouts.sql — the printed forms, and which task wants
 -- which one (DESIGN.md §16, §13).
 --
 -- A seed, not a migration: Run seed re-executes it on every press, every insert
 -- is ON CONFLICT DO NOTHING, and every binding is guarded on the column still
 -- being empty. A layout retuned in the library editor and a binding changed
 -- there both survive every future press, which is the whole point of there
--- being twelve forms rather than ninety worksheets.
+-- being seventeen forms rather than ninety worksheets.
 --
 -- The table and the two columns come from 004_worksheets.sql, which is a
 -- migration and applies once. Pressing Run seed before Apply pending fails on
@@ -22,7 +22,9 @@
 -- change anything else about a form.
 
 -- ---------------------------------------------------------------------------
--- The twelve forms.
+-- The forms. Twelve from slice 10, plus the five slice 12 adds:
+-- `specimen-boxes`, `venn`, `bar-graph`, `scale-strip`, `map-marks`
+-- (LIBRARY_v3.md §1).
 -- ---------------------------------------------------------------------------
 INSERT INTO worksheet_layouts (slug, name, kind, height_thirds, spec) VALUES
   ('lines-4', 'Four ruled lines', 'lines', 1,
@@ -48,7 +50,17 @@ INSERT INTO worksheet_layouts (slug, name, kind, height_thirds, spec) VALUES
   ('checklist', 'Check-off list', 'checklist', 1,
    '{"items":8,"labels":[]}'),
   ('storyboard', 'Six-panel storyboard', 'storyboard', 2,
-   '{"panels":6}')
+   '{"panels":6}'),
+  ('specimen-boxes', 'Several boxes, each labelled', 'boxes', 2,
+   '{"boxes":4,"caption":"","label_lines":1,"circle_one":false}'),
+  ('venn', 'The overlap', 'venn', 2,
+   '{"labels":["There","Here"],"shared":"Both","lines_each":3}'),
+  ('bar-graph', 'A bar for each number', 'chart', 2,
+   '{"mode":"bars","orient":"vertical","bars":5,"scale_marks":5,"marks":2,"unit":"","axis_label":"","caption":"","captions":["",""]}'),
+  ('scale-strip', 'A scale with write-in marks', 'chart', 1,
+   '{"mode":"scale","orient":"vertical","bars":5,"scale_marks":5,"marks":2,"unit":"","axis_label":"","caption":"","captions":["",""]}'),
+  ('map-marks', 'The country itself, numbered pins', 'map', 2,
+   '{"caption":"","pins":5}')
 ON CONFLICT (slug) DO NOTHING;
 
 -- ---------------------------------------------------------------------------
@@ -73,7 +85,7 @@ WHERE worksheet_layout_id IS NULL AND slug IN (
   'desert-shall-blossom', 'border-that-moved', 'what-they-grow',
   'feast-they-keep', 'holiday-they-mark', 'sabbath-keepers-there',
   'sound-of-the-country', 'wow-fact', 'tonights-dinner', 'getting-around',
-  'their-rest-day', 'girls-and-women', 'game-kids-play', 'animals-on-the-menu'
+  'their-rest-day', 'girls-and-women', 'game-kids-play'
 );
 
 UPDATE task_templates SET worksheet_layout_id =
@@ -85,7 +97,7 @@ WHERE worksheet_layout_id IS NULL AND slug IN (
 UPDATE task_templates SET worksheet_layout_id =
   (SELECT id FROM worksheet_layouts WHERE slug = 'box-caption')
 WHERE worksheet_layout_id IS NULL AND slug IN (
-  'map-outline', 'national-symbol',
+  'national-symbol',
   'wild-animal', 'ancient-site',
   'place-of-worship', 'house-they-live-in'
 );
@@ -93,11 +105,11 @@ WHERE worksheet_layout_id IS NULL AND slug IN (
 UPDATE task_templates SET worksheet_layout_id =
   (SELECT id FROM worksheet_layouts WHERE slug = 'box-beside')
 WHERE worksheet_layout_id IS NULL AND slug IN (
-  'flag-draw', 'currency-animal', 'river-that-matters',
-  'animal-in-trouble', 'tree-that-grows', 'wild-place-protected', 'who-leads',
+  'flag-draw', 'currency-animal',
+  'animal-in-trouble', 'wild-place-protected', 'who-leads',
   'made-here', 'before-history', 'oldest-thing-here',
-  'the-sport-they-love', 'breakfast-there', 'life-outdoors', 'who-is-famous',
-  'landmark-to-see', 'what-they-wear', 'craft-of-the-land'
+  'the-sport-they-love', 'life-outdoors', 'who-is-famous',
+  'landmark-to-see', 'what-they-wear'
 );
 
 UPDATE task_templates SET worksheet_layout_id =
@@ -111,12 +123,6 @@ WHERE worksheet_layout_id IS NULL AND slug IN (
 );
 
 UPDATE task_templates SET worksheet_layout_id =
-  (SELECT id FROM worksheet_layouts WHERE slug = 'table-3')
-WHERE worksheet_layout_id IS NULL AND slug IN (
-  'under-the-ground', 'market-day'
-);
-
-UPDATE task_templates SET worksheet_layout_id =
   (SELECT id FROM worksheet_layouts WHERE slug = 'timeline')
 WHERE worksheet_layout_id IS NULL AND slug IN (
   'independence-day', 'war-that-changed', 'who-ruled-before', 'kid-life'
@@ -125,7 +131,7 @@ WHERE worksheet_layout_id IS NULL AND slug IN (
 UPDATE task_templates SET worksheet_layout_id =
   (SELECT id FROM worksheet_layouts WHERE slug = 'figures')
 WHERE worksheet_layout_id IS NULL AND slug IN (
-  'how-many-people', 'weather-there-now', 'highest-point'
+  'how-many-people'
 );
 
 UPDATE task_templates SET worksheet_layout_id =
@@ -142,15 +148,76 @@ WHERE worksheet_layout_id IS NULL AND slug IN (
   'museum-choose', 'zine-choose'
 );
 
+UPDATE task_templates SET worksheet_layout_id =
+  (SELECT id FROM worksheet_layouts WHERE slug = 'specimen-boxes')
+WHERE worksheet_layout_id IS NULL AND slug IN (
+  'under-the-ground', 'tree-that-grows', 'craft-of-the-land', 'market-day'
+);
+
+UPDATE task_templates SET worksheet_layout_id =
+  (SELECT id FROM worksheet_layouts WHERE slug = 'venn')
+WHERE worksheet_layout_id IS NULL AND slug IN (
+  'breakfast-there', 'animals-on-the-menu'
+);
+
+UPDATE task_templates SET worksheet_layout_id =
+  (SELECT id FROM worksheet_layouts WHERE slug = 'scale-strip')
+WHERE worksheet_layout_id IS NULL AND slug IN (
+  'highest-point', 'weather-there-now'
+);
+
+UPDATE task_templates SET worksheet_layout_id =
+  (SELECT id FROM worksheet_layouts WHERE slug = 'map-marks')
+WHERE worksheet_layout_id IS NULL AND slug IN (
+  'map-outline', 'river-that-matters'
+);
+
+UPDATE task_templates SET worksheet_layout_id =
+  (SELECT id FROM worksheet_layouts WHERE slug = 'bar-graph')
+WHERE worksheet_layout_id IS NULL AND slug IN (
+  'what-work-pays'
+);
+
 -- Per-template overrides. The knobs a form exposes are the knobs a task is
--- allowed to lean on, and these are the four places where the generic caption
--- would send a kid to the phone to find out what to draw.
+-- allowed to lean on, and these are the places where the layout's generic
+-- default would send a kid to the phone to find out what to draw.
 UPDATE task_templates SET worksheet_spec = '{"caption":"Their flag, in their colors"}'
   WHERE worksheet_spec IS NULL AND slug = 'flag-draw';
-UPDATE task_templates SET worksheet_spec = '{"caption":"The outline, with the capital starred"}'
-  WHERE worksheet_spec IS NULL AND slug = 'map-outline';
 UPDATE task_templates SET worksheet_spec =
   '{"captions":["People","Square miles","One more number"]}'
   WHERE worksheet_spec IS NULL AND slug = 'how-many-people';
 UPDATE task_templates SET worksheet_spec = '{"columns":["Hello","How it sounds"]}'
   WHERE worksheet_spec IS NULL AND slug = 'language-hello';
+
+UPDATE task_templates SET worksheet_spec = '{"caption":"What comes out of their ground"}'
+  WHERE worksheet_spec IS NULL AND slug = 'under-the-ground';
+UPDATE task_templates SET worksheet_spec =
+  '{"boxes":3,"caption":"The leaf, the fruit, and what they make"}'
+  WHERE worksheet_spec IS NULL AND slug = 'tree-that-grows';
+UPDATE task_templates SET worksheet_spec = '{"caption":"The same pattern, four times"}'
+  WHERE worksheet_spec IS NULL AND slug = 'craft-of-the-land';
+UPDATE task_templates SET worksheet_spec =
+  '{"caption":"Four things for sale","circle_one":true}'
+  WHERE worksheet_spec IS NULL AND slug = 'market-day';
+
+UPDATE task_templates SET worksheet_spec =
+  '{"labels":["Their breakfast","Our breakfast"]}'
+  WHERE worksheet_spec IS NULL AND slug = 'breakfast-there';
+UPDATE task_templates SET worksheet_spec = '{"labels":["They eat","We eat"]}'
+  WHERE worksheet_spec IS NULL AND slug = 'animals-on-the-menu';
+
+UPDATE task_templates SET worksheet_spec =
+  '{"marks":3,"unit":"feet above sea level","captions":["Their highest point","Sea level","Their lowest ground"]}'
+  WHERE worksheet_spec IS NULL AND slug = 'highest-point';
+UPDATE task_templates SET worksheet_spec =
+  '{"unit":"°F","captions":["Their weather","Our weather"]}'
+  WHERE worksheet_spec IS NULL AND slug = 'weather-there-now';
+
+UPDATE task_templates SET worksheet_spec = '{"caption":"Your country","pins":3}'
+  WHERE worksheet_spec IS NULL AND slug = 'map-outline';
+UPDATE task_templates SET worksheet_spec = '{"caption":"Their biggest river","pins":3}'
+  WHERE worksheet_spec IS NULL AND slug = 'river-that-matters';
+
+UPDATE task_templates SET worksheet_spec =
+  '{"orient":"horizontal","bars":3,"axis_label":"What one week of pay buys","caption":"Loaves of bread  ·  Bus rides  ·  Pairs of shoes"}'
+  WHERE worksheet_spec IS NULL AND slug = 'what-work-pays';
