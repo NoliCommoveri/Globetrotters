@@ -240,11 +240,14 @@ The draw also refuses to print the same worksheet form twice in one week, which
 five draws against twenty-seven forms would otherwise do about 40% of the time by
 arithmetic alone.
 
-**Slices 00 to 11 are built and the app does the whole nine-month job.** One
-remains: slice 12 writes the 106 prompts, 19 forms and 10 renderers the draw was
-measured against. Until it lands the pool is 49 rather than 153, so the
-five-month cooldown blocks most of it by month six — expected, and a reason to
-finish the library rather than to soften the number.
+**Slices 00 to 11 are built and the app does the whole nine-month job.** Ten
+remain: slices 12 to 21 write the 106 prompts, 19 forms and 10 renderers the draw
+was measured against, plus the twelve prompts two focuses are still owed and the
+affinities for the three that have none. Until they land the pool is 49 rather
+than 153, so the five-month cooldown blocks most of it by month six — expected,
+and a reason to finish the library rather than to soften the number. Forms lead
+prompts, because a binding points at a layout row that has to exist first; that
+is the only forced ordering in the ten.
 
 Every Cloudflare due-out is closed, and so are the three inks, the school year
 (September through May) and the paper (D-13 — US Letter). Three remain. Two block
@@ -252,9 +255,10 @@ no code: the fonts (D-10) — the shell, the stamp and the wall run on a system
 stack — and which tablet the wall runs on (D-14), where the wake lock is
 feature-detected either way and what is unresolved is whether the owner has to
 set display sleep by hand. The third is D-15, twenty countries of affinity apiece
-for the three focuses that have none, and it blocks one part of slice 12.
+for the three focuses that have none, and it is the whole of slice 21.
 
-Three questions are open against slice 12 and listed in its file.
+Three questions are open: two in slice 14, which builds the renderers they
+change, and one in slice 15.
 
 The Worker's own tests run with `node --test test/*.test.js` and need nothing
 installed. They are a build-session tool, not something the owner ever runs —

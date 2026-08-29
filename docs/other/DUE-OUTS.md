@@ -35,7 +35,7 @@ to `003_country_data.sql`.
 It matters most for Who Gets What, because the countries that focus suits are not the ones
 a kid picks off a map. All three focuses are seeded and pickable as of slice 11, and the
 draw reads tags rather than affinities, so nothing about them is blocked — it is the
-country card's recommendation that is waiting, and that is slice 12.
+country card's recommendation that is waiting, and that is slice 21.
 
 
 **D-02, D-06. Cloudflare.** Both are done. The database is `globetrotters-prod`

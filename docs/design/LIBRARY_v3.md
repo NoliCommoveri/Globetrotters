@@ -1990,7 +1990,7 @@ it, which is why the focus table below lists seven tags for it and not eight. Th
 tables under *What each focus actually reaches* and *What the shape delivers* were measured
 with it weighted: People and Power's reach is unchanged, since `governance` covers the same
 four prompts, but those four fall from ×13 to ×7 and its measured columns move a little.
-Slice 12 re-measures against the finished library.
+Slice 19 re-measures against the finished library.
 
 **Seven topic tags carry no weight from any focus** — `clothing`, `emblems`,
 `future-plans`, `holiday-calendar` (10 members), `infrastructure` (10), `sabbath`,
@@ -2229,11 +2229,17 @@ height measured against real paper before it is trusted: `fields`, `boxes`, `ven
 because they ride existing renderers: `differences` on `split`; `list-n`, `week-strip` and
 `bullets` on `checklist`; `figure-anchor` on `figures`.
 
-**Four knobs.** MARKER accepts `bullet` in the `checklist` branch, plus one CSS rule.
+**Knobs on renderers that already exist, and there are more of them than the four the v2
+plan counted.** MARKER accepts `bullet` in the `checklist` branch, plus one CSS rule.
 BELOW on the `box` branch stacks the two children `.beside` already builds. MIDDLE on the
 new `pair` branch draws a captioned write-in line on the arrow, skipped when the string is
 empty — four bindings use it. LINES on the new `clocks` branch is the rule `lines` already
-uses.
+uses. Four more are needed by v3 bindings and are not in the shipped `KINDS` table:
+SHARED on `split`, which every `differences` binding sets; UNIT and ENDS on `timeline`,
+which rule 5 depends on; and CIRCLE_ONE, ORIENT and CAPTION on `checklist`, which `list-n`
+and `week-strip` need. The `figures` branch is not extended at all but rewritten:
+`figure-anchor` is one boxed number with a unit and an anchor line, and the three-box
+knobs go with the form that is retired.
 
 **One schema fact decides sequencing, and it is not the CHECK constraints.**
 `worksheet_layouts.kind` and `task_templates.tier` are CHECKs inside migrations that have
@@ -2261,10 +2267,15 @@ rather than from that week's half, respects the per-form cap against the nine ta
 on the plan, and will not put a second copy of a form into the week it is swapping inside.
 Both pins are unswappable, `cook-it` as before and `wow-fact` for the same reason.
 
-**Seeds only insert.** Every seed statement is `ON CONFLICT DO NOTHING` and every binding
-is guarded on `worksheet_layout_id IS NULL`, so new forms, prompts and tags land through a
-seed file. The nine UPDATEs in §5 and the three `shared`-row fixes need migrations — a
-migration runs once and never stomps a layout retuned in the library editor afterwards.
+**Seeds only insert, and that is why corrections go through Erase everything.** Every
+seed statement is `ON CONFLICT DO NOTHING` and every binding is guarded on
+`worksheet_layout_id IS NULL`, so new forms, prompts and tags land on a press and nothing
+already there is touched. The §5 rewrites, the three `shared`-row fixes and the forty-six
+rebindings are corrections to rows a press has already written, so they are made in
+`002_seed.sql` and `005_worksheet_layouts.sql` in place and the database rebuilt —
+**Erase everything · Apply pending · Run seed**. A migration would also work and is the
+wrong shape: it would freeze a correction the library editor can no longer revise, and
+there is no data in this database worth protecting from a rebuild.
 
 **Build order, if it is split.** `specimen-boxes`, `venn`, `bar-graph` and `map-marks`
 first: those four alone move the most prompts off a shape that fights them. `then-now`,
@@ -2278,7 +2289,7 @@ just what a page looks like.
 
 1. **`country_focus_affinity` rows for Who Lives Here, Who Gets What and Stories and
    Spirits.** Twenty countries each, one line of reason apiece. Without them the app never
-   recommends any of the three. D-15, and slice 12 waits on it.
+   recommends any of the three. D-15, and it is the whole of slice 21.
 2. **Sourcing on the six hardest prompts** — `the-group-that-gets-less`, `who-can-read`,
    `what-their-money-goes-to`, `is-the-law-kept`, `can-they-worship-freely`,
    `the-company-that-got-caught`. All have sources with a position. The sourcing footer
