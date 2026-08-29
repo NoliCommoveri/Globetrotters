@@ -17,11 +17,13 @@ seeding, or deploy requires a terminal.
 |---|---|
 | `CLAUDE.md` | Directives for every session. Read first. |
 | `docs/design/DESIGN.md` | The spec. Each section carries a completion marker. |
-| `docs/slices/INDEX.md` | The eleven slices, in build order, with status |
+| `docs/design/LIBRARY_v3.md` | Every form, every prompt, the tag/focus weights and the draw |
+| `docs/slices/INDEX.md` | The twelve slices, in build order, with status |
 | `docs/slices/NN-name.md` | One slice: instructions, due-outs, questions, exit criteria |
 | `docs/other/DUE-OUTS.md` | What the owner must provide, by slice |
 | `docs/other/SEED-CONTENT.md` | Column rules and row forms for the hand-written seed lists |
 | `docs/other/OPEN-QUESTIONS.md` | Questions blocking build, and answered ones |
+| `docs/other/FOCUS-AUDIT.md` | Which focus each prompt actually serves, judged by hand |
 | `src/` | The Worker: entry and routing, `/api/*`, `/admin`, `/print`, `lib/`, `migrations/` |
 | `public/` | Two static documents — the family app and the wall — the app stylesheet and the print stylesheet, eleven JS modules |
 | `test/` | `node --test test/*.test.js` — no dependencies, no install |

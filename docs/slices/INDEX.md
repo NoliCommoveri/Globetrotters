@@ -1,11 +1,12 @@
 # Slice index
 
-Eleven slices against `../design/DESIGN.md`. Each ends at a state you can open
+Twelve slices against `../design/DESIGN.md`. Each ends at a state you can open
 in a browser and judge.
 
 A build session takes the first slice not marked `built` and reads its file.
-**Every slice is built.** What is left in this repo is the two outstanding
-due-outs, D-10 and D-14, and neither is code.
+**Slices 00–10 are built.** Slice 11 is the first not started: it is the draw engine
+`LIBRARY_v3.md` specifies, and it is the only one of the v3 slices that is not content.
+Also outstanding are due-outs D-10, D-14 and D-15, none of them code.
 
 | # | Slice | Status | Band | Depends on | Design sections |
 |---|---|---|---|---|---|
@@ -20,6 +21,7 @@ due-outs, D-10 and D-14, and neither is code.
 | 08 | [Library editor](08-library-editor.md) | built | L | 02 | §12 |
 | 09 | [Content fill](09-content-fill.md) | built | L | 04 | §9, §13 |
 | 10 | [Printed worksheets](10-worksheets.md) | built | L | 05 | §16 |
+| 11 | [The merged draw](11-merged-draw.md) | not started | L | 04, 09 | §4, §5, §13 |
 
 Statuses: `not started` · `in progress` · `built`.
 
@@ -105,8 +107,8 @@ Every section of `DESIGN.md` and the slice that finishes it.
 | §1 Scope | — (scope statement, nothing to build) |
 | §2 Stack | 03 — built but for the fonts (D-10) |
 | §3 Migrations | 02 — built |
-| §4 The task model | 04 — built |
-| §5 Schema | 10 — built |
+| §4 The task model | 04 — built; 11 — the merged draw |
+| §5 Schema | 10 — built; 11 — three tables and a column |
 | §6 API | 10 — built |
 | §7 This week | 05 — built |
 | §7 Month setup | 04 — built |
@@ -117,7 +119,7 @@ Every section of `DESIGN.md` and the slice that finishes it.
 | §10 Progress | 05 — built |
 | §11 Design direction | 07 — built but for the fonts (D-10) |
 | §12 Library editor | 10 — built |
-| §13 Seed data | 10 — built |
+| §13 Seed data | 10 — built; 11 — nine focuses |
 | §14 Build order | — (superseded by this index) |
 | §15 Decisions | — (tracked in ../other/OPEN-QUESTIONS.md) |
 | §16 Printed worksheets | 10 — built |

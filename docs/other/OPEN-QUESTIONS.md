@@ -10,8 +10,13 @@ moved to the answered list at the bottom of this file.
 
 ## Open
 
-Nothing. Every question raised against a slice has been answered and written
-into `../design/DESIGN.md`.
+Nothing blocking slice 11. Every question raised against a slice has been answered and
+written into `../design/DESIGN.md`.
+
+Four questions are raised against `../design/LIBRARY_v3.md` §7 and are listed there rather
+than here, because none of them blocks a slice that exists yet: whether *who published
+this* becomes a stretch line on the six hardest prompts, whether `storyboard` gains a
+CAPTION knob, and whether `emblems` and `civic-process` should exist at all.
 
 ---
 
@@ -19,6 +24,8 @@ into `../design/DESIGN.md`.
 
 | # | Question | Answer |
 |---|---|---|
+| Q-16 | Do weeks 2 and 3 draw from one pool or two? | **One.** Two per-week draws made a focus's opinion about one week decide nothing about the other, and the library's topic tags are week-lopsided — nine tags with five or more members live entirely in one week. Five of nine focuses had three or fewer genuinely on-theme prompts on one side of the line, which put a whole week of five sheets ignoring the chosen focus at 20–90% of months. One pool of 153, eight drawn, dealt four and four, takes that to 1–19% for seven of the nine and costs the month one task — which puts it back at twenty on twenty weekdays, since `cook-it` becomes one of the ten rather than an eleventh appended to them. `wow-fact` is pinned opposite it in week 2. `DESIGN.md` §4, `LIBRARY_v3.md` §3, `FOCUS-AUDIT.md`. |
+| Q-15 | Is the mode-tag anti-monotony rule hard or soft? | **Hard** — never two prompts sharing a mode tag in one month's weeks 2–3. The worry was deadlock: `us-contrast` is 41 of 167 prompts and forbidding a second is a real constraint. Against a 153-template pool it is not one, measured at zero fallbacks in 40,000 draws. The soft version (halving a taken mode's weight) does most of the work and leaves the case it was built for — three sheets that all say *and now write ours next to it* — reachable. `LIBRARY_v3.md` §3. |
 | Q-12 | Who prints the month's pages, and from what device? | Anyone, from any device. The printer is reachable from the kids' phones, so a print button is real wherever it sits — which then left where it sits to be decided by the sheets rather than by the device. It is **Print week**, beside every week's heading on Plan, and there is no month-wide button: the sheets break on the week, so printing all four the day the month is drawn puts weeks 2 and 3 on paper a swap away from being wrong, and reprinting the month to fix one week reprints two that nothing changed. `DESIGN.md` §7, §16. |
 | Q-11 | Does week 4's "present" task require an audience? | No. All six sequences end "present it to your family" — whoever is home. A scheduled presentation night would be the app asserting a household commitment nine times a year that it cannot see and cannot enforce, and the first month it slips, six templates are telling a kid to do something that is not going to happen. Nothing in the app schedules the event or asks whether it happened. `DESIGN.md` §13, §15. |
 | Q-14 | Can a country hook be deleted, when nothing else in the library can? | Yes, and it is the whole of the exception. `archived = 1` exists because `plan_tasks` and `month_plans` reference templates, focuses and project types, and a hard delete would break a month already in progress; nothing references a hook. A generated hook that is wrong, with no correct hook to type over it, has nowhere else to go. There is no delete button anywhere else in the editor. `DESIGN.md` §12, §15. |
