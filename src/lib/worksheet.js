@@ -88,10 +88,23 @@ export const KINDS = {
     columns: strings(2, 5, ['What', 'Where', 'Why it matters']),
     rows: int(1, 16, 6),
   },
-  timeline: { ticks: int(2, 10, 5) },
+  // ENDS labels the two endpoints, printed either side of the ticks — what
+  // stops two timelines in one workbook from reading as the same page. UNIT
+  // names what the line measures. No ENDS value hard-codes a year that will
+  // go stale: "A hundred years ago" and "Today", not "1925" (LIBRARY_v3.md §4
+  // rule 5).
+  timeline: {
+    ticks: int(2, 10, 5),
+    unit: text(20, 'years'),
+    ends: strings(2, 2, ['', '']),
+  },
+  // One large boxed number with its unit and a ruled anchor line beneath —
+  // never a second unrelated fact, always something the kid already knows
+  // that is about the same size (LIBRARY_v3.md §1).
   figures: {
-    boxes: int(1, 6, 3),
-    captions: strings(0, 6, []),
+    caption: text(80, ''),
+    unit: text(30, ''),
+    anchor_prompt: text(80, 'About the same as…'),
   },
   checklist: {
     items: int(1, 16, 8),
@@ -101,7 +114,10 @@ export const KINDS = {
     orient: choice(['list', 'across'], 'list'),
     caption: text(80, ''),
   },
-  storyboard: { panels: int(2, 8, 6) },
+  // CAPTION prints above the six panels, naming what they are of — a legend,
+  // a Bible account, a process — skipped when empty, the same rule MIDDLE
+  // follows on `pair` (LIBRARY_v3.md §1).
+  storyboard: { panels: int(2, 8, 6), caption: text(80, '') },
   boxes: {
     boxes: int(2, 6, 4),
     caption: text(80, ''),
@@ -169,6 +185,16 @@ export const KINDS = {
     captions: strings(1, 4, ['Their clock', 'Our clock']),
     digital_line: bool(true),
     lines: int(0, 8, 2),
+  },
+  // The recipe page: a dish name and a Serves line, a narrow amount column
+  // beside INGREDIENTS lines, STEPS numbered step lines, and a sketch box
+  // captioned "How it actually turned out." Three thirds and cannot pack
+  // with anything else, so it always lands on a clean sheet that can come
+  // out of the binder and go on the counter (LIBRARY_v3.md §1).
+  recipe: {
+    ingredients: int(1, 16, 10),
+    steps: int(1, 12, 6),
+    sketch: bool(true),
   },
 };
 
@@ -266,20 +292,29 @@ const RENDER = {
 
   table: (spec) => RENDER.split(spec),
 
+  // ENDS flanks the ticks with the two endpoint labels; UNIT prints under the
+  // line, naming what it measures. Either is skipped when blank.
   timeline: (spec) => {
     const ticks = Array.from(
       { length: spec.ticks },
       () => '<li><span class="tick"></span><span class="slot"></span></li>',
     ).join('');
-    return `<div class="timeline"><ol>${ticks}</ol></div>`;
+    const [startEnd, finishEnd] = spec.ends;
+    const start = startEnd ? `<span class="timeline-end start">${escapeHtml(startEnd)}</span>` : '';
+    const finish = finishEnd ? `<span class="timeline-end finish">${escapeHtml(finishEnd)}</span>` : '';
+    const unit = spec.unit ? `<p class="timeline-unit">${escapeHtml(spec.unit)}</p>` : '';
+    return `<div class="timeline"><div class="timeline-strip">${start}<ol>${ticks}</ol>${finish}</div>${unit}</div>`;
   },
 
+  // One large boxed number with its unit inside and a ruled anchor line
+  // beneath, captioned by ANCHOR_PROMPT. The number is always something the
+  // kid found, never something they estimated.
   figures: (spec) => {
-    const cells = Array.from({ length: spec.boxes }, (_, i) => {
-      const caption = spec.captions[i] ? escapeHtml(spec.captions[i]) : '&nbsp;';
-      return `<li><div class="ink"></div><span>${caption}</span></li>`;
-    }).join('');
-    return `<ul class="figures">${cells}</ul>`;
+    const caption = spec.caption ? `<p class="figure-caption">${escapeHtml(spec.caption)}</p>` : '';
+    const unit = spec.unit ? `<span class="figure-unit">${escapeHtml(spec.unit)}</span>` : '';
+    return `<div class="figure-anchor">${caption}<div class="figure-box"><div class="ink"></div>${unit}</div>
+<div class="figure-anchor-line"><span class="figure-anchor-prompt">${escapeHtml(spec.anchor_prompt)}</span><span class="figure-anchor-rule"></span></div>
+</div>`;
   },
 
   // `labels` names the items — week 4's materials arrive this way. `items` is
@@ -310,7 +345,8 @@ const RENDER = {
       { length: spec.panels },
       (_, i) => `<li><span class="panel-no">${i + 1}</span></li>`,
     ).join('');
-    return `<ol class="storyboard">${panels}</ol>`;
+    const caption = spec.caption ? `<p class="storyboard-caption">${escapeHtml(spec.caption)}</p>` : '';
+    return `<div class="storyboard-form">${caption}<ol class="storyboard">${panels}</ol></div>`;
   },
 
   // Several small drawing boxes, one ruled label line under each. CIRCLE_ONE
@@ -436,6 +472,31 @@ ${spec.digital_line ? '<span class="clock-digital"></span>' : ''}
     const faces = Array.from({ length: spec.faces }, (_, i) => face(spec.captions[i] || '')).join('');
     const foot = spec.lines > 0 ? `<div class="clock-foot">${rules(spec.lines)}</div>` : '';
     return `<div class="clocks"><div class="clock-row">${faces}</div>${foot}</div>`;
+  },
+
+  // Dish name and a Serves line at the head, a narrow amount column beside
+  // INGREDIENTS ruled lines, STEPS numbered step lines, and — when SKETCH is
+  // set — a box captioned "How it actually turned out."
+  recipe: (spec) => {
+    const ingredients = Array.from(
+      { length: spec.ingredients },
+      () => '<li><span class="recipe-amount"></span><span class="recipe-ingredient"></span></li>',
+    ).join('');
+    const steps = Array.from(
+      { length: spec.steps },
+      (_, i) => `<li><span class="recipe-step-no">${i + 1}</span><span class="recipe-step-line"></span></li>`,
+    ).join('');
+    const sketch = spec.sketch
+      ? '<figure class="box recipe-sketch"><div class="ink"></div><figcaption>How it actually turned out</figcaption></figure>'
+      : '';
+    return `<div class="recipe">
+<div class="recipe-head">
+<label class="recipe-field recipe-dish"><span>Dish</span><span class="recipe-write"></span></label>
+<label class="recipe-field recipe-serves"><span>Serves</span><span class="recipe-write short"></span></label>
+</div>
+<div class="recipe-body"><ul class="recipe-ingredients">${ingredients}</ul><ol class="recipe-steps">${steps}</ol></div>
+${sketch}
+</div>`;
   },
 };
 

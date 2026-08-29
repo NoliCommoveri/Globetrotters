@@ -269,6 +269,72 @@ test('orient list still pads to items when labels are fewer', () => {
   assert.equal((html.match(/<li>/g) || []).length, 8);
 });
 
+// ------------------------------------------------------ the slice 15 kinds --
+
+test('figures (figure-anchor) keeps its own keys and drops one belonging to another kind', () => {
+  const spec = readSpec('figures', {
+    caption: 'People who live there', unit: 'people', anchor_prompt: 'About the same as…', boxes: 3,
+  });
+  assert.deepEqual(spec, {
+    caption: 'People who live there', unit: 'people', anchor_prompt: 'About the same as…',
+  });
+});
+
+test('figures falls back to the default anchor prompt when none is given', () => {
+  assert.equal(readSpec('figures', {}).anchor_prompt, 'About the same as…');
+});
+
+test('figure-anchor prints a caption and a unit only when set', () => {
+  const bare = renderForm('figures', readSpec('figures', {}));
+  assert.ok(!bare.includes('figure-caption'));
+  assert.ok(!bare.includes('figure-unit'));
+  const filled = renderForm('figures', readSpec('figures', { caption: 'How many', unit: 'people' }));
+  assert.match(filled, /figure-caption">How many/);
+  assert.match(filled, /figure-unit">people/);
+});
+
+test('timeline keeps its own keys and drops one belonging to another kind', () => {
+  const spec = readSpec('timeline', { ticks: 3, unit: 'clock', ends: ['Wake up', 'Bedtime'], boxes: 4 });
+  assert.deepEqual(spec, { ticks: 3, unit: 'clock', ends: ['Wake up', 'Bedtime'] });
+});
+
+test('timeline ends falls back to blank when only one end is given', () => {
+  assert.deepEqual(readSpec('timeline', { ends: ['Only one'] }).ends, ['', '']);
+});
+
+test('timeline prints end labels only when both are set; the unit line prints at its default', () => {
+  const bare = renderForm('timeline', readSpec('timeline', {}));
+  assert.ok(!bare.includes('timeline-end'));
+  assert.match(bare, /timeline-unit">years/);
+  const labelled = renderForm('timeline', readSpec('timeline', { ends: ['It started', 'It ended'], unit: 'clock' }));
+  assert.match(labelled, /timeline-end start">It started/);
+  assert.match(labelled, /timeline-end finish">It ended/);
+  assert.match(labelled, /timeline-unit">clock/);
+});
+
+test('storyboard gains a caption, printed above the panels only when set', () => {
+  const spec = readSpec('storyboard', { panels: 6, caption: 'Their story, six panels in order' });
+  assert.deepEqual(spec, { panels: 6, caption: 'Their story, six panels in order' });
+  const bare = renderForm('storyboard', readSpec('storyboard', {}));
+  assert.ok(!bare.includes('storyboard-caption'));
+  const captioned = renderForm('storyboard', spec);
+  assert.match(captioned, /storyboard-caption">Their story, six panels in order/);
+});
+
+test('recipe keeps its own keys and drops one belonging to another kind', () => {
+  const spec = readSpec('recipe', { ingredients: 8, steps: 5, sketch: false, boxes: 4 });
+  assert.deepEqual(spec, { ingredients: 8, steps: 5, sketch: false });
+});
+
+test('recipe draws one line per ingredient and one per step, and a sketch box only when asked', () => {
+  const on = renderForm('recipe', readSpec('recipe', { ingredients: 10, steps: 6, sketch: true }));
+  assert.equal((on.match(/class="recipe-amount"/g) || []).length, 10);
+  assert.equal((on.match(/class="recipe-step-no"/g) || []).length, 6);
+  assert.match(on, /recipe-sketch/);
+  const off = renderForm('recipe', readSpec('recipe', { sketch: false }));
+  assert.ok(!off.includes('recipe-sketch'));
+});
+
 // ------------------------------------------------- the real seeded library --
 
 function seededDb() {
@@ -371,6 +437,61 @@ test('box-caption is gone and nothing is bound to it', () => {
     db.prepare("SELECT COUNT(*) AS n FROM worksheet_layouts WHERE slug = 'box-caption'").get().n,
     0,
   );
+});
+
+test('compare and the old three-box figures form are gone and nothing is bound to them', () => {
+  const db = seededDb();
+  for (const slug of ['compare', 'figures']) {
+    assert.equal(
+      db.prepare('SELECT COUNT(*) AS n FROM worksheet_layouts WHERE slug = ?').get(slug).n,
+      0,
+      slug,
+    );
+  }
+});
+
+test('how-many-people, size-next-to-yours and getting-around print figure-anchor', () => {
+  const db = seededDb();
+  for (const slug of ['how-many-people', 'size-next-to-yours', 'getting-around']) {
+    const segment = segmentFor(seededRow(db, slug));
+    assert.equal(segment.kind, 'figures', slug);
+    assert.ok(segment.spec.anchor_prompt, slug);
+  }
+});
+
+test('what-people-believe prints a three-row table, and feast-they-keep and tonights-dinner move off lines-4', () => {
+  const db = seededDb();
+  const believe = segmentFor(seededRow(db, 'what-people-believe'));
+  assert.equal(believe.kind, 'table');
+  assert.deepEqual(believe.spec.columns, ['The religion', 'When it arrived there', 'A day it keeps']);
+  const feast = segmentFor(seededRow(db, 'feast-they-keep'));
+  assert.equal(feast.height_thirds, 2);
+  const dinner = segmentFor(seededRow(db, 'tonights-dinner'));
+  assert.equal(dinner.kind, 'box');
+  assert.equal(dinner.spec.lines, 3);
+});
+
+test('cook-it prints a recipe card, three thirds, alone on its sheet', () => {
+  const segment = segmentFor(seededRow(seededDb(), 'cook-it'));
+  assert.equal(segment.kind, 'recipe');
+  assert.equal(segment.height_thirds, 3);
+  assert.deepEqual(packSheets([segment]).map((s) => s.segments.length), [1]);
+});
+
+test('who-ruled-before, war-that-changed and kid-life each carry distinct timeline ends', () => {
+  const db = seededDb();
+  const ends = ['who-ruled-before', 'war-that-changed', 'kid-life'].map((slug) => {
+    const segment = segmentFor(seededRow(db, slug));
+    assert.equal(segment.kind, 'timeline', slug);
+    return segment.spec.ends.join('->');
+  });
+  assert.equal(new Set(ends).size, ends.length, ends.join(' | '));
+});
+
+test('story-they-tell carries a storyboard caption', () => {
+  const segment = segmentFor(seededRow(seededDb(), 'story-they-tell'));
+  assert.equal(segment.kind, 'storyboard');
+  assert.ok(segment.spec.caption);
 });
 
 test('every kind reads at least one knob and renders without one', () => {

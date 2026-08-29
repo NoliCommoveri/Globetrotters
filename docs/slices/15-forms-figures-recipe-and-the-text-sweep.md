@@ -1,8 +1,8 @@
 # Slice 15 — Forms: figures, recipe, and the text sweep
 
-**Status:** not started
+**Status:** built
 **Band:** L
-**Implements:** §16 (two forms, two retirements, the `timeline` knobs), §13 (the last of the seeded rewrites)
+**Implements:** §16 (two forms, two retirements, the `timeline` and `storyboard` knobs), §13 (the last of the seeded rewrites)
 **Depends on:** 14
 
 **Goal.** The end of the forms work and the end of the seeded library's drift. `figures` is
@@ -22,7 +22,7 @@ untouched.
 |---|---|
 | New renderer kinds | 1 — `recipe` |
 | Renderer rewritten | 1 — `figures` |
-| Kind gaining knobs | 1 — `timeline` (UNIT, ENDS) |
+| Kinds gaining knobs | 2 — `timeline` (UNIT, ENDS), `storyboard` (CAPTION, Q-18) |
 | New `worksheet_layouts` rows | 2 |
 | Forms retired | 2 — `compare`, `figures` |
 | Seeded prompts rebound | 7 |
@@ -84,24 +84,10 @@ None.
 
 ## Open questions
 
-Two, both raised in `LIBRARY_v3.md` §7, both asked here because the code that depends on
-them is a renderer and this is the last slice that touches one. One `AskUserQuestion` call
-each, one at a time.
-
-1. **Does `storyboard` gain a CAPTION knob?** Three week-3 storyboards — a legend, a Bible
-   account, a process — print as six identical panels without it. It would be the one new
-   knob in v3. `story-they-tell` is seeded and rewritten in this slice; the other two land
-   in slices 19 and 20, so the answer has to exist before they do.
-2. **Does *who published this, and what do they want you to think* become a stretch line
-   on the six hardest prompts, or stay a footer?** The six are
-   `the-group-that-gets-less`, `who-can-read`, `what-their-money-goes-to`,
-   `is-the-law-kept`, `can-they-worship-freely`, `the-company-that-got-caught`, spread
-   across slices 16, 17 and 18. **There is no stretch-line mechanism anywhere in the
-   schema or the renderer today** — `LIBRARY_v3.md` carries exactly one *Stretch:* line, on
-   `how-far-away-is-it`, and nothing prints it. So this is really two questions: whether
-   the six get the line, and whether a stretch line is a thing a prompt can have. If the
-   answer is a line, this slice builds it; the prompt slices then carry data and nothing
-   more.
+None. Q-17 and Q-18 are answered and written into `../design/LIBRARY_v3.md` §1, §7 (and
+`../other/OPEN-QUESTIONS.md`): `storyboard` gains a CAPTION knob — the one new knob v3
+adds — and the sourcing footer already on every worksheet stays the whole of source
+attribution; no stretch-line mechanism is built.
 
 ## Build
 

@@ -199,7 +199,7 @@ food.
 | `timeline` | **KEEP** | 1 | `timeline` | `{"ticks":5,"unit":"years","ends":["",""]}` | TICKS, UNIT, ENDS |
 | `flow-steps` | **NEW** | 1 | `flow` | `{"steps":4,"orient":"across","caption":""}` | STEPS, ORIENT, CAPTION |
 | `then-now` | **NEW** | 2 | `pair` | `{"captions":["Before","After"],"lines_each":2,"middle":""}` | CAPTIONS, LINES_EACH, MIDDLE |
-| `storyboard` | **KEEP** | 2 | `storyboard` | `{"panels":6}` | PANELS |
+| `storyboard` | **KEEP** | 2 | `storyboard` | `{"panels":6,"caption":""}` | PANELS, CAPTION |
 
 **`timeline`** — ENDS labels the two endpoints, and the labels are what stop two timelines
 in one workbook from reading as the same page. **No ENDS value hard-codes a year that will
@@ -214,6 +214,10 @@ line on the arrow itself — a date, a number, a name. Four of seven bindings us
 they are the four where the hinge is the finding: the year the last one was seen, the date
 they stopped belonging to somebody else, how many were taken and for how long, who carried
 it off and when.
+
+**`storyboard`** — CAPTION prints above the six panels, naming what they are of: a legend,
+a Bible account, a process. Skipped when the string is empty, the same rule MIDDLE follows
+on `then-now`.
 
 ---
 
@@ -1513,7 +1517,7 @@ Spec: `{"panels":6}`
 > **Find a story they tell**
 > Find a folk tale, legend, or myth from this country. Tell the whole thing in six pictures, start to finish. If a panel needs a word to make sense, write it inside the panel.
 
-Spec: `{"panels":6}`
+Spec: `{"panels":6,"caption":"Their story, six panels in order"}`
 
 **`creature-they-warn-about`** · **NEW** · form `box-beside` · page `culture`
 `tags: folklore-belief, story-telling`
@@ -2290,20 +2294,15 @@ just what a page looks like.
 1. **`country_focus_affinity` rows for Who Lives Here, Who Gets What and Stories and
    Spirits.** Twenty countries each, one line of reason apiece. Without them the app never
    recommends any of the three. D-15, and it is the whole of slice 22.
-2. **Sourcing on the six hardest prompts** — `the-group-that-gets-less`, `who-can-read`,
-   `what-their-money-goes-to`, `is-the-law-kept`, `can-they-worship-freely`,
-   `the-company-that-got-caught`. All have sources with a position. The sourcing footer
-   already on every worksheet handles attribution; what is not yet decided is whether *who
-   published this, and what do they want you to think* becomes a stretch line on those six
-   rather than a footer.
-3. **Three storyboards now sit in the week-3 pool** — `story-they-tell`,
-   `bible-happened-here`, `how-they-make-it` — and `storyboard` has only a PANELS knob, so
-   nothing distinguishes them on the page the way ENDS distinguishes two timelines. They
-   are different tasks (a legend, a Bible account, a process) but they print as six
-   identical panels. Either accept it, or add a CAPTION knob to the `storyboard` branch —
-   which would be the one new knob in v3.
-4. **Whether `emblems` should exist at all.** Four members, all in week 1, never drawn
+2. **Whether `emblems` should exist at all.** Four members, all in week 1, never drawn
    against. It is honest documentation and dead weight in the same row.
-5. **Twelve week-3-flavoured prompts, six each for Ancient World and Conflict and
+3. **Twelve week-3-flavoured prompts, six each for Ancient World and Conflict and
    Change.** The one piece of writing v3 still owes. Everything else in this document is a
    draw change or a seed.
+
+Two questions this section used to carry are settled. Sourcing on the six hardest
+prompts — `the-group-that-gets-less`, `who-can-read`, `what-their-money-goes-to`,
+`is-the-law-kept`, `can-they-worship-freely`, `the-company-that-got-caught` — stays on the
+sourcing footer every worksheet already carries; there is no stretch-line mechanism and
+none is built. `storyboard` gains CAPTION (§1), so `story-they-tell` and the two storyboards
+still to come each name what their six panels are of.
