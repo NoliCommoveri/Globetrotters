@@ -39,12 +39,11 @@ Parent-facing, behind `ADMIN_TOKEN`, not part of the kid experience.
   tier, workbook page, and the worksheet layout the task's printed segment uses
   (§16). New tasks default `origin = 'custom'`.
   `POST /admin/api/tasks`, `PATCH /admin/api/tasks/:id`
-- **Focus editor** — name, blurb, and the weight grid: that focus against every
-  week 2–3 task, each cell cycling `off / 1 / 3`. Editing weights one form
-  field at a time would be miserable at 50 tasks. The grid writes sparsely —
-  cells left at 1 store no row.
+- **Focus editor** — name, blurb, and the grid of what a focus favours. Slice 11
+  rebuilt it on tags: the grid is the topic vocabulary at a 0–3 weight rather
+  than a row per prompt. See 11-merged-draw.md.
   `POST /admin/api/focuses`, `PATCH /admin/api/focuses/:id`,
-  `PUT /admin/api/focuses/:id/weights`
+  `PUT /admin/api/focuses/:id/tags`
 - **New focus flow** — because weights are sparse and missing means 1, a newly
   created focus is immediately valid with zero rows and can be tuned
   afterwards. Warn if a focus has fewer than ~15 tasks at weight ≥1 across
@@ -86,9 +85,9 @@ Parent-facing, behind `ADMIN_TOKEN`, not part of the kid experience.
 - Fixing a typo in a prompt changes it inside an active month
 - Archiving a template removes it from the next draw and leaves existing
   `plan_tasks` intact
-- The weight grid round-trips: set a cell to 1, the row disappears
-- A focus created with zero weight rows draws successfully
-- The under-15-tasks warning fires on a fresh focus against the slice 02 seed
+- The focus grid round-trips: set a cell to its neutral value, the row disappears
+- A focus created with no opinions at all draws successfully
+- The thin-focus warning fires on a fresh focus
 - Export downloads, and re-importing that file changes nothing: every row
   round-trips and a second import is a no-op. There is no preview database to
   restore into (§2), so the round-trip is proven in place

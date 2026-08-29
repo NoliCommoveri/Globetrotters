@@ -255,8 +255,7 @@ dashboard, because a secret value must not be committed to git.
 
 ## 4. The task model
 
-**Status:** partial · slice 04 built the two-pool draw; the merged pool, the deal and the
-tag weighting are slice 11
+**Status:** built · the merged pool, the deal and the tag weighting landed with slice 11
 
 This is the core idea. Three layers:
 
@@ -409,11 +408,11 @@ nothing to protect: no work has been done yet.
 
 ## 5. Schema (D1 / SQLite)
 
-**Status:** partial · `001_schema.sql` (slice 01) and `004_worksheets.sql`, which
-adds `worksheet_layouts` and the two columns it hangs off `task_templates`
-(slice 10). Slice 11 edits `001` in place — `prompt_tags`, `focus_tags`, a `fixed`
-tier, and `task_focus_weights` deleted — and rebuilds the database through Erase
-everything (§3).
+**Status:** built · `001_schema.sql` holds every table below and
+`004_worksheets.sql` adds `worksheet_layouts` and the two columns it hangs off
+`task_templates`. Slice 11 edited `001` in place — `prompt_tags`, `focus_tags`, a
+`fixed` tier, `task_focus_weights` deleted — and rebuilt the database through
+Erase everything (§3).
 
 ```sql
 CREATE TABLE people (
@@ -475,7 +474,8 @@ CREATE TABLE task_templates (
   prompt          TEXT NOT NULL,       -- the 10-minute instruction, kid voice
   week_theme      INTEGER NOT NULL CHECK (week_theme BETWEEN 1 AND 4),
   workbook_page   TEXT,                -- 'flag', 'map', 'history', 'ecology', ...
-  tier            TEXT NOT NULL CHECK (tier IN ('core','focus','wild')),
+  -- 'fixed' is a pinned prompt: never weighted, cooled down or swapped.
+  tier            TEXT NOT NULL CHECK (tier IN ('core','focus','wild','fixed')),
   project_type_id INTEGER REFERENCES project_types(id),  -- week 4 only
   position        INTEGER,             -- week 4 ordering
   archived        INTEGER NOT NULL DEFAULT 0,
@@ -486,12 +486,24 @@ CREATE TABLE task_templates (
   worksheet_spec      TEXT   -- JSON, overrides keys of the layout's own spec
 );
 
--- Sparse on purpose: a missing row means weight 1. Only opinions are stored.
-CREATE TABLE task_focus_weights (
+-- What a prompt is about ('topic') and how the answer gets produced ('mode').
+-- Two namespaces and never one vocabulary: a mode tag carries no weight and a
+-- topic tag constrains nothing, so a focus weighting `us-contrast` at 3 would
+-- pull a quarter of the library at once (LIBRARY_v3.md §3).
+CREATE TABLE prompt_tags (
   task_template_id INTEGER NOT NULL REFERENCES task_templates(id),
-  focus_id         INTEGER NOT NULL REFERENCES focuses(id),
-  weight           REAL NOT NULL,      -- 0 excludes, 3 favors
-  PRIMARY KEY (task_template_id, focus_id)
+  namespace        TEXT    NOT NULL CHECK (namespace IN ('topic','mode')),
+  tag              TEXT    NOT NULL,
+  PRIMARY KEY (task_template_id, namespace, tag)
+);
+
+-- What a focus favours, over tags rather than over prompts. Sparse: an absent
+-- tag is no opinion, and the draw's `1 +` floor keeps every prompt reachable.
+CREATE TABLE focus_tags (
+  focus_id INTEGER NOT NULL REFERENCES focuses(id),
+  tag      TEXT    NOT NULL,
+  weight   INTEGER NOT NULL CHECK (weight BETWEEN 1 AND 3),
+  PRIMARY KEY (focus_id, tag)
 );
 
 -- §16. About a dozen rows. A layout is a printed form, not a worksheet: many
@@ -566,7 +578,8 @@ CREATE TABLE media (                    -- R2 pointers; table only, no bucket in
 
 CREATE INDEX idx_plan_tasks_plan_week ON plan_tasks(plan_id, week_no);
 CREATE INDEX idx_sessions_plan_date   ON sessions(plan_id, local_date);
-CREATE INDEX idx_weights_focus        ON task_focus_weights(focus_id);
+CREATE INDEX idx_prompt_tags_tag      ON prompt_tags(namespace, tag);
+CREATE INDEX idx_focus_tags_focus     ON focus_tags(focus_id);
 CREATE INDEX idx_stamps_person        ON stamps(person_id);
 CREATE INDEX idx_hooks_country        ON country_hooks(country_id);
 ```
@@ -622,8 +635,9 @@ PATCH  /api/me                        {person_id} -> re-issued cookie carrying i
 GET    /api/catalog                   countries + hooks + affinities + focuses
                                       + project types. ~67KB (~16KB gzipped),
                                       ETag + 304.
-GET    /api/focuses/:id/samples       three weight-3 titles, one week at a time,
-                                      for the setup screen's focus preview
+GET    /api/focuses/:id/samples       the three titles this focus lifts hardest,
+                                      one natural half at a time, for the setup
+                                      screen's focus preview
 
 POST   /api/plans                     {person, month, country, focus, project}
                                       -> draws 20 tasks. 409 on UNIQUE(person, month),
@@ -638,9 +652,12 @@ DELETE /api/plans/:id/complete        un-complete, removes the stamp. Confirmed.
 PATCH  /api/tasks/:id                 {status} sets the target state, idempotent —
                                       never a toggle. An open -> done transition
                                       also writes a session; a repeat does not.
-POST   /api/tasks/:id/swap            redraw same week + focus, excluding this plan's
-                                      tasks. Week 1 slot 5 and weeks 2-3 only, open
-                                      tasks only, three per month.
+POST   /api/tasks/:id/swap            redraw one slot against the same focus,
+                                      excluding this plan's tasks and respecting
+                                      the form cap. Weeks 2-3 draw from the whole
+                                      merged pool. Week 1 slot 5 and weeks 2-3
+                                      only, never a `fixed` pin, open tasks only,
+                                      three per month.
 POST   /api/sessions                  {plan_id, plan_task_id?, minutes?, note?}
 
 GET    /api/passport                  all stamps, all people, every plan, plus the
@@ -672,14 +689,15 @@ GET    /admin/api/people              the three people
 PATCH  /admin/api/people/:id          name, ink color, sort order
 
 GET    /admin/library                 library editor page
-GET    /admin/api/library             tasks, focuses, project types, weights, draw
-                                      counts by person, and the country list with
-                                      its hook and affinity counts
+GET    /admin/api/library             tasks, focuses, project types, focus tags,
+                                      prompt tags, draw counts by person, and the
+                                      country list with its hook and affinity
+                                      counts
 POST   /admin/api/tasks               create custom task
 PATCH  /admin/api/tasks/:id           edit, or set archived
 POST   /admin/api/focuses             create
 PATCH  /admin/api/focuses/:id         edit name, blurb, archived
-PUT    /admin/api/focuses/:id/weights bulk weight update (sparse — deletes weight-1 rows)
+PUT    /admin/api/focuses/:id/tags    bulk tag weights (sparse — deletes 0 rows)
 POST   /admin/api/project-types       create
 PATCH  /admin/api/project-types/:id   edit, reorder week-4 sequence
 GET    /admin/api/countries/:id       one country's hooks and affinities
@@ -828,10 +846,11 @@ not a form.
 - **Tap through** to all hooks and the recommended focuses with their reason lines.
 - **Focus: show the consequence, not the description.** "people-and-power" means
   nothing to a kid. Highlighting a focus shows three sample task titles it would pull
-  in — drawn from its **`weight = 3` rows only**, and alternating between weeks 2 and
-  3 so the preview shows the whole month rather than half of it. Weights are sparse
-  and a missing row means 1, so sampling everything a focus "would pull in" returns
-  mostly neutral tasks and every focus previews identically. The titles come from
+  in — **the three it lifts hardest by `fw`**, alternating between the prompts'
+  natural halves so the preview shows the whole month rather than half of it. Tag
+  weights are sparse and every prompt floors at 1, so sampling everything a focus
+  "would pull in" returns mostly baseline tasks and every focus previews
+  identically. The two pins are excluded: they land whatever is picked. The titles come from
   **`GET /api/focuses/:id/samples`**, one request per focus tapped, memoized for the
   life of the page (Q-06). Recommended focuses arrive pre-highlighted — the preview
   open — but **never pre-selected**: choosing is always a tap.
@@ -1172,33 +1191,37 @@ carries the first four weeks of the year.
 
 ## 12. Library editor
 
-**Status:** partial · slice 08 built all of it but the worksheet layout editor,
-which arrived with its table in slice 10. The focus tab edits a focus's opinion of
-individual templates; slice 11 replaces that with the fifty topic tags a focus weights,
-because that is what the draw reads.
+**Status:** built · slice 08 built all of it but the worksheet layout editor,
+which arrived with its table in slice 10, and the focus tab, which slice 11
+rebuilt on tags.
 
 Tasks, focuses, and project types are all editable in the app. Parent-facing, behind
 `ADMIN_TOKEN`, not part of the kid experience.
 
-**Task list** — every template, filterable by week, tier, focus weight, and workbook
-page. Shows how many times each has been drawn and by whom, so it's obvious which
-ones are dead weight. Inline edit for title, prompt, week, tier, workbook page,
-and the worksheet layout the task's printed segment uses (§16). New tasks default
-to `origin = 'custom'`.
+**Task list** — every template, filterable by week, tier, tag, workbook page, and
+whether a chosen focus lifts it above baseline. Shows how many times each has been
+drawn and by whom, so it's obvious which ones are dead weight, and each row prints
+its own topic and mode tags — read-only, because a prompt and its tags are written
+together and an untagged prompt draws at baseline forever with nothing to report
+it. Inline edit for title, prompt, week, tier, workbook page, and the worksheet
+layout the task's printed segment uses (§16). New tasks default to
+`origin = 'custom'`.
 
-**Focus editor** — name, blurb, and the weight grid: that focus against every week 2–3
-task, each cell cycling `off / 1 / 3`. Editing weights one form field at a time would
-be miserable at 50 tasks. The grid writes sparsely — cells left at 1 store no row.
+**Focus editor** — name, blurb, and the tag grid: that focus against the topic
+vocabulary, each cell cycling `0 / 1 / 2 / 3`, with the number of prompts carrying
+each tag beside it. Fifty tags rather than 153 prompts, which is both a smaller
+screen and a more honest one — a focus says what it is *about*, and a prompt
+written afterwards is drawn correctly the moment it is tagged. The grid writes
+sparsely: cells left at 0 store no row. A tag typed into the box at the bottom
+joins the list even if nothing carries it yet, which is what makes a new tag
+reachable with no deploy.
 
-**New focus flow** — because weights are sparse and missing means 1, a newly created
-focus is immediately valid with zero rows and can be tuned afterward. Warn if a focus
-has fewer than **15 tasks at weight ≥1 in either week 2 or week 3**, since the draw
-takes five from each week and needs headroom. Counted per week, not summed: a focus
-rich in week 2 and bare in week 3 draws the same five tasks every month just as
-surely as one bare in both. Against the library's twenty-five templates per
-week nothing is thin, seeded or custom: a focus with no weight rows at all still
-counts twenty-five in each week, because a missing row means 1. The warning is
-live for a library someone has archived their way through, not for this one.
+**New focus flow** — because tags are sparse and an absent one is no opinion, a
+newly created focus is immediately valid with zero rows and can be tuned
+afterward. There is no weight-0 and so no way to shrink the pool: `fw` floors at
+1, every prompt stays reachable, and the draw cannot be starved from this screen.
+What is warned about is the one thing left — a focus whose tags match no prompt at
+all. It draws, and it draws exactly what picking nothing would.
 
 **Worksheet layout editor** — the dozen printed forms of §16: name, kind, height
 in thirds, and that kind's own knobs. Every field is a named value the renderer
@@ -1223,7 +1246,7 @@ would break a month already in progress. Nothing references a hook. A junk hook
 with no correct hook to type over it has nowhere else to go. Everything else
 archives, and there is no delete button anywhere else on the page.
 
-Affinities save as a set, the same shape as the weight grid: each of the six
+Affinities save as a set, the same shape as the tag grid: each of the nine
 focuses is off, 2 or 3, and off stores no row.
 
 **Project type editor** — name, materials, and the ordered week-4 sequence. These are
@@ -1239,9 +1262,12 @@ mid-month — for that, archive the old one and create a new task.
 forever.
 
 **Export and import** — `GET /admin/api/library.json` dumps tasks, focuses, project
-types, weights, hooks, affinities, and the worksheet layouts with each task's
-binding, as JSON, and `POST` to the same path reads one back. This is the backup, and it's how a tuned library gets carried into next school
-year without a terminal.
+types, focus tags, prompt tags, hooks, affinities, and the worksheet layouts with
+each task's binding, as JSON, and `POST` to the same path reads one back. This is
+the backup, and it's how a tuned library gets carried into next school year
+without a terminal. The file states its version and the import refuses one it
+does not read, which is what keeps a pre-tag backup from restoring a library with
+no focus opinions in it at all.
 
 Every row in the file is keyed on a natural key — slug for tasks, focuses,
 project types and layouts, ISO3 for countries — and never on an id, because a restore lands in
@@ -1259,13 +1285,14 @@ skipping the task would leave the week one short.
 
 ## 13. Seed data
 
-**Status:** partial · the runner, 3 people, 6 focuses, 6 project types, 195
-countries, **90 task templates**, 87 focus weights, `003_country_data.sql`'s 222
-hooks and 200 affinities across 100 countries (slices 02 and 09), and
-`005_worksheet_layouts.sql`'s twelve printed forms with a binding on every week
-1–3 template and on each project type's planning step (slice 10). Slice 11 takes the
-focuses to nine and replaces the 87 weights with `focus_tags` and `prompt_tags`; slice 12
-writes the 106 prompts and 19 forms `LIBRARY_v3.md` §2 still holds only as a document.
+**Status:** partial · the runner, 3 people, 9 focuses, 6 project types, 195
+countries, **91 task templates**, 65 focus tags and 177 prompt tags,
+`003_country_data.sql`'s 222 hooks and 200 affinities across 100 countries
+(slices 02, 09 and 11), and `005_worksheet_layouts.sql`'s twelve printed forms
+with a binding on every week 1–3 template and on each project type's planning
+step (slice 10). What remains is slice 12: the 106 prompts and 19 forms
+`LIBRARY_v3.md` §2 still holds only as a document, and the three new focuses'
+`country_focus_affinity` rows (D-15).
 
 Seed files are not migrations (§3). They live beside them in `/src/migrations/`
 and are exported from the same index as `SEEDS`, but they are re-run by **Run
@@ -1276,9 +1303,15 @@ touched again, so an edit made in the library editor survives every future
 press; and the file itself can grow, which is how the library reached a database
 that was already seeded and carrying a month of real work.
 
+Correcting a row that has already been seeded is the third case, and **Erase
+everything** is what answers it: every table drops and both files are re-read, so
+a wrong prompt is an edit to `002` and three button presses rather than a second
+row somewhere else saying the opposite. That is why `001` and `002` are rewritten
+in place rather than appended to.
+
 - `001_schema.sql` — tables and indexes. A migration.
 - `002_seed.sql` — people, focuses, project types, countries, task templates,
-  weights. A seed.
+  prompt tags, focus tags. A seed.
 - `003_country_data.sql` — hooks, focus affinities, revised research depth.
   A seed. Its hook insert is guarded on the country rather than conflict-keyed,
   because a hook has no natural key and a deleted one must stay deleted (§9).
@@ -1297,50 +1330,55 @@ Contents of `002_seed.sql`:
   three inks are one deep purple, one lilac and one blue — `#5B2A86`, `#D07AC0`,
   `#2E6FD9` — distinct in hue on screen and ~26% / ~61% / ~41% grey on a home
   printer, which is what keeps three stamps apart on a photocopied passport.
-- **6 focuses and 6 project types.** Each focus carries a blurb written to a 5th
+- **9 focuses and 6 project types.** Each focus carries a blurb written to a 5th
   grader; each project type a freeform "what you'll need" the week-4 gather task
-  points at.
+  points at. `who-lives-here`, `who-gets-what` and `stories-and-spirits` have no
+  `country_focus_affinity` rows yet (D-15): pickable from the list, never
+  recommended on a country card until slice 12 writes them.
 - **195 countries** with continent, region and `research_depth`, unadorned here —
   hooks and affinities are `003`, which also corrects the adventure level on the
   countries whose hooks proved the first pass wrong. The conflict key is `iso3`,
   so a name can be corrected without minting a second row for the same country.
-- **90 task templates** and **87 focus weights**. The floor that makes the draw
-  work at all is 27 — a 5-template week draws all of itself and leaves Swap with
-  no candidate, and one project type's week 4 is 5 rows on its own. The library
-  is far past that floor because the floor sizes the pool for the **draw**, and
-  the draw is not what runs out. Five tasks come out of a week however deep it
-  is, so depth costs the kid nothing. What depth buys is nine months that differ
-  from each other, and a focus that still means something in month nine.
+- **91 task templates**, **177 prompt tags** and **65 focus tags**. The floor that
+  makes the draw work at all is eight drawable prompts across weeks 2 and 3 plus
+  one project type's five. The library is far past that floor because the floor
+  sizes the pool for the **draw**, and the draw is not what runs out. Ten tasks
+  come out of the merged pool however deep it is, so depth costs the kid nothing.
+  What depth buys is nine months that differ from each other, a five-month
+  cooldown that never bites, and a focus that still means something in month nine.
 
 | Week | Templates | Note |
 |---|---|---|
 | 1 | 10 | 4 `core` — flag, map, location/borders, language & writing system — plus 6 competing for the 5th slot |
-| 2 | 25 | one pool with week 3; five drawn per week, the spare is what makes Swap and nine months work |
-| 3 | 25 | same |
+| 2 | 26 | 25 drawable plus the pinned `wow-fact`; one merged pool with week 3 |
+| 3 | 25 | 24 drawable plus the pinned `cook-it`; eight are drawn across the two and dealt |
 | 4 | 30 | five for each of the six project types, as ordered sequences |
 
-`LIBRARY_v3.md` takes weeks 1–3 to 12 / 86 / 69 and the focuses to nine — slice 11 for the
-focuses, slice 12 for the prompts. Until they land these are the seeded numbers.
+The week column is the prompt's **natural half**, not a draw pool: nothing in the
+draw reads it and only the deal's arc preference does (§4). `LIBRARY_v3.md` takes
+weeks 1–3 to 12 / 86 / 69 — 106 prompts still to write, and that is slice 12.
+Against the 49 drawable seeded today the cooldown blocks 40 by month six and the
+stalest-back fallback becomes the mechanism, which is a reason to finish the
+library rather than to soften the number.
 
 All six project types carry a full week-4 sequence, so setup offers all six.
 
-**Tier means what is drawn, not how hard it is.** `core` is fixed and always
-included — week 1's four, and all five week-4 rows. `focus` is the
-focus-weighted pool, weeks 2 and 3. `wild` is eligible but off the main line:
-week 1's fifth-slot candidates.
+**Tier means how a row is chosen, not how hard it is.** `core` is always
+included — week 1's four, and all five week-4 rows. `focus` is the merged weeks
+2–3 pool the draw weights. `wild` is eligible but off the main line: week 1's
+fifth-slot candidates. `fixed` is the two pinned prompts, never weighted, never
+cooled down, never swapped.
 
-`task_focus_weights` stores only an opinion: 3 for on-theme, 0 to exclude,
-nothing in between, and no row at all for neutral. `LIBRARY_v3.md` replaces it with
-`focus_tags` × `prompt_tags`, at which point the per-week assertion below goes away with
-the per-week draw (§4) and is replaced by one on the merged pool: every focus holds at
-least ten prompts the focus audit calls on-theme. Until then: every focus
-holds **six** weight-3 tasks in week 2 **and** six in week 3 — per week, because
-the draw is per week, so a focus with an opinion about only one of them leaves
-the other identical to picking no focus at all; and six rather than three
-because against a 25-task pool three on-theme tasks put barely one of them in a
-draw of five, while six put two or three. And no focus may exclude more than one
-task in a week: exclusions eat the spare that Swap draws from, and the headroom
-a wider pool buys is for content, not for exclusions.
+**A focus is a set of weighted tags, and it can only ever favour.** `focus_tags`
+stores an opinion about a topic tag — 1, 2 or 3 — and no row at all where there
+is none; `prompt_tags` carries two to four topic tags and zero to two mode tags
+per week 1–3 prompt. `fw = 1 + 2 * SUM` over the shared topic tags, so there is
+no weight-0 and no way to exclude: the assertion the per-week draw needed is gone
+with it, and what replaces it is one on the merged pool. Every focus lifts at
+least six of the drawable prompts above baseline — a smoke floor against a
+mistyped tag set, which is this seed's one silent failure. The target is
+`LIBRARY_v3.md` §3's ten on-theme prompts per focus, and it is slice 12's to
+reach.
 
 **Every week 1–3 template is bound to one of the twelve layouts**, in
 `005_worksheet_layouts.sql` (§16). The heights are the load-bearing half: a
@@ -1362,7 +1400,7 @@ countries at any point in the month.
 **Five templates carry the family's lens, and five is the size of it.** This is
 a Sabbath-keeping Christian household, and the library reflects that the way a
 family's own curriculum does: as a few tasks that look at a country through it,
-not as a frame over all ninety. Two sit in week 2 — `kingdom-over-this-place`
+not as a frame over all ninety-one. Two sit in week 2 — `kingdom-over-this-place`
 reads Micah 4:1-4 against something the country is struggling with now, and
 `desert-shall-blossom` reads Isaiah 35:1-2 against its most worn-out land. Three
 sit in week 3 — `their-rest-day` asks which day the country actually rests,
@@ -1370,7 +1408,7 @@ sit in week 3 — `their-rest-day` asks which day the country actually rests,
 are called, and `feast-they-keep` reads Zechariah 14:16 against the country's own
 harvest festival.
 
-They obey every rule the other eighty-five do: one action, ten minutes, second
+They obey every rule the other eighty-six do: one action, ten minutes, second
 person, and **not country-specific** — every country has a rest day, a festival,
 and something that needs fixing. A scripture reference is the one assertion a
 task is allowed to make, because a citation is checkable; everything the kid is
@@ -1426,13 +1464,13 @@ Resolved:
   telling a kid to do something that is not going to happen. Whoever is in the
   kitchen is a real audience, and it is the one that is always there. See §13.
 - **The library carries the family's lens in five templates, not as a frame.**
-  Five of ninety look at a country through the Sabbath and the coming Kingdom,
-  and the country hooks point at scripture's own ground where a country has it.
-  The alternative — a seventh focus — was rejected: a focus is a *draw weight*,
+  Five of ninety-one look at a country through the Sabbath and the coming
+  Kingdom, and the country hooks point at scripture's own ground where a country
+  has it. The alternative — a tenth focus — was rejected: a focus is a *draw weight*,
   so it would make the lens something a kid picks instead of something the year
-  quietly contains, and it would need six on-theme tasks in each of weeks 2 and
-  3 to satisfy §13, which is eighteen more templates and a much heavier hand
-  than intended. See §13.
+  quietly contains, and it would need a tag set reaching enough of the pool to
+  satisfy §13, which is a dozen more templates and a much heavier hand than
+  intended. See §13.
 - **A hook is re-seeded per country, not per hook.** `country_hooks` has no
   natural key, so `003`'s insert skips any country that already holds a hook
   rather than conflict-matching the text. It is what makes the editor's one
@@ -1609,8 +1647,8 @@ is the sheet, composed of segments.
 - A **sheet** is what comes out of the printer: a header band and the segments
   packed into it.
 
-**Layouts are a library, not one worksheet per task.** Ninety bespoke worksheets
-is ninety pieces of content on top of §13, and most of them would be the same
+**Layouts are a library, not one worksheet per task.** A bespoke worksheet per
+task is another ninety pieces of content on top of §13, and most of them the same
 box twice. "Copy the flag" and "trace the outline and star the capital" want the
 identical form. Twelve layouts plus one binding per template is the same result
 for a twelfth of the writing, and it is the version the parent can keep tuning

@@ -37,7 +37,7 @@ row counts on `/admin/health`. `001_schema.sql` carries every table in §5.
 
 **Slice 02 is built.** `/admin` now also has **Run seed** and the people editor:
 three names and three inks, changed in a browser. `002_seed.sql` carries the
-three people, six focuses, six project types, 195 countries and the task
+three people, nine focuses, six project types, 195 countries and the task
 library — enough to draw a real month, and enough that the focus a kid picks
 every month does not hand back the same week every month. `GET /api/catalog`
 serves the picker's one fetch with an ETag, so a row corrected in the editor
@@ -152,20 +152,19 @@ with no passcode and replays nothing.
 
 **Slice 08 is built** — the library editor. `/admin/library`, behind the same
 token and linked only from `/admin`: the task list with every template's draw
-count and by whom, the focus editor with the weight grid, the project type
-editor with its week-4 sequence, and the country editor for hooks and focus
-fits. Nothing is deleted — `archived = 1` takes a template out of future draws
+count and by whom, the focus editor with its tag grid, the project type editor
+with its week-4 sequence, and the country editor for hooks and focus fits. Nothing is deleted — `archived = 1` takes a template out of future draws
 and leaves every month already drawn intact — with one exception: a country
 hook, which nothing references, and which a wrong generated line has nowhere
 else to go from.
 
 Edits reach an active month with no republish, because `plan_tasks` joins to
-`task_templates` rather than copying the text. The weight grid writes sparsely:
-a cell at 1 is the absence of an opinion and stores no row, and a cell moved
-back to 1 deletes the row it had. A focus created with no weights at all draws
-immediately, and the page warns when either week 2 or week 3 is under fifteen
-tasks — which, against the library's twenty-five a week, is nothing: the warning
-is there for a library someone has archived their way through.
+`task_templates` rather than copying the text. The tag grid writes sparsely: a
+cell at 0 is the absence of an opinion and stores no row, and a cell moved back
+to 0 deletes the row it had. A focus created with no tags at all draws
+immediately, and the page warns when a focus's tags match no prompt at all —
+which is the only way left to make a focus mean nothing, since a tag weight can
+only ever favour.
 
 `GET /admin/api/library.json` is the backup and `POST` to the same path reads
 one back. It is keyed on slugs and ISO3 codes rather than ids, so it lands in a
@@ -176,9 +175,9 @@ The one part not built is the worksheet layout editor, which moved to slice 10
 because the table it edits arrives there.
 
 **Slice 09 is built** — the content, and the thing that decides whether the app
-is good rather than merely working. The library is **90 task templates**: ten in
-week 1, twenty-five in each of weeks 2 and 3, and a five-task sequence for every
-one of the six project types, so setup offers all six. `003_country_data.sql`
+is good rather than merely working. The library is **91 task templates**: ten in
+week 1, fifty-one across weeks 2 and 3, and a five-task sequence for every one of
+the six project types, so setup offers all six. `003_country_data.sql`
 adds **222 hooks and 200 focus affinities across 100 countries**, chosen for
 spread across continent, adventure level and focus, and it corrects the
 adventure level where writing a country's hooks proved the first pass wrong.
@@ -186,8 +185,8 @@ adventure level where writing a country's hooks proved the first pass wrong.
 Every hook is a lead — "Find out what is carved into the desert at Nazca" — and
 never an assertion, because a few hundred hand-written hooks will contain errors
 and the phrasing decides whether an error costs a dead-end search or a false
-sentence copied into a workbook. Five of the ninety templates carry the family's
-Sabbath and Kingdom lens, and five is the deliberate size of it.
+sentence copied into a workbook. Five of the ninety-one templates carry the
+family's Sabbath and Kingdom lens, and five is the deliberate size of it.
 
 Re-running the seed cannot duplicate a hook or resurrect a deleted one: hooks
 have no natural key, so the insert skips any country that already holds one,
@@ -221,10 +220,31 @@ twelve layouts and the bindings. SQLite has no `ADD COLUMN IF NOT EXISTS`, so
 DDL cannot live in a file Run seed re-executes; and layouts in a migration could
 never be corrected without reading as drift.
 
-**Slices 00 to 10 are built and the app does the whole nine-month job.** Two
-remain, both from `docs/design/LIBRARY_v3.md`: slice 11 merges weeks 2 and 3 into
-one tag-weighted draw, and slice 12 writes the 106 prompts, 19 forms and 10
-renderers that draw was measured against.
+**Slice 11 is built** — the merged draw. Weeks 2 and 3 stopped being two pools.
+Eight prompts are drawn from one pool of 49 against tag weights, dealt four and
+four, and joined by two pinned tasks: `wow-fact` in week 2 and `cook-it` in week
+3. A month is twenty again, and a focus is never absent from a whole week of
+paper — the failure the merge exists to fix ran at 20 to 90% of months.
+
+A focus is now a set of weighted **tags** rather than an opinion about each
+prompt. `prompt_tags` says what a prompt is about (`topic`) and how the answer
+gets produced (`mode`); `focus_tags` says which topics a focus cares about, and a
+prompt scores `1 + 2 x` the sum of the weights it shares. Two consequences worth
+the change: a prompt tagged once at authoring time is drawn correctly by every
+focus from then on, with no per-prompt row to write; and there is no way to
+exclude, so nothing in the editor can starve the draw. The mode tags do what
+topic tags cannot — no month draws two prompts sharing one, and the two wildcard
+slots guarantee a month holds somebody from the country actually speaking.
+
+The draw also refuses to print the same worksheet form twice in one week, which
+five draws against twenty-seven forms would otherwise do about 40% of the time by
+arithmetic alone.
+
+**Slices 00 to 11 are built and the app does the whole nine-month job.** One
+remains: slice 12 writes the 106 prompts, 19 forms and 10 renderers the draw was
+measured against. Until it lands the pool is 49 rather than 153, so the
+five-month cooldown blocks most of it by month six — expected, and a reason to
+finish the library rather than to soften the number.
 
 Every Cloudflare due-out is closed, and so are the three inks, the school year
 (September through May) and the paper (D-13 — US Letter). Three remain. Two block
@@ -234,8 +254,7 @@ feature-detected either way and what is unresolved is whether the owner has to
 set display sleep by hand. The third is D-15, twenty countries of affinity apiece
 for the three focuses that have none, and it blocks one part of slice 12.
 
-No question blocks slice 11. Three are open against slice 12 and listed in its
-file.
+Three questions are open against slice 12 and listed in its file.
 
 The Worker's own tests run with `node --test test/*.test.js` and need nothing
 installed. They are a build-session tool, not something the owner ever runs —

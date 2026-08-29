@@ -33,8 +33,9 @@ countries each with a one-line reason, typed into the library editor's focus tab
 to `003_country_data.sql`.
 
 It matters most for Who Gets What, because the countries that focus suits are not the ones
-a kid picks off a map. Slice 11 seeds all three focuses and does not need this — the draw
-reads tags, not affinities — so it is slice 12 that is waiting.
+a kid picks off a map. All three focuses are seeded and pickable as of slice 11, and the
+draw reads tags rather than affinities, so nothing about them is blocked — it is the
+country card's recommendation that is waiting, and that is slice 12.
 
 
 **D-02, D-06. Cloudflare.** Both are done. The database is `globetrotters-prod`

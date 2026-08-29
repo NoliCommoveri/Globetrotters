@@ -43,13 +43,14 @@ Every `prompt` in second person to a 5th grader, one clear action, finishable in
 ten minutes. "Find out which animal is on their money and draw it" — not
 "Research national symbolism."
 
-Five of the ninety carry the family's Sabbath and Kingdom lens — two in week 2,
-three in week 3 — and five is the deliberate size of it (`DESIGN.md` §13). They
-obey every rule the other eighty-five do, country-agnostic included: every
-country has a rest day, a harvest festival, and something that needs fixing.
+Five of them carry the family's Sabbath and Kingdom lens — two in week 2, three
+in week 3 — and five is the deliberate size of it (`DESIGN.md` §13). They obey
+every rule the rest do, country-agnostic included: every country has a rest day,
+a harvest festival, and something that needs fixing.
 
-`task_focus_weights` rows only where a focus has an opinion: 3 for on-theme, 0
-to exclude. Neutral tasks get no row.
+A focus's opinion is a set of weighted tags, and every prompt this slice wrote
+carries the topic and mode tags the draw reads. Slice 11 owns both tables — see
+11-merged-draw.md.
 
 Weeks 1–3 hold all research and aggregation. Week 4 is production only.
 
@@ -124,13 +125,14 @@ assertion rather than a claim — the test that holds it is named.
 
 - ✅ Deal me three never deals a blank, on ten consecutive shuffles —
   `test/deal.test.js`, run as written against the real seed
-- ✅ Every focus has ≥15 templates at weight ≥1 across weeks 2 and 3. Trivially
-  true at 25 a week with at most one exclusion, so the assertion that earns its
-  place is the stronger one: six weight-3 tasks per focus per week —
-  `test/seed-content.test.js`
-- ✅ Nine consecutive months drawn for one person show no week with a repeat —
-  `test/draw.test.js`, nine months against the real library for each of the six
-  focuses, which is the worst case a kid who knows what they like produces
+- ✅ Every focus reaches enough of the pool to shape a month —
+  `test/seed-content.test.js`. Slice 11 restated this against tags: the count is
+  how many prompts a focus lifts above baseline, and it is one number over the
+  merged pool rather than two over two weeks.
+- ✅ Every focus draws a whole month from the real seeded library —
+  `test/draw.test.js`. Slice 11's cooldown made a nine-month run a slice 12
+  assertion: against 49 drawable it blocks forty by month six, which is a library
+  size to fix and not a draw to weaken.
 - ✅ All six project types are selectable with a full week-4 sequence —
   `test/seed-content.test.js`
 - ✅ Every prompt reads as one action a 5th grader can finish in ten minutes

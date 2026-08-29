@@ -2248,19 +2248,18 @@ form row must exist before a prompt can bind to it.
 answers when a learner last drew a prompt, and a log written at draw time would record
 prompts a redraw threw away and cool them down for nothing.
 
-**The draw engine changes shape, and it is the largest code change in v3.** Today
-`src/lib/draw.js` runs twice, once per week, over `task_focus_weights`. It becomes one
-draw of eight over the merged pool plus a deal — see §3 *The draw* and *The deal*. Four
-things it needs that it does not have: the tag join in place of the weight lookup, the
-per-form cap of two, an exhaustive seventy-way deal, and the two pins. The deal is small
-and pure — it takes ten prompts and returns two lists — so it is the piece to write first
-and test on its own. `plan_tasks.week_no` still holds 2 or 3 and every screen downstream
-is unchanged: what changes is which rows get which number.
+**The draw engine is the largest code change in v3, and slice 11 built it.**
+`src/lib/draw.js` is one draw of eight over the merged pool plus a deal — see §3 *The
+draw* and *The deal*. Four things it gained: the tag join in place of the weight lookup,
+the per-form cap of two, an exhaustive seventy-way deal, and the two pins. The deal is
+small and pure — it takes ten prompts and returns two lists — and it takes no randomness,
+so the same eight always land the same way. `plan_tasks.week_no` still holds 2 or 3 and
+every screen downstream is unchanged: what changed is which rows get which number.
 
-**Swap widens with the pool.** A swap in week 2 or 3 redraws from all 153 rather than from
-that week's 85 or 69, and must respect the same per-form cap against the ten already on
-the plan. Both pins are unswappable, `cook-it` as before and `wow-fact` for the same
-reason.
+**Swap widened with the pool.** A swap in week 2 or 3 redraws from the whole merged pool
+rather than from that week's half, respects the per-form cap against the nine tasks still
+on the plan, and will not put a second copy of a form into the week it is swapping inside.
+Both pins are unswappable, `cook-it` as before and `wow-fact` for the same reason.
 
 **Seeds only insert.** Every seed statement is `ON CONFLICT DO NOTHING` and every binding
 is guarded on `worksheet_layout_id IS NULL`, so new forms, prompts and tags land through a
