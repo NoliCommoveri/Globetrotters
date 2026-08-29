@@ -143,6 +143,20 @@ ${plans.results.length === 0
 </table>`}
 <div id="reset-out"></div>
 
+<h2>Erase everything</h2>
+<p class="note">Drops every table, the migration ledger included — people, the
+library, every month, every stamp. Nothing survives it and there is no undo.
+Afterwards the database is empty: press <em>Apply pending</em>, then
+<em>Run seed</em>, and it is rebuilt from the files in the repo.<br>
+This is what makes the schema editable in place. A column that has to change
+changes in <code>001_schema.sql</code> and comes back through here, instead of
+through a new file carrying an ALTER for something SQLite will not alter.
+Type <code>erase everything</code> to confirm.</p>
+<p><input type="text" id="erase-confirm" placeholder="erase everything"
+    autocapitalize="off" autocorrect="off" spellcheck="false" style="width:14rem">
+  <button id="erase">Erase</button></p>
+<div id="erase-out"></div>
+
 <form method="post" action="/admin/logout"><button type="submit">Sign out</button></form>
 
 <script>
@@ -251,6 +265,32 @@ for (const button of document.querySelectorAll('button.p-save')) {
     }
   });
 }
+
+const erase = document.getElementById('erase');
+if (erase) erase.addEventListener('click', async () => {
+  const out = document.getElementById('erase-out');
+  erase.disabled = true;
+  erase.textContent = 'Erasing…';
+  try {
+    const { data } = await post('/admin/api/erase', {
+      confirm: document.getElementById('erase-confirm').value,
+    });
+    if (data && data.ok) {
+      show(out, 'Dropped ' + data.dropped.length + ' tables:\\n  '
+        + data.dropped.join('\\n  ')
+        + '\\n\\nThe database is empty. Apply pending, then Run seed.');
+      return;
+    }
+    const stuck = data && data.remaining && data.remaining.length
+      ? '\\n\\nStill there: ' + data.remaining.join(', ') : '';
+    show(out, ((data && data.error) || 'Unexpected response') + stuck);
+  } catch (err) {
+    show(out, String(err));
+  } finally {
+    erase.disabled = false;
+    erase.textContent = 'Erase';
+  }
+});
 
 for (const button of document.querySelectorAll('button.reset')) {
   button.addEventListener('click', async () => {

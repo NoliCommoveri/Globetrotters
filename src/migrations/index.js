@@ -4,8 +4,10 @@
 //
 // MIGRATIONS is schema. Apply order is the array's order, ids are zero-padded
 // to three digits so a lexicographic sort agrees with it, each file's checksum
-// is recorded when it runs, and an edit afterwards shows on /admin as drift.
-// A file here is written once and never touched again.
+// is recorded when it runs, and an edit afterwards shows on /admin as drift and
+// is never reapplied on its own. Erase everything is the way to make an edited
+// file run again: it drops the ledger with the tables, so the whole list is
+// pending and the database is rebuilt from the files as they now read.
 //
 // SEEDS is data, and every insert in one is ON CONFLICT DO NOTHING. Run seed
 // re-executes the whole list on every press: a row that exists is left alone,

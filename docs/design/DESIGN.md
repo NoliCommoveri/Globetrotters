@@ -140,15 +140,21 @@ command. Everything runs from a browser.
   chunk one statement at a time to name the offender, which commits the
   statements before it. A migration that halts is not recorded and stays pending,
   so fixing it means adding a new file — D1 has no transaction spanning batches.
-- Migration files are append-only. To change something already applied, add a new
-  file. The runner refuses to re-run an applied id.
+- The runner refuses to re-run an applied id, so a file that has run is finished:
+  changing it changes nothing and shows as drift. There are two ways forward and
+  the second is usually the right one here — add a new file carrying the change,
+  or press **Erase everything**, edit the original, and rebuild. Append-only is a
+  rule about data that cannot be got back, and this database holds none.
 
 **Schema and seed are two lists, protected by opposite rules.**
 `src/migrations/index.js` exports both, and it stays the only place `.sql` is
 imported.
 
-- **`MIGRATIONS`** is schema. Checksummed, append-only, applied once by **Apply
-  pending**, and an edit afterwards shows as drift.
+- **`MIGRATIONS`** is schema. Checksummed, applied once by **Apply pending**, and
+  an edit afterwards shows as drift — never silently reapplied, because the
+  runner cannot know whether the edit is safe against rows that already exist.
+  Erase everything is how an edited file is made to run: the ledger goes with the
+  tables, so the edited 001 is pending again.
 - **`SEEDS`** is data. Every insert is `ON CONFLICT ... DO NOTHING`, and **Run
   seed** re-executes the whole list on every press: a row that exists is left
   exactly as it is, a row that is new is inserted.
@@ -185,8 +191,20 @@ press.
   terminal problem wearing a browser. A name is 1–24 characters — long enough to
   be a name, short enough for the stamp face — and an ink is a six-digit hex,
   stored uppercase, because it is rendered into both CSS and SVG later.
-- **Reset month** *(guarded)* — delete a `month_plan` and its tasks. This is the
-  one destructive control. The typed confirmation is **the plan's own month**,
+- **Erase everything** *(guarded)* — drops every table, `_migrations` included,
+  and leaves the database as it was before the first Apply pending. Apply pending
+  and Run seed then rebuild it from the files in the repo. Drop order is
+  discovered rather than declared: D1 enforces foreign keys and DROP TABLE does
+  an implicit DELETE, so the runner retries until a pass drops nothing new, which
+  takes the tables leaves-first without hardcoding the shape of the schema. The
+  typed confirmation is the fixed phrase `erase everything` — the argument
+  against a fixed word holds for a control aimed at one row while the others must
+  survive, and this one takes the whole database or none of it. **It is what
+  makes the schema files editable in place**, which is worth more here than
+  append-only: a CHECK constraint SQLite will not alter is an edit to 001 and
+  three button presses.
+- **Reset month** *(guarded)* — delete a `month_plan` and its tasks. The narrower
+  of the two destructive controls. The typed confirmation is **the plan's own month**,
   `2026-09`, not a fixed word: a word you type every time stops being a
   confirmation, and this one names the thing being destroyed. D1 enforces foreign
   keys, so it must delete in dependency order: `sessions`, `media`, `stamps`,
