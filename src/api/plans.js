@@ -9,7 +9,7 @@
 // everything is free and resettable; after it, the plan is fixed (Q-01, Q-02).
 
 import { json } from '../lib/html.js';
-import { drawPlan, drawDeepWeek, week4Rows, ShortPoolError } from '../lib/draw.js';
+import { drawPlan, drawDeepWeeks, week4Rows, ShortPoolError } from '../lib/draw.js';
 import { isMonth, inSchoolYear, monthsBetween, startDateFor, todayIn, weekOf } from '../lib/dates.js';
 
 const WEEK_THEMES = { 1: 'Foundations', 2: 'Deep Dive', 3: 'Deep Dive', 4: 'Make & Present' };
@@ -23,8 +23,11 @@ export const SWAP_BUDGET = 3;
 // anchor workbook pages and are meant to repeat — swapping one leaves a physical
 // page with nothing feeding it. Not week 4, which is an ordered sequence rather
 // than a draw. And not a task already done.
+// `fixed` joins `core` and week 4. Both pins are pinned because a draw is the
+// wrong instrument for them, and a swap is a draw (§4).
 export const swappable = (task) =>
-  task.status === 'open' && task.week_no !== 4 && task.tier !== 'core';
+  task.status === 'open' && task.week_no !== 4
+  && task.tier !== 'core' && task.tier !== 'fixed';
 
 // ------------------------------------------------------------------ reads --
 
@@ -156,15 +159,33 @@ export async function planPayload(env, id) {
 // ------------------------------------------------------------- draw inputs --
 
 // Two lookups the pure engine takes as functions: what this focus thinks of a
-// template, and how long since this person last drew it.
+// template, and how long since this person last drew it. Everything intrinsic
+// to a template — its form, its mode tags, the paper it takes — rides on the
+// row instead, because it does not depend on who is drawing.
 export async function drawInputs(env, { personId, month, focusId }) {
-  const [templates, weights, history] = await Promise.all([
+  const [templates, weights, modes, history] = await Promise.all([
+    env.DB.prepare(`
+      SELECT task_templates.id, task_templates.slug, task_templates.week_theme,
+             task_templates.tier, task_templates.project_type_id, task_templates.position,
+             task_templates.worksheet_layout_id AS form,
+             COALESCE(worksheet_layouts.height_thirds, 1) AS thirds
+      FROM task_templates
+      LEFT JOIN worksheet_layouts ON worksheet_layouts.id = task_templates.worksheet_layout_id
+      WHERE task_templates.archived = 0
+    `).all(),
+    // fw = 1 + 2 * SUM over the topic tags this focus weights. The `1 +` floor
+    // is the no-zeros rule and the reason this is a LEFT JOIN in spirit: a
+    // template with no overlap returns no row here and reads as 1 below.
+    env.DB.prepare(`
+      SELECT prompt_tags.task_template_id, SUM(focus_tags.weight) AS shared
+      FROM prompt_tags
+      JOIN focus_tags ON focus_tags.tag = prompt_tags.tag AND focus_tags.focus_id = ?
+      WHERE prompt_tags.namespace = 'topic'
+      GROUP BY prompt_tags.task_template_id
+    `).bind(focusId).all(),
     env.DB.prepare(
-      'SELECT id, week_theme, tier, project_type_id, position FROM task_templates WHERE archived = 0'
+      "SELECT task_template_id, tag FROM prompt_tags WHERE namespace = 'mode'"
     ).all(),
-    env.DB.prepare(
-      'SELECT task_template_id, weight FROM task_focus_weights WHERE focus_id = ?'
-    ).bind(focusId).all(),
     // Strictly earlier months, which is what lets a redraw work at all: the plan
     // being drawn is in `month` itself, and counting it would score everything
     // it just drew at zero and exclude it.
@@ -177,16 +198,26 @@ export async function drawInputs(env, { personId, month, focusId }) {
     `).bind(personId, month).all(),
   ]);
 
-  // Sparse on purpose: a missing row means weight 1, and only opinions are
-  // stored (§5). Reading it as a Map keeps that default in one expression.
-  const weightById = new Map(weights.results.map((w) => [w.task_template_id, w.weight]));
+  // Sparse on purpose: a template this focus shares no tag with has no row
+  // here and reads as the baseline 1 (§5). Reading it as a Map keeps that
+  // default in one expression.
+  const sharedById = new Map(weights.results.map((w) => [w.task_template_id, Number(w.shared)]));
   const monthsById = new Map(
     history.results.map((h) => [h.id, monthsBetween(h.last_month, month)])
   );
+  const modesById = new Map();
+  for (const row of modes.results) {
+    if (!modesById.has(row.task_template_id)) modesById.set(row.task_template_id, []);
+    modesById.get(row.task_template_id).push(row.tag);
+  }
 
   return {
-    templates: templates.results,
-    focusWeight: (id) => (weightById.has(id) ? weightById.get(id) : 1),
+    templates: templates.results.map((t) => ({ ...t, modes: modesById.get(t.id) ?? [] })),
+    // The 2x is the scale and it is load-bearing: at `1 +` alone a focus lifts
+    // on-theme content by about 2x, which lands as 1.5 of the ten tasks for a
+    // thin focus. Doubling puts a typical focus at 2.5-4 of ten without letting
+    // the heaviest single prompt past 5% of pool weight (LIBRARY_v3.md §3).
+    focusWeight: (id) => 1 + 2 * (sharedById.get(id) ?? 0),
     monthsSince: (id) => (monthsById.has(id) ? monthsById.get(id) : null),
   };
 }
@@ -197,10 +228,23 @@ const insertTask = (env, planId, row) => env.DB.prepare(
 ).bind(planId, row.task_template_id, row.week_no, row.position);
 
 export function shortPool(err) {
+  if (err.week === 4) {
+    return json({ ok: false, error: 'That project type has no week 4 yet. Pick another one.' },
+      { status: 409 });
+  }
+  // A missing pin, which is what a `fixed` task archived in the library editor
+  // looks like from here. Named rather than reported as a count, because the
+  // count is right and the row is what is gone.
+  if (err.available === err.needed - 1 && (err.week === 2 || err.week === 3)) {
+    return json({
+      ok: false,
+      error: `Week ${err.week} has no pinned task. Un-archive it in the library before drawing.`,
+    }, { status: 409 });
+  }
   return json({
     ok: false,
-    error: err.week === 4
-      ? 'That project type has no week 4 yet. Pick another one.'
+    error: err.week == null
+      ? `The library is short of Deep Dive tasks — it offers ${err.available} and weeks 2 and 3 need ${err.needed}.`
       : `The library is short of week ${err.week} tasks — it offers ${err.available} and a week needs ${err.needed}.`,
   }, { status: 409 });
 }
@@ -364,8 +408,12 @@ export async function apiPatchPlan(request, env, session, params) {
     if (!focus) return json({ ok: false, error: 'No such focus.' }, { status: 400 });
 
     try {
+      // One draw of eight and one deal, not two draws of five. Changing the
+      // focus is exactly the moment the merged pool exists for: a focus's
+      // opinion has to be able to reshape both weeks at once, or half the month
+      // ignores what was just picked.
       const inputs = await drawInputs(env, { personId: plan.person_id, month: plan.month, focusId });
-      const rows = [...drawDeepWeek(2, inputs), ...drawDeepWeek(3, inputs)];
+      const rows = drawDeepWeeks(inputs);
       statements.push(
         env.DB.prepare('UPDATE month_plans SET focus_id = ? WHERE id = ?').bind(focusId, id),
         env.DB.prepare('DELETE FROM plan_tasks WHERE plan_id = ? AND week_no IN (2, 3)').bind(id),

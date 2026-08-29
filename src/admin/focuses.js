@@ -1,14 +1,16 @@
-// /admin/api/focuses — the focus editor and the weight grid (DESIGN.md §12).
+// /admin/api/focuses — the focus editor and the tag grid (DESIGN.md §12).
 //
-// The grid is the reason this route exists as a bulk PUT rather than a row at a
-// time: six focuses against twenty-six week 2-3 tasks is 156 cells today and
-// several hundred after slice 09, and saving one cell per request would make
-// tuning a focus a hundred round trips.
+// A focus's opinion is a set of weighted topic tags, not a list of prompts. The
+// grid is fifty tags against a 0-3 weight rather than 153 prompts, which is a
+// smaller and a more honest screen: it says what a focus is about, and every
+// prompt written afterwards is drawn correctly the moment it is tagged.
 //
-// It writes sparsely. A missing row means weight 1 (§5), so a cell left at 1
-// stores nothing and a cell moved back to 1 deletes the row it had. Only
-// opinions are stored, which is what keeps the table readable and the seed
-// small.
+// A bulk PUT rather than a row at a time, for the same reason the grid is one
+// screen: tuning a focus is moving four or five tags at once and looking at
+// what it did, and one request per cell would make that a round trip a click.
+//
+// It writes sparsely. A missing row is no opinion, so a cell left at 0 stores
+// nothing and a cell moved back to 0 deletes the row it had.
 
 import { json } from '../lib/html.js';
 import { readJson } from '../lib/body.js';
@@ -17,42 +19,52 @@ import { Fields, slugify, uniqueSlug } from './fields.js';
 const MAX_NAME = 40;
 const MAX_BLURB = 160;
 
-// The draw takes five tasks from each of weeks 2 and 3. Five out of thirteen is
-// the same five months running; fifteen is the point where a focus stops
-// feeling like one deck. Checked per week, because a focus rich in week 2 and
-// bare in week 3 draws just as badly as one bare in both.
-export const POOL_FLOOR = 15;
-
 const COLUMNS = 'id, slug, name, blurb, archived, origin';
 
 const load = (env, id) =>
   env.DB.prepare(`SELECT ${COLUMNS} FROM focuses WHERE id = ?`).bind(id).first();
 
-// Effective weight, not stored weight: COALESCE(weight, 1) is the sparse rule
-// written out, and it is why a focus with no rows at all counts every task.
-export async function poolCounts(db) {
+export const NO_REACH = { week2: 0, week3: 0 };
+
+// How many drawable weeks 2-3 prompts this focus lifts above baseline, split by
+// the prompt's natural half. Not "on-theme", which is a hand audit nothing here
+// can compute — this is every prompt sharing a tag the focus weights, a single
+// weight-1 tag included.
+//
+// The split is worth showing even though the draw ignores it: the deal has to
+// put four prompts in each week, and a focus that reaches twelve prompts on one
+// side and one on the other is the content gap the merged pool exists to
+// survive rather than to hide (LIBRARY_v3.md §3).
+export async function reachCounts(db) {
   const { results } = await db.prepare(`
-    SELECT focuses.id AS focus_id, task_templates.week_theme AS week, COUNT(*) AS n
-    FROM focuses
+    SELECT focus_tags.focus_id, task_templates.week_theme AS week,
+           COUNT(DISTINCT task_templates.id) AS n
+    FROM focus_tags
+    JOIN prompt_tags
+      ON prompt_tags.tag = focus_tags.tag AND prompt_tags.namespace = 'topic'
     JOIN task_templates
-      ON task_templates.week_theme IN (2, 3) AND task_templates.archived = 0
-    LEFT JOIN task_focus_weights
-      ON task_focus_weights.task_template_id = task_templates.id
-     AND task_focus_weights.focus_id = focuses.id
-    WHERE COALESCE(task_focus_weights.weight, 1) >= 1
-    GROUP BY focuses.id, task_templates.week_theme
+      ON task_templates.id = prompt_tags.task_template_id
+     AND task_templates.week_theme IN (2, 3)
+     AND task_templates.tier != 'fixed'
+     AND task_templates.archived = 0
+    GROUP BY focus_tags.focus_id, task_templates.week_theme
   `).all();
 
-  const pools = new Map();
+  const reach = new Map();
   for (const row of results) {
-    const pool = pools.get(row.focus_id) || { week2: 0, week3: 0 };
-    pool[`week${row.week}`] = Number(row.n);
-    pools.set(row.focus_id, pool);
+    const found = reach.get(row.focus_id) || { ...NO_REACH };
+    found[`week${row.week}`] = Number(row.n);
+    reach.set(row.focus_id, found);
   }
-  return pools;
+  return reach;
 }
 
-export const thin = (pool) => pool.week2 < POOL_FLOOR || pool.week3 < POOL_FLOOR;
+// Zero, and only zero. There is no weight-0 any more — `fw` floors at 1, so
+// every prompt is reachable by every focus and no amount of tuning can shrink
+// the pool the draw takes eight from. What is left to warn about is a focus
+// whose tags match no prompt at all: it is valid, it draws, and it draws
+// exactly what picking nothing would.
+export const thin = (reach) => reach.week2 + reach.week3 === 0;
 
 export async function apiCreateFocus(request, env) {
   const body = await readJson(request);
@@ -70,12 +82,12 @@ export async function apiCreateFocus(request, env) {
     "INSERT INTO focuses (slug, name, blurb, archived, origin) VALUES (?, ?, ?, 0, 'custom')"
   ).bind(slug, name, fields.value('blurb') ?? null).run();
 
-  // A focus is valid the moment it exists: zero weight rows means every task is
-  // at 1 and the draw works. The warning is advice about the shape of the
-  // month, not a gate on saving.
+  // A focus is valid the moment it exists: zero tag rows means every prompt is
+  // at the baseline 1 and the draw works. The warning is advice about the shape
+  // of the month, not a gate on saving.
   const focus = await load(env, res.meta.last_row_id);
-  const pool = (await poolCounts(env.DB)).get(focus.id) || { week2: 0, week3: 0 };
-  return json({ ok: true, focus: { ...focus, pool, thin: thin(pool) } }, { status: 201 });
+  const reach = (await reachCounts(env.DB)).get(focus.id) || { ...NO_REACH };
+  return json({ ok: true, focus: { ...focus, reach, thin: thin(reach) } }, { status: 201 });
 }
 
 export async function apiPatchFocus(request, env, params) {
@@ -95,67 +107,66 @@ export async function apiPatchFocus(request, env, params) {
   return json({ ok: true, focus: await load(env, id) });
 }
 
-// The three states a cell cycles through. 0 excludes the task from this focus
-// outright, 1 is no opinion, 3 favors it — the same three the draw's score()
-// reads (§4).
-const ALLOWED = [0, 1, 3];
+// The four states a cell cycles through. 0 is no opinion and stores no row; 1,
+// 2 and 3 are the weights `fw = 1 + 2 * SUM(weight)` sums (§4). There is no
+// exclusion any more, which is the point: a focus says what it is about and
+// never what the library may not offer.
+const ALLOWED = [0, 1, 2, 3];
 
-// PUT, not PATCH: the body is the whole of this focus's column and what is
+// A tag is lowercase letters, digits and hyphens, and the grid can mint one the
+// library has never seen — that is what makes a new tag reachable without a
+// deploy. Bounded and shaped, because the value is a join key and it will
+// appear on a page.
+const TAG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+const MAX_TAG = 40;
+const MAX_TAGS = 200;
+
+// PUT, not PATCH: the body is the whole of this focus's tag set and what is
 // absent from it is absent from the table. That is what makes the grid's save
 // idempotent — press it twice and the second press writes the same rows.
-export async function apiPutFocusWeights(request, env, params) {
+export async function apiPutFocusTags(request, env, params) {
   const id = Number(params.id);
   if (!(await load(env, id))) return json({ ok: false, error: 'No such focus' }, { status: 404 });
 
   const body = await readJson(request);
-  const cells = Array.isArray(body.weights) ? body.weights : null;
-  if (!cells) return json({ ok: false, error: 'weights must be a list' }, { status: 400 });
+  const cells = Array.isArray(body.tags) ? body.tags : null;
+  if (!cells) return json({ ok: false, error: 'tags must be a list' }, { status: 400 });
+  if (cells.length > MAX_TAGS) {
+    return json({ ok: false, error: `That is more than ${MAX_TAGS} tags` }, { status: 400 });
+  }
 
   const keep = new Map();
   for (const cell of cells) {
-    const taskId = Number(cell?.task_template_id);
+    const tag = String(cell?.tag ?? '').trim().toLowerCase();
     const weight = Number(cell?.weight);
-    if (!Number.isInteger(taskId)) {
-      return json({ ok: false, error: 'Every cell needs a task_template_id' }, { status: 400 });
+    if (!TAG.test(tag) || tag.length > MAX_TAG) {
+      return json({ ok: false, error: 'A tag is lowercase words joined by hyphens' }, { status: 400 });
     }
     if (!ALLOWED.includes(weight)) {
       return json({ ok: false, error: `Weight must be one of ${ALLOWED.join(', ')}` }, { status: 400 });
     }
-    keep.set(taskId, weight);
-  }
-
-  if (keep.size) {
-    const ids = [...keep.keys()];
-    const { results: known } = await env.DB.prepare(
-      `SELECT id FROM task_templates WHERE id IN (${ids.map(() => '?').join(', ')})`
-    ).bind(...ids).all();
-    if (known.length !== ids.length) {
-      return json({ ok: false, error: 'A cell names a task that does not exist' }, { status: 400 });
-    }
+    keep.set(tag, weight);
   }
 
   // One batch, so a half-written grid is not a state the editor can leave
-  // behind. Weight-1 cells are deleted rather than stored: the row and its
+  // behind. Weight-0 cells are deleted rather than stored: the row and its
   // absence mean the same thing, and storing it would grow the table by the
   // size of the grid every time somebody opened it.
   const statements = [];
-  for (const [taskId, weight] of keep) {
-    statements.push(weight === 1
-      ? env.DB.prepare(
-          'DELETE FROM task_focus_weights WHERE focus_id = ? AND task_template_id = ?'
-        ).bind(id, taskId)
+  for (const [tag, weight] of keep) {
+    statements.push(weight === 0
+      ? env.DB.prepare('DELETE FROM focus_tags WHERE focus_id = ? AND tag = ?').bind(id, tag)
       : env.DB.prepare(`
-          INSERT INTO task_focus_weights (task_template_id, focus_id, weight)
-          VALUES (?, ?, ?)
-          ON CONFLICT (task_template_id, focus_id) DO UPDATE SET weight = excluded.weight
-        `).bind(taskId, id, weight));
+          INSERT INTO focus_tags (focus_id, tag, weight) VALUES (?, ?, ?)
+          ON CONFLICT (focus_id, tag) DO UPDATE SET weight = excluded.weight
+        `).bind(id, tag, weight));
   }
   if (statements.length) await env.DB.batch(statements);
 
   const { results } = await env.DB.prepare(
-    'SELECT task_template_id, weight FROM task_focus_weights WHERE focus_id = ? ORDER BY task_template_id'
+    'SELECT tag, weight FROM focus_tags WHERE focus_id = ? ORDER BY tag'
   ).bind(id).all();
-  const pool = (await poolCounts(env.DB)).get(id) || { week2: 0, week3: 0 };
+  const reach = (await reachCounts(env.DB)).get(id) || { ...NO_REACH };
 
-  return json({ ok: true, focus_id: id, weights: results, pool, thin: thin(pool) });
+  return json({ ok: true, focus_id: id, tags: results, reach, thin: thin(reach) });
 }

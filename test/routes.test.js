@@ -299,8 +299,8 @@ test('the library editor answers on every one of its routes', async () => {
   const library = await asAdmin(e, '/admin/api/library');
   assert.equal(library.status, 200);
   const data = await library.json();
-  assert.equal(data.tasks.length, 90);
-  assert.equal(data.focuses.length, 6);
+  assert.equal(data.tasks.length, 91);
+  assert.equal(data.focuses.length, 9);
   assert.equal(data.layouts.length, 12);
   // Every layout's form is drawn from the knobs the server sends, so the two
   // cannot drift into a field the renderer would drop.
@@ -321,7 +321,7 @@ test('the library editor answers on every one of its routes', async () => {
   assert.equal((await json(`/admin/api/tasks/${taskId}`, 'PATCH', { archived: 1 })).status, 200);
   assert.equal((await json('/admin/api/focuses', 'POST', { name: 'Money' })).status, 201);
   assert.equal((await json('/admin/api/focuses/1', 'PATCH', { blurb: 'Edited.' })).status, 200);
-  assert.equal((await json('/admin/api/focuses/1/weights', 'PUT', { weights: [] })).status, 200);
+  assert.equal((await json('/admin/api/focuses/1/tags', 'PUT', { tags: [] })).status, 200);
   assert.equal((await json('/admin/api/project-types', 'POST', { name: 'Board game' })).status, 201);
   assert.equal((await json('/admin/api/project-types/1', 'PATCH', { name: 'Trifold' })).status, 200);
 

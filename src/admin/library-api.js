@@ -12,12 +12,13 @@
 
 import { json } from '../lib/html.js';
 import { readJson } from '../lib/body.js';
-import { poolCounts, thin } from './focuses.js';
+import { reachCounts, thin, NO_REACH } from './focuses.js';
 import { kindKnobs } from './layouts.js';
 import { KIND_NAMES, readSpec, pickSpec } from '../lib/worksheet.js';
 
 export async function apiLibrary(request, env) {
-  const [people, focuses, projectTypes, tasks, weights, draws, countries, layouts] = await Promise.all([
+  const [people, focuses, projectTypes, tasks, focusTags, promptTags,
+         draws, countries, layouts] = await Promise.all([
     env.DB.prepare('SELECT id, name, color FROM people ORDER BY sort_order, id').all(),
     env.DB.prepare('SELECT id, slug, name, blurb, archived, origin FROM focuses ORDER BY id').all(),
     env.DB.prepare(`
@@ -39,8 +40,13 @@ export async function apiLibrary(request, env) {
       FROM task_templates
       ORDER BY week_theme, project_type_id, position, id
     `).all(),
+    env.DB.prepare('SELECT focus_id, tag, weight FROM focus_tags ORDER BY focus_id, tag').all(),
+    // Every tag on every prompt, both namespaces. The focus grid needs the
+    // topic vocabulary the library actually uses — a tag no prompt carries is
+    // a weight on nothing — and the task list shows a prompt's own tags beside
+    // it, which is the only place a mistyped tag is visible.
     env.DB.prepare(
-      'SELECT task_template_id, focus_id, weight FROM task_focus_weights ORDER BY focus_id, task_template_id'
+      'SELECT task_template_id, namespace, tag FROM prompt_tags ORDER BY task_template_id, namespace, tag'
     ).all(),
     // By whom, not just how many: a task every kid has had is dead weight in a
     // way a task one kid drew twice is not.
@@ -75,18 +81,19 @@ export async function apiLibrary(request, env) {
     `).all(),
   ]);
 
-  const pools = await poolCounts(env.DB);
+  const reaches = await reachCounts(env.DB);
 
   return json({
     ok: true,
     people: people.results,
     focuses: focuses.results.map((f) => {
-      const pool = pools.get(f.id) || { week2: 0, week3: 0 };
-      return { ...f, pool, thin: thin(pool) };
+      const reach = reaches.get(f.id) || { ...NO_REACH };
+      return { ...f, reach, thin: thin(reach) };
     }),
     project_types: projectTypes.results,
     tasks: tasks.results,
-    weights: weights.results,
+    focus_tags: focusTags.results,
+    prompt_tags: promptTags.results,
     draws: draws.results,
     countries: countries.results,
     layouts: layouts.results,
@@ -105,10 +112,15 @@ export async function apiLibrary(request, env) {
 // slugs for exactly this reason (§13).
 // ---------------------------------------------------------------------------
 
-export const EXPORT_VERSION = 1;
+// 2 since the weights table became two tag tables. A version 1 file carries a
+// `weights` list this build has nowhere to put, and importing it silently would
+// restore a library with no focus opinions in it at all — so the version check
+// refuses it and says which version this build reads.
+export const EXPORT_VERSION = 2;
 
 export async function libraryExport(db) {
-  const [focuses, projectTypes, tasks, weights, hooks, affinities, layouts] = await Promise.all([
+  const [focuses, projectTypes, tasks, focusTags, promptTags,
+         hooks, affinities, layouts] = await Promise.all([
     db.prepare('SELECT slug, name, blurb, archived, origin FROM focuses ORDER BY slug').all(),
     db.prepare('SELECT slug, name, materials, archived, origin FROM project_types ORDER BY slug').all(),
     db.prepare(`
@@ -121,11 +133,14 @@ export async function libraryExport(db) {
       ORDER BY t.slug
     `).all(),
     db.prepare(`
-      SELECT t.slug AS task, f.slug AS focus, w.weight
-      FROM task_focus_weights w
-      JOIN task_templates t ON t.id = w.task_template_id
-      JOIN focuses f ON f.id = w.focus_id
-      ORDER BY t.slug, f.slug
+      SELECT f.slug AS focus, ft.tag, ft.weight
+      FROM focus_tags ft JOIN focuses f ON f.id = ft.focus_id
+      ORDER BY f.slug, ft.tag
+    `).all(),
+    db.prepare(`
+      SELECT t.slug AS task, pt.namespace, pt.tag
+      FROM prompt_tags pt JOIN task_templates t ON t.id = pt.task_template_id
+      ORDER BY t.slug, pt.namespace, pt.tag
     `).all(),
     db.prepare(`
       SELECT c.iso3 AS country, h.text, h.position, h.origin
@@ -151,7 +166,8 @@ export async function libraryExport(db) {
     focuses: focuses.results,
     project_types: projectTypes.results,
     tasks: tasks.results,
-    weights: weights.results,
+    focus_tags: focusTags.results,
+    prompt_tags: promptTags.results,
     hooks: hooks.results,
     affinities: affinities.results,
     layouts: layouts.results,
@@ -360,31 +376,61 @@ async function importTasks(im, rows) {
   }
 }
 
-async function importWeights(im, rows) {
-  const tasks = await im.index('SELECT id, slug FROM task_templates');
+// A tag is not an anchor: it is a value, and a focus is free to weight one no
+// prompt carries yet. So the only thing resolved here is the focus slug, and a
+// tag outside the shape the editor writes is skipped rather than stored.
+const TAG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
+async function importFocusTags(im, rows) {
   const focuses = await im.index('SELECT id, slug FROM focuses');
+  const { results } = await im.db.prepare('SELECT focus_id, tag, weight FROM focus_tags').all();
+  const existing = new Map(results.map((r) => [`${r.focus_id}:${r.tag}`, r.weight]));
+
+  for (const row of rows) {
+    const focus = focuses.get(clean(row.focus));
+    const tag = (clean(row.tag) || '').toLowerCase();
+    const weight = Number(row.weight);
+    if (!focus || !TAG.test(tag) || !(weight >= 1 && weight <= 3)) {
+      im.count('focus_tags', 'skipped');
+      continue;
+    }
+    const key = `${focus.id}:${tag}`;
+    if (!existing.has(key)) {
+      await im.db.prepare('INSERT INTO focus_tags (focus_id, tag, weight) VALUES (?, ?, ?)')
+        .bind(focus.id, tag, Math.round(weight)).run();
+      im.count('focus_tags', 'inserted');
+    } else if (existing.get(key) !== Math.round(weight)) {
+      await im.db.prepare('UPDATE focus_tags SET weight = ? WHERE focus_id = ? AND tag = ?')
+        .bind(Math.round(weight), focus.id, tag).run();
+      im.count('focus_tags', 'updated');
+    }
+  }
+}
+
+// Three columns and all three are the key, so a row is either there or it is
+// not: there is nothing on a prompt tag to update. A namespace outside the two
+// is skipped rather than written, because a third namespace would be weighted
+// by nothing and constrain nothing.
+async function importPromptTags(im, rows) {
+  const tasks = await im.index('SELECT id, slug FROM task_templates');
   const { results } = await im.db.prepare(
-    'SELECT task_template_id, focus_id, weight FROM task_focus_weights'
+    'SELECT task_template_id, namespace, tag FROM prompt_tags'
   ).all();
-  const existing = new Map(results.map((r) => [`${r.task_template_id}:${r.focus_id}`, r.weight]));
+  const existing = new Set(results.map((r) => `${r.task_template_id}:${r.namespace}:${r.tag}`));
 
   for (const row of rows) {
     const task = tasks.get(clean(row.task));
-    const focus = focuses.get(clean(row.focus));
-    const weight = Number(row.weight);
-    if (!task || !focus || !Number.isFinite(weight)) { im.count('weights', 'skipped'); continue; }
-    const key = `${task.id}:${focus.id}`;
-    if (!existing.has(key)) {
-      await im.db.prepare(
-        'INSERT INTO task_focus_weights (task_template_id, focus_id, weight) VALUES (?, ?, ?)'
-      ).bind(task.id, focus.id, weight).run();
-      im.count('weights', 'inserted');
-    } else if (existing.get(key) !== weight) {
-      await im.db.prepare(
-        'UPDATE task_focus_weights SET weight = ? WHERE task_template_id = ? AND focus_id = ?'
-      ).bind(weight, task.id, focus.id).run();
-      im.count('weights', 'updated');
+    const namespace = clean(row.namespace);
+    const tag = (clean(row.tag) || '').toLowerCase();
+    if (!task || !['topic', 'mode'].includes(namespace) || !TAG.test(tag)) {
+      im.count('prompt_tags', 'skipped');
+      continue;
     }
+    if (existing.has(`${task.id}:${namespace}:${tag}`)) continue;
+    await im.db.prepare(
+      'INSERT INTO prompt_tags (task_template_id, namespace, tag) VALUES (?, ?, ?)'
+    ).bind(task.id, namespace, tag).run();
+    im.count('prompt_tags', 'inserted');
   }
 }
 
@@ -444,10 +490,11 @@ async function importAffinities(im, rows) {
   }
 }
 
-const KINDS = ['focuses', 'project_types', 'layouts', 'tasks', 'weights', 'hooks', 'affinities'];
+const KINDS = ['focuses', 'project_types', 'layouts', 'tasks',
+               'focus_tags', 'prompt_tags', 'hooks', 'affinities'];
 
-// Order matters: tasks reference project types, weights reference both tasks
-// and focuses, affinities reference focuses. Import in dependency order and a
+// Order matters: tasks reference project types, prompt tags reference tasks,
+// focus tags and affinities reference focuses. Import in dependency order and a
 // single pass is enough.
 export async function libraryImport(db, file) {
   const im = new Importer(db);
@@ -458,7 +505,8 @@ export async function libraryImport(db, file) {
   await importProjectTypes(im, list('project_types'));
   await importLayouts(im, list('layouts'));
   await importTasks(im, list('tasks'));
-  await importWeights(im, list('weights'));
+  await importFocusTags(im, list('focus_tags'));
+  await importPromptTags(im, list('prompt_tags'));
   await importHooks(im, list('hooks'));
   await importAffinities(im, list('affinities'));
   return im.counts;

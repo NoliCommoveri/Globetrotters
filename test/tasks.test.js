@@ -220,13 +220,16 @@ test('swap replaces in place and names what it replaced', async () => {
   assert.equal(tasksOf(body).length, 20);
 });
 
+// Week 2's first slot is the pinned `wow-fact` and week 3's is `cook-it`, so a
+// swap test that wants a swappable card asks for one.
+const swappableIn = (body, week) => weekTasks(body, week).filter((t) => t.swappable);
+
 test('a swap never draws a template the plan already holds', async () => {
   const e = await env();
-  const p = await plan(e);
-  let body = p;
+  let body = await plan(e);
 
   for (const slot of [0, 1, 2]) {
-    const task = weekTasks(body, 2)[slot];
+    const task = swappableIn(body, 2)[slot];
     ({ body } = await call(e, 1, `/api/tasks/${task.id}/swap`, { method: 'POST' }));
   }
 
@@ -236,26 +239,59 @@ test('a swap never draws a template the plan already holds', async () => {
 
 test('the fourth swap is refused', async () => {
   const e = await env();
-  const p = await plan(e);
-  let body = p;
+  let body = await plan(e);
 
   for (const slot of [0, 1, 2]) {
-    const task = weekTasks(body, 2)[slot];
+    const task = swappableIn(body, 2)[slot];
     ({ body } = await call(e, 1, `/api/tasks/${task.id}/swap`, { method: 'POST' }));
   }
   assert.equal(body.swaps_left, 0);
 
-  const fourth = weekTasks(body, 3)[0];
+  const fourth = swappableIn(body, 3)[0];
   const { res, body: refused } = await call(e, 1, `/api/tasks/${fourth.id}/swap`, { method: 'POST' });
   assert.equal(res.status, 409);
   assert.match(refused.error, /3 swaps/);
+});
+
+test('the two pinned tasks are refused, and they are where they were pinned', async () => {
+  const e = await env();
+  const p = await plan(e);
+
+  const pins = [[2, 'wow-fact'], [3, 'cook-it']];
+  for (const [week, slug] of pins) {
+    const task = weekTasks(p, week)[0];
+    assert.equal(task.tier, 'fixed');
+    assert.equal(task.swappable, false);
+
+    const { res, body } = await call(e, 1, `/api/tasks/${task.id}/swap`, { method: 'POST' });
+    assert.equal(res.status, 409, `${slug} was swappable`);
+    assert.match(body.error, /every month/);
+  }
+});
+
+test('a week-2 swap can return a prompt whose natural half is week 3', async () => {
+  // The swap pool is the whole merged 2-3 pool, not the week the card sits in:
+  // the deal, not the draw, decided which week it landed in (§4).
+  let crossed = false;
+  for (let n = 0; n < 12 && !crossed; n += 1) {
+    const e = await env();
+    const p = await plan(e);
+    const task = swappableIn(p, 2)[0];
+    const { body } = await call(e, 1, `/api/tasks/${task.id}/swap`, { method: 'POST' });
+
+    const replacement = find(body, task.id).task_template_id;
+    const row = await e.DB.prepare('SELECT week_theme FROM task_templates WHERE id = ?')
+      .bind(replacement).first();
+    if (row.week_theme === 3) crossed = true;
+  }
+  assert.ok(crossed, 'twelve week-2 swaps never reached a natural week 3 prompt');
 });
 
 test('a redraw resets the swap budget, because it destroys what the swaps bought', async () => {
   const e = await env();
   const p = await plan(e);
 
-  const task = weekTasks(p, 2)[0];
+  const task = swappableIn(p, 2)[0];
   const swapped = await call(e, 1, `/api/tasks/${task.id}/swap`, { method: 'POST' });
   assert.equal(swapped.body.swaps_used, 1);
 

@@ -30,7 +30,7 @@ test('carries the five lists setup needs', async () => {
   for (const key of ['countries', 'focuses', 'project_types', 'hooks', 'affinities']) {
     assert.ok(Array.isArray(body[key]), `${key} missing`);
   }
-  assert.equal(body.focuses.length, 6);
+  assert.equal(body.focuses.length, 9);
   assert.equal(body.project_types.length, 6);
 });
 

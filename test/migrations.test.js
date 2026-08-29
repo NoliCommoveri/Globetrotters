@@ -161,7 +161,7 @@ test('any other delete order hits a foreign key error', async () => {
 });
 
 // A statement may open with the comment block that precedes it — the file's own
-// header, and the note above task_focus_weights. SQLite accepts that, and the
+// header, and the notes above the two tag tables. SQLite accepts that, and the
 // splitter is right not to strip it: the checksum is over the file as written.
 test('the schema file is one statement per table and index, and splits cleanly', () => {
   const statements = splitStatements(SCHEMA);
@@ -171,7 +171,7 @@ test('the schema file is one statement per table and index, and splits cleanly',
   const indexes = statements.filter((s) => /CREATE INDEX/i.test(s));
 
   assert.deepEqual([...created].sort(), [...SCHEMA_TABLES].sort());
-  assert.equal(indexes.length, 5);
+  assert.equal(indexes.length, 6);
   assert.equal(statements.length, created.length + indexes.length);
 });
 

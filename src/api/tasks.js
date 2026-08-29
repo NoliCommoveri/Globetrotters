@@ -14,7 +14,7 @@
 import { json } from '../lib/html.js';
 import { sessionStatement } from './sessions.js';
 import { planPayload, drawInputs, swappable, SWAP_BUDGET } from './plans.js';
-import { sampleWithoutReplacement, score, ShortPoolError } from '../lib/draw.js';
+import { sampleWithoutReplacement, score, FORM_CAP, ShortPoolError } from '../lib/draw.js';
 
 const STATES = new Set(['open', 'done']);
 
@@ -81,18 +81,48 @@ export async function apiPatchTask(request, env, session, params) {
 
 // ------------------------------------------------------------------ swap --
 
-// The candidate pool for one slot: the same week, the same focus, and every
-// template already in this plan excluded. `UNIQUE (plan_id, task_template_id)`
-// enforces that last part at the database level anyway — this is what keeps it
-// from being enforced as a constraint violation (§4).
+// The candidate pool for one slot: the same focus, and every template already
+// in this plan excluded. `UNIQUE (plan_id, task_template_id)` enforces that
+// last part at the database level anyway — this is what keeps it from being
+// enforced as a constraint violation (§4).
+//
+// For a week-2 or week-3 card the pool is the whole merged 2-3 pool, not the
+// week the card happens to sit in: `week_theme` is the prompt's natural half
+// and the deal, not the draw, decided which week it landed in. It respects the
+// form cap against the nine tasks still on the plan, and it will not put a
+// second copy of a form into the week it is swapping inside — form repetition
+// in one week is the one thing §4 forbids outright, and a swap is a draw.
+//
+// Mode tags are not checked here. The anti-monotony rule is scoped to the draw
+// (§4); a swap is the owner deliberately spending one of three, and refusing it
+// over a second `us-contrast` would cost more than the repeat does.
 function swapPool(task, inputs, held) {
-  const pool = inputs.templates.filter((t) => (
-    t.week_theme === task.week_no
-    && !held.has(t.id)
-    // Week 1's fifth slot draws from the same non-core pool the draw itself
-    // uses. The four core tasks are not candidates for it and never were.
-    && (task.week_no !== 1 || t.tier !== 'core')
-  ));
+  const deep = task.week_no === 2 || task.week_no === 3;
+  const byId = new Map(inputs.templates.map((t) => [t.id, t]));
+
+  // The slot being swapped gives its seat back first, or a card can never be
+  // replaced by another of its own form.
+  const seats = new Map();
+  const inWeek = new Set();
+  for (const row of held.rows) {
+    if (row.task_template_id === task.task_template_id) continue;
+    const form = byId.get(row.task_template_id)?.form ?? null;
+    if (form == null) continue;
+    seats.set(form, (seats.get(form) || 0) + 1);
+    if (row.week_no === task.week_no) inWeek.add(form);
+  }
+
+  const pool = inputs.templates.filter((t) => {
+    if (held.ids.has(t.id)) return false;
+    if (!deep) {
+      // Week 1's fifth slot draws from the same non-core pool the draw itself
+      // uses. The four core tasks are not candidates for it and never were.
+      return t.week_theme === task.week_no && t.tier !== 'core';
+    }
+    if (t.week_theme !== 2 && t.week_theme !== 3) return false;
+    if (t.tier === 'fixed') return false;
+    return t.form == null || ((seats.get(t.form) || 0) < FORM_CAP && !inWeek.has(t.form));
+  });
   return pool.map((t) => ({ id: t.id, weight: score(inputs.focusWeight(t.id), inputs.monthsSince(t.id)) }));
 }
 
@@ -115,7 +145,9 @@ export async function apiSwapTask(request, env, session, params) {
       ok: false,
       error: task.week_no === 4
         ? 'Week 4 is a sequence. It stays in order.'
-        : 'That one is on every country. It stays.',
+        : task.tier === 'fixed'
+          ? 'That one is on every month, whatever you picked. It stays.'
+          : 'That one is on every country. It stays.',
     }, { status: 409 });
   }
 
@@ -130,9 +162,8 @@ export async function apiSwapTask(request, env, session, params) {
   const inputs = await drawInputs(env, {
     personId: task.person_id, month: task.month, focusId: task.focus_id,
   });
-  const held = new Set(
-    payload.weeks.flatMap((w) => w.tasks).map((t) => t.task_template_id)
-  );
+  const rows = payload.weeks.flatMap((w) => w.tasks);
+  const held = { rows, ids: new Set(rows.map((t) => t.task_template_id)) };
 
   let picked;
   try {

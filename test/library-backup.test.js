@@ -15,7 +15,7 @@ import { runSeed } from '../src/lib/seed.js';
 import { libraryExport, libraryImport, apiLibraryExport, apiLibraryImport }
   from '../src/admin/library-api.js';
 import { apiPatchTask, apiCreateTask } from '../src/admin/tasks.js';
-import { apiCreateFocus, apiPutFocusWeights } from '../src/admin/focuses.js';
+import { apiCreateFocus, apiPutFocusTags } from '../src/admin/focuses.js';
 import { apiCreateHook, apiPutAffinities } from '../src/admin/countries.js';
 
 const read = (name) => readFileSync(new URL(`../src/migrations/${name}`, import.meta.url), 'utf8');
@@ -55,12 +55,15 @@ function snapshot(db) {
       FROM task_templates t LEFT JOIN project_types p ON p.id = t.project_type_id
       ORDER BY t.slug
     `),
-    weights: rows(`
-      SELECT t.slug AS task, f.slug AS focus, w.weight
-      FROM task_focus_weights w
-      JOIN task_templates t ON t.id = w.task_template_id
-      JOIN focuses f ON f.id = w.focus_id
-      ORDER BY t.slug, f.slug
+    focus_tags: rows(`
+      SELECT f.slug AS focus, ft.tag, ft.weight
+      FROM focus_tags ft JOIN focuses f ON f.id = ft.focus_id
+      ORDER BY f.slug, ft.tag
+    `),
+    prompt_tags: rows(`
+      SELECT t.slug AS task, p.namespace, p.tag
+      FROM prompt_tags p JOIN task_templates t ON t.id = p.task_template_id
+      ORDER BY t.slug, p.namespace, p.tag
     `),
     hooks: rows(`
       SELECT c.iso3, h.text, h.position FROM country_hooks h
@@ -75,7 +78,7 @@ function snapshot(db) {
 }
 
 // A library that has actually been tuned: an edited seed row, a custom task, a
-// new focus, a rewritten weight column, a hook and a set of fits. An export of
+// new focus with a tag set of its own, a hook and a set of fits. An export of
 // the untouched seed would round-trip a file with almost nothing in it.
 async function tuned(e) {
   await apiPatchTask(new Request('https://example.test/x', {
@@ -98,14 +101,12 @@ async function tuned(e) {
     name: 'Money and Trade', blurb: 'What things cost and who they come from.',
   })).json();
 
-  const { results } = e.DB.prepare(
-    'SELECT id FROM task_templates WHERE week_theme IN (2, 3) ORDER BY id LIMIT 6'
-  ).all();
-  await apiPutFocusWeights(new Request('https://example.test/x', {
+  await apiPutFocusTags(new Request('https://example.test/x', {
     method: 'PUT',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({
-      weights: results.map((r, i) => ({ task_template_id: r.id, weight: i % 3 === 0 ? 0 : 3 })),
+      tags: [{ tag: 'trade', weight: 3 }, { tag: 'work-and-money', weight: 3 },
+             { tag: 'public-money', weight: 2 }, { tag: 'who-owns-it', weight: 1 }],
     }),
   }), e, { id: String(focus.id) });
 
@@ -123,11 +124,12 @@ test('the export carries every library table, keyed by slug and ISO3', async () 
   await tuned(e);
   const file = await libraryExport(e.DB);
 
-  assert.equal(file.version, 1);
-  assert.equal(file.focuses.length, 7);
+  assert.equal(file.version, 2);
+  assert.equal(file.focuses.length, 10);
   assert.equal(file.project_types.length, 6);
-  assert.equal(file.tasks.length, 91);
-  assert.ok(file.weights.length >= 42);
+  assert.equal(file.tasks.length, 92);
+  assert.ok(file.focus_tags.length >= 65);
+  assert.ok(file.prompt_tags.length >= 177);
   assert.equal(file.hooks.length, 1);
   assert.equal(file.affinities.length, 1);
 
@@ -135,7 +137,8 @@ test('the export carries every library table, keyed by slug and ISO3', async () 
   assert.ok(file.tasks.every((t) => t.id === undefined));
   assert.equal(file.hooks[0].country, 'JPN');
   assert.equal(file.affinities[0].country, 'JPN');
-  assert.equal(typeof file.weights[0].task, 'string');
+  assert.equal(typeof file.prompt_tags[0].task, 'string');
+  assert.equal(typeof file.focus_tags[0].focus, 'string');
 });
 
 test('importing the export back changes nothing, twice over', async () => {
@@ -163,7 +166,8 @@ test('an import into an empty library restores all of it', async () => {
   // A fresh database with the schema and countries but no library: the shape a
   // restore actually lands in.
   const target = await env();
-  target.DB.db.exec('DELETE FROM task_focus_weights');
+  target.DB.db.exec('DELETE FROM prompt_tags');
+  target.DB.db.exec('DELETE FROM focus_tags');
   target.DB.db.exec('DELETE FROM country_focus_affinity');
   target.DB.db.exec('DELETE FROM country_hooks');
   target.DB.db.exec('DELETE FROM task_templates');
@@ -171,8 +175,8 @@ test('an import into an empty library restores all of it', async () => {
   target.DB.db.exec('DELETE FROM project_types');
 
   const counts = await libraryImport(target.DB, file);
-  assert.equal(counts.tasks.inserted, 91);
-  assert.equal(counts.focuses.inserted, 7);
+  assert.equal(counts.tasks.inserted, 92);
+  assert.equal(counts.focuses.inserted, 10);
   assert.equal(counts.project_types.inserted, 6);
   assert.equal(counts.hooks.inserted, 1);
   assert.equal(counts.affinities.inserted, 1);
@@ -193,7 +197,8 @@ test('an import reports what it changed, and nothing else', async () => {
   assert.equal(counts.tasks.updated, 1);
   assert.equal(counts.focuses.inserted, 0);
   assert.equal(counts.tasks.inserted, 0);
-  assert.equal(counts.weights.updated, 0);
+  assert.equal(counts.focus_tags.updated, 0);
+  assert.equal(counts.prompt_tags.inserted, 0);
 
   const row = e.DB.prepare('SELECT blurb FROM focuses WHERE slug = ?')
     .bind(file.focuses[0].slug).first();
@@ -206,13 +211,16 @@ test('a row the file cannot anchor is skipped, never half-written', async () => 
   const week4 = file.tasks.find((t) => t.project_type === 'trifold-board');
 
   const broken = {
-    version: 1,
+    version: 2,
     focuses: [{ slug: '', name: 'Nameless' }],
     tasks: [
       { ...week4, slug: 'orphan-week4', project_type: 'no-such-project' },
       { slug: 'no-week', title: 'x', prompt: 'y', week_theme: 9, tier: 'focus' },
     ],
-    weights: [{ task: 'no-such-task', focus: 'ancient-world', weight: 3 }],
+    focus_tags: [{ focus: 'no-such-focus', tag: 'trade', weight: 3 },
+                 { focus: 'ancient-world', tag: 'Not A Tag', weight: 3 }],
+    prompt_tags: [{ task: 'no-such-task', namespace: 'topic', tag: 'trade' },
+                  { task: 'flag-draw', namespace: 'colour', tag: 'trade' }],
     hooks: [{ country: 'ZZZ', text: 'Nowhere.' }],
     affinities: [{ country: 'JPN', focus: 'ancient-world', score: 5 }],
   };
@@ -220,7 +228,8 @@ test('a row the file cannot anchor is skipped, never half-written', async () => 
   const counts = await libraryImport(e.DB, broken);
   assert.equal(counts.focuses.skipped, 1);
   assert.equal(counts.tasks.skipped, 2);
-  assert.equal(counts.weights.skipped, 1);
+  assert.equal(counts.focus_tags.skipped, 2);
+  assert.equal(counts.prompt_tags.skipped, 2);
   assert.equal(counts.hooks.skipped, 1);
   assert.equal(counts.affinities.skipped, 1);
   assert.equal(counts.tasks.inserted, 0);
@@ -232,7 +241,7 @@ test('the export downloads as a file, and a file with no library in it is refuse
   const res = await apiLibraryExport(req('GET'), e);
   assert.equal(res.status, 200);
   assert.match(res.headers.get('content-disposition'), /^attachment; filename="globetrotters-library-/);
-  assert.equal((await res.json()).version, 1);
+  assert.equal((await res.json()).version, 2);
 
   assert.equal((await apiLibraryImport(req('POST', { hello: 'world' }), e)).status, 400);
   assert.equal((await apiLibraryImport(req('POST', { version: 99, tasks: [] }), e)).status, 400);

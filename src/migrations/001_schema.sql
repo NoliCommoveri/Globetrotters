@@ -1,8 +1,10 @@
 -- 001_schema.sql — every table and index in DESIGN.md §5.
 --
--- Migration files are append-only. Nothing in this file is ever edited once it
--- has been applied: an edit shows up on /admin as drift, not as a re-run. To
--- change the schema, add 002_.
+-- Edited in place, not appended to. Append-only exists to protect data that
+-- cannot be got back, and there is none here: Erase everything on /admin drops
+-- every table, `_migrations` included, so a schema change is an edit to this
+-- file followed by Erase everything, Apply pending, Run seed (§3). That is what
+-- lets a CHECK constraint gain a value SQLite will not ALTER into one.
 --
 -- No `people` rows and no library rows here. Seed data is slice 02, and naming
 -- your own kids must not require editing a migration in a web editor (§3).
@@ -66,7 +68,10 @@ CREATE TABLE task_templates (
   prompt          TEXT NOT NULL,       -- the 10-minute instruction, kid voice
   week_theme      INTEGER NOT NULL CHECK (week_theme BETWEEN 1 AND 4),
   workbook_page   TEXT,                -- 'flag', 'map', 'history', 'ecology', ...
-  tier            TEXT NOT NULL CHECK (tier IN ('core','focus','wild')),
+  -- `fixed` is a pinned prompt: never weighted, never cooled down, never
+  -- swapped. `wow-fact` and `cook-it` are the two, and they are the reason a
+  -- month is twenty rather than twenty-one (§4).
+  tier            TEXT NOT NULL CHECK (tier IN ('core','focus','wild','fixed')),
   project_type_id INTEGER REFERENCES project_types(id),  -- week 4 only
   position        INTEGER,             -- week 4 ordering
   archived        INTEGER NOT NULL DEFAULT 0,
@@ -74,12 +79,27 @@ CREATE TABLE task_templates (
   updated_at      TEXT
 );
 
--- Sparse on purpose: a missing row means weight 1. Only opinions are stored.
-CREATE TABLE task_focus_weights (
+-- What a prompt is about, and how the answer gets produced. Two namespaces in
+-- one table and never one vocabulary: mode tags contribute no weight and topic
+-- tags constrain nothing, so a focus weighting `us-contrast` at 3 would pull a
+-- quarter of the library at once (../../docs/design/LIBRARY_v3.md §3).
+CREATE TABLE prompt_tags (
   task_template_id INTEGER NOT NULL REFERENCES task_templates(id),
-  focus_id         INTEGER NOT NULL REFERENCES focuses(id),
-  weight           REAL NOT NULL,      -- 0 excludes, 3 favors
-  PRIMARY KEY (task_template_id, focus_id)
+  namespace        TEXT    NOT NULL CHECK (namespace IN ('topic','mode')),
+  tag              TEXT    NOT NULL,
+  PRIMARY KEY (task_template_id, namespace, tag)
+);
+
+-- What a focus favours, declared over tags rather than over prompts. A prompt
+-- tagged once at authoring time is then drawn correctly by every focus with a
+-- matching affinity, with no per-prompt row to write and none to forget.
+-- Sparse: an absent tag is no opinion, and the draw's `1 +` floor is what keeps
+-- a prompt no focus reaches still reachable (§4).
+CREATE TABLE focus_tags (
+  focus_id INTEGER NOT NULL REFERENCES focuses(id),
+  tag      TEXT    NOT NULL,
+  weight   INTEGER NOT NULL CHECK (weight BETWEEN 1 AND 3),
+  PRIMARY KEY (focus_id, tag)
 );
 
 CREATE TABLE month_plans (
@@ -139,6 +159,7 @@ CREATE TABLE media (                    -- R2 pointers; table only, no bucket in
 
 CREATE INDEX idx_plan_tasks_plan_week ON plan_tasks(plan_id, week_no);
 CREATE INDEX idx_sessions_plan_date   ON sessions(plan_id, local_date);
-CREATE INDEX idx_weights_focus        ON task_focus_weights(focus_id);
+CREATE INDEX idx_prompt_tags_tag      ON prompt_tags(namespace, tag);
+CREATE INDEX idx_focus_tags_focus     ON focus_tags(focus_id);
 CREATE INDEX idx_stamps_person        ON stamps(person_id);
 CREATE INDEX idx_hooks_country        ON country_hooks(country_id);

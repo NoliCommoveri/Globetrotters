@@ -182,7 +182,7 @@ export async function resetMonth(db, planId) {
 
 export const SCHEMA_TABLES = [
   'people', 'countries', 'focuses', 'project_types', 'country_hooks',
-  'country_focus_affinity', 'task_templates', 'task_focus_weights',
+  'country_focus_affinity', 'task_templates', 'prompt_tags', 'focus_tags',
   'month_plans', 'plan_tasks', 'sessions', 'stamps', 'media',
 ];
 
