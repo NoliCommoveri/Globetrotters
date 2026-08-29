@@ -299,9 +299,9 @@ test('the library editor answers on every one of its routes', async () => {
   const library = await asAdmin(e, '/admin/api/library');
   assert.equal(library.status, 200);
   const data = await library.json();
-  assert.equal(data.tasks.length, 92);
+  assert.equal(data.tasks.length, 94);
   assert.equal(data.focuses.length, 9);
-  assert.equal(data.layouts.length, 17);
+  assert.equal(data.layouts.length, 25);
   // Every layout's form is drawn from the knobs the server sends, so the two
   // cannot drift into a field the renderer would drop.
   assert.ok(Object.keys(data.kind_knobs).length >= 12);

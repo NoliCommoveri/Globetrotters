@@ -348,7 +348,7 @@ FROM (
    1, 'map', 'core', NULL, NULL),
 
   ('neighbors-list', 'Find who your country borders',
-   'Look at the map and list every country that shares a border with yours. If it''s an island with no land borders, write that instead.',
+   'Look at the map and list every country that shares a border with yours, going clockwise from the top. If there are more than eight, list the eight with the longest borders. If it''s an island with no land borders, write down the nearest country across the water instead.',
    1, 'map', 'core', NULL, NULL),
 
   ('language-hello', 'Say hello and write it',
@@ -367,7 +367,7 @@ FROM (
    1, 'people', 'wild', NULL, NULL),
 
   ('time-there-now', 'Find out what time it is there',
-   'Work out what time it is in their capital right now. Write it next to your own time, and write one sentence about what people there are probably doing.',
+   'Work out what time it is in their capital right now. Draw the hands on both clocks and write both times in digits underneath, then write one sentence about what people there are probably doing.',
    1, 'map', 'wild', NULL, NULL),
 
   ('size-next-to-yours', 'How big is it really?',
@@ -387,7 +387,7 @@ FROM (
    2, 'history', 'focus', NULL, NULL),
 
   ('who-leads', 'Find out who leads the country',
-   'Find out how this country chooses its leader and what that person is called. Write one sentence about how they got the job.',
+   'Find out what this country''s leader is called and how a person gets that job. Write the steps in order, from ordinary person to running the country.',
    2, 'government', 'focus', NULL, NULL),
 
   ('law-you-notice', 'Find a surprising law',
@@ -419,7 +419,7 @@ FROM (
    2, 'land', 'focus', NULL, NULL),
 
   ('made-here', 'Find something made there',
-   'Find one thing this country makes and sells to the rest of the world. Write down what it is, then check your own house for anything made there.',
+   'Find one thing this country makes and sells to the rest of the world. Check your own house for it first. Draw the trip it takes in four steps, from where it starts to somebody''s house — and if you found one at home, that house is the last box.',
    2, 'money', 'focus', NULL, NULL),
 
   ('what-work-pays', 'What a week of work buys',
@@ -427,7 +427,7 @@ FROM (
    2, 'money', 'focus', NULL, NULL),
 
   ('border-that-moved', 'Find a border that moved',
-   'Find out whether this country''s borders or its name have changed in the last two hundred years. Write down what changed, or write that nothing did.',
+   'Find out how this country''s borders have changed in the last two hundred years. Draw the shape it was then and the shape it is now, and write what changed between them — including its name, if that changed too.',
    2, 'history', 'focus', NULL, NULL),
 
   ('before-history', 'Find something from before writing',
@@ -438,7 +438,7 @@ FROM (
    2, 'history', 'focus', NULL, NULL),
 
   ('independence-day', 'Find the day they became a country',
-   'Find out when this country started ruling itself, and who it belonged to before that. Write the date down and draw one thing people do to celebrate it.',
+   'Find out when this country started ruling itself and who it belonged to before that. Write the date on the arrow, then show who was in charge before and what people do on that day now.',
    2, 'history', 'focus', NULL, NULL),
 
   ('war-that-changed', 'Find a fight that changed things',
@@ -466,7 +466,7 @@ FROM (
    2, 'land', 'focus', NULL, NULL),
 
   ('desert-shall-blossom', 'Find the land that needs healing',
-   'Find the driest, most worn-out or most polluted place in this country. Read Isaiah 35:1-2, then draw that same place the way it will look when the land is healed.',
+   'Find the driest, most worn-out or most polluted place in this country and look at a photo of it. Draw what you see. Then read Isaiah 35:1-2 and draw that same place the way it will look when the land is healed.',
    2, 'land', 'focus', NULL, NULL),
 
   ('weather-that-hits', 'Find the weather they brace for',
@@ -480,6 +480,14 @@ FROM (
   ('oldest-thing-here', 'Find the oldest thing they keep',
    'Find the oldest object in one of this country''s museums. Write down what it is, how old it is, and where it was dug up.',
    2, 'prehistory', 'focus', NULL, NULL),
+
+  ('who-lives-there', 'Who lives there?',
+   'Find out which groups of people make up this country and roughly what share each one is. Color your hundred people to match and write the key yourself. If the country doesn''t count its people this way at all, write that on the key instead.',
+   2, 'people', 'focus', NULL, NULL),
+
+  ('how-they-learn', 'Find out how kids there learn',
+   'Find out whether school is free there, how many years a kid is required to go, and what it costs a family who has to pay. Then find out whether teaching your own children at home is allowed there, and roughly how many families do it. Write five things you found out, one to a bullet.',
+   2, 'people', 'focus', NULL, NULL),
 
   ('kid-life', 'A day in their life',
    'Find out what a school day looks like for a kid your age in this country. Write three ways it is different from your day.',
@@ -537,7 +545,7 @@ FROM (
    3, 'people', 'focus', NULL, NULL),
 
   ('city-and-country', 'City or countryside?',
-   'Find out whether most people there live in cities or out in the countryside, and name the biggest city. Write down one reason people are moving where they are moving.',
+   'Find out how many people out of every hundred there live in cities and how many live out in the countryside. Color a row for each, then label one row with their biggest city and the other with the part of the country most of the farming happens in.',
    3, 'people', 'focus', NULL, NULL),
 
   ('getting-around', 'Find out how they get around',
@@ -553,7 +561,7 @@ FROM (
    3, 'people', 'focus', NULL, NULL),
 
   ('their-rest-day', 'Find their day off',
-   'Find out which days are the weekend in this country and which day people rest. Write down what closes on the seventh day there, if anything does.',
+   'Find out which days are the weekend in this country and which day people rest — and find out which day they call the first day of the week, because it is not the same everywhere. Shade the days most people do not work, then write what closes on their rest day, if anything does, and which day their week starts on.',
    3, 'people', 'focus', NULL, NULL),
 
   ('sabbath-keepers-there', 'Find who keeps the seventh day',
@@ -848,6 +856,12 @@ FROM (
   ('tree-that-grows',         'topic', 'everyday-food'),
   ('oldest-thing-here',       'topic', 'deep-time'),
   ('oldest-thing-here',       'topic', 'crafts'),
+  ('who-lives-there',         'topic', 'who-gets-less'),
+  ('who-lives-there',         'topic', 'migration'),
+  ('who-lives-there',         'mode', 'demographics-stat'),
+  ('how-they-learn',          'topic', 'schooling'),
+  ('how-they-learn',          'topic', 'public-money'),
+  ('how-they-learn',          'topic', 'family'),
   ('kid-life',                'topic', 'daily-life'),
   ('kid-life',                'topic', 'schooling'),
   ('kid-life',                'topic', 'family'),

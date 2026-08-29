@@ -187,9 +187,27 @@ body {
              display: flex; flex-direction: column; }
 .checklist li { flex: 1 1 0; display: flex; align-items: center; gap: .1in;
                 border-bottom: 1px solid var(--rule); min-height: .24in; }
-.checklist .tick-box { flex: 0 0 .16in; height: .16in; border: 1.5px solid var(--rule); }
+.checklist .tick-box { flex: 0 0 .16in; width: .16in; height: .16in; border: 1.5px solid var(--rule); }
 .checklist .label { font-size: .8rem; }
 .checklist .steps .label b { font-weight: 700; }
+
+/* MARKER, CAPTION and CIRCLE_ONE on `checklist`. */
+.checklist-form { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; }
+.checklist-form .checklist { flex: 1 1 auto; }
+.checklist-caption { margin: 0 0 .05in; font-size: .78rem; color: #222; }
+.checklist-hint { margin: .05in 0 0; font-size: .72rem; color: #444; font-style: italic; }
+.tick-number { flex: 0 0 auto; min-width: .22in; font-size: .8rem; font-weight: 700; }
+.tick-bullet { flex: 0 0 .09in; width: .09in; height: .09in; border-radius: 50%; background: var(--rule); }
+
+/* ORIENT `across`: labelled columns rather than labelled rows — the week
+ * strip's seven days, each its own marker and label. */
+.checklist-across .checklist { flex-direction: row; }
+.checklist-across .checklist li {
+  flex: 1 1 0; flex-direction: column; justify-content: flex-start; align-items: center;
+  gap: .06in; border-bottom: 0; border-right: 1px solid var(--rule); padding: .04in 0;
+}
+.checklist-across .checklist li:last-child { border-right: 0; }
+.checklist-across .label { font-size: .72rem; text-align: center; }
 
 .storyboard { flex: 1 1 auto; margin: 0; padding: 0; list-style: none;
               display: grid; grid-template-columns: repeat(3, 1fr);
@@ -281,6 +299,78 @@ body {
   border: 1.5px solid var(--rule); border-radius: 50%;
   font-size: .68rem; color: #222;
 }
+
+/* Two panels with an arrow between them: draw it then, draw it now. MIDDLE is
+ * a captioned write-in slot on the hinge itself. */
+.pair { flex: 1 1 auto; display: flex; align-items: stretch; gap: .16in; min-height: 0; }
+.pair-panel { flex: 1 1 0; display: flex; flex-direction: column; min-height: 0; }
+.pair-panel .ink { flex: 1 1 auto; border: 1.5px solid var(--rule); border-radius: .06in; }
+.pair-caption { margin: .04in 0 .02in; font-size: .72rem; color: #444; text-align: center; }
+.pair-panel .rules { flex: 0 0 auto; }
+.pair-panel .rules i { flex: 0 0 auto; min-height: .2in; }
+.pair-hinge { flex: 0 0 .5in; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.pair-shaft { display: flex; align-items: center; width: 100%; }
+.pair-line { flex: 1 1 auto; height: 2px; background: var(--rule); }
+.pair-head {
+  width: 0; height: 0; border-top: .05in solid transparent; border-bottom: .05in solid transparent;
+  border-left: .09in solid var(--rule);
+}
+.pair-hinge-label { font-size: .64rem; color: #444; margin-bottom: .03in; text-align: center; }
+.pair-hinge-rule { width: 70%; border-bottom: 1px solid var(--rule); margin-top: .05in; height: 1px; }
+
+/* Boxes joined by arrows: this causes the next thing. */
+.flow { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; }
+.flow-row { flex: 1 1 auto; margin: 0; padding: 0; list-style: none; min-height: 0;
+            display: flex; align-items: stretch; gap: .05in; }
+.flow-step { flex: 1 1 0; display: flex; flex-direction: column; min-height: 0; position: relative; }
+.flow-no { position: absolute; top: .02in; left: .04in; font-size: .6rem; color: var(--faint); }
+.flow-step .ink { flex: 1 1 auto; border: 1.5px solid var(--rule); border-radius: .06in; }
+.flow-arrow { flex: 0 0 .12in; display: flex; align-items: center; justify-content: center; }
+.flow-arrow .flow-head {
+  width: 0; height: 0; border-top: .045in solid transparent; border-bottom: .045in solid transparent;
+  border-left: .08in solid var(--rule);
+}
+.flow-caption { margin: .05in 0 0; font-size: .72rem; color: #444; text-align: center; }
+.flow-down .flow-row { flex-direction: column; }
+.flow-down .flow-arrow { flex: 0 0 .1in; }
+.flow-down .flow-arrow .flow-head {
+  width: 0; height: 0; border-left: .045in solid transparent; border-right: .045in solid transparent;
+  border-top: .08in solid var(--rule); border-bottom: none;
+}
+
+/* Icon arrays: ROWS of PER_ROW small figures a kid colors in. KEY is a
+ * printed line under a pictograph; KEY_ROWS is blank ruled lines under a
+ * hundred-people grid, for a key the kid writes themselves. */
+.grid-form { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; }
+.grid-caption { margin: 0 0 .05in; font-size: .78rem; color: #222; }
+.grid-rows { flex: 1 1 auto; margin: 0; padding: 0; list-style: none; min-height: 0;
+             display: flex; flex-direction: column; gap: .03in; }
+.grid-row { flex: 1 1 0; display: flex; align-items: center; gap: .1in; min-height: 0; }
+.grid-dots { flex: 1 1 auto; display: flex; align-items: center; justify-content: space-between; }
+.grid-dots i { flex: 0 0 auto; width: .18in; height: .18in; border: 1px solid var(--rule); border-radius: 50%; }
+.grid-row-label { flex: 0 0 1.1in; align-self: flex-end; height: 1em; border-bottom: 1px solid var(--rule); }
+.grid-key { margin: .05in 0 0; font-size: .72rem; color: #444; }
+.grid-key-rows { flex: 0 0 auto; margin: .05in 0 0; padding: 0; list-style: none;
+                 display: flex; flex-direction: column; gap: .04in; }
+.grid-key-rows li { display: flex; align-items: center; gap: .08in; }
+.grid-swatch { flex: 0 0 .14in; height: .14in; border: 1px solid var(--rule); }
+.grid-key-rule { flex: 1 1 auto; border-bottom: 1px solid var(--rule); height: .18in; }
+
+/* Two empty clock faces — twelve ticks, no hands, the kid draws those — a
+ * caption under each and a short line for the digits, plus LINES ruled lines
+ * across the foot. */
+.clocks { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; }
+.clock-row { flex: 1 1 auto; display: flex; justify-content: center; align-items: flex-start;
+             gap: .3in; min-height: 0; }
+.clock { flex: 0 0 1.7in; display: flex; flex-direction: column; align-items: center; }
+.clock-face { position: relative; width: 1.5in; height: 1.5in; border: 1.5px solid var(--rule); border-radius: 50%; }
+.clock-face i {
+  position: absolute; width: .05in; height: .05in; margin: -.025in;
+  border-radius: 50%; background: var(--rule);
+}
+.clock-caption { margin-top: .05in; font-size: .72rem; color: #444; }
+.clock-digital { display: block; width: 1in; margin-top: .04in; border-bottom: 1px solid var(--rule); height: .2in; }
+.clock-foot { margin-top: .08in; }
 
 /* Week 4's one sheet is composed, not packed: the materials and the five steps
  * take the height they need and the storyboard absorbs the rest, so the sheet

@@ -22,9 +22,10 @@
 -- change anything else about a form.
 
 -- ---------------------------------------------------------------------------
--- The forms. Twelve from slice 10, plus the five slice 12 adds:
--- `specimen-boxes`, `venn`, `bar-graph`, `scale-strip`, `map-marks`
--- (LIBRARY_v3.md §1).
+-- The forms. Twelve from slice 10, five slice 12 adds — `specimen-boxes`,
+-- `venn`, `bar-graph`, `scale-strip`, `map-marks` — and eight slice 13 adds:
+-- `then-now`, `flow-steps`, `hundred-people`, `pictograph`, `clock-pair`,
+-- `list-n`, `bullets`, `week-strip` (LIBRARY_v3.md §1).
 -- ---------------------------------------------------------------------------
 INSERT INTO worksheet_layouts (slug, name, kind, height_thirds, spec) VALUES
   ('lines-4', 'Four ruled lines', 'lines', 1,
@@ -48,7 +49,7 @@ INSERT INTO worksheet_layouts (slug, name, kind, height_thirds, spec) VALUES
   ('label-it', 'One big sketch with callouts', 'box', 3,
    '{"caption":"Draw it big, then label the parts","lines":0,"callouts":6}'),
   ('checklist', 'Check-off list', 'checklist', 1,
-   '{"items":8,"labels":[]}'),
+   '{"items":8,"labels":[],"marker":"box","circle_one":false,"orient":"list","caption":""}'),
   ('storyboard', 'Six-panel storyboard', 'storyboard', 2,
    '{"panels":6}'),
   ('specimen-boxes', 'Several boxes, each labelled', 'boxes', 2,
@@ -60,7 +61,23 @@ INSERT INTO worksheet_layouts (slug, name, kind, height_thirds, spec) VALUES
   ('scale-strip', 'A scale with write-in marks', 'chart', 1,
    '{"mode":"scale","orient":"vertical","bars":5,"scale_marks":5,"marks":2,"unit":"","axis_label":"","caption":"","captions":["",""]}'),
   ('map-marks', 'The country itself, numbered pins', 'map', 2,
-   '{"caption":"","pins":5}')
+   '{"caption":"","pins":5}'),
+  ('then-now', 'Before and after, joined by an arrow', 'pair', 2,
+   '{"captions":["Before","After"],"lines_each":2,"middle":""}'),
+  ('flow-steps', 'Steps in order', 'flow', 1,
+   '{"steps":4,"orient":"across","caption":""}'),
+  ('hundred-people', 'A hundred people, colored in', 'grid', 2,
+   '{"rows":10,"per_row":10,"key_rows":4,"key":"","caption":"If this country were 100 people","label_lines":false}'),
+  ('pictograph', 'Two rows of ten', 'grid', 1,
+   '{"rows":2,"per_row":10,"key_rows":0,"key":"Each figure =","caption":"","label_lines":true}'),
+  ('clock-pair', 'Two clocks', 'clocks', 1,
+   '{"faces":2,"captions":["Their clock","Our clock"],"digital_line":true,"lines":2}'),
+  ('list-n', 'A numbered list', 'checklist', 1,
+   '{"items":5,"labels":[],"marker":"number","circle_one":false,"orient":"list","caption":""}'),
+  ('bullets', 'Blank bullets', 'checklist', 1,
+   '{"items":5,"labels":[],"marker":"bullet","circle_one":false,"orient":"list","caption":""}'),
+  ('week-strip', 'The week, shaded', 'checklist', 1,
+   '{"items":7,"labels":["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],"marker":"box","circle_one":false,"orient":"across","caption":""}')
 ON CONFLICT (slug) DO NOTHING;
 
 -- ---------------------------------------------------------------------------
@@ -80,12 +97,12 @@ ON CONFLICT (slug) DO NOTHING;
 UPDATE task_templates SET worksheet_layout_id =
   (SELECT id FROM worksheet_layouts WHERE slug = 'lines-4')
 WHERE worksheet_layout_id IS NULL AND slug IN (
-  'neighbors-list', 'anthem-listen', 'time-there-now',
+  'anthem-listen',
   'weather-that-hits', 'law-you-notice', 'who-can-vote', 'first-people',
-  'desert-shall-blossom', 'border-that-moved', 'what-they-grow',
+  'what-they-grow',
   'feast-they-keep', 'holiday-they-mark', 'sabbath-keepers-there',
   'sound-of-the-country', 'wow-fact', 'tonights-dinner', 'getting-around',
-  'their-rest-day', 'girls-and-women', 'game-kids-play'
+  'girls-and-women'
 );
 
 UPDATE task_templates SET worksheet_layout_id =
@@ -106,8 +123,8 @@ UPDATE task_templates SET worksheet_layout_id =
   (SELECT id FROM worksheet_layouts WHERE slug = 'box-beside')
 WHERE worksheet_layout_id IS NULL AND slug IN (
   'flag-draw', 'currency-animal',
-  'animal-in-trouble', 'wild-place-protected', 'who-leads',
-  'made-here', 'before-history', 'oldest-thing-here',
+  'animal-in-trouble', 'wild-place-protected',
+  'before-history', 'oldest-thing-here',
   'the-sport-they-love', 'life-outdoors', 'who-is-famous',
   'landmark-to-see', 'what-they-wear'
 );
@@ -119,13 +136,13 @@ WHERE worksheet_layout_id IS NULL AND slug IN ('language-hello');
 UPDATE task_templates SET worksheet_layout_id =
   (SELECT id FROM worksheet_layouts WHERE slug = 'compare')
 WHERE worksheet_layout_id IS NULL AND slug IN (
-  'size-next-to-yours', 'city-and-country'
+  'size-next-to-yours'
 );
 
 UPDATE task_templates SET worksheet_layout_id =
   (SELECT id FROM worksheet_layouts WHERE slug = 'timeline')
 WHERE worksheet_layout_id IS NULL AND slug IN (
-  'independence-day', 'war-that-changed', 'who-ruled-before', 'kid-life'
+  'war-that-changed', 'who-ruled-before', 'kid-life'
 );
 
 UPDATE task_templates SET worksheet_layout_id =
@@ -178,6 +195,58 @@ WHERE worksheet_layout_id IS NULL AND slug IN (
   'what-work-pays'
 );
 
+UPDATE task_templates SET worksheet_layout_id =
+  (SELECT id FROM worksheet_layouts WHERE slug = 'then-now')
+WHERE worksheet_layout_id IS NULL AND slug IN (
+  'border-that-moved', 'independence-day', 'desert-shall-blossom'
+);
+
+UPDATE task_templates SET worksheet_layout_id =
+  (SELECT id FROM worksheet_layouts WHERE slug = 'flow-steps')
+WHERE worksheet_layout_id IS NULL AND slug IN (
+  'who-leads', 'made-here'
+);
+
+UPDATE task_templates SET worksheet_layout_id =
+  (SELECT id FROM worksheet_layouts WHERE slug = 'pictograph')
+WHERE worksheet_layout_id IS NULL AND slug IN (
+  'city-and-country'
+);
+
+UPDATE task_templates SET worksheet_layout_id =
+  (SELECT id FROM worksheet_layouts WHERE slug = 'clock-pair')
+WHERE worksheet_layout_id IS NULL AND slug IN (
+  'time-there-now'
+);
+
+UPDATE task_templates SET worksheet_layout_id =
+  (SELECT id FROM worksheet_layouts WHERE slug = 'list-n')
+WHERE worksheet_layout_id IS NULL AND slug IN (
+  'neighbors-list', 'game-kids-play'
+);
+
+UPDATE task_templates SET worksheet_layout_id =
+  (SELECT id FROM worksheet_layouts WHERE slug = 'week-strip')
+WHERE worksheet_layout_id IS NULL AND slug IN (
+  'their-rest-day'
+);
+
+-- `hundred-people` and `bullets` have no seeded prompt in slice 12's library,
+-- so each seeds one here: `who-lives-there` and `how-they-learn`, both from
+-- LIBRARY_v3.md §2 *Who the people are* (slice 17 owns that subject heading
+-- and skips these two rows).
+UPDATE task_templates SET worksheet_layout_id =
+  (SELECT id FROM worksheet_layouts WHERE slug = 'hundred-people')
+WHERE worksheet_layout_id IS NULL AND slug IN (
+  'who-lives-there'
+);
+
+UPDATE task_templates SET worksheet_layout_id =
+  (SELECT id FROM worksheet_layouts WHERE slug = 'bullets')
+WHERE worksheet_layout_id IS NULL AND slug IN (
+  'how-they-learn'
+);
+
 -- Per-template overrides. The knobs a form exposes are the knobs a task is
 -- allowed to lean on, and these are the places where the layout's generic
 -- default would send a kid to the phone to find out what to draw.
@@ -221,3 +290,32 @@ UPDATE task_templates SET worksheet_spec = '{"caption":"Their biggest river","pi
 UPDATE task_templates SET worksheet_spec =
   '{"orient":"horizontal","bars":3,"axis_label":"What one week of pay buys","caption":"Loaves of bread  ·  Bus rides  ·  Pairs of shoes"}'
   WHERE worksheet_spec IS NULL AND slug = 'what-work-pays';
+
+UPDATE task_templates SET worksheet_spec =
+  '{"captions":["Two hundred years ago","Today"],"middle":"Its name, if it changed"}'
+  WHERE worksheet_spec IS NULL AND slug = 'border-that-moved';
+UPDATE task_templates SET worksheet_spec =
+  '{"captions":["Who they belonged to","What they do now"],"middle":"The date"}'
+  WHERE worksheet_spec IS NULL AND slug = 'independence-day';
+UPDATE task_templates SET worksheet_spec =
+  '{"captions":["How it looks now","When the land is healed"]}'
+  WHERE worksheet_spec IS NULL AND slug = 'desert-shall-blossom';
+
+UPDATE task_templates SET worksheet_spec = '{"caption":"How a person gets that job"}'
+  WHERE worksheet_spec IS NULL AND slug = 'who-leads';
+UPDATE task_templates SET worksheet_spec = '{"caption":"From there to here"}'
+  WHERE worksheet_spec IS NULL AND slug = 'made-here';
+
+UPDATE task_templates SET worksheet_spec = '{"key":"Each figure = 10 people out of 100"}'
+  WHERE worksheet_spec IS NULL AND slug = 'city-and-country';
+
+UPDATE task_templates SET worksheet_spec = '{"items":8}'
+  WHERE worksheet_spec IS NULL AND slug = 'neighbors-list';
+UPDATE task_templates SET worksheet_spec = '{"items":3}'
+  WHERE worksheet_spec IS NULL AND slug = 'game-kids-play';
+
+UPDATE task_templates SET worksheet_spec = '{"caption":"Shade the days most people do not work"}'
+  WHERE worksheet_spec IS NULL AND slug = 'their-rest-day';
+
+UPDATE task_templates SET worksheet_spec = '{"caption":"Five things about how kids there learn"}'
+  WHERE worksheet_spec IS NULL AND slug = 'how-they-learn';
