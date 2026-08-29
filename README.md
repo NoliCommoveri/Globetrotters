@@ -18,7 +18,7 @@ seeding, or deploy requires a terminal.
 | `CLAUDE.md` | Directives for every session. Read first. |
 | `docs/design/DESIGN.md` | The spec. Each section carries a completion marker. |
 | `docs/design/LIBRARY_v3.md` | Every form, every prompt, the tag/focus weights and the draw |
-| `docs/slices/INDEX.md` | The twelve slices, in build order, with status |
+| `docs/slices/INDEX.md` | The thirteen slices, in build order, with status |
 | `docs/slices/NN-name.md` | One slice: instructions, due-outs, questions, exit criteria |
 | `docs/other/DUE-OUTS.md` | What the owner must provide, by slice |
 | `docs/other/SEED-CONTENT.md` | Column rules and row forms for the hand-written seed lists |
@@ -47,6 +47,12 @@ Seed files are not migrations. `src/migrations/index.js` exports `MIGRATIONS` �
 checksummed, applied once — and `SEEDS` — re-run in full on every press, every
 insert `ON CONFLICT DO NOTHING`. That is what lets the seed grow later without
 reading as drift, and what makes a correction in the library editor permanent.
+
+`/admin` also carries **Erase everything**, which drops every table and the
+migration ledger with them. Apply pending and Run seed then rebuild the database
+from the files, which is what makes a schema file editable in place instead of
+appended to: a CHECK constraint SQLite will not alter is an edit and three button
+presses. It asks you to type `erase everything` first, and there is no undo.
 
 **Slice 03 is built, except its fonts.** The family passcode gets you in once
 per device, `PATCH /api/me` writes which of the three people you are into the
@@ -215,14 +221,21 @@ twelve layouts and the bindings. SQLite has no `ADD COLUMN IF NOT EXISTS`, so
 DDL cannot live in a file Run seed re-executes; and layouts in a migration could
 never be corrected without reading as drift.
 
-**Every slice is built.** Every Cloudflare due-out is closed, and so are the
-three inks, the school year (September through May) and the paper (D-13 — US
-Letter). Two remain and neither blocks code: the fonts (D-10) — the shell, the
-stamp and the wall run on a system stack — and which tablet the wall runs on
-(D-14), where the wake lock is feature-detected either way and what is
-unresolved is whether the owner has to set display sleep by hand.
+**Slices 00 to 10 are built and the app does the whole nine-month job.** Two
+remain, both from `docs/design/LIBRARY_v3.md`: slice 11 merges weeks 2 and 3 into
+one tag-weighted draw, and slice 12 writes the 106 prompts, 19 forms and 10
+renderers that draw was measured against.
 
-No open questions outstanding.
+Every Cloudflare due-out is closed, and so are the three inks, the school year
+(September through May) and the paper (D-13 — US Letter). Three remain. Two block
+no code: the fonts (D-10) — the shell, the stamp and the wall run on a system
+stack — and which tablet the wall runs on (D-14), where the wake lock is
+feature-detected either way and what is unresolved is whether the owner has to
+set display sleep by hand. The third is D-15, twenty countries of affinity apiece
+for the three focuses that have none, and it blocks one part of slice 12.
+
+No question blocks slice 11. Three are open against slice 12 and listed in its
+file.
 
 The Worker's own tests run with `node --test test/*.test.js` and need nothing
 installed. They are a build-session tool, not something the owner ever runs —

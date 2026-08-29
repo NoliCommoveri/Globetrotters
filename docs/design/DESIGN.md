@@ -308,9 +308,10 @@ A focus is a set of weighted **tags**, not a list of templates (`focus_tags`), s
 prompt self-onboards: tag it once at authoring time and every focus with a matching
 affinity draws it correctly. The nine tag sets are in `../design/LIBRARY_v3.md` §3.
 
-`who-gets-what` and `stories-and-spirits` are new and neither can ship without
-`country_focus_affinity` rows — a focus with none is never recommended for any country on
-any country card, forever (D-15).
+`who-gets-what` and `stories-and-spirits` are new, and `who-lives-here` was named here
+long before it was seeded. None of the three has `country_focus_affinity` rows, and a
+focus with none is never recommended for any country on any country card, forever (D-15).
+All three are pickable from the day slice 11 seeds them; the recommendation waits.
 
 ### Project types (seed these)
 
@@ -336,7 +337,10 @@ weeks 2 and 3 — one draw, then a deal:
     template whose worksheet form already holds 2 of the ten seats
     (the 2 pinned tasks count) or whose mode tag is already taken this month
   draw 2 wildcards: uniformly from the bottom quarter of the remaining
-    eligible pool by fw, same form cap
+    eligible pool by fw, the quarter recomputed between the two, same form cap
+  the wildcards are also the repair budget for mode balance: if the ten hold no
+    hands-on prompt the first draws only from hands-on candidates, and the
+    second does the same for personal-voice
   deal the 8 into two lists of 4, choosing among the 70 splits by, in order:
     1. no worksheet form appears twice inside one week
     2. the two weeks hold as near the same SUM of fw  -- not a count of them
@@ -363,6 +367,13 @@ drop the single stalest cooldown prompt back in rather than erroring.
 Repetition across *months* is genuinely fine, which the original framing got right:
 **no task is country-specific.** "Find out which animal is on their money and draw it" is
 a completely different task in Peru than in Japan. Week 1 treats that as a feature.
+
+**Every month holds at least one `hands-on` and at least one `personal-voice`
+prompt.** Not per week — week 2 holds one `hands-on` and two `personal-voice`, so a
+per-week rule forces a repeat. A month in which nobody from the country ever speaks is the
+failure the library is most trying to avoid, and the anti-monotony rule above does not
+prevent it: forbidding a second of a mode tag says nothing about the first. The two
+wildcard slots pay for it, which costs the draw nothing it was using.
 
 **Repetition of *form* inside one week is not fine, and is the one thing the draw
 forbids outright.** Five draws against twenty-seven worksheet forms collide about 40% of
@@ -398,9 +409,11 @@ nothing to protect: no work has been done yet.
 
 ## 5. Schema (D1 / SQLite)
 
-**Status:** built · `001_schema.sql` (slice 01) and `004_worksheets.sql`, which
+**Status:** partial · `001_schema.sql` (slice 01) and `004_worksheets.sql`, which
 adds `worksheet_layouts` and the two columns it hangs off `task_templates`
-(slice 10).
+(slice 10). Slice 11 edits `001` in place — `prompt_tags`, `focus_tags`, a `fixed`
+tier, and `task_focus_weights` deleted — and rebuilds the database through Erase
+everything (§3).
 
 ```sql
 CREATE TABLE people (
@@ -1027,7 +1040,9 @@ response cannot be rendered by a later change to the client that forgot why.
 
 ## 9. Country data
 
-**Status:** built · slice 09
+**Status:** partial · slice 09 built all of it. The three focuses with no
+`country_focus_affinity` rows — `who-lives-here`, `who-gets-what`,
+`stories-and-spirits` — are recommended on no country card until D-15 lands in slice 12.
 
 The picker is only as good as what it can tell you about a country. This does not
 require a recommendation engine — it requires a column. All of it is generated once,
@@ -1157,8 +1172,10 @@ carries the first four weeks of the year.
 
 ## 12. Library editor
 
-**Status:** built · slice 08 built all of it but the worksheet layout editor,
-which arrived with its table in slice 10.
+**Status:** partial · slice 08 built all of it but the worksheet layout editor,
+which arrived with its table in slice 10. The focus tab edits a focus's opinion of
+individual templates; slice 11 replaces that with the fifty topic tags a focus weights,
+because that is what the draw reads.
 
 Tasks, focuses, and project types are all editable in the app. Parent-facing, behind
 `ADMIN_TOKEN`, not part of the kid experience.
@@ -1242,11 +1259,13 @@ skipping the task would leave the week one short.
 
 ## 13. Seed data
 
-**Status:** built · the runner, 3 people, 6 focuses, 6 project types, 195
+**Status:** partial · the runner, 3 people, 6 focuses, 6 project types, 195
 countries, **90 task templates**, 87 focus weights, `003_country_data.sql`'s 222
 hooks and 200 affinities across 100 countries (slices 02 and 09), and
 `005_worksheet_layouts.sql`'s twelve printed forms with a binding on every week
-1–3 template and on each project type's planning step (slice 10).
+1–3 template and on each project type's planning step (slice 10). Slice 11 takes the
+focuses to nine and replaces the 87 weights with `focus_tags` and `prompt_tags`; slice 12
+writes the 106 prompts and 19 forms `LIBRARY_v3.md` §2 still holds only as a document.
 
 Seed files are not migrations (§3). They live beside them in `/src/migrations/`
 and are exported from the same index as `SEEDS`, but they are re-run by **Run
@@ -1300,8 +1319,8 @@ Contents of `002_seed.sql`:
 | 3 | 25 | same |
 | 4 | 30 | five for each of the six project types, as ordered sequences |
 
-`LIBRARY_v3.md` takes weeks 1–3 to 12 / 86 / 69 and the focuses to nine. Until it lands
-these are the seeded numbers.
+`LIBRARY_v3.md` takes weeks 1–3 to 12 / 86 / 69 and the focuses to nine — slice 11 for the
+focuses, slice 12 for the prompts. Until they land these are the seeded numbers.
 
 All six project types carry a full week-4 sequence, so setup offers all six.
 
@@ -1564,7 +1583,9 @@ the code that depends on them is written, never guessed.
 
 ## 16. Printed worksheets
 
-**Status:** built · slice 10
+**Status:** partial · slice 10 built the route, the packer, the twelve forms and the
+layout editor. `LIBRARY_v3.md` needs twenty-seven, so slice 12 adds nineteen layout rows
+and ten renderer branches.
 
 The physical looseleaf workbook is the point of the project (§1, §7). Twenty
 tasks a month arrive as prompts on a phone and land on paper the kid has to

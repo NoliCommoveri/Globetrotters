@@ -18,19 +18,23 @@ terminal — if something appears to, it is specced wrong (§3).
 | D-12 | The month the school year starts | 04 | done — September through May |
 | D-13 | Paper size, for the passport and the worksheets | 06, 10 | done — US Letter |
 | D-14 | Which tablet and browser the wall runs on | 07 | outstanding |
-| D-15 | `country_focus_affinity` rows for the two new focuses | 11 | outstanding |
+| D-15 | `country_focus_affinity` rows for the three unaffiliated focuses | 12 | outstanding |
 
 ---
 
 ## Detail
 
-**D-15. Affinities for the two new focuses.** `who-gets-what` and `stories-and-spirits`
-are new in `LIBRARY_v3.md` and neither has a single `country_focus_affinity` row. A focus
-with none is never recommended for any country on any country card, forever — it is
-pickable and never suggested. Roughly twenty countries each with a one-line reason, typed
-into the library editor's focus tab or added to `003_country_data.sql`. It matters most
-for Who Gets What, because the countries that focus suits are not the ones a kid picks off
-a map.
+**D-15. Affinities for three focuses.** `who-gets-what` and `stories-and-spirits` are new
+in `LIBRARY_v3.md`; `who-lives-here` is named in `DESIGN.md` §4 and was never seeded. None
+of the three has a single `country_focus_affinity` row — the 200 rows in
+`003_country_data.sql` cover the other six. A focus with none is never recommended for any
+country on any country card, forever: it is pickable and never suggested. Roughly twenty
+countries each with a one-line reason, typed into the library editor's focus tab or added
+to `003_country_data.sql`.
+
+It matters most for Who Gets What, because the countries that focus suits are not the ones
+a kid picks off a map. Slice 11 seeds all three focuses and does not need this — the draw
+reads tags, not affinities — so it is slice 12 that is waiting.
 
 
 **D-02, D-06. Cloudflare.** Both are done. The database is `globetrotters-prod`
