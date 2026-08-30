@@ -123,27 +123,28 @@ WHERE worksheet_layout_id IS NULL AND slug IN (
   'flag-draw', 'currency-animal',
   'before-history',
   'life-outdoors', 'who-is-famous',
-  'landmark-to-see', 'tonights-dinner'
+  'landmark-to-see', 'tonights-dinner',
+  'made-because-they-needed-it'
 );
 
 UPDATE task_templates SET worksheet_layout_id =
   (SELECT id FROM worksheet_layouts WHERE slug = 'split-two')
 WHERE worksheet_layout_id IS NULL AND slug IN (
-  'language-hello', 'in-their-numbers', 'bible-name-now-name'
+  'language-hello', 'in-their-numbers', 'bible-name-now-name', 'your-money-there'
 );
 
 UPDATE task_templates SET worksheet_layout_id =
   (SELECT id FROM worksheet_layouts WHERE slug = 'table-3')
 WHERE worksheet_layout_id IS NULL AND slug IN (
   'what-people-believe', 'when-it-reached-everybody', 'is-the-law-kept',
-  'if-you-break-a-rule-there', 'help-when-money-runs-out'
+  'if-you-break-a-rule-there', 'help-when-money-runs-out', 'the-work-nobody-wants'
 );
 
 UPDATE task_templates SET worksheet_layout_id =
   (SELECT id FROM worksheet_layouts WHERE slug = 'timeline')
 WHERE worksheet_layout_id IS NULL AND slug IN (
   'war-that-changed', 'who-ruled-before', 'kid-life', 'long-before-people',
-  'the-last-hundred-years', 'bible-in-their-tongue'
+  'the-last-hundred-years', 'bible-in-their-tongue', 'the-company-that-got-caught'
 );
 
 UPDATE task_templates SET worksheet_layout_id =
@@ -175,7 +176,8 @@ WHERE worksheet_layout_id IS NULL AND slug IN (
 UPDATE task_templates SET worksheet_layout_id =
   (SELECT id FROM worksheet_layouts WHERE slug = 'specimen-boxes')
 WHERE worksheet_layout_id IS NULL AND slug IN (
-  'under-the-ground', 'tree-that-grows', 'craft-of-the-land', 'market-day'
+  'under-the-ground', 'tree-that-grows', 'craft-of-the-land', 'market-day',
+  'plants-that-heal'
 );
 
 UPDATE task_templates SET worksheet_layout_id =
@@ -187,50 +189,53 @@ WHERE worksheet_layout_id IS NULL AND slug IN (
 UPDATE task_templates SET worksheet_layout_id =
   (SELECT id FROM worksheet_layouts WHERE slug = 'scale-strip')
 WHERE worksheet_layout_id IS NULL AND slug IN (
-  'highest-point', 'weather-there-now'
+  'highest-point', 'weather-there-now', 'how-high-they-live', 'rain-in-a-year'
 );
 
 UPDATE task_templates SET worksheet_layout_id =
   (SELECT id FROM worksheet_layouts WHERE slug = 'map-marks')
 WHERE worksheet_layout_id IS NULL AND slug IN (
-  'map-outline', 'river-that-matters'
+  'map-outline', 'river-that-matters', 'where-the-ground-shakes',
+  'where-the-food-grows', 'climate-bands'
 );
 
 UPDATE task_templates SET worksheet_layout_id =
   (SELECT id FROM worksheet_layouts WHERE slug = 'bar-graph')
 WHERE worksheet_layout_id IS NULL AND slug IN (
-  'what-work-pays'
+  'what-work-pays', 'where-the-price-goes', 'what-their-money-goes-to',
+  'rain-through-the-year'
 );
 
 UPDATE task_templates SET worksheet_layout_id =
   (SELECT id FROM worksheet_layouts WHERE slug = 'then-now')
 WHERE worksheet_layout_id IS NULL AND slug IN (
   'border-that-moved', 'independence-day', 'desert-shall-blossom',
-  'who-was-taken-from-here', 'somebody-elses-museum'
+  'who-was-taken-from-here', 'somebody-elses-museum', 'the-one-that-is-gone'
 );
 
 UPDATE task_templates SET worksheet_layout_id =
   (SELECT id FROM worksheet_layouts WHERE slug = 'flow-steps')
 WHERE worksheet_layout_id IS NULL AND slug IN (
-  'who-leads', 'made-here', 'how-a-law-is-made'
+  'who-leads', 'made-here', 'how-a-law-is-made', 'water-to-the-tap',
+  'where-the-trash-goes'
 );
 
 UPDATE task_templates SET worksheet_layout_id =
   (SELECT id FROM worksheet_layouts WHERE slug = 'pictograph')
 WHERE worksheet_layout_id IS NULL AND slug IN (
-  'city-and-country'
+  'city-and-country', 'what-the-land-is-used-for'
 );
 
 UPDATE task_templates SET worksheet_layout_id =
   (SELECT id FROM worksheet_layouts WHERE slug = 'clock-pair')
 WHERE worksheet_layout_id IS NULL AND slug IN (
-  'time-there-now'
+  'time-there-now', 'their-working-day'
 );
 
 UPDATE task_templates SET worksheet_layout_id =
   (SELECT id FROM worksheet_layouts WHERE slug = 'list-n')
 WHERE worksheet_layout_id IS NULL AND slug IN (
-  'neighbors-list', 'game-kids-play'
+  'neighbors-list', 'game-kids-play', 'who-they-trade-with'
 );
 
 UPDATE task_templates SET worksheet_layout_id =
@@ -508,3 +513,59 @@ UPDATE task_templates SET worksheet_spec =
 UPDATE task_templates SET worksheet_spec =
   '{"caption":"What they are building or studying"}'
   WHERE worksheet_spec IS NULL AND slug = 'what-they-are-working-on';
+
+-- Slice 17 overrides.
+UPDATE task_templates SET worksheet_spec =
+  '{"orient":"horizontal","bars":4,"axis_label":"Out of every $100 a shopper here pays","caption":"The farmer or miner  ·  The company  ·  Shipping  ·  The shop"}'
+  WHERE worksheet_spec IS NULL AND slug = 'where-the-price-goes';
+UPDATE task_templates SET worksheet_spec =
+  '{"ticks":3,"ends":["It started","Now"]}'
+  WHERE worksheet_spec IS NULL AND slug = 'the-company-that-got-caught';
+UPDATE task_templates SET worksheet_spec =
+  '{"columns":["The job","Who actually does it","What it pays"],"rows":3}'
+  WHERE worksheet_spec IS NULL AND slug = 'the-work-nobody-wants';
+UPDATE task_templates SET worksheet_spec = '{"caption":"Biggest buyer first"}'
+  WHERE worksheet_spec IS NULL AND slug = 'who-they-trade-with';
+UPDATE task_templates SET worksheet_spec = '{"lines":3}'
+  WHERE worksheet_spec IS NULL AND slug = 'made-because-they-needed-it';
+UPDATE task_templates SET worksheet_spec =
+  '{"orient":"horizontal","bars":4,"axis_label":"Out of every 100 dollars they spend","caption":"Schools  ·  Health  ·  Soldiers  ·  Roads and building"}'
+  WHERE worksheet_spec IS NULL AND slug = 'what-their-money-goes-to';
+UPDATE task_templates SET worksheet_spec =
+  '{"columns":["In their money","In US dollars"],"rows":3}'
+  WHERE worksheet_spec IS NULL AND slug = 'your-money-there';
+UPDATE task_templates SET worksheet_spec =
+  '{"captions":["When work starts","When work ends"]}'
+  WHERE worksheet_spec IS NULL AND slug = 'their-working-day';
+UPDATE task_templates SET worksheet_spec =
+  '{"unit":"feet above sea level","captions":["Their capital","Our town"]}'
+  WHERE worksheet_spec IS NULL AND slug = 'how-high-they-live';
+UPDATE task_templates SET worksheet_spec =
+  '{"caption":"Where the ground is not still","pins":3}'
+  WHERE worksheet_spec IS NULL AND slug = 'where-the-ground-shakes';
+UPDATE task_templates SET worksheet_spec =
+  '{"caption":"Where their food comes from","pins":3}'
+  WHERE worksheet_spec IS NULL AND slug = 'where-the-food-grows';
+UPDATE task_templates SET worksheet_spec =
+  '{"key":"Each figure = 10 acres out of every 100"}'
+  WHERE worksheet_spec IS NULL AND slug = 'what-the-land-is-used-for';
+UPDATE task_templates SET worksheet_spec = '{"caption":"From the sky to the cup"}'
+  WHERE worksheet_spec IS NULL AND slug = 'water-to-the-tap';
+UPDATE task_templates SET worksheet_spec =
+  '{"caption":"From the bin to wherever it stops"}'
+  WHERE worksheet_spec IS NULL AND slug = 'where-the-trash-goes';
+UPDATE task_templates SET worksheet_spec =
+  '{"unit":"inches of rain a year","captions":["Their year","Our year"]}'
+  WHERE worksheet_spec IS NULL AND slug = 'rain-in-a-year';
+UPDATE task_templates SET worksheet_spec =
+  '{"bars":4,"axis_label":"Inches of rain in the month","caption":"January  ·  April  ·  July  ·  October"}'
+  WHERE worksheet_spec IS NULL AND slug = 'rain-through-the-year';
+UPDATE task_templates SET worksheet_spec =
+  '{"caption":"Their weather, band by band","pins":4}'
+  WHERE worksheet_spec IS NULL AND slug = 'climate-bands';
+UPDATE task_templates SET worksheet_spec =
+  '{"captions":["When it was still here","That same place now"],"middle":"The year the last one was seen"}'
+  WHERE worksheet_spec IS NULL AND slug = 'the-one-that-is-gone';
+UPDATE task_templates SET worksheet_spec =
+  '{"caption":"Four plants and what they are for","circle_one":true}'
+  WHERE worksheet_spec IS NULL AND slug = 'plants-that-heal';

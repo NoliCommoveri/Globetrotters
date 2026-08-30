@@ -805,7 +805,83 @@ FROM (
 
   ('what-they-are-working-on', 'Find what their scientists are building',
    'Find out what people in this country are researching or building right now: a rocket, a telescope, a seed bank, a medicine, a machine that thinks, a way to catch water. Draw the thing, then write who is paying for it and what they hope it does. If nothing there is big enough to make the news, find out what they are studying about their own land — a crop, a disease, a fish count.',
-   2, 'government', 'focus', NULL, NULL)
+   2, 'government', 'focus', NULL, NULL),
+
+  ('where-the-price-goes', 'Find out who gets the money',
+   'Pick one thing this country sells to the rest of the world — coffee, cocoa, cobalt, cotton, bananas, cut flowers. Out of every hundred dollars a shopper pays for it, find how much reaches the farmer or miner, how much the company keeps, how much goes on shipping, and how much the shop keeps. Draw a bar for each. If nobody has worked it out for this country, use the closest country that sells it.',
+   2, 'money', 'focus', NULL, NULL),
+
+  ('the-company-that-got-caught', 'Find a company that got caught',
+   'Find one time a company — theirs, or a foreign one working there — did something to this country people are still angry about: a spill, a collapse, a river, a wage, a forest, a mine. Mark three moments on the line: when it started, when people found out, and what happened since. If you cannot find one, find the biggest company there, who owns it, and mark three big dates in its life instead.',
+   2, 'money', 'focus', NULL, NULL),
+
+  ('the-work-nobody-wants', 'Find out who does the work nobody there wants',
+   'Find three jobs in this country that people there try not to do — dangerous, filthy, badly paid, or done out of sight. For each one write who actually does it — a particular group of people, people from another country, women, children — and what it pays.',
+   2, 'money', 'focus', NULL, NULL),
+
+  ('who-they-trade-with', 'Who buys what they sell',
+   'Find the five countries this country sells the most to. List them biggest first, and put a star next to ours if it is on the list.',
+   2, 'money', 'focus', NULL, NULL),
+
+  ('made-because-they-needed-it', 'Find something they made because they needed it',
+   'Find one thing invented, designed or first made in this country to solve a problem people there actually had — a stove, a pump, a crop, a boat built for their water, a way of paying without a bank. Draw it, then write what the problem was and whether anybody outside the country uses it now.',
+   2, 'money', 'focus', NULL, NULL),
+
+  ('what-their-money-goes-to', 'Where their government''s money goes',
+   'Out of every hundred dollars this country''s government spends, find out roughly how much goes to schools, to hospitals and doctors, to soldiers, and to roads and building. Draw a bar for each one. If they do not publish it, use the World Bank''s numbers and write on the sheet that that is where they came from.',
+   2, 'money', 'focus', NULL, NULL),
+
+  ('your-money-there', 'Turn your money into theirs',
+   'Find out what their money is called and what one US dollar is worth in it today. Then write three amounts in their money and in ours: one dollar, everything you have saved right now, and what you would need to buy lunch for our whole family there.',
+   2, 'money', 'focus', NULL, NULL),
+
+  ('their-working-day', 'Find out how long their working day is',
+   'Find out what time an ordinary job there starts and what time it finishes. Draw the hands on both clocks and write both times in digits, then write how many hours that is in a week there and how many hours a week a full job is here.',
+   2, 'money', 'focus', NULL, NULL),
+
+  ('how-high-they-live', 'How high up is their capital?',
+   'Find out how many feet above sea level their capital city sits, and how high our own town sits. Mark both on the scale and label each mark.',
+   2, 'land', 'focus', NULL, NULL),
+
+  ('where-the-ground-shakes', 'Find where the ground is not still',
+   'Find out whether this country gets earthquakes or has volcanoes. Mark three places on the map and name them: one volcano or fault line, the last place a big quake hit, and the nearest big city to it. If the ground there never moves, mark the three places most at risk from flood instead.',
+   2, 'land', 'focus', NULL, NULL),
+
+  ('where-the-food-grows', 'Map where their food comes from',
+   'Mark three places on the map and name them: where their main crop is grown, where animals are kept or fish are caught, and the city most of that food is carried to.',
+   2, 'land', 'focus', NULL, NULL),
+
+  ('what-the-land-is-used-for', 'What the land is doing',
+   'Out of every hundred acres of this country, find out how many are farmed and how many are forest or wild. Color a row for each and label the rows.',
+   2, 'land', 'focus', NULL, NULL),
+
+  ('water-to-the-tap', 'Follow their water home',
+   'Find out where drinking water comes from in this country. Fill the four boxes from where it falls or is pumped through to somebody''s cup, and mark the box where it gets cleaned — or write that there isn''t one.',
+   2, 'land', 'focus', NULL, NULL),
+
+  ('where-the-trash-goes', 'Follow their garbage',
+   'Find out what happens to household rubbish there. Put four boxes between the bin in somebody''s kitchen and wherever it finally stops, and write in the box where anything gets sorted or reused — or write on the last box that nothing does.',
+   2, 'land', 'focus', NULL, NULL),
+
+  ('rain-in-a-year', 'How wet is it there?',
+   'Find out how many inches of rain fall in their capital in a year, and how many fall where we live. Mark both on the scale and label each mark.',
+   2, 'climate', 'focus', NULL, NULL),
+
+  ('rain-through-the-year', 'When their rain comes',
+   'Find out how much rain falls in their capital in January, in April, in July and in October. Draw a bar for each month, then write underneath which of those months a farmer there would be watching. If their capital is not where the farming is, use the biggest farming town instead and say which one.',
+   2, 'climate', 'focus', NULL, NULL),
+
+  ('climate-bands', 'Put their weather on the map',
+   'Find a climate map of this country. Shade the different weather bands onto the map, then mark and name four of them: the wettest part, the driest part, the part where snow falls — or write that none of it does — and the band most people actually live in.',
+   2, 'climate', 'focus', NULL, NULL),
+
+  ('the-one-that-is-gone', 'The animal that is not there anymore',
+   'Find an animal that lived in this country within the last few hundred years and is now gone for good — one people actually saw, not one dug out of rock. Draw it in the place it lived, then draw that same place today, and write on the arrow the year the last one was seen. If nothing there has gone for good, find the one that is down to its last few hundred and draw the place it used to range.',
+   2, 'ecology', 'focus', NULL, NULL),
+
+  ('plants-that-heal', 'Find what they grow for medicine',
+   'Find four plants that grow in this country that people there use as medicine — for a fever, a cut, a cough, a stomach. Draw each one and write what it is used for underneath. Circle any that a doctor here would also hand you.',
+   2, 'ecology', 'focus', NULL, NULL)
 -- END task_templates
 ) v
 LEFT JOIN project_types p ON p.slug = v.project_type
@@ -1111,7 +1187,75 @@ FROM (
   ('help-when-money-runs-out', 'topic', 'public-money'),
   ('help-when-money-runs-out', 'topic', 'who-gets-less'),
   ('what-they-are-working-on', 'topic', 'science-research'),
-  ('what-they-are-working-on', 'topic', 'future-plans')
+  ('what-they-are-working-on', 'topic', 'future-plans'),
+  ('where-the-price-goes',     'topic', 'who-owns-it'),
+  ('where-the-price-goes',     'topic', 'trade'),
+  ('where-the-price-goes',     'topic', 'who-gets-less'),
+  ('where-the-price-goes',     'mode',  'us-contrast'),
+  ('the-company-that-got-caught', 'topic', 'who-owns-it'),
+  ('the-company-that-got-caught', 'topic', 'damage-and-repair'),
+  ('the-company-that-got-caught', 'topic', 'advocacy'),
+  ('the-work-nobody-wants',    'topic', 'who-gets-less'),
+  ('the-work-nobody-wants',    'topic', 'work-and-money'),
+  ('the-work-nobody-wants',    'topic', 'forced-movement'),
+  ('who-they-trade-with',      'topic', 'trade'),
+  ('who-they-trade-with',      'topic', 'who-owns-it'),
+  ('who-they-trade-with',      'mode',  'us-contrast'),
+  ('made-because-they-needed-it', 'topic', 'science-research'),
+  ('made-because-they-needed-it', 'topic', 'infrastructure'),
+  ('what-their-money-goes-to', 'topic', 'public-money'),
+  ('what-their-money-goes-to', 'topic', 'governance'),
+  ('what-their-money-goes-to', 'topic', 'public-services'),
+  ('what-their-money-goes-to', 'mode',  'us-contrast'),
+  ('your-money-there',         'topic', 'public-money'),
+  ('your-money-there',         'topic', 'travel'),
+  ('your-money-there',         'mode',  'measurement'),
+  ('your-money-there',         'mode',  'us-contrast'),
+  ('their-working-day',        'topic', 'work-and-money'),
+  ('their-working-day',        'topic', 'daily-life'),
+  ('their-working-day',        'mode',  'us-contrast'),
+  ('their-working-day',        'mode',  'measurement'),
+  ('how-high-they-live',       'topic', 'altitude'),
+  ('how-high-they-live',       'topic', 'city-life'),
+  ('how-high-they-live',       'mode',  'measurement'),
+  ('how-high-they-live',       'mode',  'us-contrast'),
+  ('where-the-ground-shakes',  'topic', 'landform'),
+  ('where-the-ground-shakes',  'topic', 'damage-and-repair'),
+  ('where-the-ground-shakes',  'topic', 'infrastructure'),
+  ('where-the-ground-shakes',  'mode',  'map-work'),
+  ('where-the-food-grows',     'topic', 'agriculture'),
+  ('where-the-food-grows',     'topic', 'landform'),
+  ('where-the-food-grows',     'topic', 'everyday-food'),
+  ('where-the-food-grows',     'mode',  'map-work'),
+  ('what-the-land-is-used-for', 'topic', 'agriculture'),
+  ('what-the-land-is-used-for', 'topic', 'landform'),
+  ('what-the-land-is-used-for', 'topic', 'wildlife'),
+  ('what-the-land-is-used-for', 'mode',  'demographics-stat'),
+  ('water-to-the-tap',         'topic', 'water'),
+  ('water-to-the-tap',         'topic', 'infrastructure'),
+  ('water-to-the-tap',         'topic', 'public-services'),
+  ('water-to-the-tap',         'topic', 'daily-life'),
+  ('where-the-trash-goes',     'topic', 'public-services'),
+  ('where-the-trash-goes',     'topic', 'damage-and-repair'),
+  ('where-the-trash-goes',     'topic', 'city-life'),
+  ('rain-in-a-year',           'topic', 'weather-pattern'),
+  ('rain-in-a-year',           'topic', 'water'),
+  ('rain-in-a-year',           'mode',  'measurement'),
+  ('rain-in-a-year',           'mode',  'us-contrast'),
+  ('rain-through-the-year',    'topic', 'weather-pattern'),
+  ('rain-through-the-year',    'topic', 'water'),
+  ('rain-through-the-year',    'topic', 'agriculture'),
+  ('rain-through-the-year',    'topic', 'sun-and-seasons'),
+  ('climate-bands',            'topic', 'weather-pattern'),
+  ('climate-bands',            'topic', 'landform'),
+  ('climate-bands',            'topic', 'city-life'),
+  ('climate-bands',            'mode',  'map-work'),
+  ('the-one-that-is-gone',     'topic', 'extinction'),
+  ('the-one-that-is-gone',     'topic', 'wildlife'),
+  ('the-one-that-is-gone',     'topic', 'damage-and-repair'),
+  ('plants-that-heal',         'topic', 'health'),
+  ('plants-that-heal',         'topic', 'folklore-belief'),
+  ('plants-that-heal',         'topic', 'wildlife')
 -- END prompt_tags
 ) v
 JOIN task_templates t ON t.slug = v.task

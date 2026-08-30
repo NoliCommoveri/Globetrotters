@@ -1,6 +1,6 @@
 # Slice 17 — Prompts: money, land, weather, living things
 
-**Status:** not started
+**Status:** built
 **Band:** M
 **Implements:** §13 (19 of the 106 prompts)
 **Depends on:** 16
