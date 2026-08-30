@@ -881,7 +881,91 @@ FROM (
 
   ('plants-that-heal', 'Find what they grow for medicine',
    'Find four plants that grow in this country that people there use as medicine — for a fever, a cut, a cough, a stomach. Draw each one and write what it is used for underneath. Circle any that a doctor here would also hand you.',
-   2, 'ecology', 'focus', NULL, NULL)
+   2, 'ecology', 'focus', NULL, NULL),
+
+  ('the-group-that-gets-less', 'Find out who there gets less',
+   'In most countries one group gets less than the others — less school, less money, less land, less say, less safety. Find out who that is in this country and write four things they get less of, one to a bullet. If people there disagree about whether it is happening at all, write what each side says instead.',
+   2, 'people', 'focus', NULL, NULL),
+
+  ('what-work-they-do', 'What a hundred of them do all day',
+   'If this country were a hundred working people, find out how many farm or fish, how many make things in factories or workshops, how many sell things or serve people, and how many do something else. Color your hundred to match and write the key yourself.',
+   2, 'people', 'focus', NULL, NULL),
+
+  ('the-job-a-kid-does', 'Draw a kid there at work',
+   'Find out what work children there actually do — in a field, a workshop, a mine, a market, a house that is not theirs. Draw one of them doing it, then write how old they usually are and what they are not doing while they do it. If children there do not work, find out what stopped it and what year.',
+   2, 'people', 'focus', NULL, NULL),
+
+  ('how-many-languages', 'Count their languages',
+   'Find four languages actually spoken there, not just the official one: the official one, the one most people speak at home, and two more — including one only a few thousand people still speak.',
+   2, 'people', 'focus', NULL, NULL),
+
+  ('most-common-names', 'The names half of them have',
+   'Find the most common name for a man there, the most common for a woman, and the most common family name. For each, write roughly how many people carry it and where the name came from — a saint, a king, a job, a place, a word that means something. If nobody counts names there, use the phone book of their biggest city and say that is what you used.',
+   2, 'people', 'focus', NULL, NULL),
+
+  ('family-size', 'How big is a family there?',
+   'Find the average number of children in a family there and write it next to the number in our house, along with two more things about how families there are put together — who else lives in the house, who looks after the small ones. Then write the one thing about families that turns out to be the same in both houses.',
+   2, 'people', 'focus', NULL, NULL),
+
+  ('young-or-old', 'A country of kids or of grandparents?',
+   'Find out how many people out of every hundred there are under 15, how many are between 15 and 65, and how many are over 65. Draw a bar for each.',
+   2, 'people', 'focus', NULL, NULL),
+
+  ('how-long-they-live', 'How long people live',
+   'Find the average life expectancy there. Write it in the box, then write ours underneath and one reason for the gap between them.',
+   2, 'people', 'focus', NULL, NULL),
+
+  ('who-can-read', 'How many of them read',
+   'Out of every hundred grown men in this country, find out how many can read and write. Then find the same number for grown women. Color a row for each and label the rows. If nearly everybody there can read, find the nearest country where that is not true, put its numbers on the second row, and write both names on the key.',
+   2, 'people', 'focus', NULL, NULL),
+
+  ('who-finishes-school', 'How far does learning go?',
+   'Find out how many kids out of every hundred there finish secondary school, and how many go on to university. Color one row for each and label the rows.',
+   2, 'people', 'focus', NULL, NULL),
+
+  ('when-you-are-old-enough', 'How old you have to be there',
+   'Find out how old you have to be in this country to leave school, to have a job, and to drive. Write each one next to how old you have to be here. Then find the one age that is the same on both sides.',
+   2, 'people', 'focus', NULL, NULL),
+
+  ('how-you-get-a-house', 'Find out how a family gets a house there',
+   'Find out how an ordinary family there comes to have a home: saving for it, borrowing from a bank, inheriting it, renting it, or building it themselves out of what is nearby. Take the five boxes from no house to living in it for the most common way, and write in each box who is paying.',
+   2, 'people', 'focus', NULL, NULL),
+
+  ('who-owns-the-roof', 'How many of them own their home',
+   'Out of every hundred families there, find out how many own the home they live in rather than renting it. Then find the same number for families here. Color a row for each and label the rows.',
+   2, 'people', 'focus', NULL, NULL),
+
+  ('who-came-and-who-left', 'Who came and who left',
+   'Find out where people there have moved from, and where people from there have moved to. Name the two countries most tied to this one by people moving, and one reason they went.',
+   2, 'people', 'focus', NULL, NULL),
+
+  ('who-they-took-in', 'Find out who ran to this country',
+   'Find out whether people from anywhere else have run to this country to be safe. Name three groups who did, and for each write what they were running from and roughly how many came. If it went the other way and people ran out of here instead, do it that way round and say so on the sheet.',
+   2, 'people', 'focus', NULL, NULL),
+
+  ('where-they-go-when-they-go', 'Find out where they go',
+   'Find three places people from this country go when they leave home: the country most of them travel to, the city inside their own country most people head for, and one place they go for work. For each, write who goes and why. If most people there never leave the district they were born in, name the three places they do go — a market town, a shrine, a hospital — and write that instead.',
+   2, 'people', 'focus', NULL, NULL),
+
+  ('what-a-kid-carries', 'What''s in their bag',
+   'Find out what a kid your age there carries with them on an ordinary day. List five things, one to a bullet. If one of them is something you have never had to carry, put a star next to it.',
+   3, 'people', 'focus', NULL, NULL),
+
+  ('what-they-can-plug-in', 'What they can plug in',
+   'Out of every hundred people there, find out how many have electricity at home, how many have a phone of their own, and how many can get on the Internet. Draw a bar for each.',
+   3, 'people', 'focus', NULL, NULL),
+
+  ('what-they-keep', 'Find out what animals live with them',
+   'Find out what animals people there keep — in the house, in the yard, on the roof, tied up outside. Draw four of them and write under each whether it is a pet, a worker, or dinner. Circle the one that would surprise somebody here.',
+   3, 'people', 'focus', NULL, NULL),
+
+  ('street-animals', 'Find out who the animals in the street belong to',
+   'Find out what animals walk around loose in a town there — dogs, cats, cows, goats, monkeys, chickens. Draw one where you would actually see it, then write who feeds it, whether anybody owns it, and what happens to it if it gets sick. If nothing runs loose there, find out what stops it.',
+   3, 'people', 'focus', NULL, NULL),
+
+  ('find-them-near-us', 'Find this country near our house',
+   'Find the closest place to us run by people from this country, or selling what they sell — a restaurant, a shop, a church, a grocery aisle, a market stall. Draw the sign or the front of it, then write how far away it is and one thing you could go and buy there this week. If there is nothing within a drive, find the nearest city that has one and how far that is.',
+   3, 'people', 'focus', NULL, NULL)
 -- END task_templates
 ) v
 LEFT JOIN project_types p ON p.slug = v.project_type
@@ -1255,7 +1339,76 @@ FROM (
   ('the-one-that-is-gone',     'topic', 'damage-and-repair'),
   ('plants-that-heal',         'topic', 'health'),
   ('plants-that-heal',         'topic', 'folklore-belief'),
-  ('plants-that-heal',         'topic', 'wildlife')
+  ('plants-that-heal',         'topic', 'wildlife'),
+  ('the-group-that-gets-less', 'topic', 'who-gets-less'),
+  ('the-group-that-gets-less', 'topic', 'advocacy'),
+  ('the-group-that-gets-less', 'mode',  'demographics-stat'),
+  ('what-work-they-do',        'topic', 'work-and-money'),
+  ('what-work-they-do',        'topic', 'agriculture'),
+  ('what-work-they-do',        'topic', 'city-life'),
+  ('what-work-they-do',        'mode',  'demographics-stat'),
+  ('the-job-a-kid-does',       'topic', 'who-gets-less'),
+  ('the-job-a-kid-does',       'topic', 'work-and-money'),
+  ('the-job-a-kid-does',       'topic', 'schooling'),
+  ('how-many-languages',       'topic', 'language'),
+  ('how-many-languages',       'topic', 'who-gets-less'),
+  ('how-many-languages',       'mode',  'demographics-stat'),
+  ('most-common-names',        'topic', 'names'),
+  ('most-common-names',        'topic', 'language'),
+  ('most-common-names',        'topic', 'religion'),
+  ('most-common-names',        'mode',  'demographics-stat'),
+  ('family-size',              'topic', 'family'),
+  ('family-size',              'topic', 'daily-life'),
+  ('family-size',              'mode',  'demographics-stat'),
+  ('family-size',              'mode',  'us-contrast'),
+  ('young-or-old',             'topic', 'health'),
+  ('young-or-old',             'topic', 'schooling'),
+  ('young-or-old',             'mode',  'demographics-stat'),
+  ('how-long-they-live',       'topic', 'health'),
+  ('how-long-they-live',       'topic', 'who-gets-less'),
+  ('how-long-they-live',       'mode',  'demographics-stat'),
+  ('how-long-they-live',       'mode',  'us-contrast'),
+  ('who-can-read',             'topic', 'schooling'),
+  ('who-can-read',             'topic', 'who-gets-less'),
+  ('who-can-read',             'mode',  'demographics-stat'),
+  ('who-finishes-school',      'topic', 'schooling'),
+  ('who-finishes-school',      'topic', 'who-gets-less'),
+  ('who-finishes-school',      'mode',  'demographics-stat'),
+  ('when-you-are-old-enough',  'topic', 'governance'),
+  ('when-you-are-old-enough',  'topic', 'daily-life'),
+  ('when-you-are-old-enough',  'topic', 'schooling'),
+  ('when-you-are-old-enough',  'mode',  'us-contrast'),
+  ('how-you-get-a-house',      'topic', 'housing'),
+  ('how-you-get-a-house',      'topic', 'work-and-money'),
+  ('how-you-get-a-house',      'topic', 'family'),
+  ('who-owns-the-roof',        'topic', 'housing'),
+  ('who-owns-the-roof',        'topic', 'who-gets-less'),
+  ('who-owns-the-roof',        'mode',  'demographics-stat'),
+  ('who-owns-the-roof',        'mode',  'us-contrast'),
+  ('who-came-and-who-left',    'topic', 'migration'),
+  ('who-came-and-who-left',    'topic', 'work-and-money'),
+  ('who-they-took-in',         'topic', 'forced-movement'),
+  ('who-they-took-in',         'topic', 'migration'),
+  ('who-they-took-in',         'topic', 'advocacy'),
+  ('where-they-go-when-they-go', 'topic', 'travel'),
+  ('where-they-go-when-they-go', 'topic', 'migration'),
+  ('where-they-go-when-they-go', 'topic', 'city-life'),
+  ('what-a-kid-carries',       'topic', 'daily-life'),
+  ('what-a-kid-carries',       'topic', 'schooling'),
+  ('what-a-kid-carries',       'mode',  'us-contrast'),
+  ('what-they-can-plug-in',    'topic', 'infrastructure'),
+  ('what-they-can-plug-in',    'topic', 'daily-life'),
+  ('what-they-can-plug-in',    'mode',  'demographics-stat'),
+  ('what-they-keep',           'topic', 'animals-with-people'),
+  ('what-they-keep',           'topic', 'daily-life'),
+  ('what-they-keep',           'topic', 'agriculture'),
+  ('street-animals',           'topic', 'animals-with-people'),
+  ('street-animals',           'topic', 'city-life'),
+  ('street-animals',           'topic', 'daily-life'),
+  ('find-them-near-us',        'topic', 'migration'),
+  ('find-them-near-us',        'topic', 'everyday-food'),
+  ('find-them-near-us',        'mode',  'hands-on'),
+  ('find-them-near-us',        'mode',  'personal-voice')
 -- END prompt_tags
 ) v
 JOIN task_templates t ON t.slug = v.task

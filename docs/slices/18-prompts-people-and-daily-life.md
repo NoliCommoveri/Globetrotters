@@ -1,6 +1,6 @@
 # Slice 18 — Prompts: who the people are, an ordinary day
 
-**Status:** not started
+**Status:** built
 **Band:** L
 **Implements:** §13 (21 of the 106 prompts)
 **Depends on:** 17
