@@ -105,14 +105,30 @@ test('coverage spreads across continents, adventure levels and focuses', () => {
   `);
   assert.equal(depths.length, 3, 'all three adventure levels need hooked countries');
 
+  // All nine, not six. A focus with no affinity row is pickable and never
+  // suggested on any country card, forever — which is what the three newest
+  // focuses were until D-15 landed.
   const focuses = rows(`
     SELECT f.slug, COUNT(*) AS n FROM country_focus_affinity a
     JOIN focuses f ON f.id = a.focus_id GROUP BY f.id
   `);
-  assert.equal(focuses.length, 6);
+  assert.equal(focuses.length, 9, 'every focus needs somewhere it is recommended');
   for (const row of focuses) {
     assert.ok(row.n >= 15, `${row.slug} is recommended for only ${row.n} countries`);
   }
+});
+
+test('every recommendation sits on a country the shuffle can deal', () => {
+  // "Deal me three" only deals a country carrying MIN_HOOKS or more
+  // (public/js/deal.js), so an affinity on an unhooked country is one the
+  // picker can never surface. Browse and search still reach all 195, but a
+  // recommendation nobody is dealt is a recommendation nobody reads.
+  const unreachable = rows(`
+    SELECT DISTINCT c.name FROM country_focus_affinity a
+    JOIN countries c ON c.id = a.country_id
+    WHERE (SELECT COUNT(*) FROM country_hooks h WHERE h.country_id = c.id) < 2
+  `).map((r) => r.name);
+  assert.deepEqual(unreachable, []);
 });
 
 test('an affinity is a recommendation with a reason, never a warning', () => {

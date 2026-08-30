@@ -4,8 +4,7 @@ The six hand-written lists in the seed files — countries, task templates, prom
 and focus tags in `002_seed.sql`, hooks and focus affinities in
 `003_country_data.sql` — and the rules a row has to satisfy. All six are
 seeded: 195 countries, 92 templates, 180 prompt tags, 65 focus tags, and 222 hooks and
-200 affinities across 100 countries. This is the reference for **adding** to them, which
-is what slices 16 to 20 do 106 more times.
+260 affinities across 100 countries. This is the reference for **adding** to them.
 
 Each list sits between a `-- BEGIN x` / `-- END x` pair in its file. Rows go
 inside the markers in the form below and nothing else changes. Nothing here
@@ -242,14 +241,19 @@ a *new country* to this list works normally.
 
 ### Focus affinities
 
-2 or 3 a country. Recommendations only — there is no way to say "bad fit", and
+3 a country. Recommendations only — there is no way to say "bad fit", and
 there should not be: any focus is allowed on any country, and the app's job is
 to say what is good about a choice rather than argue with it.
 
+**Only ever on a country that already carries hooks.** "Deal me three" draws
+from countries with two or more hooks, so a recommendation on an unadorned
+country is one the shuffle can never show. `test/country-data.test.js` fails on
+one, and the fix is to pick a different country rather than to relax the rule.
+
 | Column | Rule |
 |---|---|
-| `iso3` | The country. |
-| `focus` | One of the six focus slugs. |
+| `iso3` | The country. It must appear in the hooks block, or already carry hooks. |
+| `focus` | One of the nine focus slugs. |
 | `score` | `3` exceptional fit · `2` good fit. Nothing else exists. |
 | `reason` | Kid-facing, 15–90 characters, no full stop. It is shown under the focus name on setup, so it has to read out loud in one breath. `you'll have more to draw than fits on the page`. |
 

@@ -4,13 +4,15 @@ Twenty-three slices against `../design/DESIGN.md`. Each ends at a state you can 
 browser and judge.
 
 A build session takes the first slice not marked `built` and reads its file.
-**Slices 00–20 are built.** The nineteen forms and ten renderers `LIBRARY_v3.md` calls for
-all exist, every one of the sixty-one seeded week 1–3 prompts says and prints what §2 says
-it does, and slices 16–20 landed the whole of the 106-prompt library the draw engine was
-measured against. The pool is 167 prompts, 153 of them drawable, and slice 20 ran the
-numbers §3 claims against it for the first time. What remains is the twelve prompts owed to
-Ancient World and Conflict and Change — one M slice. Also outstanding are due-outs D-10 and
-D-14, neither of them code, and D-15, which is the whole of slice 22.
+**Slices 00–20 and 22 are built.** The nineteen forms and ten renderers `LIBRARY_v3.md`
+calls for all exist, every one of the sixty-one seeded week 1–3 prompts says and prints
+what §2 says it does, and slices 16–20 landed the whole of the 106-prompt library the draw
+engine was measured against. The pool is 167 prompts, 153 of them drawable, and slice 20
+ran the numbers §3 claims against it for the first time. Slice 22 finished the country
+data: all nine focuses are recommended somewhere and every adorned country carries three
+affinities. **What remains is slice 21** — the twelve prompts owed to Ancient World and
+Conflict and Change, one M slice. Also outstanding are due-outs D-10 and D-14, neither of
+them code.
 
 | # | Slice | Status | Band | Depends on | Design sections |
 |---|---|---|---|---|---|
@@ -36,7 +38,7 @@ D-14, neither of them code, and D-15, which is the whole of slice 22.
 | 19 | [Prompts: school, names, belief](19-prompts-school-names-belief.md) | built | L | 18 | §13 |
 | 20 | [Prompts: craft, food, voices](20-prompts-craft-food-voices.md) | built | L | 19 | §13, §16 |
 | 21 | [The twelve owed](21-the-twelve-owed.md) | not started | M | 20 | §13 |
-| 22 | [The affinities](22-affinities.md) | not started | S | 11 | §9 |
+| 22 | [The affinities](22-affinities.md) | built | S | 11 | §9 |
 
 Statuses: `not started` · `in progress` · `built`.
 
@@ -48,7 +50,8 @@ the binder.
 
 **Slice 09 had the most leverage on how the app feels.** The library is 91
 templates, all six project types carry a week-4 sequence, and
-`003_country_data.sql` puts 222 hooks and 200 affinities on 100 countries.
+`003_country_data.sql` puts 222 hooks and 200 affinities on 100 countries — the
+affinities reached 260 when slice 22 added the last three focuses.
 Setup's three content-dependent features — the hook line on a country card, the
 recommended focuses with their reason lines, and "Deal me three" — were built
 inert in slice 04 and came alive with no client change. Its one open question,
@@ -226,9 +229,12 @@ Conflict and Change, which are at twelve and ten on-theme prompts where every ot
 is at seventeen or better. It comes after the measurement, so it is written against a
 number rather than a guess.
 
-**Slice 22 is D-15 and depends on nothing.** Sixty affinity rows for the three focuses
-that have none. It sits last because it is blocked on the owner; it can be taken the day
-the rows exist.
+**Slice 22 was D-15 and depended on nothing, so it landed ahead of slice 21.** Sixty
+affinity rows for the three focuses that had none, twenty each, taking every adorned
+country from two recommendations to three. It carries one finding worth reading before the
+next piece of country work: a recommendation is only visible where the shuffle can deal
+the country, and "Deal me three" needs two hooks. Qatar and Bangladesh are the best Who
+Gets What months in the library and neither could take a row, because neither has hooks.
 
 **A partial library is a working library, and that is what makes this splittable at all.**
 The draw does not care how big the pool is: 61 prompts draws a month, 100 draws a better
@@ -309,7 +315,7 @@ Every section of `DESIGN.md` and the slice that finishes it.
 | §7 Passport | 06 — built |
 | §7 Plan | 05 — built |
 | §8 The wall tablet | 07 — built |
-| §9 Country data | 09 — built; 22 — the three new focuses' affinities (D-15) |
+| §9 Country data | 09, 22 — built |
 | §10 Progress | 05 — built |
 | §11 Design direction | 07 — built but for the fonts (D-10) |
 | §12 Library editor | 11 — built |

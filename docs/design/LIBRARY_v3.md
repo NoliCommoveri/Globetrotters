@@ -2032,10 +2032,11 @@ think is out there.* Thirty-six on-theme prompts, the deepest focus in the libra
 also the one an eleven-year-old picks off the list unprompted, which is worth something on
 its own.
 
-**Both need `country_focus_affinity` rows before they ship.** A focus with none is never
-recommended for any country on any country card, forever. Roughly twenty countries each
-with a one-line reason. For Who Gets What this matters more than for any other focus,
-because the countries it suits are not the ones a kid picks off a map.
+**All three carry `country_focus_affinity` rows**, twenty countries each with a one-line
+reason (slice 22). A focus with none would be recommended on no country card, ever. For Who
+Gets What this mattered more than for any other focus, because the countries it suits are
+not the ones a kid picks off a map — and that is also why it is the focus most constrained
+by the rule that a recommendation only shows on a country the shuffle can deal.
 
 ### The draw
 
@@ -2326,10 +2327,7 @@ just what a page looks like.
 
 ## 7. Still open
 
-1. **`country_focus_affinity` rows for Who Lives Here, Who Gets What and Stories and
-   Spirits.** Twenty countries each, one line of reason apiece. Without them the app never
-   recommends any of the three. D-15, and it is the whole of slice 22.
-2. **Twelve week-3-flavoured prompts, six each for Ancient World and Conflict and
+1. **Twelve week-3-flavoured prompts, six each for Ancient World and Conflict and
    Change.** The one piece of writing v3 still owes. Everything else in this document is a
    draw change or a seed.
 
