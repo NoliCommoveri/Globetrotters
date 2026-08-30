@@ -1,6 +1,6 @@
 # Slice 16 — Prompts: deep time, empire, the Book, government
 
-**Status:** not started
+**Status:** built
 **Band:** L
 **Implements:** §13 (24 of the 106 prompts)
 **Depends on:** 15
@@ -41,14 +41,9 @@ None.
 
 ## Open questions
 
-One, raised in `LIBRARY_v3.md` §7 and asked here because this is the first slice that
-writes to the tag vocabulary at the week-1 end of it.
-
-**Does `emblems` exist at all?** Four members — `flag-draw`, `currency-animal`,
-`national-symbol`, `anthem-listen` — all in week 1, all seeded, and no focus weights it or
-ever will, since week 1 is not drawn from the weighted pool. It is honest documentation
-and dead weight in the same row. Deleting it is four `prompt_tags` rows; keeping it is a
-tag the focus tab shows with four members no focus can reach.
+None. Q-19 is answered and written into `../design/LIBRARY_v3.md` §7 (and
+`../other/OPEN-QUESTIONS.md`): `emblems` stays — four members, all in week 1, never drawn
+against, kept as honest documentation even though no focus can ever reach it.
 
 ## Build
 
@@ -84,7 +79,7 @@ never a date. Three `timeline` bindings land here.
   prompts appear, and no month draws two prompts sharing a mode tag.
 - A month prints with no third overflowing.
 - Drawable count reported: 74.
-- `emblems` answered, written into `DESIGN.md`, moved to the answered list.
+- `emblems` answered, written into `LIBRARY_v3.md`, moved to the answered list.
 
 ## Do not build
 

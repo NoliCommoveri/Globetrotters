@@ -108,13 +108,13 @@ ON CONFLICT (slug) DO NOTHING;
 UPDATE task_templates SET worksheet_layout_id =
   (SELECT id FROM worksheet_layouts WHERE slug = 'lines-4')
 WHERE worksheet_layout_id IS NULL AND slug IN (
-  'anthem-listen', 'wow-fact'
+  'anthem-listen', 'wow-fact', 'how-they-say-it-began', 'whats-in-the-news'
 );
 
 UPDATE task_templates SET worksheet_layout_id =
   (SELECT id FROM worksheet_layouts WHERE slug = 'lines-8')
 WHERE worksheet_layout_id IS NULL AND slug IN (
-  'kingdom-over-this-place', 'feast-they-keep'
+  'kingdom-over-this-place', 'feast-they-keep', 'can-they-worship-freely'
 );
 
 UPDATE task_templates SET worksheet_layout_id =
@@ -128,24 +128,28 @@ WHERE worksheet_layout_id IS NULL AND slug IN (
 
 UPDATE task_templates SET worksheet_layout_id =
   (SELECT id FROM worksheet_layouts WHERE slug = 'split-two')
-WHERE worksheet_layout_id IS NULL AND slug IN ('language-hello');
+WHERE worksheet_layout_id IS NULL AND slug IN (
+  'language-hello', 'in-their-numbers', 'bible-name-now-name'
+);
 
 UPDATE task_templates SET worksheet_layout_id =
   (SELECT id FROM worksheet_layouts WHERE slug = 'table-3')
 WHERE worksheet_layout_id IS NULL AND slug IN (
-  'what-people-believe'
+  'what-people-believe', 'when-it-reached-everybody', 'is-the-law-kept',
+  'if-you-break-a-rule-there', 'help-when-money-runs-out'
 );
 
 UPDATE task_templates SET worksheet_layout_id =
   (SELECT id FROM worksheet_layouts WHERE slug = 'timeline')
 WHERE worksheet_layout_id IS NULL AND slug IN (
-  'war-that-changed', 'who-ruled-before', 'kid-life'
+  'war-that-changed', 'who-ruled-before', 'kid-life', 'long-before-people',
+  'the-last-hundred-years', 'bible-in-their-tongue'
 );
 
 UPDATE task_templates SET worksheet_layout_id =
   (SELECT id FROM worksheet_layouts WHERE slug = 'figure-anchor')
 WHERE worksheet_layout_id IS NULL AND slug IN (
-  'how-many-people', 'size-next-to-yours', 'getting-around'
+  'how-many-people', 'size-next-to-yours', 'getting-around', 'how-far-away-is-it'
 );
 
 UPDATE task_templates SET worksheet_layout_id =
@@ -201,13 +205,14 @@ WHERE worksheet_layout_id IS NULL AND slug IN (
 UPDATE task_templates SET worksheet_layout_id =
   (SELECT id FROM worksheet_layouts WHERE slug = 'then-now')
 WHERE worksheet_layout_id IS NULL AND slug IN (
-  'border-that-moved', 'independence-day', 'desert-shall-blossom'
+  'border-that-moved', 'independence-day', 'desert-shall-blossom',
+  'who-was-taken-from-here', 'somebody-elses-museum'
 );
 
 UPDATE task_templates SET worksheet_layout_id =
   (SELECT id FROM worksheet_layouts WHERE slug = 'flow-steps')
 WHERE worksheet_layout_id IS NULL AND slug IN (
-  'who-leads', 'made-here'
+  'who-leads', 'made-here', 'how-a-law-is-made'
 );
 
 UPDATE task_templates SET worksheet_layout_id =
@@ -246,25 +251,34 @@ UPDATE task_templates SET worksheet_layout_id =
   (SELECT id FROM worksheet_layouts WHERE slug = 'box-note')
 WHERE worksheet_layout_id IS NULL AND slug IN (
   'national-symbol', 'ancient-site', 'wild-animal', 'wild-place-protected',
-  'place-of-worship'
+  'place-of-worship', 'made-there-first', 'the-first-church-there',
+  'what-they-are-working-on'
 );
 
 UPDATE task_templates SET worksheet_layout_id =
   (SELECT id FROM worksheet_layouts WHERE slug = 'label-small')
 WHERE worksheet_layout_id IS NULL AND slug IN (
-  'house-they-live-in', 'what-they-wear'
+  'house-they-live-in', 'what-they-wear', 'dinosaur-that-lived-here'
 );
 
 UPDATE task_templates SET worksheet_layout_id =
   (SELECT id FROM worksheet_layouts WHERE slug = 'differences')
 WHERE worksheet_layout_id IS NULL AND slug IN (
-  'law-you-notice', 'who-can-vote', 'girls-and-women', 'the-sport-they-love'
+  'law-you-notice', 'who-can-vote', 'girls-and-women', 'the-sport-they-love',
+  'who-comes-when-it-burns'
 );
 
--- `hundred-people` and `bullets` have no seeded prompt in slice 12's library,
--- so each seeds one here: `who-lives-there` and `how-they-learn`, both from
--- LIBRARY_v3.md §2 *Who the people are* (slice 17 owns that subject heading
--- and skips these two rows).
+UPDATE task_templates SET worksheet_layout_id =
+  (SELECT id FROM worksheet_layouts WHERE slug = 'bullets')
+WHERE worksheet_layout_id IS NULL AND slug IN (
+  'what-they-plan-next', 'who-speaks-up-there', 'what-they-do-for-you'
+);
+
+-- `hundred-people` has no seeded prompt in slice 12's library, so it seeds one
+-- here: `who-lives-there`, from LIBRARY_v3.md §2 *Who the people are* (slice
+-- 17 owns that subject heading and skips this row). `bullets` bootstrapped
+-- the same way with `how-they-learn`, and now carries three prompts of its
+-- own (above).
 UPDATE task_templates SET worksheet_layout_id =
   (SELECT id FROM worksheet_layouts WHERE slug = 'hundred-people')
 WHERE worksheet_layout_id IS NULL AND slug IN (
@@ -429,9 +443,68 @@ UPDATE task_templates SET worksheet_spec = '{"caption":"Draw the outside"}'
 UPDATE task_templates SET worksheet_spec = '{"caption":"Draw the outfit, then label three parts"}'
   WHERE worksheet_spec IS NULL AND slug = 'what-they-wear';
 
--- `differences` bindings. `law-you-notice` and `who-can-vote` match the
--- layout's own columns and need no override.
+-- `differences` bindings. `law-you-notice`, `who-can-vote` and
+-- `who-comes-when-it-burns` match the layout's own columns and need no
+-- override.
 UPDATE task_templates SET worksheet_spec = '{"columns":["Girls there","Girls here"]}'
   WHERE worksheet_spec IS NULL AND slug = 'girls-and-women';
 UPDATE task_templates SET worksheet_spec = '{"columns":["Their game","A game I play"]}'
   WHERE worksheet_spec IS NULL AND slug = 'the-sport-they-love';
+
+-- Slice 16 overrides. `how-they-say-it-began`, `whats-in-the-news` and
+-- `can-they-worship-freely` match their layouts' own defaults and need none.
+UPDATE task_templates SET worksheet_spec =
+  '{"caption":"Miles from our house to their capital","unit":"miles","anchor_prompt":"That is about … times our longest drive, which was to…"}'
+  WHERE worksheet_spec IS NULL AND slug = 'how-far-away-is-it';
+UPDATE task_templates SET worksheet_spec =
+  '{"columns":["Their unit","What it measures, and how big"]}'
+  WHERE worksheet_spec IS NULL AND slug = 'in-their-numbers';
+UPDATE task_templates SET worksheet_spec =
+  '{"ticks":4,"ends":["200 million years ago","Today"]}'
+  WHERE worksheet_spec IS NULL AND slug = 'long-before-people';
+UPDATE task_templates SET worksheet_spec =
+  '{"caption":"Draw it alive, then label three parts"}'
+  WHERE worksheet_spec IS NULL AND slug = 'dinosaur-that-lived-here';
+UPDATE task_templates SET worksheet_spec = '{"ends":["A hundred years ago","Today"]}'
+  WHERE worksheet_spec IS NULL AND slug = 'the-last-hundred-years';
+UPDATE task_templates SET worksheet_spec =
+  '{"captions":["Where they were taken from","Where they were taken to"],"middle":"Roughly how many, for how long"}'
+  WHERE worksheet_spec IS NULL AND slug = 'who-was-taken-from-here';
+UPDATE task_templates SET worksheet_spec =
+  '{"captions":["Where it was made","Where it sits now"],"middle":"Who took it, and when"}'
+  WHERE worksheet_spec IS NULL AND slug = 'somebody-elses-museum';
+UPDATE task_templates SET worksheet_spec =
+  '{"columns":["The change","The year there","The year here"],"rows":4}'
+  WHERE worksheet_spec IS NULL AND slug = 'when-it-reached-everybody';
+UPDATE task_templates SET worksheet_spec = '{"caption":"Made there first"}'
+  WHERE worksheet_spec IS NULL AND slug = 'made-there-first';
+UPDATE task_templates SET worksheet_spec =
+  '{"columns":["The name in Scripture","What it is called now"],"rows":3}'
+  WHERE worksheet_spec IS NULL AND slug = 'bible-name-now-name';
+UPDATE task_templates SET worksheet_spec = '{"ticks":3,"ends":["First arrived","Today"]}'
+  WHERE worksheet_spec IS NULL AND slug = 'bible-in-their-tongue';
+UPDATE task_templates SET worksheet_spec = '{"caption":"The oldest one still standing"}'
+  WHERE worksheet_spec IS NULL AND slug = 'the-first-church-there';
+UPDATE task_templates SET worksheet_spec = '{"caption":"From an idea to a law"}'
+  WHERE worksheet_spec IS NULL AND slug = 'how-a-law-is-made';
+UPDATE task_templates SET worksheet_spec =
+  '{"columns":["What the law says","What actually happens","How you know"],"rows":3}'
+  WHERE worksheet_spec IS NULL AND slug = 'is-the-law-kept';
+UPDATE task_templates SET worksheet_spec =
+  '{"columns":["What is against the law","What happens to you","Who decides"],"rows":3}'
+  WHERE worksheet_spec IS NULL AND slug = 'if-you-break-a-rule-there';
+UPDATE task_templates SET worksheet_spec =
+  '{"caption":"Five things this country says it is trying to do"}'
+  WHERE worksheet_spec IS NULL AND slug = 'what-they-plan-next';
+UPDATE task_templates SET worksheet_spec =
+  '{"items":4,"caption":"Four things this group is asking for"}'
+  WHERE worksheet_spec IS NULL AND slug = 'who-speaks-up-there';
+UPDATE task_templates SET worksheet_spec =
+  '{"caption":"Five things a family there can count on"}'
+  WHERE worksheet_spec IS NULL AND slug = 'what-they-do-for-you';
+UPDATE task_templates SET worksheet_spec =
+  '{"columns":["The help","Who can get it","Who pays for it"],"rows":3}'
+  WHERE worksheet_spec IS NULL AND slug = 'help-when-money-runs-out';
+UPDATE task_templates SET worksheet_spec =
+  '{"caption":"What they are building or studying"}'
+  WHERE worksheet_spec IS NULL AND slug = 'what-they-are-working-on';

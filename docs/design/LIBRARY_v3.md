@@ -457,7 +457,7 @@ Spec: `{"caption":"Miles from our house to their capital","unit":"miles","anchor
 `tags: trade, crafts, daily-life` · `mode: measurement`
 
 > **Find the measurements only they use**
-> Nearly every country measures in meters and kilograms — but most of them also kept older units of their own for land, for rice, for cloth, for distance walked. Find four things people there still measure their own way. Write each unit the way they say it, and next to it what it measures and roughly how big it is. If they truly use nothing but metric, find the four units they gave up and when they gave them up.
+> Nearly every country measures in meters and kilograms — but most also kept older units of their own for land, rice, cloth, or distance walked. Find four things people there still measure their own way. Write each unit the way they say it, and next to it what it measures and roughly how big it is. If they truly use nothing but metric, find the four units they gave up and when they gave them up.
 
 Spec: `{"columns":["Their unit","What it measures, and how big"],"rows":4}`
 
@@ -570,9 +570,9 @@ Spec: `{"captions":["Who they belonged to","What they do now"],"lines_each":2,"m
 `tags: forced-movement, empire-and-rule, conflict-history`
 
 > **Find out whether people were taken from here — or brought here**
-> Find out whether people from this country were ever taken away and made to work for somebody else: sold, shipped, marched, or born into it. Or find out whether people were brought *here* that way. Draw the place they were taken from and the place they were taken to, and write on the arrow roughly how many, and for how long it went on. If neither happened here, find out who does the worst-paid work in this country today and where those people come from, and draw that instead.
+> Find out whether people from this country were ever taken away to work for someone else — sold, shipped, marched, or born into it — or whether people were brought *here* that way. Draw where they were taken from and to, and write on the arrow how many, and for how long. If neither happened here, find who does the worst-paid work here now and where they come from, and draw that instead.
 
-Spec: `{"captions":["Where they were taken from","Where they were taken to"],"lines_each":2,"middle":"Roughly how many, and for how long"}`
+Spec: `{"captions":["Where they were taken from","Where they were taken to"],"lines_each":2,"middle":"Roughly how many, for how long"}`
 
 **`somebody-elses-museum`** · **NEW** · form `then-now` · page `history`
 `tags: empire-and-rule, who-owns-it, crafts`
@@ -718,7 +718,7 @@ Spec: `{"items":5,"marker":"bullet","caption":"Five things this country says it 
 `tags: advocacy, governance, who-gets-less` · `mode: personal-voice`
 
 > **Find the people asking for something**
-> Find a group in this country that is asking their government to change something — for farmers, for disabled people, for a language, for a river, for people with no house. Write four things that group is asking for, one to a bullet. If nobody there is allowed to ask their government for anything in public, find somebody outside the country asking on their behalf, and write down what they are asking for.
+> Find a group in this country that is asking their government to change something — for farmers, disabled people, a language, a river, people with no house. Write four things that group is asking for, one to a bullet. If nobody there is allowed to ask their government for anything in public, find somebody outside the country asking on their behalf, and write down what they are asking for.
 
 Spec: `{"items":4,"marker":"bullet","caption":"Four things this group is asking for"}`
 
@@ -2294,15 +2294,16 @@ just what a page looks like.
 1. **`country_focus_affinity` rows for Who Lives Here, Who Gets What and Stories and
    Spirits.** Twenty countries each, one line of reason apiece. Without them the app never
    recommends any of the three. D-15, and it is the whole of slice 22.
-2. **Whether `emblems` should exist at all.** Four members, all in week 1, never drawn
-   against. It is honest documentation and dead weight in the same row.
-3. **Twelve week-3-flavoured prompts, six each for Ancient World and Conflict and
+2. **Twelve week-3-flavoured prompts, six each for Ancient World and Conflict and
    Change.** The one piece of writing v3 still owes. Everything else in this document is a
    draw change or a seed.
 
-Two questions this section used to carry are settled. Sourcing on the six hardest
+Three questions this section used to carry are settled. Sourcing on the six hardest
 prompts — `the-group-that-gets-less`, `who-can-read`, `what-their-money-goes-to`,
 `is-the-law-kept`, `can-they-worship-freely`, `the-company-that-got-caught` — stays on the
 sourcing footer every worksheet already carries; there is no stretch-line mechanism and
 none is built. `storyboard` gains CAPTION (§1), so `story-they-tell` and the two storyboards
-still to come each name what their six panels are of.
+still to come each name what their six panels are of. `emblems` stays: four members, all
+in week 1, never drawn against — honest documentation of what `flag-draw`,
+`currency-animal`, `national-symbol` and `anthem-listen` share, kept even though no focus
+can ever reach it.

@@ -4,11 +4,12 @@ Twenty-three slices against `../design/DESIGN.md`. Each ends at a state you can 
 browser and judge.
 
 A build session takes the first slice not marked `built` and reads its file.
-**Slices 00–15 are built.** The nineteen forms and ten renderers `LIBRARY_v3.md` calls for
-all exist, and every one of the sixty-one seeded week 1–3 prompts says and prints what §2
-says it does. What remains is the library the draw engine was measured against — 106 new
-prompts — split into six slices, none of them larger than L. Also outstanding are due-outs
-D-10 and D-14, neither of them code, and D-15, which is the whole of slice 22.
+**Slices 00–16 are built.** The nineteen forms and ten renderers `LIBRARY_v3.md` calls for
+all exist, every one of the sixty-one seeded week 1–3 prompts says and prints what §2 says
+it does, and slice 16 landed the first batch of the library the draw engine was measured
+against. What remains is 82 more prompts, split into five slices, none of them larger than
+L. Also outstanding are due-outs D-10 and D-14, neither of them code, and D-15, which is
+the whole of slice 22.
 
 | # | Slice | Status | Band | Depends on | Design sections |
 |---|---|---|---|---|---|
@@ -28,7 +29,7 @@ D-10 and D-14, neither of them code, and D-15, which is the whole of slice 22.
 | 13 | [Forms: pair, flow, grid, clocks](13-forms-pair-flow-grid-clocks.md) | built | L | 12 | §16, §13 |
 | 14 | [Forms: fields and the box knobs](14-forms-fields-and-the-box-knobs.md) | built | L | 13 | §16, §13 |
 | 15 | [Forms: figures, recipe, text sweep](15-forms-figures-recipe-and-the-text-sweep.md) | built | L | 14 | §16, §13 |
-| 16 | [Prompts: deep time to government](16-prompts-deep-time-to-government.md) | not started | L | 15 | §13 |
+| 16 | [Prompts: deep time to government](16-prompts-deep-time-to-government.md) | built | L | 15 | §13 |
 | 17 | [Prompts: money, land, weather](17-prompts-money-land-weather.md) | not started | M | 16 | §13 |
 | 18 | [Prompts: people and daily life](18-prompts-people-and-daily-life.md) | not started | L | 17 | §13 |
 | 19 | [Prompts: school, names, belief](19-prompts-school-names-belief.md) | not started | L | 18 | §13 |
@@ -171,6 +172,9 @@ drawable, and every one of the sixty-one seeded week 1–3 prompts now says and 
 are `LIBRARY_v3.md` §2's own subject headings — already ordered by subject, already sized
 right, and findable again without a note. A prompt and its tags land in the same edit,
 always: an untagged prompt draws at baseline forever and nothing in the app reports it.
+**Slice 16 is built**: deep time, empire, the Book and government — `long-before-people`
+through `what-they-are-working-on`, 24 prompts in all — land on the forms slices 12–15
+built, and the drawable count rises from 52 to 74.
 
 **Slice 20 owns the numbers.** Everything §3 claims — the nine-month run, the paper table,
 the form caps, the fallback that never fires — needs 153 drawable prompts, and slice 20 is
@@ -210,11 +214,12 @@ in 12–21 reports the drawable count it ended at**:
 one thing, or nothing exercises the renderer. The batches that own those three subject
 headings skip those rows.
 
-**Three questions were open, one each asked in the slice whose code depended on it.**
-Slice 15, the last slice that touched a renderer, settled two: `storyboard` gains a
-CAPTION knob, and *who published this* stays a footer — no stretch-line mechanism is
-built. One remains, asked in slice 16, the first slice writing at that end of the tag
-vocabulary: whether `emblems` should exist at all.
+**Three questions were open, one each asked in the slice whose code depended on it, and
+all three are now settled.** Slice 15, the last slice that touched a renderer, settled
+two: `storyboard` gains a CAPTION knob, and *who published this* stays a footer — no
+stretch-line mechanism is built. Slice 16 settled the third, at the week-1 end of the tag
+vocabulary: `emblems` stays — four members, all in week 1, never drawn against, kept as
+honest documentation even though no focus can ever reach it.
 `civic-process` was a fourth and slice 11 settled it — the tag stays, the weight goes.
 
 ---

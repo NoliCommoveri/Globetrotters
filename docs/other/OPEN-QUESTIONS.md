@@ -10,15 +10,8 @@ moved to the answered list at the bottom of this file.
 
 ## Open
 
-Nothing blocking slice 15. Every question raised against a slice has been answered
-and written into `../design/DESIGN.md`.
-
-One is raised against `../design/LIBRARY_v3.md` §7 and is listed there and in the slice
-that builds the code depending on it rather than here: whether `emblems` should exist at
-all, which blocks slice 16.
-`civic-process` was settled by slice 11 — the tag stays on its four prompts
-and People and Power stops weighting it, because all four carry `governance` too and
-weighting both pays twice for the same rows.
+Nothing blocking slice 16. Every question raised against a slice has been answered
+and written into `../design/DESIGN.md` or `../design/LIBRARY_v3.md`.
 
 ---
 
@@ -26,6 +19,7 @@ weighting both pays twice for the same rows.
 
 | # | Question | Answer |
 |---|---|---|
+| Q-19 | Should `emblems` exist at all? | **Yes, it stays.** Four members — `flag-draw`, `currency-animal`, `national-symbol`, `anthem-listen` — all in week 1, none drawn against, since week 1 is a uniform draw from eight rather than a weighted one. Honest documentation of what the four share, kept even though no focus can ever reach it. `LIBRARY_v3.md` §2, §7. |
 | Q-18 | Does `storyboard` gain a CAPTION knob? | **Yes** — the one new knob v3 adds. Three week-3 storyboards are a legend, a Bible account and a process, and PANELS alone printed them as six identical panels; CAPTION names what the six are of, printed above them and skipped when empty, the same rule MIDDLE follows on `then-now`. `LIBRARY_v3.md` §1, §7. |
 | Q-17 | Does *who published this, and what do they want you to think* become a stretch line on the six hardest prompts, or stay a footer? | **Stays a footer.** No stretch-line mechanism is built. The sourcing footer already on every worksheet is judged sufficient for attribution on `the-group-that-gets-less`, `who-can-read`, `what-their-money-goes-to`, `is-the-law-kept`, `can-they-worship-freely` and `the-company-that-got-caught`. `LIBRARY_v3.md` §7. |
 | Q-16 | Do weeks 2 and 3 draw from one pool or two? | **One.** Two per-week draws made a focus's opinion about one week decide nothing about the other, and the library's topic tags are week-lopsided — nine tags with five or more members live entirely in one week. Five of nine focuses had three or fewer genuinely on-theme prompts on one side of the line, which put a whole week of five sheets ignoring the chosen focus at 20–90% of months. One pool of 153, eight drawn, dealt four and four, takes that to 1–19% for seven of the nine and costs the month one task — which puts it back at twenty on twenty weekdays, since `cook-it` becomes one of the ten rather than an eleventh appended to them. `wow-fact` is pinned opposite it in week 2. `DESIGN.md` §4, `LIBRARY_v3.md` §3, `FOCUS-AUDIT.md`. |
