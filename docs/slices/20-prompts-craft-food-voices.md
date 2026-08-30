@@ -75,11 +75,14 @@ The whole of `LIBRARY_v3.md` §3, and this is the slice that owns them.
   at or under 42% and 57% *a week with none of it*.
 - Nine months back to back never fall through to the stalest-back cooldown fallback.
 - No form exceeds its cap: `box-beside` 13, `fields` 12, `table-3` 11, `label-it` 1.
-- A month prints at 8.3 sheets, and a week spills to a fourth sheet in about 3% of weeks.
+- A month prints at 9.2 sheets, and a week spills to a fourth sheet in 10.9% of week 2s
+  and 15.1% of week 3s.
 - Every one of the ten new renderers prints at the height its layout row claims, checked
   once more across a full printed month.
+- Every drawable prompt can actually be drawn — asserted against the real seed, because
+  a synthetic fixture cannot fail it.
 - Every month holds at least one `hands-on` and at least one `personal-voice`, without a
-  fallback.
+  fallback in all but about one month in nine hundred.
 - §3's two measured tables and `FOCUS-AUDIT.md` report what the finished library does.
 
 ## Do not build

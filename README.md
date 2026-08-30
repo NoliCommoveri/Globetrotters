@@ -240,14 +240,14 @@ The draw also refuses to print the same worksheet form twice in one week, which
 five draws against twenty-seven forms would otherwise do about 40% of the time by
 arithmetic alone.
 
-**Slices 00 to 11 are built and the app does the whole nine-month job.** Ten
-remain: slices 12 to 22 write the 106 prompts, 19 forms and 10 renderers the draw
-was measured against, plus the twelve prompts two focuses are still owed and the
-affinities for the three that have none. Until they land the pool is 49 rather
-than 153, so the five-month cooldown blocks most of it by month six — expected,
-and a reason to finish the library rather than to soften the number. Forms lead
+**Slices 00 to 20 are built and the app does the whole nine-month job.** Two
+remain: the twelve prompts Ancient World and Conflict and Change are still owed
+(slice 21) and the affinities for the three focuses that have none (slice 22).
+The pool is the 153 drawable prompts the draw was measured against, the
+three-month cooldown never bites — the fresh pool never fell below 129 against
+the eight a draw needs — and no drawable prompt is unreachable. Forms lead
 prompts, because a binding points at a layout row that has to exist first; that
-is the only forced ordering in the ten.
+was the only forced ordering in slices 12 to 20.
 
 Every Cloudflare due-out is closed, and so are the three inks, the school year
 (September through May) and the paper (D-13 — US Letter). Three remain. Two block

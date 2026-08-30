@@ -301,16 +301,14 @@ INSERT INTO countries (name, iso3, continent, region, research_depth) VALUES
 ON CONFLICT (iso3) DO NOTHING;
 
 -- ---------------------------------------------------------------------------
--- Task templates — 118 rows. 12 in week 1 (4 core + 8 competing for the fifth
--- slot), 51 in week 2, 25 in week 3, and 30 in week 4: five steps each for all
+-- Task templates — 197 rows. 12 in week 1 (4 core + 8 competing for the fifth
+-- slot), 86 in week 2, 69 in week 3, and 30 in week 4: five steps each for all
 -- six project types.
 --
--- Weeks 2 and 3 are one pool of 76, of which 74 are drawable and two are
--- pinned. LIBRARY_v3.md §2 holds 167 week 1-3 prompts and these are the 88 of
--- them that are written; slices 17 to 20 land the other 79, onto the forms and
--- renderers slices 12 to 15 build first. Until they do, the five-month cooldown
--- is sized for a pool roughly twice this one and a learner nine months deep
--- runs on the stalest-back fallback.
+-- Weeks 2 and 3 are one pool of 155, of which 153 are drawable and two are
+-- pinned. That is the whole of LIBRARY_v3.md §2's 167 week 1-3 prompts, and the
+-- pool the draw's numbers are measured against: the three-month cooldown never
+-- reaches the stalest-back fallback, and every one of the 153 can be drawn.
 --
 -- Tier says how a row is chosen, not how hard it is. `core` is always included
 -- — week 1's four and every week-4 row. `focus` is the merged weeks 2-3 pool

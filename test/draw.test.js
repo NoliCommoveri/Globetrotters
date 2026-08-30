@@ -23,7 +23,7 @@ import { DatabaseSync } from 'node:sqlite';
 import {
   recency, score, sampleWithoutReplacement, drawWeek1, drawDeepWeeks, week4Rows,
   drawPlan, dealWeeks, mergedPool, pinsBy, ShortPoolError,
-  COOLDOWN_MONTHS, FORM_CAP, DRAWN, BALANCE_MODES, LATE_ONLY,
+  COOLDOWN_MONTHS, FORM_CAP, MODE_CAP, DRAWN, BALANCE_MODES, LATE_ONLY,
 } from '../src/lib/draw.js';
 import { swappable } from '../src/api/plans.js';
 
@@ -37,13 +37,13 @@ const sequence = (...values) => {
 // ------------------------------------------------------------ the scores --
 
 test('the cooldown is a cliff, not a curve', () => {
-  assert.equal(COOLDOWN_MONTHS, 5);
+  assert.equal(COOLDOWN_MONTHS, 3);
   assert.equal(recency(null), 1);
   assert.equal(recency(1), 0);
-  assert.equal(recency(5), 0);
-  // Six months on, and not before: "not drawn again before month m+6" is the
-  // sentence, and m+6 is the first month it comes back.
-  assert.equal(recency(6), 1);
+  assert.equal(recency(3), 0);
+  // Four months on, and not before: "not drawn again before month m+4" is the
+  // sentence, and m+4 is the first month it comes back.
+  assert.equal(recency(4), 1);
 });
 
 test('weight 0 excludes, and recency is the only thing that makes one', () => {
@@ -52,7 +52,7 @@ test('weight 0 excludes, and recency is the only thing that makes one', () => {
   // The tag join floors at 1, so a template the focus does not reach is still
   // drawn — the no-zeros rule, arithmetically.
   assert.equal(score(1, null), 1);
-  assert.equal(score(9, 6), 9);
+  assert.equal(score(9, 4), 9);
 });
 
 test('weighted selection removes what it picks and never returns a duplicate', () => {
@@ -280,13 +280,21 @@ test('a thousand months keep every rule the draw makes', () => {
       assert.ok(n <= FORM_CAP, `month ${month} gives ${form} ${n} of the ten seats`);
     }
 
-    // No mode tag twice in the month. Scoped to the month rather than the week
-    // because the deal, not the draw, decides which week a prompt lands in.
-    const modes = ten.flatMap((t) => t.modes ?? []);
-    assert.equal(new Set(modes).size, modes.length, `month ${month} repeats a mode tag`);
+    // No mode tag more than twice in the month. Scoped to the month rather than
+    // the week because the deal, not the draw, decides which week a prompt lands
+    // in. Two rather than one because `cook-it` is pinned and carries
+    // `hands-on`: a cap of one spends that tag before the draw begins and makes
+    // every other `hands-on` prompt in the library unreachable.
+    const modeCounts = new Map();
+    for (const m of ten.flatMap((t) => t.modes ?? [])) {
+      modeCounts.set(m, (modeCounts.get(m) || 0) + 1);
+    }
+    for (const [tag, n] of modeCounts) {
+      assert.ok(n <= MODE_CAP, `month ${month} gives ${tag} ${n} of the ten seats`);
+    }
 
-    if (modes.includes('hands-on')) handsOn += 1;
-    if (modes.includes('personal-voice')) personal += 1;
+    if (modeCounts.has('hands-on')) handsOn += 1;
+    if (modeCounts.has('personal-voice')) personal += 1;
 
     // The two prompts that say "this month" in their wording never land early.
     for (const t of weeks[2]) {
@@ -605,6 +613,94 @@ test('nine months back to back never fall through to the stalest-back cooldown f
       }
     }
   }
+});
+
+// The rule that has to be measured against the real library rather than a
+// fixture, because it is the one the fixture cannot fail: a synthetic pool
+// deals its mode tags round-robin, so no prompt carries two that collide and
+// no mode concentrates on one form. The real library does both — four of the
+// eight `personal-voice` prompts are on `lines-4`, whose other seat `wow-fact`
+// takes every month — and it is where a cap of one on mode tags made seven
+// `hands-on` prompts unreachable for good.
+test('every drawable prompt in the real library can actually be drawn', () => {
+  const { rows, byId, focuses, weigherFor } = realLibrary();
+  const drawable = mergedPool(rows);
+  const seen = new Set();
+
+  for (const focus of focuses) {
+    const fw = weigherFor(focus.id);
+    for (let n = 0; n < 250; n += 1) {
+      const plan = drawDeepWeeks({
+        templates: rows, focusWeight: fw, monthsSince: () => null, random: Math.random,
+      });
+      for (const row of plan) seen.add(byId.get(row.task_template_id).slug);
+    }
+  }
+
+  const never = drawable.filter((t) => !seen.has(t.slug)).map((t) => t.slug);
+  assert.deepEqual(never, [],
+    `${never.length} drawable prompts were never drawn in 2,250 months: ${never.join(', ')}`);
+});
+
+// Nine months back to back, against the real seed, for every focus: the caps
+// hold and the month-level balance rule is satisfied without falling back.
+// `personal-voice` is the one that degrades, and it degrades with the cooldown
+// rather than with the draw — which is why COOLDOWN_MONTHS is three and not
+// five. The ceiling is generous against the measured 0.11% so that a content
+// edit has room to move it before the test starts failing on noise.
+test('nine months back to back keep the caps and the mode balance', () => {
+  const { rows, byId, focuses, weigherFor } = realLibrary();
+  const RUNS = 20;
+  let months = 0;
+  let noVoice = 0;
+
+  for (const focus of focuses) {
+    const fw = weigherFor(focus.id);
+    for (let learner = 0; learner < RUNS; learner += 1) {
+      const drawnIn = new Map();
+      for (let month = 0; month < 9; month += 1) {
+        const plan = drawDeepWeeks({
+          templates: rows,
+          focusWeight: fw,
+          monthsSince: (id) => (drawnIn.has(id) ? month - drawnIn.get(id) : null),
+          random: Math.random,
+        });
+        const ten = plan.map((r) => byId.get(r.task_template_id));
+        months += 1;
+
+        const seats = new Map();
+        const modes = new Map();
+        for (const t of ten) {
+          if (t.form != null) seats.set(t.form, (seats.get(t.form) || 0) + 1);
+          for (const m of t.modes) modes.set(m, (modes.get(m) || 0) + 1);
+        }
+        for (const [form, n] of seats) {
+          assert.ok(n <= FORM_CAP, `${focus.slug} month ${month}: form ${form} took ${n}`);
+        }
+        for (const [tag, n] of modes) {
+          assert.ok(n <= MODE_CAP, `${focus.slug} month ${month}: mode ${tag} took ${n}`);
+        }
+        // No form twice inside one week — the one thing §4 forbids outright.
+        for (const week of [2, 3]) {
+          const forms = plan.filter((r) => r.week_no === week)
+            .map((r) => byId.get(r.task_template_id).form).filter((f) => f != null);
+          assert.equal(new Set(forms).size, forms.length,
+            `${focus.slug} month ${month} week ${week} prints two of the same form`);
+        }
+        // `cook-it` carries `hands-on` and is pinned, so this one is structural.
+        assert.ok(modes.has('hands-on'), `${focus.slug} month ${month} has no hands-on`);
+        if (!modes.has('personal-voice')) noVoice += 1;
+
+        for (const row of plan) {
+          const t = byId.get(row.task_template_id);
+          if (t.tier !== 'fixed') drawnIn.set(t.id, month);
+        }
+      }
+    }
+  }
+
+  const rate = (noVoice / months) * 100;
+  assert.ok(rate <= 1, `${rate.toFixed(2)}% of months had nobody from the country speaking`);
 });
 
 // LIBRARY_v3.md §3, "What the shape delivers": the two weakest focuses,
