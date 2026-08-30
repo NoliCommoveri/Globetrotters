@@ -1,6 +1,6 @@
 # Slice 19 — Prompts: school, names, belief
 
-**Status:** not started
+**Status:** built
 **Band:** L
 **Implements:** §13 (27 of the 106 prompts)
 **Depends on:** 18
