@@ -1073,7 +1073,55 @@ FROM (
 
   ('what-year-is-it-there', 'Find out what year it is there',
    'Some countries do not count years from the birth of Christ, and some run two calendars at once — one for the office, one for the holidays. Find the year it is right now on the calendar used for feast days there. Write it in the box, then what their count starts from and when their new year falls. If they use our calendar, find the last one they used and the year they changed.',
-   3, 'culture', 'focus', NULL, NULL)
+   3, 'culture', 'focus', NULL, NULL),
+
+  ('how-they-make-it', 'Watch something get made',
+   'Find out how one thing this country is known for is actually made — a cloth, a pot, a knife, a cheese, a paper, an instrument. Tell it in six pictures from raw material to finished thing. If a panel needs a word to make sense, write it inside the panel.',
+   3, 'culture', 'focus', NULL, NULL),
+
+  ('before-you-visit', 'Four things to know before you knock',
+   'Find out what counts as polite there and what would embarrass a visitor: shoes, greetings, hands, gifts, how loud to be, what you call somebody older than you. Write four things you would want to know before the door opened, one to a bullet.',
+   3, 'culture', 'focus', NULL, NULL),
+
+  ('school-lunch', 'What kids eat in the middle of the day',
+   'Find out what a kid your age there eats in the middle of the day, who cooks it, and whether the family pays for it. Write each one next to how lunch works at our house. Then write the one thing about lunch you would not have to explain to a kid from there.',
+   3, 'food', 'focus', NULL, NULL),
+
+  ('famous-dish', 'The dish they''re known for',
+   'Find the one dish a person from this country would name first if you asked what to eat there. Write what goes in it and one reason it became the famous one.',
+   3, 'food', 'focus', NULL, NULL),
+
+  ('holiday-dish', 'The food that only comes once a year',
+   'Find the dish people there only make for one holiday. Write which day it belongs to and one reason it''s saved for that day.',
+   3, 'food', 'focus', NULL, NULL),
+
+  ('something-sweet', 'Find something sweet',
+   'Find a dessert, cake or sweet people there make for special days. Draw it, then write what makes it sweet — honey, dates, sugar cane, fruit — and what day of the year people there make it for.',
+   3, 'food', 'focus', NULL, NULL),
+
+  ('street-food', 'What they''d buy with their own money',
+   'Find one thing sold from a stall or a cart there that a kid could buy with their own coins. Find out where you would buy it and what it costs.',
+   3, 'food', 'focus', NULL, NULL),
+
+  ('drink-with-dinner', 'What''s in their cup',
+   'Find out what people there drink with a meal: tea, coffee, juice, milk, something you''ve never heard of. Write how it''s made and whether it''s served hot or cold.',
+   3, 'food', 'focus', NULL, NULL),
+
+  ('market-days', 'Find out when the market runs',
+   'Find out which days of the week the main market or market day happens in a town there. Shade those days, then write what the biggest one is for — food, animals, cloth, everything.',
+   3, 'food', 'focus', NULL, NULL),
+
+  ('grows-better-there', 'Find something you love that grows better there',
+   'Pick a food you actually like to eat and find out whether it grows better in this country than it does here. Draw it growing — on the tree, in the ground, on the vine — then write what their land or weather gives it that ours doesn''t, and where the ones in our kitchen come from.',
+   3, 'food', 'focus', NULL, NULL),
+
+  ('hear-from-a-kid', 'Hear it from someone who lives there',
+   'Find a kid or a young person from this country describing their own life — a video, an interview, a letter, a school project posted online. Write down one thing they said that you would never have guessed from anything else you found this month.',
+   3, 'people', 'focus', NULL, NULL),
+
+  ('what-they-say-about-us', 'Hear what they say about us',
+   'Find somebody from this country talking or writing about visiting or moving to America — what surprised them, what they missed, what they thought was strange. Write what they said in your own words. If you cannot find anyone who came here, find somebody from there writing about any country that is not their own.',
+   3, 'people', 'focus', NULL, NULL)
 -- END task_templates
 ) v
 LEFT JOIN project_types p ON p.slug = v.project_type
@@ -1610,7 +1658,46 @@ FROM (
   ('what-year-is-it-there',  'topic', 'holiday-calendar'),
   ('what-year-is-it-there',  'topic', 'religion'),
   ('what-year-is-it-there',  'topic', 'sun-and-seasons'),
-  ('what-year-is-it-there',  'mode',  'measurement')
+  ('what-year-is-it-there',  'mode',  'measurement'),
+
+  ('how-they-make-it',       'topic', 'crafts'),
+  ('how-they-make-it',       'topic', 'trade'),
+  ('how-they-make-it',       'topic', 'work-and-money'),
+  ('how-they-make-it',       'mode',  'hands-on'),
+  ('before-you-visit',       'topic', 'daily-life'),
+  ('before-you-visit',       'topic', 'family'),
+  ('before-you-visit',       'mode',  'us-contrast'),
+  ('school-lunch',           'topic', 'everyday-food'),
+  ('school-lunch',           'topic', 'schooling'),
+  ('school-lunch',           'topic', 'public-services'),
+  ('school-lunch',           'mode',  'us-contrast'),
+  ('famous-dish',            'topic', 'celebration-food'),
+  ('famous-dish',            'topic', 'story-telling'),
+  ('holiday-dish',           'topic', 'celebration-food'),
+  ('holiday-dish',           'topic', 'holiday-calendar'),
+  ('holiday-dish',           'topic', 'religion'),
+  ('something-sweet',        'topic', 'celebration-food'),
+  ('something-sweet',        'topic', 'holiday-calendar'),
+  ('something-sweet',        'topic', 'agriculture'),
+  ('street-food',            'topic', 'everyday-food'),
+  ('street-food',            'topic', 'public-money'),
+  ('street-food',            'topic', 'city-life'),
+  ('drink-with-dinner',      'topic', 'everyday-food'),
+  ('drink-with-dinner',      'topic', 'agriculture'),
+  ('market-days',            'topic', 'everyday-food'),
+  ('market-days',            'topic', 'city-life'),
+  ('market-days',            'topic', 'trade'),
+  ('grows-better-there',     'topic', 'agriculture'),
+  ('grows-better-there',     'topic', 'everyday-food'),
+  ('grows-better-there',     'topic', 'trade'),
+  ('grows-better-there',     'mode',  'us-contrast'),
+  ('hear-from-a-kid',        'topic', 'daily-life'),
+  ('hear-from-a-kid',        'topic', 'schooling'),
+  ('hear-from-a-kid',        'mode',  'personal-voice'),
+  ('what-they-say-about-us', 'topic', 'migration'),
+  ('what-they-say-about-us', 'topic', 'travel'),
+  ('what-they-say-about-us', 'mode',  'personal-voice'),
+  ('what-they-say-about-us', 'mode',  'us-contrast')
 -- END prompt_tags
 ) v
 JOIN task_templates t ON t.slug = v.task

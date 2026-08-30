@@ -27,7 +27,7 @@ const CONTINENTS = ['Africa', 'Asia', 'Europe', 'North America', 'South America'
 // to week 2 and `cook-it` to week 3, and `week_theme` is the prompt's natural
 // half rather than a draw pool. Nothing in the draw reads these numbers; the
 // deal's arc preference is the only thing that does.
-const WEEK_SIZES = { 1: 12, 2: 86, 3: 57, 4: 30 };
+const WEEK_SIZES = { 1: 12, 2: 86, 3: 69, 4: 30 };
 
 // The seven mode tags. A month draws at most one prompt carrying each, and it
 // draws at least one `hands-on` and one `personal-voice` — so a mode tag
@@ -36,7 +36,7 @@ const MODE_TAGS = ['us-contrast', 'demographics-stat', 'measurement', 'hands-on'
                    'map-work', 'personal-voice', 'scripture-read'];
 
 // A smoke floor, not the target. LIBRARY_v3.md §3 puts a finished focus at
-// 41-66 prompts above baseline and 10-40 on-theme; against the 141 drawable
+// 41-66 prompts above baseline and 10-40 on-theme; against the 153 drawable
 // prompts seeded today the thinnest lifts well past this floor. Six is low
 // enough to have headroom and high enough that a mistyped tag set — the one
 // silent failure in this file — fails here rather than three months into a
@@ -79,7 +79,7 @@ test('195 countries, each with a real continent and an adventure level', () => {
   assert.equal(new Set(countries.map((c) => c.iso3)).size, countries.length, 'duplicate iso3');
 });
 
-test('185 task templates, distributed 12 / 86 / 57 / 30', () => {
+test('197 task templates, distributed 12 / 86 / 69 / 30', () => {
   const counts = Object.fromEntries(
     rows('SELECT week_theme, COUNT(*) AS n FROM task_templates GROUP BY week_theme')
       .map((r) => [r.week_theme, r.n]),
@@ -90,11 +90,11 @@ test('185 task templates, distributed 12 / 86 / 57 / 30', () => {
   }
 });
 
-test('141 prompts are drawable — weeks 2 and 3, minus the two pins', () => {
+test('153 prompts are drawable — weeks 2 and 3, minus the two pins', () => {
   const drawable = rows(
     "SELECT id FROM task_templates WHERE week_theme IN (2, 3) AND tier != 'fixed'"
   ).length;
-  assert.equal(drawable, 141);
+  assert.equal(drawable, 153);
 });
 
 test('week 1 carries exactly four core tasks — the workbook pages depend on them', () => {

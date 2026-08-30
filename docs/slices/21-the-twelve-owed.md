@@ -7,8 +7,8 @@
 
 **Goal.** Ancient World and Conflict and Change reach twelve and ten on-theme prompts
 against a 153 pool, and every other focus is at seventeen or better. That is what leaves
-them at 42% and 57% *a week with none of it* where the rest are under 20%. No weighting
-reaches what is not written.
+them at 21% and 27% *a week with none of it*, the two highest of the nine, where the rest
+run 2% to 16%. No weighting reaches what is not written.
 
 This is the one piece of the library that is writing rather than transcription, which is
 why it is its own slice. `LIBRARY_v3.md` §7 item 5 is the whole specification: six
@@ -68,7 +68,7 @@ rewritten to include them. §7 item 5 comes out — it is no longer open.
 - Nine months back to back for a learner on Ancient World, and again on Conflict and
   Change: *a week with none of it* is below where slice 20 measured it, and reported.
 - The three caps still hold.
-- A month prints at about 8.3 sheets, unchanged.
+- A month prints at about 9.2 sheets, unchanged.
 - `LIBRARY_v3.md` §2 and §3 describe the library that exists.
 
 ## Do not build

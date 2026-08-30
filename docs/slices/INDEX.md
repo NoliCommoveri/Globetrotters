@@ -4,12 +4,13 @@ Twenty-three slices against `../design/DESIGN.md`. Each ends at a state you can 
 browser and judge.
 
 A build session takes the first slice not marked `built` and reads its file.
-**Slices 00–19 are built.** The nineteen forms and ten renderers `LIBRARY_v3.md` calls for
+**Slices 00–20 are built.** The nineteen forms and ten renderers `LIBRARY_v3.md` calls for
 all exist, every one of the sixty-one seeded week 1–3 prompts says and prints what §2 says
-it does, and slices 16–19 landed the first four batches of the library the draw engine was
-measured against. What remains is 24 more prompts, split into two slices, none of them
-larger than L. Also outstanding are due-outs D-10 and D-14, neither of them code, and D-15,
-which is the whole of slice 22.
+it does, and slices 16–20 landed the whole of the 106-prompt library the draw engine was
+measured against. The pool is 167 prompts, 153 of them drawable, and slice 20 ran the
+numbers §3 claims against it for the first time. What remains is the twelve prompts owed to
+Ancient World and Conflict and Change — one M slice. Also outstanding are due-outs D-10 and
+D-14, neither of them code, and D-15, which is the whole of slice 22.
 
 | # | Slice | Status | Band | Depends on | Design sections |
 |---|---|---|---|---|---|
@@ -33,7 +34,7 @@ which is the whole of slice 22.
 | 17 | [Prompts: money, land, weather](17-prompts-money-land-weather.md) | built | M | 16 | §13 |
 | 18 | [Prompts: people and daily life](18-prompts-people-and-daily-life.md) | built | L | 17 | §13 |
 | 19 | [Prompts: school, names, belief](19-prompts-school-names-belief.md) | built | L | 18 | §13 |
-| 20 | [Prompts: craft, food, voices](20-prompts-craft-food-voices.md) | not started | L | 19 | §13, §16 |
+| 20 | [Prompts: craft, food, voices](20-prompts-craft-food-voices.md) | built | L | 19 | §13, §16 |
 | 21 | [The twelve owed](21-the-twelve-owed.md) | not started | M | 20 | §13 |
 | 22 | [The affinities](22-affinities.md) | not started | S | 11 | §9 |
 
@@ -189,10 +190,28 @@ largest batch in the split — land on the forms already built, and the drawable
 count rises from 114 to 141. Two `clock-pair` bindings, one `venn` binding and the
 second of the three storyboards land here too, and the family's Sabbath and Kingdom
 prompts reach five with `nations-before-the-throne` and `when-sabbath-starts`.
+**Slice 20 is built too, and it is the last of the five**: making, wearing and what
+they are proud of, food, and voices — `how-they-make-it` through
+`what-they-say-about-us`, 12 prompts in all — land on the forms already built, the
+drawable count rises from 141 to **153**, and the two `personal-voice` prompts
+(`hear-from-a-kid`, `what-they-say-about-us`) complete that mode tag's members. The
+pool is now the 167 prompts `LIBRARY_v3.md` §3 was written against, and slice 20 ran
+its numbers for the first time: the nine-month on-theme coverage, the paper table
+and the form caps all measure against the real library rather than an estimate, and
+both tables under §3's *What each focus actually reaches* and *What the shape
+delivers* are rewritten with what it actually reports.
 
-**Slice 20 owns the numbers.** Everything §3 claims — the nine-month run, the paper table,
-the form caps, the fallback that never fires — needs 153 drawable prompts, and slice 20 is
-the first slice at which they exist.
+**Slice 20 owns the numbers, and it is built.** Everything §3 claims — the nine-month run,
+the paper table, the form caps, the fallback that never fires — needed 153 drawable
+prompts, and slice 20 is the first slice at which they existed to measure. The real numbers
+run ahead of the estimate they replace: every focus but Ancient World and Conflict and
+Change puts an on-theme task in all but a handful of weeks, and even those two clear the
+ceiling this version set for them. The one number that moved the wrong way is paper —
+the deal balances weight across a week, not sheets, so a month now prints at 9.2 sheets
+rather than the 8.3 the pre-measurement estimate carried, and a week 2 or 3 spills onto a
+fourth sheet in about 13% of weeks rather than 3%. Nothing about that is a defect to fix
+here: `LIBRARY_v3.md` §16 owns the layouts, and *Do not build* below is explicit that
+slice 20 measures the library as specified rather than reshapes it.
 
 **Slice 21 is the only writing.** Six week-3-flavoured prompts each for Ancient World and
 Conflict and Change, which are at twelve and ten on-theme prompts where every other focus

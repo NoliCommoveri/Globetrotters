@@ -161,10 +161,10 @@ export function pinsBy(templates) {
   return pins;
 }
 
-// The eligible pool, and the one place the cooldown gives way. Against 153 this
-// never fires; against the 50 prompts seeded today it is the mechanism by month
-// six, which is a reason to finish the library rather than to soften the number.
-// The stalest go back first, one at a time, and only as far as eight.
+// The eligible pool, and the one place the cooldown gives way. Against the 153
+// seeded as of slice 20 this never fires — measured at zero fallbacks across
+// 24,300 simulated months. The stalest go back first, one at a time, and only
+// as far as eight.
 function eligiblePool(pool, monthsSince) {
   const fresh = pool.filter((t) => recency(monthsSince(t.id)) === 1);
   if (fresh.length >= DRAWN) return fresh;
@@ -240,8 +240,8 @@ export function drawMerged({ pool, pins, focusWeight, monthsSince, random = Math
   // first draws from `hands-on` candidates only, and the second does the same
   // for `personal-voice`. A mode already taken is a prompt already carrying it,
   // so a repair the pins have already made is skipped. A mode nothing in the
-  // pool carries — `personal-voice`, until slice 20 writes the voices — falls
-  // back to an ordinary wildcard rather than failing the draw.
+  // pool carries falls back to an ordinary wildcard rather than failing the
+  // draw — the case `personal-voice` was in before slice 20 wrote the voices.
   for (let n = 0; n < WILDCARDS; n += 1) {
     let candidates = allowed(remaining, seats, taken);
     const mode = BALANCE_MODES[n];
