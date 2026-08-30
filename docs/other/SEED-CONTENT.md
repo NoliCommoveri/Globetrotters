@@ -3,7 +3,7 @@
 The six hand-written lists in the seed files — countries, task templates, prompt tags
 and focus tags in `002_seed.sql`, hooks and focus affinities in
 `003_country_data.sql` — and the rules a row has to satisfy. All six are
-seeded: 195 countries, 92 templates, 180 prompt tags, 65 focus tags, and 222 hooks and
+seeded: 195 countries, 209 templates, 564 prompt tags, 65 focus tags, and 222 hooks and
 260 affinities across 100 countries. This is the reference for **adding** to them.
 
 Each list sits between a `-- BEGIN x` / `-- END x` pair in its file. Rows go
@@ -53,17 +53,17 @@ order, and a build session turns it into the rows above.
 
 ## Task templates
 
-**92 rows**, distributed exactly.
+**209 rows**, distributed exactly.
 
 | Week | Rows | What they are |
 |---|---|---|
-| 1 | 10 | 4 `core` — flag, map, location/borders, language & writing system — always drawn. Plus 6 that compete for the 5th slot: stats, symbols, currency, time, size, anthem. |
-| 2 | 27 | History, government, law, land, climate, ecology, farming, trade, prehistory, plus the pinned `wow-fact`. |
-| 3 | 25 | People, religion, daily life for kids and women, food, art, music, sport, landmarks, plus the pinned `cook-it`. |
+| 1 | 12 | 4 `core` — flag, map, location/borders, language & writing system — always drawn. Plus 8 that compete for the 5th slot: stats, symbols, currency, time, size, anthem. |
+| 2 | 86 | History, government, law, land, climate, ecology, farming, trade, prehistory, plus the pinned `wow-fact`. |
+| 3 | 81 | People, religion, daily life for kids and women, food, art, music, sport, landmarks, plus the pinned `cook-it`. |
 | 4 | 30 | Five for each of the six project types, in order: choose · gather · build · build · rehearse & present. |
 
 **The week column is the prompt's natural half, not a draw pool.** Weeks 2 and 3 are
-one pool of 52 — 50 drawable and the two pins — and eight come out of it and are dealt
+one pool of 167 — 165 drawable and the two pins — and eight come out of it and are dealt
 four and four. Nothing in the draw reads `week_theme`; only the deal's arc preference
 does, which leans a natural week 2 toward the earlier week when nothing more important
 is at stake (DESIGN.md §4).
@@ -78,9 +78,9 @@ in it, so a deeper pool costs the kid nothing and only buys variety.
 
 What runs out first is the **cooldown**, and it is sized by the scarcest mode tag rather
 than by the pool. A prompt drawn for a learner rests three months; eight a month against
-153 drawable blocks twenty-four, and the fresh pool never falls below 129 against the
+165 drawable blocks twenty-four, and the fresh pool never falls below 141 against the
 eight a draw needs. Five months was comfortable for the pool and not for
-`personal-voice`, which has eight members and spends one a month: by month six most of
+`personal-voice`, which has nine members and spends one a month: by month six most of
 them were resting and 9% of months had nobody from the country speaking in them.
 
 **Five templates carry the family's Sabbath and Kingdom lens** — two in week 2,

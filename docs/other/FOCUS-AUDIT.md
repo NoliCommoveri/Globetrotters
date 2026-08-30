@@ -14,12 +14,12 @@ the table against itself. Every prompt added since v2 that has not been hand-cur
 scores as off-theme by construction, and a focus whose defining tags happen to sit in one
 half of the library reads as healthy while producing weeks of work that ignore it.
 
-So: 155 prompts read, each judged against all nine focuses on one question.
+So: 167 prompts read, each judged against all nine focuses on one question.
 
 > **Would a learner who picked this focus recognise this task as an instance of what they
 > picked?**
 
-Zero to three focuses per prompt. 213 assignments. Five prompts serve no focus squarely
+Zero to three focuses per prompt. 235 assignments. Five prompts serve no focus squarely
 and that is not a defect — `wow-fact` is pinned for exactly that reason.
 
 The territories held to:
@@ -42,15 +42,15 @@ The territories held to:
 
 | Focus | natural wk2 | natural wk3 | total |
 |---|---|---|---|
-| Ancient World | 11 | 1 | 12 |
+| Ancient World | 11 | 7 | 18 |
 | Wild Places | 14 | 3 | 17 |
-| People and Power | 20 | 3 | 23 |
-| Food and Craft | 9 | 19 | 28 |
-| Conflict and Change | 9 | 1 | 10 |
+| People and Power | 20 | 5 | 25 |
+| Food and Craft | 9 | 20 | 29 |
+| Conflict and Change | 9 | 8 | 17 |
 | Land and Sky | 16 | 3 | 19 |
 | Who Lives Here | 13 | 27 | 40 |
-| Who Gets What | 25 | 3 | 28 |
-| Stories and Spirits | 9 | 27 | 36 |
+| Who Gets What | 25 | 6 | 31 |
+| Stories and Spirits | 9 | 30 | 39 |
 
 **The tagging is accurate.** Graded against this audit, `prompt_tags` × `focus_tags`
 scores ~100% recall and 60–92% precision on each focus's top-N by weight. Three prompts
@@ -63,14 +63,14 @@ the tag system was built for does work.
 drawing with no focus at all, which lands as 1.5 of 10 tasks for a thin focus. Hence the
 `2 ×` in `draw_weight` (`../design/LIBRARY_v3.md` §3).
 
-**The content is week-lopsided, and that was the real defect.** Five focuses have three or
-fewer on-theme prompts on one side of the old week-2/week-3 line; Ancient World and
-Conflict and Change have one each. Nine topic tags with five or more members live entirely
-in one week — `governance` 15/0, `empire-and-rule` 11/0, `wildlife` 8/0,
-`damage-and-repair` 8/0, `deep-time` 5/0, `who-owns-it` 5/0, `water` 5/0,
-`conflict-history` 4/0, `play-and-sport` 0/5. Under two separate per-week draws that put a
-week with none of the chosen focus in it at 20–90% of months, per focus. The merged pool
-is the answer to that; the twelve prompts still owed are the rest of it.
+**The content was week-lopsided, and that was the real defect.** Under two separate
+per-week draws it put a week with none of the chosen focus in it at 20–90% of months, per
+focus. The merged pool was most of the answer and slice 21's twelve prompts are the rest:
+Ancient World and Conflict and Change each had a single natural-week-3 prompt on theme,
+against fourteen to twenty-seven for the focuses that were healthy. They now hold seven
+and eight, and no focus is below three. Three topic tags the two focuses depend on were
+the ones sitting entirely in week 2 — `empire-and-rule`, `deep-time` and
+`conflict-history` — and all three now have week-3 members.
 
 ---
 
@@ -223,18 +223,27 @@ pins are the exception — `wow-fact` always week 2, `cook-it` always week 3.
 | `school-lunch` | 3 | Food and Craft, Who Lives Here |
 | `something-sweet` | 3 | Food and Craft |
 | `sound-of-the-country` | 3 | Stories and Spirits |
+| `still-done-the-old-way` | 3 | Ancient World, Food and Craft |
 | `story-they-tell` | 3 | Stories and Spirits |
 | `street-animals` | 3 | Wild Places, Who Lives Here |
 | `street-food` | 3 | Food and Craft |
 | `sun-up-sun-down` | 3 | Land and Sky |
+| `the-change-without-a-war` | 3 | Conflict and Change, People and Power |
+| `the-great-beast` | 3 | Ancient World, Stories and Spirits |
+| `the-oldest-thing-still-alive` | 3 | Ancient World |
+| `the-one-who-would-not-back-down` | 3 | Conflict and Change, People and Power |
+| `the-spark` | 3 | Conflict and Change |
 | `the-sport-they-love` | 3 | Who Lives Here |
 | `their-alphabet` | 3 | Stories and Spirits |
+| `their-flood-story` | 3 | Ancient World, Stories and Spirits |
 | `their-rest-day` | 3 | Who Lives Here, Stories and Spirits |
 | `tonights-dinner` | 3 | Food and Craft |
+| `was-the-week-always-seven` | 3 | Ancient World, Stories and Spirits |
 | `what-a-kid-carries` | 3 | Who Lives Here |
 | `what-every-kid-learns` | 3 | People and Power, Who Lives Here |
 | `what-makes-them-laugh` | 3 | Stories and Spirits |
 | `what-people-believe` | 3 | Stories and Spirits |
+| `what-the-empire-left` | 3 | Ancient World, Conflict and Change |
 | `what-the-old-people-say` | 3 | Stories and Spirits |
 | `what-they-can-plug-in` | 3 | Who Lives Here |
 | `what-they-keep` | 3 | Wild Places, Who Lives Here |
@@ -242,10 +251,13 @@ pins are the exception — `wow-fact` always week 2, `cook-it` always week 3.
 | `what-they-plow-with` | 3 | Food and Craft |
 | `what-they-say-about-us` | 3 | Who Lives Here |
 | `what-they-wear` | 3 | Food and Craft |
+| `what-was-already-true` | 3 | Conflict and Change, Who Gets What |
 | `what-year-is-it-there` | 3 | Stories and Spirits |
 | `when-sabbath-starts` | 3 | Stories and Spirits, Land and Sky |
 | `where-you-buy-clothes` | 3 | Food and Craft, Who Lives Here |
 | `who-is-famous` | 3 | Stories and Spirits |
+| `who-wanted-what` | 3 | Conflict and Change, Who Gets What |
 | `who-worships-what` | 3 | Stories and Spirits |
+| `why-they-left-when-they-did` | 3 | Conflict and Change, Who Gets What |
 | `word-they-have` | 3 | Stories and Spirits |
 | `wow-fact` | 3 | — none |

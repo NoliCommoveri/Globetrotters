@@ -3,12 +3,12 @@
 // numbers in DESIGN.md §4 are asserted here rather than described in a comment.
 //
 // Two libraries are used. The synthetic one mirrors the shape LIBRARY_v3.md §3
-// reports — 155 weeks 2-3 rows of which 153 are drawable, the same twenty-seven
+// reports — 167 weeks 2-3 rows of which 165 are drawable, the same twenty-seven
 // forms in the same proportions, fifty topic tags and seven mode tags — and it
 // is what the constraint assertions run against, because they are about the
 // shape of the library and not about which prompts are written yet.
 //
-// The real seed — 167 week 1-3 prompts, 153 drawable, finished as of slice 20 —
+// The real seed — 179 week 1-3 prompts, 165 drawable, finished as of slice 21 —
 // is used for the numbers that do depend on the library's size: nine months back
 // to back never falling through to the stalest-back cooldown fallback, and the
 // on-theme coverage `../other/FOCUS-AUDIT.md` was hand-judged against. The paper
@@ -87,20 +87,20 @@ test('the cursor lands where the weights say it does', () => {
   assert.deepEqual(sampleWithoutReplacement(candidates, 1, sequence(0.5)), [2]);
 });
 
-// ------------------------------------------------------- the 153 fixture --
+// ------------------------------------------------------- the 165 fixture --
 
 // The form table from LIBRARY_v3.md §3: form, thirds, how many want it in each
 // natural half. `checklist` is week 4's and carries none of these.
 const FORMS = [
-  ['box-beside', 1, 2, 9], ['fields', 1, 6, 6], ['table-3', 2, 9, 2],
-  ['bullets', 1, 5, 5], ['box-note', 2, 7, 2], ['differences', 1, 5, 4],
-  ['lines-4', 1, 3, 4], ['figure-anchor', 1, 1, 3], ['flow-steps', 1, 6, 1],
-  ['timeline', 1, 6, 1], ['specimen-boxes', 2, 3, 4], ['split-two', 1, 2, 3],
-  ['then-now', 2, 6, 1], ['bar-graph', 2, 5, 1], ['pictograph', 1, 4, 2],
-  ['list-n', 1, 1, 3], ['map-marks', 2, 4, 0], ['label-small', 2, 1, 4],
-  ['lines-8', 2, 2, 2], ['clock-pair', 1, 1, 2], ['scale-strip', 1, 4, 0],
-  ['venn', 2, 0, 3], ['storyboard', 2, 0, 3], ['hundred-people', 2, 2, 1],
-  ['week-strip', 1, 0, 2], ['recipe-card', 3, 0, 1], ['label-it', 3, 1, 0],
+  ['box-beside', 1, 2, 9], ['fields', 1, 6, 6], ['table-3', 2, 9, 3],
+  ['box-note', 2, 7, 3], ['bullets', 1, 5, 5], ['differences', 1, 5, 5],
+  ['then-now', 2, 6, 3], ['figure-anchor', 1, 1, 4], ['flow-steps', 1, 6, 2],
+  ['lines-4', 1, 3, 4], ['specimen-boxes', 2, 3, 5], ['timeline', 1, 6, 2],
+  ['split-two', 1, 2, 3], ['bar-graph', 2, 5, 1], ['label-small', 2, 1, 5],
+  ['list-n', 1, 1, 4], ['pictograph', 1, 4, 2], ['map-marks', 2, 4, 0],
+  ['clock-pair', 1, 1, 2], ['lines-8', 2, 2, 2], ['scale-strip', 1, 4, 0],
+  ['venn', 2, 0, 4], ['hundred-people', 2, 2, 1], ['storyboard', 2, 0, 3],
+  ['week-strip', 1, 0, 2], ['label-it', 3, 1, 0], ['recipe-card', 3, 0, 1],
 ];
 
 // Seven mode tags and how many prompts carry each, same source. They are dealt
@@ -108,7 +108,7 @@ const FORMS = [
 // which is the property the month-scoped rule is measured against.
 const MODES = [
   ['us-contrast', 41], ['demographics-stat', 17], ['measurement', 14],
-  ['hands-on', 10], ['map-work', 8], ['personal-voice', 8], ['scripture-read', 7],
+  ['hands-on', 10], ['personal-voice', 9], ['map-work', 8], ['scripture-read', 8],
 ];
 
 const TOPICS = Array.from({ length: 50 }, (_, i) => `topic-${String(i + 1).padStart(2, '0')}`);
@@ -126,7 +126,7 @@ function library() {
   for (let i = 0; i < 4; i += 1) rows.push({ id: id++, slug: `core-${i}`, week_theme: 1, tier: 'core' });
   for (let i = 0; i < 8; i += 1) rows.push({ id: id++, slug: `wild-${i}`, week_theme: 1, tier: 'wild' });
 
-  // 86 natural week 2 and 69 natural week 3, each half's forms in the reported
+  // 86 natural week 2 and 81 natural week 3, each half's forms in the reported
   // proportions. Interleaved rather than blocked by form, so a fixture where
   // every `table-3` sits next to every other cannot flatter the form cap.
   const deep = [];
@@ -141,7 +141,7 @@ function library() {
   for (const [tag, members] of MODES) {
     for (let i = 0; i < members; i += 1) {
       modes[cursor % deep.length].push(tag);
-      cursor += 7;                              // coprime with 155: no row is skipped
+      cursor += 9;                              // coprime with 167: no row is skipped
     }
   }
 
@@ -195,7 +195,7 @@ const byId = new Map(TEMPLATES.map((t) => [t.id, t]));
 const rowsOf = (plan, week) => plan.filter((r) => r.week_no === week).map((r) => byId.get(r.task_template_id));
 
 test('the fixture is the shape LIBRARY_v3 reports', () => {
-  assert.equal(mergedPool(TEMPLATES).length, 153);
+  assert.equal(mergedPool(TEMPLATES).length, 165);
   const pins = pinsBy(TEMPLATES);
   assert.equal(pins[2].slug, 'wow-fact');
   assert.equal(pins[3].slug, 'cook-it');
@@ -335,7 +335,7 @@ test('a template rests five months for one child and stays free for a sibling', 
 });
 
 test('a focus reshapes the whole month, not one week of it', () => {
-  // Ten of 153 is a thin sample, so this is the tail rather than one draw: over
+  // Ten of 165 is a thin sample, so this is the tail rather than one draw: over
   // enough months the prompts carrying the focus's heaviest tags arrive several
   // times as often as the ones it does not reach at all.
   const trials = 400;
@@ -500,8 +500,8 @@ test('the stalest goes back rather than erroring when a cooldown empties the poo
 
 // ------------------------------------------------------- the real library --
 
-// Loads the actual seed rather than a fixture: 167 week 1-3 prompts, 153
-// drawable, finished as of slice 20. `onThemeFor` reads `../other/FOCUS-AUDIT.md`
+// Loads the actual seed rather than a fixture: 179 week 1-3 prompts, 165
+// drawable, finished as of slice 21. `onThemeFor` reads `../other/FOCUS-AUDIT.md`
 // so the on-theme assertions below are graded against the same hand judgement
 // `LIBRARY_v3.md` §3's tables are.
 function realLibrary() {
@@ -586,7 +586,7 @@ test('every focus draws a whole month from the real seeded library', () => {
   }
 });
 
-// LIBRARY_v3.md §3: against 153 the cooldown never gives way. Fifty nine-month
+// LIBRARY_v3.md §3: against 165 the cooldown never gives way. Fifty nine-month
 // runs per focus — 450 learners, 4,050 months — and the fresh pool (never
 // drawn in the last five months) never once drops below the eight a draw
 // needs, so `eligiblePool` never reaches for a stale prompt. It never comes
@@ -707,7 +707,7 @@ test('nine months back to back keep the caps and the mode balance', () => {
 // Ancient World and Conflict and Change, still clear the ceiling this version
 // set for them — a week with none of their on-theme content at or under 42%
 // and 57% — even though they hold only twelve and ten on-theme prompts apiece
-// in the 153 pool.
+// in the 165 pool.
 test('Ancient World and Conflict and Change clear their week-with-none ceiling', () => {
   const { rows, byId, focuses, weigherFor, onThemeFor } = realLibrary();
   const ceilings = { 'Ancient World': 42, 'Conflict and Change': 57 };
