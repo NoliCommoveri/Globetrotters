@@ -491,7 +491,85 @@ FROM (
   ('PLW', 'wild-places',         3, 'a lake full of jellyfish that cannot sting you'),
   ('PLW', 'land-and-sky',        2, 'islands shaped like mushrooms in impossibly green water'),
   ('GUY', 'wild-places',         3, 'one of the biggest single-drop falls, in forest nobody has cleared'),
-  ('GUY', 'land-and-sky',        2, 'far more forest than people, and it is staying that way')
+  ('GUY', 'land-and-sky',        2, 'far more forest than people, and it is staying that way'),
+
+  -- Who Lives Here, Who Gets What and Stories and Spirits (D-15). The other six
+  -- focuses were seeded two to a country; these three had no row anywhere, which
+  -- made them pickable and never suggested. Twenty countries each, so every
+  -- adorned country now carries three.
+  --
+  -- Every country here already holds hooks, and that is a rule rather than a
+  -- coincidence: "Deal me three" only deals a country with two or more hooks
+  -- (public/js/deal.js), so a recommendation on an unhooked country is one the
+  -- shuffle can never show. Qatar and Bangladesh are the two this cost — both
+  -- are excellent Who Gets What months and neither is in the shuffle.
+  --
+  -- The countries were chosen against the prompts each focus actually reaches,
+  -- not against its name: `where-the-price-goes` and `somebody-elses-museum` for
+  -- Who Gets What, `kid-life` and `how-you-get-a-house` for Who Lives Here,
+  -- `their-alphabet` and `creature-they-warn-about` for Stories and Spirits.
+  ('JPN', 'who-lives-here',      3, 'they clean their own school and walk there on their own'),
+  ('KOR', 'who-lives-here',      3, 'their school day ends long after yours would have'),
+  ('MNG', 'who-lives-here',      3, 'a home that packs onto a cart, and no tap to follow'),
+  ('IND', 'who-lives-here',      3, 'big households, lunch tins, and water that comes on at set hours'),
+  ('FIN', 'who-lives-here',      3, 'school starts at seven and lunch is free for every child'),
+  ('CUB', 'who-lives-here',      3, 'a ration book, a housing swap, and a uniform for every grade'),
+  ('VNM', 'who-lives-here',      2, 'breakfast on a plastic stool and a whole family on one motorbike'),
+  ('PHL', 'who-lives-here',      2, 'so much is written in English you can hear it from a kid there'),
+  ('KEN', 'who-lives-here',      2, 'uniforms, matatus, and paying for everything by phone'),
+  ('RWA', 'who-lives-here',      2, 'one Saturday a month the whole country cleans up together'),
+  ('MAR', 'who-lives-here',      2, 'the bathhouse, the bakery and the market are all one street'),
+  ('TZA', 'who-lives-here',      2, 'school in Swahili, and everybody greets everybody first'),
+  ('LKA', 'who-lives-here',      2, 'white uniforms, free school, and rice and curry three times a day'),
+  ('BRA', 'who-lives-here',      2, 'school in the morning or the afternoon, and football in between'),
+  ('ARG', 'who-lives-here',      2, 'a white coat for school, dinner at ten, and mate going round'),
+  ('DOM', 'who-lives-here',      2, 'baseball in the street and a corner shop that sells everything'),
+  ('ESP', 'who-lives-here',      2, 'dinner at ten at night and kids still out in the square'),
+  ('NLD', 'who-lives-here',      2, 'the whole country gets around by bike, kids included'),
+  ('WSM', 'who-lives-here',      2, 'a house with no walls, and a family that runs the village'),
+  ('BTN', 'who-lives-here',      2, 'the national dress is what you wear to school and to work'),
+
+  ('COD', 'who-gets-what',       3, 'what is inside your phone came out of the ground here'),
+  ('GHA', 'who-gets-what',       3, 'follow a chocolate bar back and find out who got paid'),
+  ('SAU', 'who-gets-what',       3, 'most of the work there is done by people who came to do it'),
+  ('BOL', 'who-gets-what',       3, 'silver built somebody else''s empire, and now it is the lithium'),
+  ('ZAF', 'who-gets-what',       3, 'who owns the land here is still being argued out loud'),
+  ('HTI', 'who-gets-what',       3, 'they freed themselves, and then were made to pay for it'),
+  ('NGA', 'who-gets-what',       3, 'their bronzes sit in other people''s museums, and they want them back'),
+  ('PAK', 'who-gets-what',       3, 'a girl from here spoke up about school and the world heard it'),
+  ('UZB', 'who-gets-what',       2, 'the whole country was sent to pick cotton, until people said stop'),
+  ('GTM', 'who-gets-what',       2, 'the people who own the land and the people who work it are not the same'),
+  ('CHL', 'who-gets-what',       2, 'copper pays for the country, and one of the moai is in London'),
+  ('LBN', 'who-gets-what',       2, 'a small country holding more people who ran than almost anywhere'),
+  ('UGA', 'who-gets-what',       2, 'people who arrive running are given land and allowed to work'),
+  ('AUS', 'who-gets-what',       2, 'children were taken from their families, and the country said sorry'),
+  ('COL', 'who-gets-what',       2, 'millions walked in from next door and were let in'),
+  ('SEN', 'who-gets-what',       2, 'the coast people were taken from, with the buildings still on it'),
+  ('KHM', 'who-gets-what',       2, 'statues taken from their temples are being sent home'),
+  ('PER', 'who-gets-what',       2, 'the mines pay for a lot, and the villages above them see least'),
+  ('TUR', 'who-gets-what',       2, 'it has taken in more people running from war than almost anywhere'),
+  ('GBR', 'who-gets-what',       2, 'a lot of what other countries are asking for back is here'),
+
+  ('ISL', 'stories-and-spirits', 3, 'sagas, hidden folk, and a name that tells you whose child you are'),
+  ('IRL', 'stories-and-spirits', 3, 'fairy forts nobody will plough, and monks who wrote the books'),
+  ('ETH', 'stories-and-spirits', 3, 'its own alphabet, its own calendar, and one of the oldest churches'),
+  ('MEX', 'stories-and-spirits', 3, 'the dead get a day, a table and their favourite food'),
+  ('GRC', 'stories-and-spirits', 3, 'the myths you already know, and the churches Paul wrote to'),
+  ('CZE', 'stories-and-spirits', 3, 'Hus, the Golem, and a clock that has run since the 1400s'),
+  ('NZL', 'stories-and-spirits', 3, 'the North Island is a fish somebody pulled up'),
+  ('IDN', 'stories-and-spirits', 3, 'the stories get told with shadow puppets, all night long'),
+  ('ISR', 'stories-and-spirits', 3, 'you can stand in the places the stories happened'),
+  ('DEU', 'stories-and-spirits', 2, 'the Grimms wrote the tales down, and Luther made the Bible German'),
+  ('RUS', 'stories-and-spirits', 2, 'Baba Yaga, the firebird, and an alphabet worth copying out'),
+  ('MDG', 'stories-and-spirits', 2, 'the ancestors are family, and there are rules about everything'),
+  ('NOR', 'stories-and-spirits', 2, 'trolls, runes, and wooden churches eight hundred years old'),
+  ('PNG', 'stories-and-spirits', 2, 'over eight hundred languages, and people still translating into them'),
+  ('MLT', 'stories-and-spirits', 2, 'Paul was shipwrecked here and they will show you where'),
+  ('THA', 'stories-and-spirits', 2, 'every building has a little house outside it for the spirits'),
+  ('CHN', 'stories-and-spirits', 2, 'a zodiac, a monkey king, and numbers that are lucky or not'),
+  ('EGY', 'stories-and-spirits', 2, 'the Holy Family came through, and the church here never left'),
+  ('ITA', 'stories-and-spirits', 2, 'saints, catacombs, and a witch who brings the presents'),
+  ('JAM', 'stories-and-spirits', 2, 'Anansi came over with the people, and duppies came too')
 -- END country_focus_affinity
 ) v
 JOIN countries c ON c.iso3 = v.iso3

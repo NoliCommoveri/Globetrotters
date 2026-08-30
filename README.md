@@ -254,8 +254,8 @@ Every Cloudflare due-out is closed, and so are the three inks, the school year
 no code: the fonts (D-10) — the shell, the stamp and the wall run on a system
 stack — and which tablet the wall runs on (D-14), where the wake lock is
 feature-detected either way and what is unresolved is whether the owner has to
-set display sleep by hand. The third is D-15, twenty countries of affinity apiece
-for the three focuses that have none, and it is the whole of slice 22.
+set display sleep by hand. D-15 was the third and is done: twenty countries of
+affinity apiece for the three focuses that had none, landed by slice 22.
 
 Three questions are open: two in slice 15, which builds the renderers they
 change, and one in slice 16.

@@ -39,10 +39,10 @@ ON CONFLICT (id) DO NOTHING;
 -- name, so it is written to a 5th grader and says what the month will feel
 -- like, not what the category is called.
 --
--- The last three have no `country_focus_affinity` rows, so they are pickable
--- from the list and never recommended on a country card until D-15 lands. That
--- is a gap in the recommendation and not in the draw: the draw never reads
--- affinity.
+-- All nine carry `country_focus_affinity` rows in 003, so all nine are both
+-- pickable from the list and recommended on some country card. A focus with no
+-- rows would be a gap in the recommendation and not in the draw: the draw never
+-- reads affinity.
 -- ---------------------------------------------------------------------------
 INSERT INTO focuses (slug, name, blurb) VALUES
   ('ancient-world', 'Ancient World',

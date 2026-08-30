@@ -308,9 +308,10 @@ prompt self-onboards: tag it once at authoring time and every focus with a match
 affinity draws it correctly. The nine tag sets are in `../design/LIBRARY_v3.md` §3.
 
 `who-gets-what` and `stories-and-spirits` are new, and `who-lives-here` was named here
-long before it was seeded. None of the three has `country_focus_affinity` rows, and a
-focus with none is never recommended for any country on any country card, forever (D-15).
-All three are pickable from the day slice 11 seeds them; the recommendation waits.
+long before it was seeded. All nine carry `country_focus_affinity` rows, twenty countries
+apiece for the three newest (§9), so every focus is both pickable and recommended
+somewhere. A focus with no rows would be pickable and never suggested on any country card,
+forever, which is why the count is asserted rather than assumed.
 
 ### Project types (seed these)
 
@@ -1079,9 +1080,8 @@ response cannot be rendered by a later change to the client that forgot why.
 
 ## 9. Country data
 
-**Status:** partial · slice 09 built all of it. The three focuses with no
-`country_focus_affinity` rows — `who-lives-here`, `who-gets-what`,
-`stories-and-spirits` — are recommended on no country card until D-15 lands in slice 22.
+**Status:** built · slice 09 built all of it and slice 22 finished the affinities, so all
+nine focuses are recommended somewhere and all 100 adorned countries carry three.
 
 The picker is only as good as what it can tell you about a country. This does not
 require a recommendation engine — it requires a column. All of it is generated once,
@@ -1092,10 +1092,19 @@ offline, and it's hand-quality rather than algorithmic.
 concrete image each. The salt flat satellites use to calibrate their cameras. A kid
 scrolling a continent should hit a sentence that makes them stop.
 
-**Focus affinity — 2–3 per country, with a reason.** `Egypt + ancient-world: you'll
+**Focus affinity — 3 per country, with a reason.** `Egypt + ancient-world: you'll
 have more to draw than fits on the page.` `Iceland + land-and-sky: the ground is
 still being built.` Only recommendations are stored (score 2 or 3); absence means
 neutral.
+
+**A recommendation only counts where the shuffle can deal it.** "Deal me three"
+draws from countries carrying two or more hooks (§7), so an affinity on an
+unadorned country is one the picker can never surface — browse and search reach
+it, the shuffle does not. Every affinity therefore sits on a hooked country, and
+that is asserted rather than left to care. It is a real constraint on the
+content, not a formality: the countries a focus like Who Gets What suits best are
+often ones a kid would never pick off a map, and those are exactly the ones most
+likely to be unhooked.
 
 **Research depth — 1 to 3.** Some countries have thin kid-accessible material.
 Twenty tasks on a country with almost nothing findable is a month of dead ends and a
@@ -1115,10 +1124,10 @@ systems couple, you lose the property that a kid can change countries any time.
 
 Ships as `003_country_data.sql`, separate from the core seed so it can be extended
 without touching it. Coverage is not all 195 and does not need to be: **100
-countries** carry 222 hooks and 200 affinities, chosen for spread across
+countries** carry 222 hooks and 260 affinities, chosen for spread across
 continent, adventure level and focus affinity — every continent, all three
-adventure levels, and every focus recommended for at least fifteen countries.
-The other 95 stay selectable and unadorned.
+adventure levels, and all nine focuses recommended for at least fifteen
+countries. The other 95 stay selectable and unadorned.
 
 **Re-running the file cannot duplicate a hook or resurrect a deleted one.**
 `country_hooks` has no unique key to conflict on — a hook is a line of prose, not
@@ -1307,17 +1316,17 @@ skipping the task would leave the week one short.
 
 **Status:** partial · the runner, 3 people, 9 focuses, 6 project types, 195
 countries, **197 task templates**, 65 focus tags and 528 prompt tags,
-`003_country_data.sql`'s 222 hooks and 200 affinities across 100 countries
-(slices 02, 09 and 11), and `005_worksheet_layouts.sql`'s twenty-eight printed
+`003_country_data.sql`'s 222 hooks and 260 affinities across 100 countries
+(slices 02, 09, 11 and 22), and `005_worksheet_layouts.sql`'s twenty-eight printed
 forms with a binding on every week 1–3 template, and on each project type's
 planning step (slices 10, 12–20). Every one of the sixty-one originally
 seeded week 1–3 prompts says and prints what §2 says it does (slices 12–15),
 and slices 16–20 landed all 106 new prompts `LIBRARY_v3.md` §2 calls for: 167
 week 1–3 prompts in all, 153 of them drawable, which is the pool §3's numbers
-are measured against. What remains is slices 21 and 22: the twelve prompts
-still owed to Ancient World and Conflict and Change, which are writing rather
-than transcription, and the three new focuses' `country_focus_affinity` rows
-(D-15).
+are measured against. Slice 22 added the last sixty
+`country_focus_affinity` rows, so every focus is recommended somewhere. What
+remains is slice 21: the twelve prompts still owed to Ancient World and
+Conflict and Change, which are writing rather than transcription.
 
 Seed files are not migrations (§3). They live beside them in `/src/migrations/`
 and are exported from the same index as `SEEDS`, but they are re-run by **Run
@@ -1358,9 +1367,8 @@ Contents of `002_seed.sql`:
   printer, which is what keeps three stamps apart on a photocopied passport.
 - **9 focuses and 6 project types.** Each focus carries a blurb written to a 5th
   grader; each project type a freeform "what you'll need" the week-4 gather task
-  points at. `who-lives-here`, `who-gets-what` and `stories-and-spirits` have no
-  `country_focus_affinity` rows yet (D-15): pickable from the list, never
-  recommended on a country card until slice 22 writes them.
+  points at. All nine are recommended on country cards, twenty countries apiece
+  for `who-lives-here`, `who-gets-what` and `stories-and-spirits` (§9).
 - **195 countries** with continent, region and `research_depth`, unadorned here —
   hooks and affinities are `003`, which also corrects the adventure level on the
   countries whose hooks proved the first pass wrong. The conflict key is `iso3`,
