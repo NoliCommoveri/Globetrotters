@@ -301,16 +301,16 @@ INSERT INTO countries (name, iso3, continent, region, research_depth) VALUES
 ON CONFLICT (iso3) DO NOTHING;
 
 -- ---------------------------------------------------------------------------
--- Task templates — 91 rows. 10 in week 1 (4 core + 6 competing for the fifth
--- slot), 26 in week 2, 25 in week 3, and 30 in week 4: five steps each for all
+-- Task templates — 118 rows. 12 in week 1 (4 core + 8 competing for the fifth
+-- slot), 51 in week 2, 25 in week 3, and 30 in week 4: five steps each for all
 -- six project types.
 --
--- Weeks 2 and 3 are one pool of 51, of which 49 are drawable and two are
--- pinned. LIBRARY_v3.md §2 holds 167 week 1-3 prompts and these are the 61 of
--- them that are written; slices 16 to 20 land the other 106, onto the forms and
+-- Weeks 2 and 3 are one pool of 76, of which 74 are drawable and two are
+-- pinned. LIBRARY_v3.md §2 holds 167 week 1-3 prompts and these are the 88 of
+-- them that are written; slices 17 to 20 land the other 79, onto the forms and
 -- renderers slices 12 to 15 build first. Until they do, the five-month cooldown
--- is sized for a pool three times this one and a learner nine months deep runs
--- on the stalest-back fallback.
+-- is sized for a pool roughly twice this one and a learner nine months deep
+-- runs on the stalest-back fallback.
 --
 -- Tier says how a row is chosen, not how hard it is. `core` is always included
 -- — week 1's four and every week-4 row. `focus` is the merged weeks 2-3 pool
@@ -709,7 +709,103 @@ FROM (
 
   ('zine-present', 'Read your zine out loud',
    'Read your zine out loud once on your own. Then hand it to your family and read it with them, page by page.',
-   4, 'project', 'core', 'illustrated-zine', 5)
+   4, 'project', 'core', 'illustrated-zine', 5),
+
+  ('how-far-away-is-it', 'How far away is it?',
+   'Find out how many miles it is from our house to their capital city. Write the number in the box, then work out how many times that is the longest drive our family has ever actually made. If you have time, find how many hours a plane takes to fly it, and what that works out to in miles an hour.',
+   1, 'map', 'wild', NULL, NULL),
+
+  ('in-their-numbers', 'Find the measurements only they use',
+   'Nearly every country measures in meters and kilograms — but most also kept older units of their own for land, rice, cloth, or distance walked. Find four things people there still measure their own way. Write each unit the way they say it, and next to it what it measures and roughly how big it is. If they truly use nothing but metric, find the four units they gave up and when they gave them up.',
+   1, 'map', 'wild', NULL, NULL),
+
+  ('long-before-people', 'What was walking here before anyone was',
+   'Find four creatures that lived on this land long before people did — dinosaurs, giant birds, mammoths, sea reptiles, cats with the wrong teeth. Mark roughly when each one lived and write its name at the mark. Notice how far along the line you get before the first one shows up. If nothing has been dug up in this country, use the nearest country that has and write which one.',
+   2, 'prehistory', 'focus', NULL, NULL),
+
+  ('dinosaur-that-lived-here', 'Draw the one that lived here first',
+   'Find a dinosaur or other giant animal that lived where this country is now. Draw it alive, standing in the land the way it was then, and label three parts of it that tell you what it ate or how it moved. If nothing has been found there, draw the closest one that has been, and label where it was dug up.',
+   2, 'prehistory', 'focus', NULL, NULL),
+
+  ('the-last-hundred-years', 'The last hundred years, in five marks',
+   'Find the five things that happened in this country in the last hundred years that people there would say changed it most — not the five a book here would pick. Mark each one and write what happened in a few words.',
+   2, 'history', 'focus', NULL, NULL),
+
+  ('who-was-taken-from-here', 'Find out whether people were taken from here — or brought here',
+   'Find out whether people from this country were ever taken away to work for someone else — sold, shipped, marched, or born into it — or whether people were brought here that way. Draw where they were taken from and to, and write on the arrow how many, and for how long. If neither happened here, find who does the worst-paid work here now and where they come from, and draw that instead.',
+   2, 'history', 'focus', NULL, NULL),
+
+  ('somebody-elses-museum', 'Find something of theirs in somebody else''s museum',
+   'Find one thing made in this country that is now kept in a museum in another country. Draw the place it was made and the room it sits in now, and write on the arrow who took it and what year. Underneath, write whether anybody has asked for it back and what happened. If nothing of theirs ever left, find something in their museums that came from somewhere else, and do it that way round.',
+   2, 'history', 'focus', NULL, NULL),
+
+  ('when-it-reached-everybody', 'When ordinary people got it',
+   'Pick four of these and find the year each one reached ordinary families there, then the year it reached ordinary families here: electric light at home, running water in the house, school required for every child, women voting, a telephone in most homes.',
+   2, 'history', 'focus', NULL, NULL),
+
+  ('made-there-first', 'Find something the world got from them',
+   'Find one thing invented, written, painted, built or composed in this country that people outside it still use or still know. Draw it — or draw its cover — then write who made it and how it got out into the world.',
+   2, 'history', 'focus', NULL, NULL),
+
+  ('how-they-say-it-began', 'Find the story they tell about where they came from',
+   'Every country has a story about how it began, and it is usually not the one in the history book — a brother and a wolf, a bird that dropped a stone, an ancestor who walked out of the sea. Find this country''s and write it in your own words, then write one line about what a history book says happened instead.',
+   2, 'history', 'focus', NULL, NULL),
+
+  ('bible-name-now-name', 'Find this place in the Bible',
+   'Find out whether this land, a place in it, or a people from it is named anywhere in Scripture — Tarshish, Cush, Sheba, Macedonia, Media, the isles of the sea. Write three names the way the Bible writes them, and next to each the name the place goes by now. If nothing here is named, do it for the nearest land that is.',
+   2, 'history', 'focus', NULL, NULL),
+
+  ('bible-in-their-tongue', 'When they first read it for themselves',
+   'Find out when the good news first reached this land, when the Bible was first printed in the language most people there speak, and one date since. Mark all three and write what happened at each mark. If it has never been printed in their language, mark the two you have and write that on the third.',
+   2, 'history', 'focus', NULL, NULL),
+
+  ('the-first-church-there', 'Draw the oldest one still standing',
+   'Find the oldest church or Christian meeting place still standing in this country. Draw it, then write when it was built and who built it. If there is none, draw the oldest place of worship there is and write when Christians first came — or that they have not.',
+   2, 'history', 'focus', NULL, NULL),
+
+  ('can-they-worship-freely', 'Find out what it costs to believe there',
+   'Find out whether people in this country are free to worship, to meet, to own a Bible, to change what they believe. Read Matthew 5:10-12 and Hebrews 13:3. Then write five or six lines: what a believer there risks, what they do anyway, and what you would find hardest about it. If everybody there is free to believe what they like, write about who was not, the last time somebody wasn''t.',
+   2, 'government', 'focus', NULL, NULL),
+
+  ('how-a-law-is-made', 'Follow a law from an idea to a rule',
+   'Find out how something becomes a law in this country. Follow it through four boxes, from somebody''s idea to the thing everybody has to obey, and write in each box who has to say yes.',
+   2, 'government', 'focus', NULL, NULL),
+
+  ('is-the-law-kept', 'Find out whether the law is kept',
+   'Find three things the law there is supposed to protect: children not working, a wage a job must pay, a day off in the working week, clean water, a school every child may attend. For each one, write what the law says, then find out what actually happens — and write down how you know.',
+   2, 'government', 'focus', NULL, NULL),
+
+  ('if-you-break-a-rule-there', 'Find out what happens if you break a rule there',
+   'Find three things that are against the law in this country — a small one, a middle one, and a serious one. For each, write what happens to a person who does it and who decides.',
+   2, 'government', 'focus', NULL, NULL),
+
+  ('whats-in-the-news', 'Find out what they are talking about',
+   'Find a newspaper or news site published in this country and read one headline from this month — a machine translation is fine, and the odd broken sentence is part of it. Write what happened in your own words, the way you would tell it to somebody at dinner.',
+   2, 'government', 'focus', NULL, NULL),
+
+  ('what-they-plan-next', 'What they say they are trying to do',
+   'Find this country''s own plan for the next ten years — governments publish them and give them names. Write five things it says the country is trying to have done, one to a bullet, in the plan''s own order. If they have not published one, find the last speech their leader gave about the future and use that. Then put a star next to the one you do not think will happen.',
+   2, 'government', 'focus', NULL, NULL),
+
+  ('who-speaks-up-there', 'Find the people asking for something',
+   'Find a group in this country that is asking their government to change something — for farmers, disabled people, a language, a river, people with no house. Write four things that group is asking for, one to a bullet. If nobody there is allowed to ask their government for anything in public, find somebody outside the country asking on their behalf, and write down what they are asking for.',
+   2, 'government', 'focus', NULL, NULL),
+
+  ('what-they-do-for-you', 'Find out what the government does for a family',
+   'Find out what a family there gets without paying for it directly: a doctor, a fire truck, someone to take the trash, help if the money runs out, a road to the house, water. Write five things a family there can count on, one to a bullet, and put a star next to any that a family here would have to pay for.',
+   2, 'government', 'focus', NULL, NULL),
+
+  ('who-comes-when-it-burns', 'Find out who comes when something goes wrong',
+   'Find out who turns up there if a house catches fire, if somebody is hurt and needs a hospital, and if somebody is in danger. Write each one next to who would come to our house. Then write the one thing that works the same way in both places.',
+   2, 'government', 'focus', NULL, NULL),
+
+  ('help-when-money-runs-out', 'Find out what happens when a family runs out of money',
+   'Find three kinds of help a family with no money can get in this country — food, rent, a payment for children, work training, a place to sleep. For each one, write who is allowed to have it and who pays for it: the government, a church, a charity, nobody.',
+   2, 'government', 'focus', NULL, NULL),
+
+  ('what-they-are-working-on', 'Find what their scientists are building',
+   'Find out what people in this country are researching or building right now: a rocket, a telescope, a seed bank, a medicine, a machine that thinks, a way to catch water. Draw the thing, then write who is paying for it and what they hope it does. If nothing there is big enough to make the news, find out what they are studying about their own land — a crop, a disease, a fish count.',
+   2, 'government', 'focus', NULL, NULL)
 -- END task_templates
 ) v
 LEFT JOIN project_types p ON p.slug = v.project_type
@@ -732,15 +828,16 @@ ON CONFLICT (slug) DO NOTHING;
 -- and one `personal-voice` prompt, which is the only mechanism guaranteeing a
 -- month in which somebody from the country actually speaks.
 --
--- 177 rows over the 61 week 1-3 prompts that are seeded — 145 topic, 32 mode.
+-- 262 rows over the 88 week 1-3 prompts that are seeded — 217 topic, 45 mode.
 -- A prompt and its tags are never separated: an untagged prompt draws at
 -- baseline forever and nothing reports it, so every prompt slice adds tags in
 -- the same edit that adds the prompts they belong to.
 --
--- No `personal-voice` row is here, because none of the eight prompts carrying
--- it is written yet. The repair budget in the draw falls back to an ordinary
--- wildcard when a mode has no candidate, so the month rule is satisfied by
--- `cook-it` alone until slice 20 lands the voices.
+-- Two of the eight prompts carrying `personal-voice` are seeded —
+-- `whats-in-the-news` and `who-speaks-up-there` — and six are not. The repair
+-- budget in the draw falls back to an ordinary wildcard when a mode has no
+-- other candidate, so the month rule holds against a pool this thin until
+-- slice 20 lands the rest.
 --
 -- Joined on slugs like everything else. A slug matching nothing contributes no
 -- row and raises no error, so the count is asserted in the tests rather than
@@ -938,7 +1035,83 @@ FROM (
   ('cook-it',                 'topic', 'everyday-food'),
   ('cook-it',                 'topic', 'celebration-food'),
   ('cook-it',                 'topic', 'crafts'),
-  ('cook-it',                 'mode', 'hands-on')
+  ('cook-it',                 'mode', 'hands-on'),
+  ('how-far-away-is-it',      'topic', 'travel'),
+  ('how-far-away-is-it',      'mode', 'measurement'),
+  ('how-far-away-is-it',      'mode', 'us-contrast'),
+  ('in-their-numbers',        'topic', 'trade'),
+  ('in-their-numbers',        'topic', 'crafts'),
+  ('in-their-numbers',        'topic', 'daily-life'),
+  ('in-their-numbers',        'mode', 'measurement'),
+  ('long-before-people',      'topic', 'deep-time'),
+  ('long-before-people',      'topic', 'extinction'),
+  ('long-before-people',      'topic', 'wildlife'),
+  ('dinosaur-that-lived-here', 'topic', 'deep-time'),
+  ('dinosaur-that-lived-here', 'topic', 'extinction'),
+  ('the-last-hundred-years',  'topic', 'milestone'),
+  ('the-last-hundred-years',  'topic', 'conflict-history'),
+  ('the-last-hundred-years',  'topic', 'empire-and-rule'),
+  ('who-was-taken-from-here', 'topic', 'forced-movement'),
+  ('who-was-taken-from-here', 'topic', 'empire-and-rule'),
+  ('who-was-taken-from-here', 'topic', 'conflict-history'),
+  ('somebody-elses-museum',   'topic', 'empire-and-rule'),
+  ('somebody-elses-museum',   'topic', 'who-owns-it'),
+  ('somebody-elses-museum',   'topic', 'crafts'),
+  ('when-it-reached-everybody', 'topic', 'milestone'),
+  ('when-it-reached-everybody', 'topic', 'infrastructure'),
+  ('when-it-reached-everybody', 'topic', 'public-services'),
+  ('when-it-reached-everybody', 'mode', 'us-contrast'),
+  ('made-there-first',        'topic', 'science-research'),
+  ('made-there-first',        'topic', 'crafts'),
+  ('made-there-first',        'topic', 'music-and-art'),
+  ('how-they-say-it-began',   'topic', 'folklore-belief'),
+  ('how-they-say-it-began',   'topic', 'story-telling'),
+  ('how-they-say-it-began',   'topic', 'empire-and-rule'),
+  ('bible-name-now-name',     'topic', 'christian-history'),
+  ('bible-name-now-name',     'topic', 'empire-and-rule'),
+  ('bible-name-now-name',     'topic', 'language'),
+  ('bible-name-now-name',     'mode', 'scripture-read'),
+  ('bible-in-their-tongue',   'topic', 'christian-history'),
+  ('bible-in-their-tongue',   'topic', 'language'),
+  ('bible-in-their-tongue',   'topic', 'milestone'),
+  ('the-first-church-there',  'topic', 'christian-history'),
+  ('the-first-church-there',  'topic', 'religion'),
+  ('the-first-church-there',  'topic', 'crafts'),
+  ('can-they-worship-freely', 'topic', 'religion'),
+  ('can-they-worship-freely', 'topic', 'governance'),
+  ('can-they-worship-freely', 'topic', 'advocacy'),
+  ('can-they-worship-freely', 'topic', 'who-gets-less'),
+  ('can-they-worship-freely', 'mode', 'scripture-read'),
+  ('how-a-law-is-made',       'topic', 'governance'),
+  ('how-a-law-is-made',       'topic', 'civic-process'),
+  ('is-the-law-kept',         'topic', 'who-gets-less'),
+  ('is-the-law-kept',         'topic', 'governance'),
+  ('is-the-law-kept',         'topic', 'work-and-money'),
+  ('if-you-break-a-rule-there', 'topic', 'governance'),
+  ('if-you-break-a-rule-there', 'topic', 'who-gets-less'),
+  ('if-you-break-a-rule-there', 'topic', 'civic-process'),
+  ('if-you-break-a-rule-there', 'mode', 'us-contrast'),
+  ('whats-in-the-news',       'topic', 'governance'),
+  ('whats-in-the-news',       'topic', 'city-life'),
+  ('whats-in-the-news',       'mode', 'personal-voice'),
+  ('what-they-plan-next',     'topic', 'future-plans'),
+  ('what-they-plan-next',     'topic', 'governance'),
+  ('who-speaks-up-there',     'topic', 'advocacy'),
+  ('who-speaks-up-there',     'topic', 'governance'),
+  ('who-speaks-up-there',     'topic', 'who-gets-less'),
+  ('who-speaks-up-there',     'mode', 'personal-voice'),
+  ('what-they-do-for-you',    'topic', 'public-services'),
+  ('what-they-do-for-you',    'topic', 'governance'),
+  ('what-they-do-for-you',    'topic', 'public-money'),
+  ('what-they-do-for-you',    'mode', 'us-contrast'),
+  ('who-comes-when-it-burns', 'topic', 'public-services'),
+  ('who-comes-when-it-burns', 'topic', 'infrastructure'),
+  ('who-comes-when-it-burns', 'mode', 'us-contrast'),
+  ('help-when-money-runs-out', 'topic', 'public-services'),
+  ('help-when-money-runs-out', 'topic', 'public-money'),
+  ('help-when-money-runs-out', 'topic', 'who-gets-less'),
+  ('what-they-are-working-on', 'topic', 'science-research'),
+  ('what-they-are-working-on', 'topic', 'future-plans')
 -- END prompt_tags
 ) v
 JOIN task_templates t ON t.slug = v.task

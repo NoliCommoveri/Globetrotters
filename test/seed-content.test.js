@@ -19,15 +19,15 @@ const SEEDS = [{ id: '002', name: '002_seed.sql', sql: read('002_seed.sql') }];
 
 const CONTINENTS = ['Africa', 'Asia', 'Europe', 'North America', 'South America', 'Oceania'];
 
-// Week 1 draws 4 core + 1 from the other six. Weeks 2 and 3 are one pool of 54
-// — 52 drawable and two pinned — and eight come out of it. Week 4 is one
+// Week 1 draws 4 core + 1 from the other eight. Weeks 2 and 3 are one pool of
+// 76 — 74 drawable and two pinned — and eight come out of it. Week 4 is one
 // project type's five, in order, and all six are filled.
 //
 // The counts by natural half are lopsided by one because `wow-fact` is pinned
 // to week 2 and `cook-it` to week 3, and `week_theme` is the prompt's natural
 // half rather than a draw pool. Nothing in the draw reads these numbers; the
 // deal's arc preference is the only thing that does.
-const WEEK_SIZES = { 1: 10, 2: 29, 3: 25, 4: 30 };
+const WEEK_SIZES = { 1: 12, 2: 51, 3: 25, 4: 30 };
 
 // The seven mode tags. A month draws at most one prompt carrying each, and it
 // draws at least one `hands-on` and one `personal-voice` — so a mode tag
@@ -36,10 +36,11 @@ const MODE_TAGS = ['us-contrast', 'demographics-stat', 'measurement', 'hands-on'
                    'map-work', 'personal-voice', 'scripture-read'];
 
 // A smoke floor, not the target. LIBRARY_v3.md §3 puts a finished focus at
-// 41-66 prompts above baseline and 10-40 on-theme; against the 52 drawable
-// prompts seeded today the thinnest lifts nine. Six is low enough to have
-// headroom and high enough that a mistyped tag set — the one silent failure in
-// this file — fails here rather than three months into a school year.
+// 41-66 prompts above baseline and 10-40 on-theme; against the 74 drawable
+// prompts seeded today the thinnest lifts well past this floor. Six is low
+// enough to have headroom and high enough that a mistyped tag set — the one
+// silent failure in this file — fails here rather than three months into a
+// school year.
 const MIN_REACH = 6;
 
 let db;
@@ -78,7 +79,7 @@ test('195 countries, each with a real continent and an adventure level', () => {
   assert.equal(new Set(countries.map((c) => c.iso3)).size, countries.length, 'duplicate iso3');
 });
 
-test('94 task templates, distributed 10 / 29 / 25 / 30', () => {
+test('118 task templates, distributed 12 / 51 / 25 / 30', () => {
   const counts = Object.fromEntries(
     rows('SELECT week_theme, COUNT(*) AS n FROM task_templates GROUP BY week_theme')
       .map((r) => [r.week_theme, r.n]),
@@ -89,11 +90,11 @@ test('94 task templates, distributed 10 / 29 / 25 / 30', () => {
   }
 });
 
-test('52 prompts are drawable — weeks 2 and 3, minus the two pins', () => {
+test('74 prompts are drawable — weeks 2 and 3, minus the two pins', () => {
   const drawable = rows(
     "SELECT id FROM task_templates WHERE week_theme IN (2, 3) AND tier != 'fixed'"
   ).length;
-  assert.equal(drawable, 52);
+  assert.equal(drawable, 74);
 });
 
 test('week 1 carries exactly four core tasks — the workbook pages depend on them', () => {
