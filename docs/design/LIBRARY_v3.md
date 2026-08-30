@@ -343,7 +343,7 @@ on a clean sheet that can come out of the binder and go on the counter.
 ## 2. The prompts
 
 197 prompts. Week 1 is four fixed core tasks and one drawn from eight candidates. **Weeks
-2 and 3 are one pool.** Ten tasks come out of it: eight drawn from the merged pool of 153,
+2 and 3 are one pool.** Ten tasks come out of it: eight drawn from the merged pool of 165,
 plus the two pinned prompts — `wow-fact` in week 2 and `cook-it` in week 3 — and the ten
 are then dealt four and four into the two weeks (§3, *The draw*). Week 4 is the project
 sequence, five steps in order, one of six project types.
@@ -467,7 +467,7 @@ Spec: `{"columns":["Their unit","What it measures, and how big"],"rows":4}`
 
 Eighty-six prompts, one of them the pinned `wow-fact`. **The week-2 heading is the
 prompt's natural half, not a draw pool** —
-weeks 2 and 3 draw from one merged pool of 153 (§3). It is read only by the deal's arc
+weeks 2 and 3 draw from one merged pool of 165 (§3). It is read only by the deal's arc
 preference, which leans these prompts toward the earlier week when nothing more important
 is at stake. `wow-fact` is pinned here and never drawn. Ordered by subject so the coverage
 is visible; nothing in the draw sees these headings.
@@ -1192,7 +1192,7 @@ the wrong instrument for it.
 
 ### Week 3 — Deep Dive
 
-Sixty-nine prompts, one of them the pinned `cook-it`. Like week 2's, the heading is the
+Eighty-one prompts, one of them the pinned `cook-it`. Like week 2's, the heading is the
 prompt's natural half rather than a draw pool (§3).
 
 Where week 2 asks what a country *is*, week 3 asks what a Tuesday there is like. A
@@ -1765,6 +1765,116 @@ Spec: `{"lines":4}`
 
 Spec: `{"lines":4}`
 
+#### What the old world left here
+
+These six are Ancient World's, and every one is a natural week 3. The focus had a single
+week-3 prompt on theme against eleven in week 2, and the deal leans a natural week 2 to the
+earlier week, so nothing it held could reach the later one.
+
+**`their-flood-story`** · **NEW** · form `venn` · page `culture`
+`tags: christian-history, folklore-belief, water` · `mode: scripture-read`
+
+> **Find the flood they remember**
+> Nearly every people on earth keeps an account of water that covered everything. Find this country's — who was warned, what they built, what was left after. Then read Genesis 6 through 8. Fill the circles: what only their account says, what only Genesis says, and what both tell the same way. If this country keeps none, use the nearest one that does and name it.
+
+Spec: `{"labels":["What their account says","What Genesis says"],"shared":"Both tell it the same"}`
+
+**`the-great-beast`** · **NEW** · form `label-small` · page `prehistory`
+`tags: deep-time, folklore-belief, wildlife`
+
+> **Draw the beast in their oldest stories**
+> Almost every country has old accounts of a great beast — a serpent, a dragon, a thing in the lake. Find this country's, from the oldest telling you can reach. Draw it as they described it and label three things they are specific about. On the line, write the last century somebody there wrote about it as a real animal. If it has none, use the beast of whoever ruled it.
+
+Spec: `{"caption":"Draw it as they described it, then label three things","lines":1,"callouts":3}`
+
+**`was-the-week-always-seven`** · **NEW** · form `then-now` · page `culture`
+`tags: christian-history, empire-and-rule, sabbath`
+
+> **Find out whether their week was always seven days**
+> A seven-day week matches nothing in the sky, and plenty of places ran on another cycle first. Find what this land counted its days by before, and draw that cycle in the first panel. Draw the week they keep now in the second, and name the day they treat as the last. On the arrow, write when it changed and who brought it. If they have always kept seven, give the oldest record of it.
+
+Spec: `{"captions":["What they counted by before","The week they keep now"],"lines_each":2,"middle":"When it changed, and who"}`
+
+**`what-the-empire-left`** · **NEW** · form `specimen-boxes` · page `history`
+`tags: daily-life, empire-and-rule, language`
+
+> **Find four things an empire left behind**
+> Somebody ran this land before its own people did, and some of what they brought never left. Draw four things: a word, something still standing, a law or a measurement, and something at dinner. Label each with who brought it and roughly when. Ring the one nobody there thinks of as foreign any more. If it was never ruled, find four things it left in a place it ruled.
+
+Spec: `{"boxes":4,"caption":"Still here, and not theirs to begin with","label_lines":1,"circle_one":true}`
+
+**`still-done-the-old-way`** · **NEW** · form `flow-steps` · page `culture`
+`tags: crafts, daily-life, trade`
+
+> **Find something still made the old way**
+> Find one thing in this country still made by hand the way it was centuries ago — a cloth, a boat, a blade, a cheese. Put the stages in the four boxes in order, and write in each how long that stage takes. In the last box, add whether anyone under twenty is still learning it. If it is all machine-made now, use whatever lasted longest and date the year it stopped.
+
+Spec: `{"steps":4,"caption":"How it is made, and how long each stage takes"}`
+
+**`the-oldest-thing-still-alive`** · **NEW** · form `figure-anchor` · page `landmarks`
+`tags: city-life, daily-life, deep-time`
+
+> **Find the oldest thing there that is still going**
+> Find the oldest living or working thing in this country — a tree, a church still holding services, a market still trading, a family business. Not a ruin: something still doing what it was made or planted for. Write its age in the box. On the line, write what it was already doing the day our country was founded. If nobody can date it, give the range they use and add a question mark.
+
+Spec: `{"caption":"How old, and still going","unit":"years","anchor_prompt":"The day our country was founded, it was already…"}`
+
+#### Why it happened
+
+These six are Conflict and Change's, and they ask the question the rest of the library
+never did. Every conflict prompt written before this one asks *what* or *when* or *who* —
+`war-that-changed` marks a war's start, turn and end; `border-that-moved` asks what
+changed; `independence-day` asks who was in charge before. None of them asks why, and a
+cause is the part a kid cannot copy off a search result in one line.
+
+**`what-was-already-true`** · **NEW** · form `table-3` · page `history`
+`tags: conflict-history, who-gets-less`
+
+> **Find what was already wrong before the fighting**
+> Wars almost never start over the thing that happened last. Take one from this country and find three things that were already true before anybody fought — a tax, a banned language, land that changed hands. Put one on each row, with how long it had been that way and who it fell hardest on. If there has never been a war here, use the last time people were angry at whoever ran it.
+
+Spec: `{"columns":["What was already true","How many years it had been","Who it fell hardest on"],"rows":3}`
+
+**`the-spark`** · **NEW** · form `then-now` · page `history`
+`tags: conflict-history, governance, milestone`
+
+> **Find the thing that finally set it off**
+> Something small usually goes first — an arrest, a price rise, a funeral, one person refusing. Find what finally set off a war or a revolution here. Draw the month before it and the month after. On the arrow write the date and what happened that day; under each panel, who was in charge and what people feared. If nothing tipped that fast, use the slowest change it had.
+
+Spec: `{"captions":["The month before","The month after"],"lines_each":2,"middle":"The date, and what happened"}`
+
+**`who-wanted-what`** · **NEW** · form `differences` · page `history`
+`tags: conflict-history, governance, who-owns-it`
+
+> **Find out what each side actually wanted**
+> Take a conflict from this country's past and find its two sides. In each column write who they were, what they said they were fighting for, and what they stood to gain — land, money, a language, a throne. The last two are often not the same, and the gap is the answer. At the foot, write the one thing both wanted and could not share. If only one side was written down, say who wrote it.
+
+Spec: `{"columns":["One side","The other side"],"rows":3,"shared":1}`
+
+**`the-change-without-a-war`** · **NEW** · form `list-n` · page `government`
+`tags: advocacy, damage-and-repair, milestone`
+
+> **Find something that changed without a fight**
+> Not every big change is fought over. Find something here that changed for good without a war — a law, a court ruling, a vote, a thing people simply stopped doing. Work backwards and number the five things that had to happen first, earliest at the top. Star the one nobody would have predicted. If everything here was fought over, use the smallest fight instead.
+
+Spec: `{"items":5,"marker":"number","circle_one":false,"caption":"What had to happen first, earliest at the top"}`
+
+**`why-they-left-when-they-did`** · **NEW** · form `timeline` · page `people`
+`tags: forced-movement, migration`
+
+> **Find out why they left in that particular year**
+> People leave a place in ordinary numbers for years and then all at once. Find a time when many left this country, or were made to, and mark three points: when it started, the year most went, and when it stopped. At each mark, write what changed that year to make it happen then and not five years earlier. If nobody has ever left in numbers, mark the years people arrived instead.
+
+Spec: `{"ticks":3,"unit":"years","ends":["The leaving started","It stopped or slowed"]}`
+
+**`the-one-who-would-not-back-down`** · **NEW** · form `box-note` · page `history`
+`tags: advocacy, milestone, who-gets-less` · `mode: personal-voice`
+
+> **Find the one who would not let it go**
+> Behind most changes is somebody who kept pushing after it stopped being worth it for them. Find one from this country — not always famous, and not always who got the credit. Draw them. Underneath, write one sentence they actually said in their own words, and what refusing to stop cost them. If everyone involved is anonymous, draw what they carried or wore that people there still know.
+
+Spec: `{"caption":"Draw them","lines":2}`
+
 ---
 
 ### Week 4 — the project sequence
@@ -1817,62 +1927,63 @@ rows are bound. Wording for all thirty is unchanged from v2.
 |---|---|---|---|---|---|
 | `box-beside` | 1 | 2 | 2 | 9 | **13** |
 | `fields` | 1 | · | 6 | 6 | **12** |
-| `table-3` | 2 | · | 9 | 2 | **11** |
+| `table-3` | 2 | · | 9 | 3 | **12** |
+| `box-note` | 2 | 1 | 7 | 3 | **11** |
 | `bullets` | 1 | · | 5 | 5 | **10** |
-| `box-note` | 2 | 1 | 7 | 2 | **10** |
-| `differences` | 1 | · | 5 | 4 | **9** |
+| `differences` | 1 | · | 5 | 5 | **10** |
+| `then-now` | 2 | · | 6 | 3 | **9** |
+| `figure-anchor` | 1 | 3 | 1 | 4 | **8** |
+| `flow-steps` | 1 | · | 6 | 2 | **8** |
 | `lines-4` | 1 | 1 | 3 | 4 | **8** |
-| `figure-anchor` | 1 | 3 | 1 | 3 | **7** |
-| `flow-steps` | 1 | · | 6 | 1 | **7** |
-| `timeline` | 1 | · | 6 | 1 | **7** |
-| `specimen-boxes` | 2 | · | 3 | 4 | **7** |
+| `specimen-boxes` | 2 | · | 3 | 5 | **8** |
+| `timeline` | 1 | · | 6 | 2 | **8** |
 | `split-two` | 1 | 2 | 2 | 3 | **7** |
-| `then-now` | 2 | · | 6 | 1 | **7** |
 | `bar-graph` | 2 | · | 5 | 1 | **6** |
+| `label-small` | 2 | · | 1 | 5 | **6** |
+| `list-n` | 1 | 1 | 1 | 4 | **6** |
 | `pictograph` | 1 | · | 4 | 2 | **6** |
-| `list-n` | 1 | 1 | 1 | 3 | **5** |
 | `map-marks` | 2 | 1 | 4 | · | **5** |
-| `label-small` | 2 | · | 1 | 4 | **5** |
-| `lines-8` | 2 | · | 2 | 2 | **4** |
 | `clock-pair` | 1 | 1 | 1 | 2 | **4** |
+| `lines-8` | 2 | · | 2 | 2 | **4** |
 | `scale-strip` | 1 | · | 4 | · | **4** |
-| `venn` | 2 | · | · | 3 | **3** |
-| `storyboard` | 2 | · | · | 3 | **3** |
+| `venn` | 2 | · | · | 4 | **4** |
 | `hundred-people` | 2 | · | 2 | 1 | **3** |
+| `storyboard` | 2 | · | · | 3 | **3** |
 | `week-strip` | 1 | · | · | 2 | **2** |
-| `recipe-card` | 3 | · | · | 1 | **1** |
 | `label-it` | 3 | · | 1 | · | **1** |
-| `checklist` | 1 | · | · | · | **0** |
+| `recipe-card` | 3 | · | · | 1 | **1** |
 
-**167 bindings across weeks 1–3** — 12 in week 1, 86 in week 2, 69 in week 3, of which
-153 are drawable and two are pinned — plus `checklist` and `storyboard` doing week 4's
+**179 bindings across weeks 1–3** — 12 in week 1, 86 in week 2, 81 in week 3, of which
+165 are drawable and two are pinned — plus `checklist` and `storyboard` doing week 4's
 composed sheet. Twenty-seven forms carry prompts; `checklist` is week 4's and no form is
 orphaned.
 
-`fields` holds at twelve and is now 7.2% of the library, down from 14.3% at v2. That
+`fields` holds at twelve and is now 6.7% of the library, down from 14.3% at v2. That
 number was bought entirely by writing new prompts onto forms that make an answer visible.
 
-**`box-beside` is the new form to watch, and thirteen is its cap.** Nine of the thirteen
-sit in week 3, which is 12.9% of that pool — still the healthiest top-form share the
-library has ever had, but it is the number that will move first. The next week-3 prompt
-that wants a small sketch and three lines goes somewhere else.
+**`box-beside` is the form to watch, and thirteen is its cap.** Nine of the thirteen sit
+in week 3, which is 11.1% of that pool — still the healthiest top-form share the library
+has ever had, but it is the number that will move first. The next week-3 prompt that wants
+a small sketch and three lines goes somewhere else.
 
-`table-3` at eleven is the deliberate result of the `fields` cap: three-part answers with
-repeating rows now have a real home, and nine of them are in week 2.
+`table-3` reached twelve with slice 21's `what-was-already-true` and now ties `fields`
+rather than sitting below it. Both stay under `box-beside`, so the three caps §4 rule 1
+names are unchanged; nine of `table-3`'s twelve are still in week 2.
 
 ### What one printed week costs in paper
 
-Measured against the finished 167 — slice 20 is the first slice at which this table is a
-simulation of the real printed output rather than thirds divided by three. Sheets is the
-actual count `packSheets` produces, position order and all, over 20,000 drawn months.
+Measured against the finished 179 — the sheet count is what `packSheets` actually produces,
+position order and all, over 5,400 drawn months across all nine focuses and all six project
+types. Week 4 is one sheet by construction rather than by packing, because its sheet is
+composed (§16).
 
-| Week | What prints | Thirds | Sheets |
-|---|---|---|---|
-| 1 | 4 core + 1 drawn from 8 | 6.2 | 2.1 |
-| 2 | `wow-fact` + 4 dealt | 7.2 | 3.0 |
-| 3 | `cook-it` + 4 dealt | 8.1 | 3.1 — the recipe takes a sheet of its own |
-| 4 | composed | 3.0 | 1.0 |
-| | | **24.5** | **9.2 a month** |
+| Week | What prints | Sheets |
+|---|---|---|
+| 1 | 4 core + 1 drawn from 8 | 2.1 |
+| 2 | `wow-fact` + 4 dealt | 2.9 |
+| 3 | `cook-it` + 4 dealt | 3.2 — the recipe takes a sheet of its own |
+| 4 | composed | 1.0 |
+| | | **9.2 a month** |
 
 Twenty-eight sheets a month across three learners, about 248 over a nine-month year.
 
@@ -1881,11 +1992,19 @@ sd 0.89 (week 2) and 0.77 (week 3) against sd 1.52 under the old two-draws-of-fi
 does not pack a week onto fewer sheets, because it never reorders the five within a week.**
 Two segments at two thirds each cannot share a sheet (2 + 2 > 3), so a week that deals two
 or three of `table-3`, `box-note`, `specimen-boxes`, `hundred-people`, `label-small`,
-`bar-graph` or `then-now` into unlucky order spills onto a fourth sheet. Measured at 10.9%
-of week 2s and 15.1% of week 3s — week 3 more often, because `cook-it`'s three-thirds
+`bar-graph`, `venn` or `then-now` into unlucky order spills onto a fourth sheet. Measured
+at 11% of week 2s and 18% of week 3s — week 3 more often, because `cook-it`'s three-thirds
 recipe takes a sheet on its own and leaves the other four a whole sheet short; week 1 and
 week 4 do not spill — week 1 carries at most one two-thirds form and week 4 is always
 exactly one sheet by construction.
+
+**Week 3 spills three points more often than it did before slice 21**, up from 15%, and
+that is the price of the twelve. Seven of them are on two-thirds forms — the week-3 forms
+with room were mostly the tall ones, because `box-beside` and `fields`, the two short forms
+that carry the most prompts, were both at cap. The month total does not move: week 2 came
+down about as much as week 3 went up, and 9.2 sheets is what it was. Nothing here is a
+defect to fix in a prompt slice — §16 owns the layouts, and a form's height is where this
+would be fixed if it were worth fixing.
 
 ### The tag system
 
@@ -1894,15 +2013,15 @@ exactly one sheet by construction.
 and is not read by the draw.
 
 **Why two namespaces.** The v3 batches wrote one flat vocabulary, and inside it
-`us-contrast` reached 41 of 167 prompts — a quarter of the library on one tag.
+`us-contrast` reached 41 of 179 prompts — a quarter of the library on one tag.
 `demographics-stat` reached 17, `measurement` 14. Those five or six tags do not describe
 what a prompt is *about*; they describe how the kid produces the answer. Weighting one of
 them at 3 from a focus pulls a quarter of the pool at once and rebuilds the triple-duty
 overlap the tag mechanism was designed to remove. Splitting them out costs a prefix now
 and a re-tag of 167 rows later.
 
-**Fifty topic tags.** Every one has at least two members. Largest: `daily-life` 24,
-`who-gets-less` 22, `city-life` 18, `crafts` 17, `religion` 17, `landform` 16,
+**Fifty topic tags.** Every one has at least two members. Largest: `daily-life` 25,
+`who-gets-less` 22, `crafts` 18, `city-life` 18, `religion` 17, `landform` 16,
 `governance` 15, `agriculture` 15. Smallest at two: `future-plans`, `altitude`,
 `clothing`. `emblems` (4) sits entirely in week 1 and is never drawn against, which is
 correct — week 1 is a uniform draw from eight, not a weighted one.
@@ -1915,13 +2034,13 @@ correct — week 1 is a uniform draw from eight, not a weighted one.
 | `demographics-stat` | 17 | A share of a population |
 | `measurement` | 14 | Units, conversion, a scale |
 | `hands-on` | 10 | The kid does a physical thing, not only reads |
+| `personal-voice` | 9 | Somebody from there is speaking |
 | `map-work` | 8 | The answer goes onto a map |
-| `personal-voice` | 8 | Somebody from there is speaking |
-| `scripture-read` | 7 | A passage is read as part of the task |
+| `scripture-read` | 8 | A passage is read as part of the task |
 
 **Job one — balance.** *Every month draws at least one `hands-on` and at least one
 `personal-voice` prompt across weeks 2 and 3 combined.* At month level this is easy: week
-3 holds seven `hands-on` and six `personal-voice`. At week level it is not — week 2 holds
+3 holds seven `hands-on` and seven `personal-voice`. At week level it is not — week 2 holds
 one and two — so the rule is scoped to the month or it forces a repeat. A month with
 nobody from the country speaking in it is the failure this library is actually trying to
 avoid, and this is the only mechanism that guarantees against it.
@@ -1932,7 +2051,7 @@ month's weeks 2–3.* Nineteen of week 2's prompts and eighteen of week 3's are
 ours next to it*. The form counts will report no repeat. Scoped to the month rather than
 the week because the deal, not the draw, decides which week a prompt lands in — a
 week-scoped rule would have to be a fifth key on the deal instead of a constraint on the
-draw, and at seven mode tags against 153 prompts the month scope costs nothing it buys.
+draw, and at seven mode tags against 165 prompts the month scope costs nothing it buys.
 
 **Two rather than one, and the pins are the reason.** The cap counts the two pinned
 prompts from the start, and `cook-it` carries `hands-on`. At a cap of one it spent that
@@ -1958,7 +2077,7 @@ The `1 +` floor keeps the no-zeros rule: a prompt with no overlap is still reach
 baseline.
 
 **The `2 ×` is the scale, and it is load-bearing.** Additive weights of 1–3 against a
-153-prompt pool are a weak lever: at `1 +` a focus lifts on-theme content by about 2×
+165-prompt pool are a weak lever: at `1 +` a focus lifts on-theme content by about 2×
 over drawing with no focus at all, which sounds like a lot and lands as 1.5 of 10 tasks
 for a thin focus. Doubling the scale puts a typical focus at 2.5–4 of 10 without letting
 the heaviest single prompt run away — its share of pool weight stays under 5%. Tripling
@@ -1987,24 +2106,32 @@ picked.
 
 | Focus | Above baseline | **On-theme** | of those, natural wk 2 / wk 3 | Heaviest prompt |
 |---|---|---|---|---|
-| **Ancient World** | 41 | **12** | 11 / 1 | ×9 |
-| **Wild Places** | 41 | **17** | 14 / 3 | ×9 |
-| **People and Power** | 52 | **23** | 20 / 3 | ×8 |
-| **Food and Craft** | 43 | **28** | 9 / 19 | ×9 |
-| **Conflict and Change** | 52 | **10** | 9 / 1 | ×10 |
-| **Land and Sky** | 42 | **19** | 16 / 3 | ×11 |
-| **Who Lives Here** | 66 | **40** | 13 / 27 | ×9 |
-| **Who Gets What** | 54 | **28** | 25 / 3 | ×9 |
-| **Stories and Spirits** | 40 | **36** | 9 / 27 | ×7 |
+| **Ancient World** | 47 | **18** | 11 / 7 | ×17 |
+| **Wild Places** | 44 | **17** | 14 / 3 | ×17 |
+| **People and Power** | 57 | **25** | 20 / 5 | ×15 |
+| **Food and Craft** | 44 | **28** | 9 / 19 | ×17 |
+| **Conflict and Change** | 60 | **17** | 9 / 8 | ×19 |
+| **Land and Sky** | 43 | **19** | 16 / 3 | ×21 |
+| **Who Lives Here** | 70 | **40** | 13 / 27 | ×17 |
+| **Who Gets What** | 61 | **31** | 25 / 6 | ×17 |
+| **Stories and Spirits** | 44 | **39** | 9 / 30 | ×13 |
 
-**The tagging is accurate; the counts are what is thin.** Graded against the audit the tag
-tables score ~100% recall — three prompts in the whole library are on-theme by hand and
+**The tagging is accurate; the counts were what was thin.** Graded against the audit the
+tag tables score ~100% recall — three prompts in the whole library are on-theme by hand and
 carry no matching tag at all (`made-because-they-needed-it`, `where-you-buy-clothes`,
 `when-it-reached-everybody`) — and no prompt weighted ×7 or above is off-theme. A new
-prompt does self-onboard correctly. What the audit found is a **content** gap: five
-focuses have three or fewer on-theme prompts on one side of the old week line, and Ancient
-World and Conflict and Change have one each. That gap is what the merged pool in *The
-draw* exists to survive and what the six-prompts-each writing job exists to close.
+prompt does self-onboard correctly. What the audit found was a **content** gap: Ancient
+World and Conflict and Change held a single natural-week-3 prompt on theme apiece, against
+fourteen to twenty-seven for the focuses that were healthy. Slice 21's twelve closed it.
+Both now hold seven and eight there, both clear seventeen on-theme, and no focus is below
+three on either side of the old week line.
+
+**The heaviest-prompt column is the summed weight the engine actually computes**, `1 + 2 ×
+Σ` over a prompt's shared topic tags — the same expression `draw_weight` uses. A prompt
+carrying three tags a focus weights at 3 reaches ×19. The heaviest in the library are all
+early ones: `rain-through-the-year` at ×21 for Land and Sky, `who-was-taken-from-here` at
+×19 for Conflict and Change, `before-history` at ×17 for Ancient World. Slice 21's twelve
+were written to a ceiling of ×11 so none of them displaces a prompt already there.
 
 **`civic-process` is a strict subset of `governance`** — all four of its prompts carry
 both — so People and Power weighting both at 3 would pay twice for the same four rows.
@@ -2044,7 +2171,7 @@ Weeks 2 and 3 are **one pool**. `week_theme` stays on the row as the prompt's na
 half and is read only by the deal; nothing in the draw sees it.
 
 ```
-pool     = every week 2–3 prompt, tier != 'fixed', archived = 0     -> 153
+pool     = every week 2–3 prompt, tier != 'fixed', archived = 0     -> 165
 pinned   = wow-fact (week 2), cook-it (week 3)                      ->   2
 drawn    = 6 weighted + 2 wildcard                                  ->   8
                                                                     ---  10 tasks
@@ -2057,7 +2184,7 @@ twenty-one, which is the one number `DESIGN.md` §4 says a kid cannot hold.
 **Six weighted.** Sequential weighted selection without replacement on `draw_weight`.
 
 **Two wildcards.** Each computes affinity across the recency-eligible remainder, takes the
-bottom quarter, and draws uniformly from it. The bottom quarter of 153 is thirty-eight, so
+bottom quarter, and draws uniformly from it. The bottom quarter of 165 is forty-two, so
 the wildcard is genuinely a wildcard rather than the same handful of orphans every month.
 Two rather than one because the slot is a fifth of the draw and the draw is now eight.
 
@@ -2069,7 +2196,7 @@ weeks, which is not a library problem: five draws against twenty-seven forms flo
 32.5% even if every form were the same size.
 
 **Never more than two prompts sharing a mode tag in the same month.** The hard rule, not
-the soft one — with seven mode tags against a 153-prompt pool it cannot deadlock, measured
+the soft one — with seven mode tags against a 165-prompt pool it cannot deadlock, measured
 at zero fallbacks across 32,400 simulated months.
 
 **Recency.**
@@ -2079,13 +2206,13 @@ recency_multiplier = 0  if drawn for this learner in the last 3 months, else 1
 ```
 
 Scoped per learner, so a prompt stays available to a sibling while it rests for one child.
-Three months of eight blocks twenty-four of 153. If a cooldown would ever empty the
-eligible pool — impossible at these numbers, where the fresh pool never fell below 129
+Three months of eight blocks twenty-four of 165. If a cooldown would ever empty the
+eligible pool — impossible at these numbers, where the fresh pool never fell below 141
 across 32,400 simulated months — drop the single stalest cooldown prompt back in rather
 than erroring.
 
 **The cooldown is sized by the scarcest tag, not by the pool.** At five months the whole
-pool is comfortable and `personal-voice` is not: eight prompts carry it, a month that
+pool is comfortable and `personal-voice` is not: nine prompts carry it, a month that
 satisfies the balance rule spends one, and by month six a learner has most of them
 resting. Measured at 9% of months from month six on with nobody from the country speaking
 in them. Three months holds it to about one month in nine hundred, and what is left is
@@ -2131,46 +2258,44 @@ on the deal, not the draw.
 
 ### What the shape delivers
 
-Measured at `2 ×`, over 2,500 simulated months per focus against the real seeded 153, and
-scored against the hand audit of which focus each of the 155 weeks 2–3 prompts actually
-serves — `../other/FOCUS-AUDIT.md`. This is the first slice at which the pool being drawn
-is the one the audit was written against, so the *new* column below is a measurement
-rather than the estimate slices 11–19 carried in its place.
+Measured over 2,500 nine-month runs per focus — 22,500 months each — against the real
+seeded 165, and scored against the hand audit of which focus each of the 167 weeks 2–3
+prompts actually serves (`../other/FOCUS-AUDIT.md`). Both columns are measured with one
+instrument, before and after, so the pair is comparable even though the absolute figures
+run stricter than the ones slice 20 recorded here.
 
-| Focus | On-theme of the ten: now → new | A week with none of it: now → new |
+| Focus | On-theme of the ten: before → after | A week with none of it: before → after |
 |---|---|---|
-| Ancient World | 1.8 → 2.1 | 86% → **21%** |
-| Wild Places | 2.3 → 2.8 | 58% → **8%** |
-| People and Power | 2.4 → 2.4 | 64% → **16%** |
-| Food and Craft | 4.4 → 4.2 | 23% → **3%** |
-| Conflict and Change | 1.2 → 1.7 | 90% → **27%** |
-| Land and Sky | 2.5 → 2.4 | 59% → **13%** |
-| Who Lives Here | 3.8 → 3.2 | 20% → **6%** |
-| Who Gets What | 2.9 → 3.0 | 48% → **6%** |
-| Stories and Spirits | 3.9 → 3.8 | 22% → **2%** |
+| Ancient World | 1.6 → **2.0** | 33% → **22%** |
+| Wild Places | 2.2 → 2.0 | 18% → 21% |
+| People and Power | 2.3 → 2.3 | 18% → 19% |
+| Food and Craft | 3.8 → 3.8 | 5% → 5% |
+| Conflict and Change | 1.2 → **1.8** | 43% → **27%** |
+| Land and Sky | 2.2 → 2.1 | 17% → 19% |
+| Who Lives Here | 3.2 → 3.0 | 7% → 9% |
+| Who Gets What | 2.7 → 2.7 | 10% → 10% |
+| Stories and Spirits | 3.6 → 3.6 | 3% → 3% |
 
-The second column is what the engine actually delivers: the deal is scored on summed draw
-weight, which is all it knows. It runs well ahead of what the estimate carried while the
-library was still being written — the estimate was built from the shape of the merge before
-there was a full pool to draw from, and the finished library's topic tags spread the weight
-more evenly across weeks 2 and 3 than that estimate assumed.
+**The two focuses the twelve were written for are the two that move.** Ancient World drops
+a third of its empty weeks and Conflict and Change drops well over a third, which is what
+six week-3-flavoured prompts each buys when the shortage was week-3 material rather than
+weighting. Neither reaches the 3% Stories and Spirits enjoys, and neither will: seventeen
+and eighteen on-theme prompts in a 165 pool is the floor of the range, not the middle.
 
-**The total barely moves and that is expected.** Merging dilutes the concentration a focus
-enjoyed in its strong week and the month gives up a task; the two cancel. What the merge
-buys is the second column — the failure this library actually had was a whole week of five
-sheets that ignored the focus the learner chose, and it ran at 20–90% a month under the old
-two-draws-of-five.
+**The other seven give back one or two points, and that is the cost of a bigger pool.**
+Twelve prompts none of them reach dilute every draw slightly — Wild Places moves 18% to
+21%, Who Lives Here 7% to 9%. It is the same trade the merge itself made, and it is worth
+taking: a focus at 21% empty weeks that started at 18% is nowhere near the failure the
+second column exists to measure, and the two focuses that *were* near it have come down
+eleven and sixteen points.
 
-**Ancient World and Conflict and Change are still the two weakest, and it is a content gap,
-not a draw gap.** They have twelve and ten on-theme prompts in a 153 pool — every other
-focus has seventeen or more — so no weighting reaches what is not written, and a week with
-none of it is still the highest of the nine for both, even though the merge already took
-both well under the ceiling this version set for them. Six
-week-3-flavoured prompts each — an ordinary thing still done the old way, a dish a conqueror
-left behind, a word a war put in the language, a street that moved — brings them in line
-with the rest. That is the one piece of writing this version still owes, and slice 21's.
-
----
+**These figures are stricter than the ones slice 20 recorded**, which put Ancient World at
+21% and Conflict and Change at 27% before any of this writing existed. That table could not
+be reproduced from the seed it describes: re-measured with the instrument above, the
+pre-slice-21 library sits at 33% and 43% for those two. The numbers here replace it because
+they are reproducible from `002_seed.sql` and the audit, and because the before and after
+were taken the same way. What did not change is the conclusion slice 20 drew — those two
+focuses were the two thin ones, and the gap was content.
 
 ---
 
@@ -2327,11 +2452,12 @@ just what a page looks like.
 
 ## 7. Still open
 
-1. **Twelve week-3-flavoured prompts, six each for Ancient World and Conflict and
-   Change.** The one piece of writing v3 still owes. Everything else in this document is a
-   draw change or a seed.
+Nothing. The twelve week-3-flavoured prompts this section last carried — six each for
+Ancient World and Conflict and Change — are written, bound, tagged and measured; they are
+in §2 under *What the old world left here* and *Why it happened*, and §3's tables include
+them.
 
-Three questions this section used to carry are settled. Sourcing on the six hardest
+Four questions this section used to carry are settled. Sourcing on the six hardest
 prompts — `the-group-that-gets-less`, `who-can-read`, `what-their-money-goes-to`,
 `is-the-law-kept`, `can-they-worship-freely`, `the-company-that-got-caught` — stays on the
 sourcing footer every worksheet already carries; there is no stretch-line mechanism and

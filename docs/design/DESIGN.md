@@ -1314,19 +1314,20 @@ skipping the task would leave the week one short.
 
 ## 13. Seed data
 
-**Status:** partial · the runner, 3 people, 9 focuses, 6 project types, 195
-countries, **197 task templates**, 65 focus tags and 528 prompt tags,
+**Status:** built · the runner, 3 people, 9 focuses, 6 project types, 195
+countries, **209 task templates**, 65 focus tags and 564 prompt tags,
 `003_country_data.sql`'s 222 hooks and 260 affinities across 100 countries
 (slices 02, 09, 11 and 22), and `005_worksheet_layouts.sql`'s twenty-eight printed
 forms with a binding on every week 1–3 template, and on each project type's
-planning step (slices 10, 12–20). Every one of the sixty-one originally
+planning step (slices 10, 12–21). Every one of the sixty-one originally
 seeded week 1–3 prompts says and prints what §2 says it does (slices 12–15),
-and slices 16–20 landed all 106 new prompts `LIBRARY_v3.md` §2 calls for: 167
-week 1–3 prompts in all, 153 of them drawable, which is the pool §3's numbers
-are measured against. Slice 22 added the last sixty
-`country_focus_affinity` rows, so every focus is recommended somewhere. What
-remains is slice 21: the twelve prompts still owed to Ancient World and
-Conflict and Change, which are writing rather than transcription.
+slices 16–20 landed all 106 new prompts `LIBRARY_v3.md` §2 calls for, and slice
+21 wrote the twelve owed to Ancient World and Conflict and Change: **179 week
+1–3 prompts in all, 165 of them drawable**, which is the pool §3's numbers are
+measured against. Slice 22 added the last sixty `country_focus_affinity` rows,
+so every focus is recommended somewhere. Every focus now reaches seventeen
+on-theme prompts or better, and none holds fewer than three on either side of
+the natural week line.
 
 Seed files are not migrations (§3). They live beside them in `/src/migrations/`
 and are exported from the same index as `SEEDS`, but they are re-run by **Run
@@ -1390,12 +1391,9 @@ Contents of `002_seed.sql`:
 
 The week column is the prompt's **natural half**, not a draw pool: nothing in the
 draw reads it and only the deal's arc preference does (§4). `LIBRARY_v3.md` takes
-weeks 1–3 to 12 / 86 / 69, which slice 20 finished landing — 153 are drawable, and
+weeks 1–3 to 12 / 86 / 81, which slice 21 finished landing — 165 are drawable, and
 the pool never falls through to the stalest-back fallback: across 32,400 simulated
-months the fresh pool never fell below 129 against the eight a draw needs.
-What remains is the twelve prompts still owed to Ancient World and Conflict and
-Change (slice 21), which raise the pool to 165 but do not change what the cooldown
-needs.
+months the fresh pool never fell below 141 against the eight a draw needs.
 
 All six project types carry a full week-4 sequence, so setup offers all six.
 

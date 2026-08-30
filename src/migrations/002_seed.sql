@@ -1119,7 +1119,62 @@ FROM (
 
   ('what-they-say-about-us', 'Hear what they say about us',
    'Find somebody from this country talking or writing about visiting or moving to America — what surprised them, what they missed, what they thought was strange. Write what they said in your own words. If you cannot find anyone who came here, find somebody from there writing about any country that is not their own.',
-   3, 'people', 'focus', NULL, NULL)
+   3, 'people', 'focus', NULL, NULL),
+
+  -- Slice 21 — the twelve owed. Six for Ancient World and six for Conflict and
+  -- Change, the two focuses that reached twelve and ten on-theme prompts against
+  -- a 153 pool where every other focus was at seventeen or better. All twelve are
+  -- natural week 3: both focuses' existing on-theme material is eleven-to-one and
+  -- nine-to-one weighted toward week 2, and the deal leans a natural week 2 toward
+  -- the earlier week, so nothing they had could reach the later one.
+
+  ('their-flood-story', 'Find the flood they remember',
+   'Nearly every people on earth keeps an account of water that covered everything. Find this country''s — who was warned, what they built, what was left after. Then read Genesis 6 through 8. Fill the circles: what only their account says, what only Genesis says, and what both tell the same way. If this country keeps none, use the nearest one that does and name it.',
+   3, 'culture', 'focus', NULL, NULL),
+
+  ('the-great-beast', 'Draw the beast in their oldest stories',
+   'Almost every country has old accounts of a great beast — a serpent, a dragon, a thing in the lake. Find this country''s, from the oldest telling you can reach. Draw it as they described it and label three things they are specific about. On the line, write the last century somebody there wrote about it as a real animal. If it has none, use the beast of whoever ruled it.',
+   3, 'prehistory', 'focus', NULL, NULL),
+
+  ('was-the-week-always-seven', 'Find out whether their week was always seven days',
+   'A seven-day week matches nothing in the sky, and plenty of places ran on another cycle first. Find what this land counted its days by before, and draw that cycle in the first panel. Draw the week they keep now in the second, and name the day they treat as the last. On the arrow, write when it changed and who brought it. If they have always kept seven, give the oldest record of it.',
+   3, 'culture', 'focus', NULL, NULL),
+
+  ('what-the-empire-left', 'Find four things an empire left behind',
+   'Somebody ran this land before its own people did, and some of what they brought never left. Draw four things: a word, something still standing, a law or a measurement, and something at dinner. Label each with who brought it and roughly when. Ring the one nobody there thinks of as foreign any more. If it was never ruled, find four things it left in a place it ruled.',
+   3, 'history', 'focus', NULL, NULL),
+
+  ('still-done-the-old-way', 'Find something still made the old way',
+   'Find one thing in this country still made by hand the way it was centuries ago — a cloth, a boat, a blade, a cheese. Put the stages in the four boxes in order, and write in each how long that stage takes. In the last box, add whether anyone under twenty is still learning it. If it is all machine-made now, use whatever lasted longest and date the year it stopped.',
+   3, 'culture', 'focus', NULL, NULL),
+
+  ('the-oldest-thing-still-alive', 'Find the oldest thing there that is still going',
+   'Find the oldest living or working thing in this country — a tree, a church still holding services, a market still trading, a family business. Not a ruin: something still doing what it was made or planted for. Write its age in the box. On the line, write what it was already doing the day our country was founded. If nobody can date it, give the range they use and add a question mark.',
+   3, 'landmarks', 'focus', NULL, NULL),
+
+  ('what-was-already-true', 'Find what was already wrong before the fighting',
+   'Wars almost never start over the thing that happened last. Take one from this country and find three things that were already true before anybody fought — a tax, a banned language, land that changed hands. Put one on each row, with how long it had been that way and who it fell hardest on. If there has never been a war here, use the last time people were angry at whoever ran it.',
+   3, 'history', 'focus', NULL, NULL),
+
+  ('the-spark', 'Find the thing that finally set it off',
+   'Something small usually goes first — an arrest, a price rise, a funeral, one person refusing. Find what finally set off a war or a revolution here. Draw the month before it and the month after. On the arrow write the date and what happened that day; under each panel, who was in charge and what people feared. If nothing tipped that fast, use the slowest change it had.',
+   3, 'history', 'focus', NULL, NULL),
+
+  ('who-wanted-what', 'Find out what each side actually wanted',
+   'Take a conflict from this country''s past and find its two sides. In each column write who they were, what they said they were fighting for, and what they stood to gain — land, money, a language, a throne. The last two are often not the same, and the gap is the answer. At the foot, write the one thing both wanted and could not share. If only one side was written down, say who wrote it.',
+   3, 'history', 'focus', NULL, NULL),
+
+  ('the-change-without-a-war', 'Find something that changed without a fight',
+   'Not every big change is fought over. Find something here that changed for good without a war — a law, a court ruling, a vote, a thing people simply stopped doing. Work backwards and number the five things that had to happen first, earliest at the top. Star the one nobody would have predicted. If everything here was fought over, use the smallest fight instead.',
+   3, 'government', 'focus', NULL, NULL),
+
+  ('why-they-left-when-they-did', 'Find out why they left in that particular year',
+   'People leave a place in ordinary numbers for years and then all at once. Find a time when many left this country, or were made to, and mark three points: when it started, the year most went, and when it stopped. At each mark, write what changed that year to make it happen then and not five years earlier. If nobody has ever left in numbers, mark the years people arrived instead.',
+   3, 'people', 'focus', NULL, NULL),
+
+  ('the-one-who-would-not-back-down', 'Find the one who would not let it go',
+   'Behind most changes is somebody who kept pushing after it stopped being worth it for them. Find one from this country — not always famous, and not always who got the credit. Draw them. Underneath, write one sentence they actually said in their own words, and what refusing to stop cost them. If everyone involved is anonymous, draw what they carried or wore that people there still know.',
+   3, 'history', 'focus', NULL, NULL)
 -- END task_templates
 ) v
 LEFT JOIN project_types p ON p.slug = v.project_type
@@ -1695,7 +1750,45 @@ FROM (
   ('what-they-say-about-us', 'topic', 'migration'),
   ('what-they-say-about-us', 'topic', 'travel'),
   ('what-they-say-about-us', 'mode',  'personal-voice'),
-  ('what-they-say-about-us', 'mode',  'us-contrast')
+  ('what-they-say-about-us', 'mode',  'us-contrast'),
+
+  ('their-flood-story',       'topic', 'folklore-belief'),
+  ('their-flood-story',       'topic', 'christian-history'),
+  ('their-flood-story',       'topic', 'water'),
+  ('their-flood-story',       'mode',  'scripture-read'),
+  ('the-great-beast',         'topic', 'folklore-belief'),
+  ('the-great-beast',         'topic', 'deep-time'),
+  ('the-great-beast',         'topic', 'wildlife'),
+  ('was-the-week-always-seven', 'topic', 'sabbath'),
+  ('was-the-week-always-seven', 'topic', 'christian-history'),
+  ('was-the-week-always-seven', 'topic', 'empire-and-rule'),
+  ('what-the-empire-left',    'topic', 'empire-and-rule'),
+  ('what-the-empire-left',    'topic', 'daily-life'),
+  ('what-the-empire-left',    'topic', 'language'),
+  ('still-done-the-old-way',  'topic', 'crafts'),
+  ('still-done-the-old-way',  'topic', 'daily-life'),
+  ('still-done-the-old-way',  'topic', 'trade'),
+  ('the-oldest-thing-still-alive', 'topic', 'deep-time'),
+  ('the-oldest-thing-still-alive', 'topic', 'city-life'),
+  ('the-oldest-thing-still-alive', 'topic', 'daily-life'),
+
+  ('what-was-already-true',   'topic', 'conflict-history'),
+  ('what-was-already-true',   'topic', 'who-gets-less'),
+  ('the-spark',               'topic', 'conflict-history'),
+  ('the-spark',               'topic', 'milestone'),
+  ('the-spark',               'topic', 'governance'),
+  ('who-wanted-what',         'topic', 'conflict-history'),
+  ('who-wanted-what',         'topic', 'who-owns-it'),
+  ('who-wanted-what',         'topic', 'governance'),
+  ('the-change-without-a-war', 'topic', 'milestone'),
+  ('the-change-without-a-war', 'topic', 'advocacy'),
+  ('the-change-without-a-war', 'topic', 'damage-and-repair'),
+  ('why-they-left-when-they-did', 'topic', 'forced-movement'),
+  ('why-they-left-when-they-did', 'topic', 'migration'),
+  ('the-one-who-would-not-back-down', 'topic', 'advocacy'),
+  ('the-one-who-would-not-back-down', 'topic', 'milestone'),
+  ('the-one-who-would-not-back-down', 'topic', 'who-gets-less'),
+  ('the-one-who-would-not-back-down', 'mode',  'personal-voice')
 -- END prompt_tags
 ) v
 JOIN task_templates t ON t.slug = v.task

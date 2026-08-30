@@ -4,15 +4,14 @@ Twenty-three slices against `../design/DESIGN.md`. Each ends at a state you can 
 browser and judge.
 
 A build session takes the first slice not marked `built` and reads its file.
-**Slices 00–20 and 22 are built.** The nineteen forms and ten renderers `LIBRARY_v3.md`
-calls for all exist, every one of the sixty-one seeded week 1–3 prompts says and prints
-what §2 says it does, and slices 16–20 landed the whole of the 106-prompt library the draw
-engine was measured against. The pool is 167 prompts, 153 of them drawable, and slice 20
-ran the numbers §3 claims against it for the first time. Slice 22 finished the country
-data: all nine focuses are recommended somewhere and every adorned country carries three
-affinities. **What remains is slice 21** — the twelve prompts owed to Ancient World and
-Conflict and Change, one M slice. Also outstanding are due-outs D-10 and D-14, neither of
-them code.
+**Every slice is built.** The nineteen forms and ten renderers `LIBRARY_v3.md` calls for
+all exist, every one of the sixty-one seeded week 1–3 prompts says and prints what §2 says
+it does, slices 16–20 landed the 106-prompt library the draw engine was measured against,
+and slice 21 wrote the twelve owed to Ancient World and Conflict and Change. The pool is
+**179 prompts, 165 of them drawable**. Slice 22 finished the country data: all nine focuses
+are recommended somewhere and every adorned country carries three affinities.
+**No slice is outstanding.** Due-outs D-10 (the fonts) and D-14 (the wall tablet) remain,
+neither of them code.
 
 | # | Slice | Status | Band | Depends on | Design sections |
 |---|---|---|---|---|---|
@@ -37,7 +36,7 @@ them code.
 | 18 | [Prompts: people and daily life](18-prompts-people-and-daily-life.md) | built | L | 17 | §13 |
 | 19 | [Prompts: school, names, belief](19-prompts-school-names-belief.md) | built | L | 18 | §13 |
 | 20 | [Prompts: craft, food, voices](20-prompts-craft-food-voices.md) | built | L | 19 | §13, §16 |
-| 21 | [The twelve owed](21-the-twelve-owed.md) | not started | M | 20 | §13 |
+| 21 | [The twelve owed](21-the-twelve-owed.md) | built | M | 20 | §13 |
 | 22 | [The affinities](22-affinities.md) | built | S | 11 | §9 |
 
 Statuses: `not started` · `in progress` · `built`.
@@ -224,10 +223,15 @@ fourth sheet in about 13% of weeks rather than 3%. Nothing about that is a defec
 here: `LIBRARY_v3.md` §16 owns the layouts, and *Do not build* below is explicit that
 slice 20 measures the library as specified rather than reshapes it.
 
-**Slice 21 is the only writing.** Six week-3-flavoured prompts each for Ancient World and
-Conflict and Change, which are at twelve and ten on-theme prompts where every other focus
-is at seventeen or better. It comes after the measurement, so it is written against a
-number rather than a guess.
+**Slice 21 is the only writing, and it is built.** Six week-3-flavoured prompts each for
+Ancient World and Conflict and Change, which stood at twelve and ten on-theme prompts where
+every other focus was at seventeen or better — and, more to the point, at one natural-week-3
+prompt each. They now hold eighteen and seventeen. *A week with none of it* falls from 33%
+to 22% and from 43% to 27%. The six for Conflict and Change ask why a conflict happened
+rather than what happened: every conflict prompt written before them asks what, when or who.
+The slice file carries two findings worth reading before the next piece of measurement work
+— §3's shape table and its heaviest-prompt column were both stale, and both are corrected
+against what the engine actually computes.
 
 **Slice 22 was D-15 and depended on nothing, so it landed ahead of slice 21.** Sixty
 affinity rows for the three focuses that had none, twenty each, taking every adorned
@@ -252,8 +256,8 @@ in 12–21 reports the drawable count it ended at**:
 | 17 | 93 |
 | 18 | 114 |
 | 19 | 141 |
-| 20 | **153** |
-| 21 | 165 |
+| 20 | 153 |
+| 21 | **165** |
 
 **Three forms have no seeded prompt to bind**, so three prompts land early with them:
 `what-work-pays` with `bar-graph` in slice 12, `who-lives-there` with `hundred-people` and
@@ -319,7 +323,7 @@ Every section of `DESIGN.md` and the slice that finishes it.
 | §10 Progress | 05 — built |
 | §11 Design direction | 07 — built but for the fonts (D-10) |
 | §12 Library editor | 11 — built |
-| §13 Seed data | 11 — nine focuses and their tags; 12–15 — the seeded sixty-one corrected; 16–20 — the 106 prompts; 21 — the twelve owed |
+| §13 Seed data | 11, 12–15, 16–20, 21 — built |
 | §14 Build order | — (superseded by this index) |
 | §15 Decisions | — (tracked in ../other/OPEN-QUESTIONS.md) |
 | §16 Printed worksheets | 10, 12–15 — built (the nineteen forms and ten renderers); 20 — the paper numbers |

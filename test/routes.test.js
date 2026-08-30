@@ -299,7 +299,7 @@ test('the library editor answers on every one of its routes', async () => {
   const library = await asAdmin(e, '/admin/api/library');
   assert.equal(library.status, 200);
   const data = await library.json();
-  assert.equal(data.tasks.length, 197);
+  assert.equal(data.tasks.length, 209);
   assert.equal(data.focuses.length, 9);
   assert.equal(data.layouts.length, 28);
   // Every layout's form is drawn from the knobs the server sends, so the two

@@ -744,3 +744,95 @@ UPDATE task_templates SET worksheet_spec =
 UPDATE task_templates SET worksheet_spec =
   '{"caption":"Draw it growing","lines":3}'
   WHERE worksheet_spec IS NULL AND slug = 'grows-better-there';
+
+-- ---------------------------------------------------------------------------
+-- Slice 21 — the twelve owed. Every one is week 3 and every one goes on a form
+-- with room: `box-beside` stays at thirteen and `fields` at twelve, the two
+-- caps §4 rule 1 names, and neither takes one of these.
+-- ---------------------------------------------------------------------------
+
+UPDATE task_templates SET worksheet_layout_id =
+  (SELECT id FROM worksheet_layouts WHERE slug = 'venn')
+WHERE worksheet_layout_id IS NULL AND slug IN ('their-flood-story');
+
+UPDATE task_templates SET worksheet_layout_id =
+  (SELECT id FROM worksheet_layouts WHERE slug = 'label-small')
+WHERE worksheet_layout_id IS NULL AND slug IN ('the-great-beast');
+
+UPDATE task_templates SET worksheet_layout_id =
+  (SELECT id FROM worksheet_layouts WHERE slug = 'then-now')
+WHERE worksheet_layout_id IS NULL AND slug IN (
+  'was-the-week-always-seven', 'the-spark'
+);
+
+UPDATE task_templates SET worksheet_layout_id =
+  (SELECT id FROM worksheet_layouts WHERE slug = 'specimen-boxes')
+WHERE worksheet_layout_id IS NULL AND slug IN ('what-the-empire-left');
+
+UPDATE task_templates SET worksheet_layout_id =
+  (SELECT id FROM worksheet_layouts WHERE slug = 'flow-steps')
+WHERE worksheet_layout_id IS NULL AND slug IN ('still-done-the-old-way');
+
+UPDATE task_templates SET worksheet_layout_id =
+  (SELECT id FROM worksheet_layouts WHERE slug = 'figure-anchor')
+WHERE worksheet_layout_id IS NULL AND slug IN ('the-oldest-thing-still-alive');
+
+UPDATE task_templates SET worksheet_layout_id =
+  (SELECT id FROM worksheet_layouts WHERE slug = 'table-3')
+WHERE worksheet_layout_id IS NULL AND slug IN ('what-was-already-true');
+
+UPDATE task_templates SET worksheet_layout_id =
+  (SELECT id FROM worksheet_layouts WHERE slug = 'differences')
+WHERE worksheet_layout_id IS NULL AND slug IN ('who-wanted-what');
+
+UPDATE task_templates SET worksheet_layout_id =
+  (SELECT id FROM worksheet_layouts WHERE slug = 'list-n')
+WHERE worksheet_layout_id IS NULL AND slug IN ('the-change-without-a-war');
+
+UPDATE task_templates SET worksheet_layout_id =
+  (SELECT id FROM worksheet_layouts WHERE slug = 'timeline')
+WHERE worksheet_layout_id IS NULL AND slug IN ('why-they-left-when-they-did');
+
+UPDATE task_templates SET worksheet_layout_id =
+  (SELECT id FROM worksheet_layouts WHERE slug = 'box-note')
+WHERE worksheet_layout_id IS NULL AND slug IN ('the-one-who-would-not-back-down');
+
+-- Slice 21 overrides. `the-great-beast` needs the one ruled line `label-small`
+-- does not carry by default: the prompt asks for the last century anybody wrote
+-- about the creature as an animal, and rule 2 runs both ways.
+UPDATE task_templates SET worksheet_spec =
+  '{"labels":["What their account says","What Genesis says"],"shared":"Both tell it the same"}'
+  WHERE worksheet_spec IS NULL AND slug = 'their-flood-story';
+UPDATE task_templates SET worksheet_spec =
+  '{"caption":"Draw it as they described it, then label three things","lines":1,"callouts":3}'
+  WHERE worksheet_spec IS NULL AND slug = 'the-great-beast';
+UPDATE task_templates SET worksheet_spec =
+  '{"captions":["What they counted by before","The week they keep now"],"lines_each":2,"middle":"When it changed, and who"}'
+  WHERE worksheet_spec IS NULL AND slug = 'was-the-week-always-seven';
+UPDATE task_templates SET worksheet_spec =
+  '{"boxes":4,"caption":"Still here, and not theirs to begin with","label_lines":1,"circle_one":true}'
+  WHERE worksheet_spec IS NULL AND slug = 'what-the-empire-left';
+UPDATE task_templates SET worksheet_spec =
+  '{"steps":4,"caption":"How it is made, and how long each stage takes"}'
+  WHERE worksheet_spec IS NULL AND slug = 'still-done-the-old-way';
+UPDATE task_templates SET worksheet_spec =
+  '{"caption":"How old, and still going","unit":"years","anchor_prompt":"The day our country was founded, it was already…"}'
+  WHERE worksheet_spec IS NULL AND slug = 'the-oldest-thing-still-alive';
+UPDATE task_templates SET worksheet_spec =
+  '{"columns":["What was already true","How many years it had been","Who it fell hardest on"],"rows":3}'
+  WHERE worksheet_spec IS NULL AND slug = 'what-was-already-true';
+UPDATE task_templates SET worksheet_spec =
+  '{"captions":["The month before","The month after"],"lines_each":2,"middle":"The date, and what happened"}'
+  WHERE worksheet_spec IS NULL AND slug = 'the-spark';
+UPDATE task_templates SET worksheet_spec =
+  '{"columns":["One side","The other side"],"rows":3,"shared":1}'
+  WHERE worksheet_spec IS NULL AND slug = 'who-wanted-what';
+UPDATE task_templates SET worksheet_spec =
+  '{"items":5,"marker":"number","circle_one":false,"caption":"What had to happen first, earliest at the top"}'
+  WHERE worksheet_spec IS NULL AND slug = 'the-change-without-a-war';
+UPDATE task_templates SET worksheet_spec =
+  '{"ticks":3,"unit":"years","ends":["The leaving started","It stopped or slowed"]}'
+  WHERE worksheet_spec IS NULL AND slug = 'why-they-left-when-they-did';
+UPDATE task_templates SET worksheet_spec =
+  '{"caption":"Draw them","lines":2}'
+  WHERE worksheet_spec IS NULL AND slug = 'the-one-who-would-not-back-down';
