@@ -1579,7 +1579,7 @@ Spec: `{"labels":["Days they keep","Days we keep"],"shared":"Both","lines_each":
 `tags: holiday-calendar, religion, sun-and-seasons` · `mode: measurement`
 
 > **Find out what year it is there**
-> Some countries do not count years from the birth of Christ, and some run two calendars at once — one for the office and one for the holidays. Find out what year it is right now on the calendar people there use for their feast days. Write it in the box, then write what their count starts from and when their new year falls. If they use the same calendar we do, find the last one they used before it and the year they changed.
+> Some countries do not count years from the birth of Christ, and some run two calendars at once — one for the office, one for the holidays. Find the year it is right now on the calendar used for feast days there. Write it in the box, then what their count starts from and when their new year falls. If they use our calendar, find the last one they used and the year they changed.
 
 Spec: `{"caption":"The year it is there right now","unit":"","anchor_prompt":"Their years count from… and their new year falls…"}`
 

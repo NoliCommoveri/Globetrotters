@@ -4,10 +4,10 @@ Twenty-three slices against `../design/DESIGN.md`. Each ends at a state you can 
 browser and judge.
 
 A build session takes the first slice not marked `built` and reads its file.
-**Slices 00–18 are built.** The nineteen forms and ten renderers `LIBRARY_v3.md` calls for
+**Slices 00–19 are built.** The nineteen forms and ten renderers `LIBRARY_v3.md` calls for
 all exist, every one of the sixty-one seeded week 1–3 prompts says and prints what §2 says
-it does, and slices 16–18 landed the first three batches of the library the draw engine was
-measured against. What remains is 51 more prompts, split into three slices, none of them
+it does, and slices 16–19 landed the first four batches of the library the draw engine was
+measured against. What remains is 24 more prompts, split into two slices, none of them
 larger than L. Also outstanding are due-outs D-10 and D-14, neither of them code, and D-15,
 which is the whole of slice 22.
 
@@ -32,7 +32,7 @@ which is the whole of slice 22.
 | 16 | [Prompts: deep time to government](16-prompts-deep-time-to-government.md) | built | L | 15 | §13 |
 | 17 | [Prompts: money, land, weather](17-prompts-money-land-weather.md) | built | M | 16 | §13 |
 | 18 | [Prompts: people and daily life](18-prompts-people-and-daily-life.md) | built | L | 17 | §13 |
-| 19 | [Prompts: school, names, belief](19-prompts-school-names-belief.md) | not started | L | 18 | §13 |
+| 19 | [Prompts: school, names, belief](19-prompts-school-names-belief.md) | built | L | 18 | §13 |
 | 20 | [Prompts: craft, food, voices](20-prompts-craft-food-voices.md) | not started | L | 19 | §13, §16 |
 | 21 | [The twelve owed](21-the-twelve-owed.md) | not started | M | 20 | §13 |
 | 22 | [The affinities](22-affinities.md) | not started | S | 11 | §9 |
@@ -182,7 +182,13 @@ day — `the-group-that-gets-less` through `find-them-near-us`, 21 prompts in al
 largest subject heading in the library — land on the forms already built, and the
 drawable count rises from 93 to 114. Nine months drawn on Who Lives Here and on Who Gets
 What now put an on-theme task in every week 2 and week 3, which neither focus could
-before this batch.
+before this batch. **Slice 19 is built too**: school, work and getting by; names,
+words and what is funny; and belief, legend and the shape of their year —
+`what-every-kid-learns` through `what-year-is-it-there`, 27 prompts in all, the
+largest batch in the split — land on the forms already built, and the drawable
+count rises from 114 to 141. Two `clock-pair` bindings, one `venn` binding and the
+second of the three storyboards land here too, and the family's Sabbath and Kingdom
+prompts reach five with `nations-before-the-throne` and `when-sabbath-starts`.
 
 **Slice 20 owns the numbers.** Everything §3 claims — the nine-month run, the paper table,
 the form caps, the fallback that never fires — needs 153 drawable prompts, and slice 20 is
