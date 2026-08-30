@@ -1287,17 +1287,18 @@ skipping the task would leave the week one short.
 ## 13. Seed data
 
 **Status:** partial · the runner, 3 people, 9 focuses, 6 project types, 195
-countries, **185 task templates**, 65 focus tags and 490 prompt tags,
+countries, **197 task templates**, 65 focus tags and 528 prompt tags,
 `003_country_data.sql`'s 222 hooks and 200 affinities across 100 countries
 (slices 02, 09 and 11), and `005_worksheet_layouts.sql`'s twenty-eight printed
 forms with a binding on every week 1–3 template, and on each project type's
-planning step (slices 10, 12–19). Every one of the sixty-one originally
+planning step (slices 10, 12–20). Every one of the sixty-one originally
 seeded week 1–3 prompts says and prints what §2 says it does (slices 12–15),
-and slices 16–19 landed the first four batches of new prompts. What remains
-is slices 20 to 22: 24 more prompts `LIBRARY_v3.md` §2 still holds only as a
-document — the twelve of them owed to Ancient World and Conflict and Change
-are writing rather than transcription — and the three new focuses'
-`country_focus_affinity` rows (D-15).
+and slices 16–20 landed all 106 new prompts `LIBRARY_v3.md` §2 calls for: 167
+week 1–3 prompts in all, 153 of them drawable, which is the pool §3's numbers
+are measured against. What remains is slices 21 and 22: the twelve prompts
+still owed to Ancient World and Conflict and Change, which are writing rather
+than transcription, and the three new focuses' `country_focus_affinity` rows
+(D-15).
 
 Seed files are not migrations (§3). They live beside them in `/src/migrations/`
 and are exported from the same index as `SEEDS`, but they are re-run by **Run
@@ -1345,7 +1346,7 @@ Contents of `002_seed.sql`:
   hooks and affinities are `003`, which also corrects the adventure level on the
   countries whose hooks proved the first pass wrong. The conflict key is `iso3`,
   so a name can be corrected without minting a second row for the same country.
-- **185 task templates**, **490 prompt tags** and **65 focus tags**. The floor that
+- **197 task templates**, **528 prompt tags** and **65 focus tags**. The floor that
   makes the draw work at all is eight drawable prompts across weeks 2 and 3 plus
   one project type's five. The library is far past that floor because the floor
   sizes the pool for the **draw**, and the draw is not what runs out. Ten tasks
@@ -1357,16 +1358,17 @@ Contents of `002_seed.sql`:
 |---|---|---|
 | 1 | 12 | 4 `core` — flag, map, location/borders, language & writing system — plus 8 competing for the 5th slot |
 | 2 | 86 | 85 drawable plus the pinned `wow-fact`; one merged pool with week 3 |
-| 3 | 57 | 56 drawable plus the pinned `cook-it`; eight are drawn across the two and dealt |
+| 3 | 69 | 68 drawable plus the pinned `cook-it`; eight are drawn across the two and dealt |
 | 4 | 30 | five for each of the six project types, as ordered sequences |
 
 The week column is the prompt's **natural half**, not a draw pool: nothing in the
 draw reads it and only the deal's arc preference does (§4). `LIBRARY_v3.md` takes
-weeks 1–3 to 12 / 86 / 69 — 24 prompts still to write, and that is slices 20 and 21.
-Against the 141 drawable seeded today the five-month cooldown has more headroom
-still, but it remains sized for 153: closing the gap is what stops the
-stalest-back fallback from becoming the mechanism rather than the safety valve
-it is meant to be.
+weeks 1–3 to 12 / 86 / 69, which slice 20 finished landing — 153 are drawable, the
+size the five-month cooldown was sized for, and the pool never falls through to the
+stalest-back fallback (measured at zero fallbacks across 24,300 simulated months).
+What remains is the twelve prompts still owed to Ancient World and Conflict and
+Change (slice 21), which raise the pool to 165 but do not change what the cooldown
+needs.
 
 All six project types carry a full week-4 sequence, so setup offers all six.
 
@@ -1384,8 +1386,9 @@ no weight-0 and no way to exclude: the assertion the per-week draw needed is gon
 with it, and what replaces it is one on the merged pool. Every focus lifts at
 least six of the drawable prompts above baseline — a smoke floor against a
 mistyped tag set, which is this seed's one silent failure. The target is
-`LIBRARY_v3.md` §3's ten on-theme prompts per focus, and slices 16 to 21 reach
-it.
+`LIBRARY_v3.md` §3's ten on-theme prompts per focus; slices 16 to 20 take seven
+of the nine focuses there, and slice 21 is the twelve prompts that take the
+other two.
 
 **Every week 1–3 template is bound to one of the twenty-eight layouts**, in
 `005_worksheet_layouts.sql` (§16). The heights are the load-bearing half: a

@@ -109,7 +109,8 @@ UPDATE task_templates SET worksheet_layout_id =
   (SELECT id FROM worksheet_layouts WHERE slug = 'lines-4')
 WHERE worksheet_layout_id IS NULL AND slug IN (
   'anthem-listen', 'wow-fact', 'how-they-say-it-began', 'whats-in-the-news',
-  'what-makes-them-laugh'
+  'what-makes-them-laugh',
+  'drink-with-dinner', 'hear-from-a-kid', 'what-they-say-about-us'
 );
 
 UPDATE task_templates SET worksheet_layout_id =
@@ -128,7 +129,8 @@ WHERE worksheet_layout_id IS NULL AND slug IN (
   'landmark-to-see', 'tonights-dinner',
   'made-because-they-needed-it',
   'street-animals', 'find-them-near-us',
-  'creature-they-warn-about'
+  'creature-they-warn-about',
+  'something-sweet', 'grows-better-there'
 );
 
 UPDATE task_templates SET worksheet_layout_id =
@@ -179,7 +181,7 @@ WHERE worksheet_layout_id IS NULL AND slug IN (
   'story-they-tell',
   'trifold-choose', 'model-choose', 'video-choose', 'skit-choose',
   'museum-choose', 'zine-choose',
-  'bible-happened-here'
+  'bible-happened-here', 'how-they-make-it'
 );
 
 UPDATE task_templates SET worksheet_layout_id =
@@ -254,7 +256,7 @@ WHERE worksheet_layout_id IS NULL AND slug IN (
 UPDATE task_templates SET worksheet_layout_id =
   (SELECT id FROM worksheet_layouts WHERE slug = 'week-strip')
 WHERE worksheet_layout_id IS NULL AND slug IN (
-  'their-rest-day'
+  'their-rest-day', 'market-days'
 );
 
 UPDATE task_templates SET worksheet_layout_id =
@@ -262,7 +264,8 @@ UPDATE task_templates SET worksheet_layout_id =
 WHERE worksheet_layout_id IS NULL AND slug IN (
   'oldest-thing-here', 'first-people', 'what-they-grow', 'weather-that-hits',
   'animal-in-trouble', 'sabbath-keepers-there', 'holiday-they-mark',
-  'sound-of-the-country', 'who-came-and-who-left'
+  'sound-of-the-country', 'who-came-and-who-left',
+  'famous-dish', 'holiday-dish', 'street-food'
 );
 
 UPDATE task_templates SET worksheet_layout_id =
@@ -286,7 +289,7 @@ UPDATE task_templates SET worksheet_layout_id =
 WHERE worksheet_layout_id IS NULL AND slug IN (
   'law-you-notice', 'who-can-vote', 'girls-and-women', 'the-sport-they-love',
   'who-comes-when-it-burns', 'family-size', 'when-you-are-old-enough',
-  'if-you-get-sick'
+  'if-you-get-sick', 'school-lunch'
 );
 
 UPDATE task_templates SET worksheet_layout_id =
@@ -294,7 +297,8 @@ UPDATE task_templates SET worksheet_layout_id =
 WHERE worksheet_layout_id IS NULL AND slug IN (
   'what-they-plan-next', 'who-speaks-up-there', 'what-they-do-for-you',
   'the-group-that-gets-less', 'what-a-kid-carries',
-  'what-every-kid-learns', 'getting-around-if-you-cant-walk', 'what-the-old-people-say'
+  'what-every-kid-learns', 'getting-around-if-you-cant-walk', 'what-the-old-people-say',
+  'before-you-visit'
 );
 
 -- `hundred-people` has no seeded prompt in slice 12's library, so it seeds one
@@ -714,3 +718,29 @@ UPDATE task_templates SET worksheet_spec =
 UPDATE task_templates SET worksheet_spec =
   '{"labels":["Days they keep","Days we keep"]}'
   WHERE worksheet_spec IS NULL AND slug = 'same-day-different-name';
+
+-- Slice 20 overrides. `how-they-make-it`, `drink-with-dinner`, `hear-from-a-kid`
+-- and `what-they-say-about-us` match their layouts' own defaults and need none.
+UPDATE task_templates SET worksheet_spec =
+  '{"items":4,"caption":"Four things a visitor should know"}'
+  WHERE worksheet_spec IS NULL AND slug = 'before-you-visit';
+UPDATE task_templates SET worksheet_spec =
+  '{"columns":["Their lunch","Our lunch"]}'
+  WHERE worksheet_spec IS NULL AND slug = 'school-lunch';
+UPDATE task_templates SET worksheet_spec =
+  '{"captions":["What it is called","What goes in it","Why this one"]}'
+  WHERE worksheet_spec IS NULL AND slug = 'famous-dish';
+UPDATE task_templates SET worksheet_spec =
+  '{"captions":["The dish","The day it belongs to","Why it waits"]}'
+  WHERE worksheet_spec IS NULL AND slug = 'holiday-dish';
+UPDATE task_templates SET worksheet_spec = '{"lines":3}'
+  WHERE worksheet_spec IS NULL AND slug = 'something-sweet';
+UPDATE task_templates SET worksheet_spec =
+  '{"captions":["What it is","Where you would buy it","What it costs"]}'
+  WHERE worksheet_spec IS NULL AND slug = 'street-food';
+UPDATE task_templates SET worksheet_spec =
+  '{"caption":"Shade the days the market is open"}'
+  WHERE worksheet_spec IS NULL AND slug = 'market-days';
+UPDATE task_templates SET worksheet_spec =
+  '{"caption":"Draw it growing","lines":3}'
+  WHERE worksheet_spec IS NULL AND slug = 'grows-better-there';

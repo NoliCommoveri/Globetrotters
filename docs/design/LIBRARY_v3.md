@@ -1862,20 +1862,28 @@ repeating rows now have a real home, and nine of them are in week 2.
 
 ### What one printed week costs in paper
 
+Measured against the finished 167 — slice 20 is the first slice at which this table is a
+simulation of the real printed output rather than thirds divided by three. Sheets is the
+actual count `packSheets` produces, position order and all, over 20,000 drawn months.
+
 | Week | What prints | Thirds | Sheets |
 |---|---|---|---|
 | 1 | 4 core + 1 drawn from 8 | 6.2 | 2.1 |
-| 2 | `wow-fact` + 4 dealt | 7.3 | 2.4 |
-| 3 | `cook-it` + 4 dealt | 8.3 | 2.8 — the recipe takes a sheet of its own |
+| 2 | `wow-fact` + 4 dealt | 7.2 | 3.0 |
+| 3 | `cook-it` + 4 dealt | 8.1 | 3.1 — the recipe takes a sheet of its own |
 | 4 | composed | 3.0 | 1.0 |
-| | | **24.8** | **8.3 a month** |
+| | | **24.5** | **9.2 a month** |
 
-Measured over the draw rather than averaged over the pool. Twenty-five sheets a month
-across three learners, about 224 over a nine-month year.
+Twenty-eight sheets a month across three learners, about 248 over a nine-month year.
 
-**The deal balances the paper, which is the reason the spread is now narrow.** Per-week
-thirds run at sd 0.97 against sd 1.52 under the old two-draws-of-five, and a week spills
-onto a fourth sheet 3% of the time rather than 28%.
+**The deal balances the paper, which is the reason the spread across weeks is narrow —
+sd 0.89 (week 2) and 0.77 (week 3) against sd 1.52 under the old two-draws-of-five — but it
+does not pack a week onto fewer sheets, because it never reorders the five within a week.**
+Two segments at two thirds each cannot share a sheet (2 + 2 > 3), so a week that deals two
+or three of `table-3`, `box-note`, `specimen-boxes`, `hundred-people`, `label-small`,
+`bar-graph` or `then-now` into unlucky order spills onto a fourth sheet. Measured at 13.8%
+of week 2s and 12.6% of week 3s; week 1 and week 4 do not spill — week 1 carries at most one
+two-thirds form and week 4 is always exactly one sheet by construction.
 
 ### The tag system
 
@@ -1968,15 +1976,15 @@ picked.
 
 | Focus | Above baseline | **On-theme** | of those, natural wk 2 / wk 3 | Heaviest prompt |
 |---|---|---|---|---|
-| **Ancient World** | 43 | **12** | 11 / 1 | ×9 |
+| **Ancient World** | 41 | **12** | 11 / 1 | ×9 |
 | **Wild Places** | 41 | **17** | 14 / 3 | ×9 |
-| **People and Power** | 52 | **23** | 20 / 3 | ×9 |
-| **Food and Craft** | 44 | **28** | 9 / 19 | ×9 |
+| **People and Power** | 52 | **23** | 20 / 3 | ×8 |
+| **Food and Craft** | 43 | **28** | 9 / 19 | ×9 |
 | **Conflict and Change** | 52 | **10** | 9 / 1 | ×10 |
 | **Land and Sky** | 42 | **19** | 16 / 3 | ×11 |
 | **Who Lives Here** | 66 | **40** | 13 / 27 | ×9 |
 | **Who Gets What** | 54 | **28** | 25 / 3 | ×9 |
-| **Stories and Spirits** | 41 | **36** | 9 / 27 | ×7 |
+| **Stories and Spirits** | 40 | **36** | 9 / 27 | ×7 |
 
 **The tagging is accurate; the counts are what is thin.** Graded against the audit the tag
 tables score ~100% recall — three prompts in the whole library are on-theme by hand and
@@ -1988,13 +1996,13 @@ World and Conflict and Change have one each. That gap is what the merged pool in
 draw* exists to survive and what the six-prompts-each writing job exists to close.
 
 **`civic-process` is a strict subset of `governance`** — all four of its prompts carry
-both — so People and Power weighting both at 3 pays twice for the same four rows. The tag
-stays as documentation of what those four prompts are and People and Power does not weight
-it, which is why the focus table below lists seven tags for it and not eight. The two
-tables under *What each focus actually reaches* and *What the shape delivers* were measured
-with it weighted: People and Power's reach is unchanged, since `governance` covers the same
-four prompts, but those four fall from ×13 to ×7 and its measured columns move a little.
-Slice 20 re-measures against the finished library.
+both — so People and Power weighting both at 3 would pay twice for the same four rows.
+The tag stays as documentation of what those four prompts are; People and Power does not
+weight it, which is why the focus table above lists seven tags for it and not eight. The
+two tables under *What each focus actually reaches* and *What the shape delivers* are
+measured against that: People and Power's reach is unchanged, since `governance` covers
+the same four prompts, but the four fall from ×13 to ×7 and its heaviest prompt reports
+×8 rather than the ×9 an uncorrected weighting would have given it.
 
 **Seven topic tags carry no weight from any focus** — `clothing`, `emblems`,
 `future-plans`, `holiday-calendar` (10 members), `infrastructure` (10), `sabbath`,
@@ -2102,37 +2110,44 @@ on the deal, not the draw.
 
 ### What the shape delivers
 
-Measured at `2 ×`, over 2,500 simulated months per focus, against a hand audit of which
-focus each of the 155 prompts actually serves — `../other/FOCUS-AUDIT.md`.
+Measured at `2 ×`, over 2,500 simulated months per focus against the real seeded 153, and
+scored against the hand audit of which focus each of the 155 weeks 2–3 prompts actually
+serves — `../other/FOCUS-AUDIT.md`. This is the first slice at which the pool being drawn
+is the one the audit was written against, so the *new* column below is a measurement
+rather than the estimate slices 11–19 carried in its place.
 
 | Focus | On-theme of the ten: now → new | A week with none of it: now → new |
 |---|---|---|
-| Ancient World | 1.8 → 1.9 | 86% → **42%** |
-| Wild Places | 2.3 → 2.6 | 58% → **20%** |
-| People and Power | 2.4 → 2.7 | 64% → **20%** |
-| Food and Craft | 4.4 → 4.1 | 23% → **1%** |
-| Conflict and Change | 1.2 → 1.4 | 90% → **57%** |
-| Land and Sky | 2.5 → 2.6 | 59% → **18%** |
-| Who Lives Here | 3.8 → 3.3 | 20% → **11%** |
-| Who Gets What | 2.9 → 3.0 | 48% → **13%** |
-| Stories and Spirits | 3.9 → 3.9 | 22% → **6%** |
+| Ancient World | 1.8 → 2.1 | 86% → **21%** |
+| Wild Places | 2.3 → 2.8 | 58% → **8%** |
+| People and Power | 2.4 → 2.4 | 64% → **16%** |
+| Food and Craft | 4.4 → 4.2 | 23% → **3%** |
+| Conflict and Change | 1.2 → 1.7 | 90% → **27%** |
+| Land and Sky | 2.5 → 2.4 | 59% → **13%** |
+| Who Lives Here | 3.8 → 3.2 | 20% → **6%** |
+| Who Gets What | 2.9 → 3.0 | 48% → **6%** |
+| Stories and Spirits | 3.9 → 3.8 | 22% → **2%** |
 
-The second column is what the engine can actually deliver: the deal is scored on summed
-draw weight, which is all it knows. A deal scored on the audit itself — an oracle the
-built thing does not have — would take Ancient World to 37% and Who Lives Here to 5%, so
-the gap between the two is the price of the proxy and it is small.
+The second column is what the engine actually delivers: the deal is scored on summed draw
+weight, which is all it knows. It runs well ahead of what the estimate carried while the
+library was still being written — the estimate was built from the shape of the merge before
+there was a full pool to draw from, and the finished library's topic tags spread the weight
+more evenly across weeks 2 and 3 than that estimate assumed.
 
 **The total barely moves and that is expected.** Merging dilutes the concentration a focus
 enjoyed in its strong week and the month gives up a task; the two cancel. What the merge
 buys is the second column — the failure this library actually had was a whole week of five
-sheets that ignored the focus the learner chose, and it ran at 20–90% a month.
+sheets that ignored the focus the learner chose, and it ran at 20–90% a month under the old
+two-draws-of-five.
 
-**Ancient World and Conflict and Change are still bad, and it is a content gap, not a draw
-gap.** They have twelve and ten on-theme prompts in a 153 pool; no weighting reaches what
-is not written. Six week-3-flavoured prompts each — an ordinary thing still done the old
-way, a dish a conqueror left behind, a word a war put in the language, a street that
-moved — brings them in line with the rest. That is the one piece of writing this version
-still owes.
+**Ancient World and Conflict and Change are still the two weakest, and it is a content gap,
+not a draw gap.** They have twelve and ten on-theme prompts in a 153 pool — every other
+focus has seventeen or more — so no weighting reaches what is not written, and a week with
+none of it is still the highest of the nine for both, even though the merge already took
+both well under the ceiling this version set for them. Six
+week-3-flavoured prompts each — an ordinary thing still done the old way, a dish a conqueror
+left behind, a word a war put in the language, a street that moved — brings them in line
+with the rest. That is the one piece of writing this version still owes, and slice 21's.
 
 ---
 

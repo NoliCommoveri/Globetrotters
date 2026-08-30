@@ -6,14 +6,14 @@
 // reports — 155 weeks 2-3 rows of which 153 are drawable, the same twenty-seven
 // forms in the same proportions, fifty topic tags and seven mode tags — and it
 // is what the constraint assertions run against, because they are about the
-// shape of the library and not about which prompts are written yet. The real
-// seed is used for the numbers that do not depend on the library's size.
+// shape of the library and not about which prompts are written yet.
 //
-// The rest of it — nine months back to back, the on-theme coverage, the paper
-// numbers — is slice 20's, and it is not soft-pedalled here. Against the 49
-// drawable prompts seeded today the five-month cooldown blocks 40 by month six
-// and the stalest-back fallback stops being a safety valve, which is a reason to
-// finish the library rather than to assert a weaker version of the number.
+// The real seed — 167 week 1-3 prompts, 153 drawable, finished as of slice 20 —
+// is used for the numbers that do depend on the library's size: nine months back
+// to back never falling through to the stalest-back cooldown fallback, and the
+// on-theme coverage `../other/FOCUS-AUDIT.md` was hand-judged against. The paper
+// numbers are measured in `LIBRARY_v3.md` §3 rather than asserted here, because
+// they read the renderer's `packSheets`, which is `worksheet.js`'s concern.
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -492,12 +492,11 @@ test('the stalest goes back rather than erroring when a cooldown empties the poo
 
 // ------------------------------------------------------- the real library --
 
-// The draw against the seeded library rather than a fixture. Fifty
-// drawable prompts is a third of what the cooldown is sized for, so this asserts
-// what does not depend on the library's size: a month is twenty, no prompt is
-// drawn twice, and the pins are where they belong. The nine-month run is
-// slice 20's, against the library it was measured for.
-test('every focus draws a whole month from the real seeded library', () => {
+// Loads the actual seed rather than a fixture: 167 week 1-3 prompts, 153
+// drawable, finished as of slice 20. `onThemeFor` reads `../other/FOCUS-AUDIT.md`
+// so the on-theme assertions below are graded against the same hand judgement
+// `LIBRARY_v3.md` §3's tables are.
+function realLibrary() {
   const db = new DatabaseSync(':memory:');
   for (const file of ['001_schema.sql', '002_seed.sql', '004_worksheets.sql',
                       '005_worksheet_layouts.sql']) {
@@ -520,21 +519,49 @@ test('every focus draws a whole month from the real seeded library', () => {
     modes.get(row.task_template_id).push(row.tag);
   }
   const rows = templates.map((t) => ({ ...t, modes: modes.get(t.id) ?? [] }));
+  const byId = new Map(rows.map((t) => [t.id, t]));
   const projectTypes = db.prepare('SELECT id FROM project_types WHERE archived = 0').all();
+  const focuses = db.prepare('SELECT id, slug, name FROM focuses').all();
 
-  for (const focus of db.prepare('SELECT id, slug FROM focuses').all()) {
+  const weigherFor = (focusId) => {
     const shared = new Map(db.prepare(`
       SELECT pt.task_template_id AS id, SUM(ft.weight) AS shared
       FROM prompt_tags pt
       JOIN focus_tags ft ON ft.tag = pt.tag AND ft.focus_id = ?
       WHERE pt.namespace = 'topic'
       GROUP BY pt.task_template_id
-    `).all(focus.id).map((r) => [r.id, Number(r.shared)]));
+    `).all(focusId).map((r) => [r.id, Number(r.shared)]));
+    return (id) => 1 + 2 * (shared.get(id) ?? 0);
+  };
 
+  const audit = readFileSync(new URL('../docs/other/FOCUS-AUDIT.md', import.meta.url), 'utf8');
+  const auditTable = audit.slice(audit.indexOf('## The table'));
+  const onThemeBySlug = new Map();
+  for (const line of auditTable.split('\n')) {
+    const m = line.match(/^\|\s*`([a-z0-9-]+)`\s*\|\s*\d\s*\|\s*(.+?)\s*\|$/);
+    if (!m) continue;
+    onThemeBySlug.set(m[1], m[2] === '— none' ? [] : m[2].split(',').map((s) => s.trim()));
+  }
+  const onThemeFor = (focusName) => {
+    const set = new Set();
+    for (const [slug, names] of onThemeBySlug) if (names.includes(focusName)) set.add(slug);
+    return set;
+  };
+
+  return { rows, byId, projectTypes, focuses, weigherFor, onThemeFor };
+}
+
+// A month is twenty, no prompt is drawn twice, and the pins are where they
+// belong — for every focus, against the real seed rather than a fixture.
+test('every focus draws a whole month from the real seeded library', () => {
+  const { rows, projectTypes, focuses, weigherFor } = realLibrary();
+  const slug = new Map(rows.map((t) => [t.id, t.slug]));
+
+  for (const focus of focuses) {
     const plan = drawPlan({
       templates: rows,
       projectTypeId: projectTypes[0].id,
-      focusWeight: (id) => 1 + 2 * (shared.get(id) ?? 0),
+      focusWeight: weigherFor(focus.id),
       monthsSince: () => null,
       random: Math.random,
     });
@@ -546,8 +573,65 @@ test('every focus draws a whole month from the real seeded library', () => {
       assert.equal(plan.filter((r) => r.week_no === week).length, 5, `${focus.slug} week ${week}`);
     }
 
-    const slug = new Map(rows.map((t) => [t.id, t.slug]));
     assert.ok(plan.some((r) => r.week_no === 2 && slug.get(r.task_template_id) === 'wow-fact'));
     assert.ok(plan.some((r) => r.week_no === 3 && slug.get(r.task_template_id) === 'cook-it'));
+  }
+});
+
+// LIBRARY_v3.md §3: against 153 the cooldown never gives way. Fifty nine-month
+// runs per focus — 450 learners, 4,050 months — and the fresh pool (never
+// drawn in the last five months) never once drops below the eight a draw
+// needs, so `eligiblePool` never reaches for a stale prompt. It never comes
+// close: the measured floor is 113 fresh against the eight needed.
+test('nine months back to back never fall through to the stalest-back cooldown fallback', () => {
+  const { rows, byId, focuses, weigherFor } = realLibrary();
+  const pool = mergedPool(rows);
+
+  for (const focus of focuses) {
+    const fw = weigherFor(focus.id);
+    for (let learner = 0; learner < 50; learner += 1) {
+      const drawnIn = new Map();
+      for (let month = 0; month < 9; month += 1) {
+        const monthsSince = (id) => (drawnIn.has(id) ? month - drawnIn.get(id) : null);
+        const fresh = pool.filter((t) => recency(monthsSince(t.id)) === 1);
+        assert.ok(fresh.length >= DRAWN,
+          `${focus.slug} learner ${learner} month ${month}: only ${fresh.length} fresh`);
+
+        const plan = drawDeepWeeks({ templates: rows, focusWeight: fw, monthsSince, random: Math.random });
+        for (const row of plan) {
+          const t = byId.get(row.task_template_id);
+          if (t.tier !== 'fixed') drawnIn.set(t.id, month);
+        }
+      }
+    }
+  }
+});
+
+// LIBRARY_v3.md §3, "What the shape delivers": the two weakest focuses,
+// Ancient World and Conflict and Change, still clear the ceiling this version
+// set for them — a week with none of their on-theme content at or under 42%
+// and 57% — even though they hold only twelve and ten on-theme prompts apiece
+// in the 153 pool.
+test('Ancient World and Conflict and Change clear their week-with-none ceiling', () => {
+  const { rows, byId, focuses, weigherFor, onThemeFor } = realLibrary();
+  const ceilings = { 'Ancient World': 42, 'Conflict and Change': 57 };
+  const TRIALS = 600;
+
+  for (const focus of focuses) {
+    const ceiling = ceilings[focus.name];
+    if (!ceiling) continue;
+
+    const fw = weigherFor(focus.id);
+    const onTheme = onThemeFor(focus.name);
+    let weeksWithNone = 0;
+    for (let n = 0; n < TRIALS; n += 1) {
+      const plan = drawDeepWeeks({ templates: rows, focusWeight: fw, monthsSince: () => null, random: Math.random });
+      for (const week of [2, 3]) {
+        const weekTasks = plan.filter((r) => r.week_no === week).map((r) => byId.get(r.task_template_id));
+        if (!weekTasks.some((t) => onTheme.has(t.slug))) weeksWithNone += 1;
+      }
+    }
+    const rate = (weeksWithNone / (TRIALS * 2)) * 100;
+    assert.ok(rate <= ceiling, `${focus.name} ran a week with none of it at ${rate.toFixed(1)}%, over the ${ceiling}% ceiling`);
   }
 });

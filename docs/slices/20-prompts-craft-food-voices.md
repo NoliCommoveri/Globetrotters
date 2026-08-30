@@ -1,6 +1,6 @@
 # Slice 20 — Prompts: craft, food, voices — and the numbers
 
-**Status:** not started
+**Status:** built
 **Band:** L
 **Implements:** §13 (the last 12 of the 106 prompts), §16 (the paper numbers)
 **Depends on:** 19
