@@ -4,12 +4,12 @@ Twenty-three slices against `../design/DESIGN.md`. Each ends at a state you can 
 browser and judge.
 
 A build session takes the first slice not marked `built` and reads its file.
-**Slices 00–16 are built.** The nineteen forms and ten renderers `LIBRARY_v3.md` calls for
+**Slices 00–17 are built.** The nineteen forms and ten renderers `LIBRARY_v3.md` calls for
 all exist, every one of the sixty-one seeded week 1–3 prompts says and prints what §2 says
-it does, and slice 16 landed the first batch of the library the draw engine was measured
-against. What remains is 82 more prompts, split into five slices, none of them larger than
-L. Also outstanding are due-outs D-10 and D-14, neither of them code, and D-15, which is
-the whole of slice 22.
+it does, and slices 16–17 landed the first two batches of the library the draw engine was
+measured against. What remains is 63 more prompts, split into four slices, none of them
+larger than L. Also outstanding are due-outs D-10 and D-14, neither of them code, and D-15,
+which is the whole of slice 22.
 
 | # | Slice | Status | Band | Depends on | Design sections |
 |---|---|---|---|---|---|
@@ -30,7 +30,7 @@ the whole of slice 22.
 | 14 | [Forms: fields and the box knobs](14-forms-fields-and-the-box-knobs.md) | built | L | 13 | §16, §13 |
 | 15 | [Forms: figures, recipe, text sweep](15-forms-figures-recipe-and-the-text-sweep.md) | built | L | 14 | §16, §13 |
 | 16 | [Prompts: deep time to government](16-prompts-deep-time-to-government.md) | built | L | 15 | §13 |
-| 17 | [Prompts: money, land, weather](17-prompts-money-land-weather.md) | not started | M | 16 | §13 |
+| 17 | [Prompts: money, land, weather](17-prompts-money-land-weather.md) | built | M | 16 | §13 |
 | 18 | [Prompts: people and daily life](18-prompts-people-and-daily-life.md) | not started | L | 17 | §13 |
 | 19 | [Prompts: school, names, belief](19-prompts-school-names-belief.md) | not started | L | 18 | §13 |
 | 20 | [Prompts: craft, food, voices](20-prompts-craft-food-voices.md) | not started | L | 19 | §13, §16 |
@@ -174,7 +174,10 @@ right, and findable again without a note. A prompt and its tags land in the same
 always: an untagged prompt draws at baseline forever and nothing in the app reports it.
 **Slice 16 is built**: deep time, empire, the Book and government — `long-before-people`
 through `what-they-are-working-on`, 24 prompts in all — land on the forms slices 12–15
-built, and the drawable count rises from 52 to 74.
+built, and the drawable count rises from 52 to 74. **Slice 17 is built too**: money and
+work, the land, weather and water, and living things — `where-the-price-goes` through
+`plants-that-heal`, 19 prompts in all — land on the forms already built, and the drawable
+count rises from 74 to 93.
 
 **Slice 20 owns the numbers.** Everything §3 claims — the nine-month run, the paper table,
 the form caps, the fallback that never fires — needs 153 drawable prompts, and slice 20 is

@@ -768,7 +768,7 @@ Spec: `{"steps":4,"orient":"across","caption":"From there to here"}`
 `tags: who-owns-it, trade, who-gets-less` · `mode: us-contrast`
 
 > **Find out who gets the money**
-> Pick one thing this country sells to the rest of the world — coffee, cocoa, cobalt, cotton, bananas, cut flowers. Out of every hundred dollars somebody here pays for it in a shop, find out roughly how much reaches the farmer or the miner, how much the company that buys it keeps, how much goes on shipping, and how much the shop keeps. Draw a bar for each. If nobody has worked it out for this country, use the closest country that sells the same thing and write which one you used.
+> Pick one thing this country sells to the rest of the world — coffee, cocoa, cobalt, cotton, bananas, cut flowers. Out of every hundred dollars a shopper pays for it, find how much reaches the farmer or miner, how much the company keeps, how much goes on shipping, and how much the shop keeps. Draw a bar for each. If nobody has worked it out for this country, use the closest country that sells it.
 
 Spec: `{"bars":4,"orient":"horizontal","scale_marks":5,"axis_label":"Out of every $100 a shopper here pays","caption":"The farmer or miner  ·  The company  ·  Shipping  ·  The shop"}`
 
@@ -776,7 +776,7 @@ Spec: `{"bars":4,"orient":"horizontal","scale_marks":5,"axis_label":"Out of ever
 `tags: who-owns-it, damage-and-repair, advocacy`
 
 > **Find a company that got caught**
-> Find one time a company — theirs, or a foreign one working there — did something to this country that people there are still angry about: a spill, a collapse, a river, a wage, a forest, a mine. Mark three moments on the line and write what happened at each: when it started, when people found out, and what has happened since. If you cannot find one, find out what the biggest company in the country is, who owns it, and mark the three biggest dates in its life instead.
+> Find one time a company — theirs, or a foreign one working there — did something to this country people are still angry about: a spill, a collapse, a river, a wage, a forest, a mine. Mark three moments on the line: when it started, when people found out, and what happened since. If you cannot find one, find the biggest company there, who owns it, and mark three big dates in its life instead.
 
 Spec: `{"ticks":3,"unit":"years","ends":["It started","Now"]}`
 
