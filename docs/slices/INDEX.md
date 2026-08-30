@@ -88,10 +88,18 @@ has named.
 `LIBRARY_v3.md` specifies both: a draw over one merged pool of 153 tagged prompts, and the
 167 prompts that pool is made of. **Slice 11 is built**: the engine draws eight from one
 pool against tag weights, deals them four and four, and joins the two pinned tasks, and it
-is proved against a synthetic pool of the right shape. Sixty-two prompts are seeded, so the
-app draws correctly from a pool a third of the intended size — with one number to watch,
-the five-month cooldown, which is sized for 153 and exhausts by month six against the 50
-that are drawable today.
+is proved against both a synthetic pool of the right shape and the real 153.
+
+**Two of its numbers were re-set once the real pool existed to measure them against, and
+both were set by the same thing — a rule counting the pinned prompts.** The mode cap is
+two rather than one: `cook-it` is pinned into every week 3 and carries `hands-on`, so a
+cap of one spent that tag before the draw began and left the library's other seven
+`hands-on` prompts permanently undrawable. And the cooldown is three months rather than
+five: five is comfortable for a 153-prompt pool and not for `personal-voice`, which has
+eight members and spends one a month, so from month six on 9% of months had nobody from
+the country speaking in them. A cooldown is sized by the scarcest set a rule has to draw
+from, not by the library. Both are asserted against the real seed now — a synthetic
+fixture deals its mode tags evenly and cannot fail either one.
 
 **Erase everything changed what a schema slice costs, and slice 11 is what spent it.**
 Every table can be dropped from `/admin` and rebuilt from the files, so `001_schema.sql`

@@ -2,7 +2,7 @@
 //
 // In JS, not SQL, and pure: it takes rows and two lookup functions and returns
 // twenty positions. Nothing here touches D1, which is what makes "a form never
-// appears twice in a week" and "a prompt rests five months for one child and
+// appears twice in a week" and "a prompt rests three months for one child and
 // stays available to a sibling" assertions in a test file rather than claims in
 // a comment.
 //
@@ -31,11 +31,18 @@ export class ShortPoolError extends Error {
 
 // ------------------------------------------------------------ the numbers --
 
-// Five months of eight blocks forty of the finished library's 153, which leaves
-// 113 eligible and no cliff. It replaced a decay because a decay was right
-// against a 25-template week and is wrong against a merged pool: recency is a
-// prohibition now, not a preference (§4).
-export const COOLDOWN_MONTHS = 5;
+// Three months of eight blocks twenty-four of the finished library's 153, which
+// leaves 129 eligible and no cliff. It replaced a decay because a decay was
+// right against a 25-template week and is wrong against a merged pool: recency
+// is a prohibition now, not a preference (§4).
+//
+// Three rather than five, and the difference is not the size of the whole pool
+// — it is the size of the smallest set the draw has to satisfy a rule from.
+// `personal-voice` has eight members; at five months a month that spends one
+// has locked out most of them by month six, and the balance rule below stops
+// being satisfiable. A cooldown has to be shorter than the scarcest thing it
+// rests.
+export const COOLDOWN_MONTHS = 3;
 
 // Ten tasks across weeks 2 and 3: two pinned, six weighted, two wildcard.
 export const WEIGHTED = 6;
@@ -49,11 +56,23 @@ export const PER_WEEK = 5;
 // deal separate the pair takes it to zero (§4).
 export const FORM_CAP = 2;
 
+// No mode tag takes more than two of the ten. Anti-monotony, not balance: two
+// prompts that both say *and now write ours next to it* is a pair, three is a
+// month with a tic (§4).
+//
+// Two rather than one, and the pins are why. `cook-it` is pinned into every
+// week 3 and carries `hands-on`, so a cap of one spent that tag before the
+// draw began and made every other `hands-on` prompt in the library
+// unreachable — seven of them, `how-they-make-it` and `their-alphabet` among
+// them, drawn zero times in eighteen thousand simulated months. A cap of two
+// leaves a seat behind each pin.
+export const MODE_CAP = 2;
+
 // The two modes every month must hold at least one of, in the order the two
 // wildcard slots repair them. A month in which nobody from the country ever
 // speaks is the failure the library is most trying to avoid, and the
-// anti-monotony rule below does not prevent it: forbidding a *second* prompt
-// with a mode tag says nothing about the first.
+// anti-monotony cap does not prevent it: capping a mode at two says nothing
+// about it appearing at all.
 export const BALANCE_MODES = ['hands-on', 'personal-voice'];
 
 // Both say "this month" in their wording, so they read wrong dealt into the
@@ -68,7 +87,7 @@ const thirdsOf = (t) => Number(t.thirds) || 1;
 
 // ------------------------------------------------------------- the scores --
 
-// A hard cooldown, not a curve. Drawn within five months for this person scores
+// A hard cooldown, not a curve. Drawn within three months for this person scores
 // 0 and is out; anything older, or never drawn, scores 1. Scoped per learner,
 // so a prompt rests for one child and stays available to a sibling (§4).
 export function recency(monthsSince) {
@@ -162,9 +181,9 @@ export function pinsBy(templates) {
 }
 
 // The eligible pool, and the one place the cooldown gives way. Against the 153
-// seeded as of slice 20 this never fires — measured at zero fallbacks across
-// 24,300 simulated months. The stalest go back first, one at a time, and only
-// as far as eight.
+// seeded as of slice 20 this never fires — across 32,400 simulated months the
+// fresh pool never fell below 129 against the eight a draw needs. The stalest go
+// back first, one at a time, and only as far as eight.
 function eligiblePool(pool, monthsSince) {
   const fresh = pool.filter((t) => recency(monthsSince(t.id)) === 1);
   if (fresh.length >= DRAWN) return fresh;
@@ -176,15 +195,15 @@ function eligiblePool(pool, monthsSince) {
 }
 
 // The strictest non-empty candidate set. Both rules hold at 153 — zero form
-// collisions in 22,500 simulated months, zero mode fallbacks in 40,000 draws —
+// collisions and zero mode fallbacks across 32,400 simulated nine-month runs —
 // but at 50 they can meet, and something has to give in a stated order rather
-// than whichever the loop happens to hit. The mode rule gives way first: it is
-// anti-monotony, a month that says *and now write ours next to it* twice. The
-// form cap is what keeps two of the same worksheet off one week's paper, which
-// §4 calls the one thing the draw forbids outright.
+// than whichever the loop happens to hit. The mode cap gives way first: it is
+// anti-monotony, a month that says *and now write ours next to it* three times.
+// The form cap is what keeps two of the same worksheet off one week's paper,
+// which §4 calls the one thing the draw forbids outright.
 function allowed(candidates, seats, taken) {
   const capOk = (t) => formOf(t) == null || (seats.get(formOf(t)) || 0) < FORM_CAP;
-  const modeOk = (t) => modesOf(t).every((m) => !taken.has(m));
+  const modeOk = (t) => modesOf(t).every((m) => (taken.get(m) || 0) < MODE_CAP);
 
   const both = candidates.filter((t) => capOk(t) && modeOk(t));
   if (both.length) return both;
@@ -195,7 +214,7 @@ function allowed(candidates, seats, taken) {
 function seat(t, seats, taken) {
   const form = formOf(t);
   if (form != null) seats.set(form, (seats.get(form) || 0) + 1);
-  for (const m of modesOf(t)) taken.add(m);
+  for (const m of modesOf(t)) taken.set(m, (taken.get(m) || 0) + 1);
 }
 
 // The wildcard's reach: the least on-theme quarter of what is left. The bottom
@@ -215,7 +234,7 @@ export function drawMerged({ pool, pins, focusWeight, monthsSince, random = Math
   if (eligible.length < DRAWN) throw new ShortPoolError(null, DRAWN, eligible.length);
 
   const seats = new Map();
-  const taken = new Set();
+  const taken = new Map();
   for (const pin of pins) seat(pin, seats, taken);
 
   const byIdMap = new Map(eligible.map((t) => [t.id, t]));
@@ -238,14 +257,21 @@ export function drawMerged({ pool, pins, focusWeight, monthsSince, random = Math
   // The two wildcard slots are also the repair budget for mode balance, which
   // costs the draw nothing it was using: if the ten hold no `hands-on` the
   // first draws from `hands-on` candidates only, and the second does the same
-  // for `personal-voice`. A mode already taken is a prompt already carrying it,
-  // so a repair the pins have already made is skipped. A mode nothing in the
-  // pool carries falls back to an ordinary wildcard rather than failing the
-  // draw — the case `personal-voice` was in before slice 20 wrote the voices.
+  // for `personal-voice`. A mode already present is a prompt already carrying
+  // it, so a repair the pins have already made — `cook-it` makes the `hands-on`
+  // one every month — is skipped. A mode nothing in the pool carries falls back
+  // to an ordinary wildcard rather than failing the draw.
   for (let n = 0; n < WILDCARDS; n += 1) {
     let candidates = allowed(remaining, seats, taken);
-    const mode = BALANCE_MODES[n];
-    if (mode && !taken.has(mode)) {
+    // Whichever balance mode is still missing, not the nth one: `cook-it`
+    // satisfies `hands-on` before the draw starts, so a slot-for-slot mapping
+    // spends the first wildcard on an ordinary pick and leaves `personal-voice`
+    // one chance instead of two. It costs nothing and is the honest reading of
+    // "the wildcards are the repair budget", though against this library it
+    // buys almost nothing: the residual misses are the `lines-4` form cap, not
+    // a shortage of attempts.
+    const mode = BALANCE_MODES.find((m) => !taken.get(m));
+    if (mode) {
       const repair = candidates.filter((t) => modesOf(t).includes(mode));
       if (repair.length) candidates = repair;
     }

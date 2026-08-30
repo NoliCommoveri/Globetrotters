@@ -330,16 +330,16 @@ weeks 2 and 3 — one draw, then a deal:
   for each template t:
     fw      = 1 + 2 * SUM(focus_tags.weight) over t's shared topic tags
     m       = months since THIS PERSON last drew t   // null if never drawn
-    recency = (m is null or m > 5) ? 1 : 0
+    recency = (m is null or m > 3) ? 1 : 0
     weight  = fw * recency
   draw 6 by weighted random selection without replacement, skipping any
-    template whose worksheet form already holds 2 of the ten seats
-    (the 2 pinned tasks count) or whose mode tag is already taken this month
+    template whose worksheet form, or whose mode tag, already holds 2 of the
+    ten seats (the 2 pinned tasks count against both)
   draw 2 wildcards: uniformly from the bottom quarter of the remaining
-    eligible pool by fw, the quarter recomputed between the two, same form cap
-  the wildcards are also the repair budget for mode balance: if the ten hold no
-    hands-on prompt the first draws only from hands-on candidates, and the
-    second does the same for personal-voice
+    eligible pool by fw, the quarter recomputed between the two, same caps
+  the wildcards are also the repair budget for mode balance: whichever of
+    hands-on and personal-voice the ten still lack, that wildcard draws only
+    from candidates carrying it
   deal the 8 into two lists of 4, choosing among the 70 splits by, in order:
     1. no worksheet form appears twice inside one week
     2. the two weeks hold as near the same SUM of fw  -- not a count of them
@@ -356,12 +356,20 @@ week 4:
 **Twenty tasks again.** Five, five, five, five. `cook-it` appended on top of a full week
 made twenty-one, which is the one number this section says a kid cannot hold.
 
-**Why a five-month cooldown and not a decay.** A decay was right against a 25-template
+**Why a three-month cooldown and not a decay.** A decay was right against a 25-template
 week, where a hard exclusion exhausted the pool by month five and fell through to an
-unordered fallback. Against 153 it is not: eight draws × five months blocks forty, leaving
-113 eligible, and the cliff never arrives. The cooldown is scoped per learner, so a prompt
-stays available to a sibling while it rests for one child. If it ever did empty the pool,
-drop the single stalest cooldown prompt back in rather than erroring.
+unordered fallback. Against 153 it is not: eight draws × three months blocks
+twenty-four, leaving 129 eligible, and the cliff never arrives. The cooldown is scoped
+per learner, so a prompt stays available to a sibling while it rests for one child. If it
+ever did empty the pool, drop the single stalest cooldown prompt back in rather than
+erroring.
+
+**Three months, and the number is set by the scarcest tag rather than by the pool.** The
+whole pool is comfortable at five; `personal-voice` is not. Eight prompts carry it, a
+month that satisfies the balance rule spends one, and at five months a learner has locked
+out most of them by month six — measured at 9% of months from month six on with nobody
+from the country speaking in them. A cooldown has to be shorter than the smallest set the
+draw has to satisfy a rule from, not shorter than the library.
 
 Repetition across *months* is genuinely fine, which the original framing got right:
 **no task is country-specific.** "Find out which animal is on their money and draw it" is
@@ -370,9 +378,20 @@ a completely different task in Peru than in Japan. Week 1 treats that as a featu
 **Every month holds at least one `hands-on` and at least one `personal-voice`
 prompt.** Not per week — week 2 holds one `hands-on` and two `personal-voice`, so a
 per-week rule forces a repeat. A month in which nobody from the country ever speaks is the
-failure the library is most trying to avoid, and the anti-monotony rule above does not
-prevent it: forbidding a second of a mode tag says nothing about the first. The two
-wildcard slots pay for it, which costs the draw nothing it was using.
+failure the library is most trying to avoid, and the anti-monotony cap above does not
+prevent it: capping a mode tag at two says nothing about it appearing at all. The two
+wildcard slots pay for it, which costs the draw nothing it was using. It holds in every
+month drawn against the finished library but about one in nine hundred, where the
+`lines-4` form cap — `wow-fact` holds one of its two seats every month, and four of the
+eight `personal-voice` prompts are bound to it — leaves the repair no candidate.
+
+**No mode tag takes more than two of the ten, and two rather than one is because of the
+pins.** `cook-it` is pinned into every week 3 and carries `hands-on`, and it counts against
+the caps from the start. At a cap of one that spent the tag before the draw began and made
+every other `hands-on` prompt in the library permanently unreachable — seven of them,
+drawn zero times in eighteen thousand simulated months. A cap of two leaves a seat behind
+each pin, and two prompts sharing a mode tag is a pair rather than the monotony the rule
+is for.
 
 **Repetition of *form* inside one week is not fine, and is the one thing the draw
 forbids outright.** Five draws against twenty-seven worksheet forms collide about 40% of
@@ -1351,7 +1370,7 @@ Contents of `002_seed.sql`:
   one project type's five. The library is far past that floor because the floor
   sizes the pool for the **draw**, and the draw is not what runs out. Ten tasks
   come out of the merged pool however deep it is, so depth costs the kid nothing.
-  What depth buys is nine months that differ from each other, a five-month
+  What depth buys is nine months that differ from each other, a three-month
   cooldown that never bites, and a focus that still means something in month nine.
 
 | Week | Templates | Note |
@@ -1363,9 +1382,9 @@ Contents of `002_seed.sql`:
 
 The week column is the prompt's **natural half**, not a draw pool: nothing in the
 draw reads it and only the deal's arc preference does (§4). `LIBRARY_v3.md` takes
-weeks 1–3 to 12 / 86 / 69, which slice 20 finished landing — 153 are drawable, the
-size the five-month cooldown was sized for, and the pool never falls through to the
-stalest-back fallback (measured at zero fallbacks across 24,300 simulated months).
+weeks 1–3 to 12 / 86 / 69, which slice 20 finished landing — 153 are drawable, and
+the pool never falls through to the stalest-back fallback: across 32,400 simulated
+months the fresh pool never fell below 129 against the eight a draw needs.
 What remains is the twelve prompts still owed to Ancient World and Conflict and
 Change (slice 21), which raise the pool to 165 but do not change what the cooldown
 needs.

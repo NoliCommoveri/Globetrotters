@@ -77,11 +77,12 @@ type's five is the other floor — but those numbers size the pool for the **dra
 the draw is not what runs out. Ten tasks come out of the merged pool however many are
 in it, so a deeper pool costs the kid nothing and only buys variety.
 
-What runs out is the **cooldown**. A prompt drawn for a learner rests five months, and
-eight a month against 50 drawable blocks forty by month six — at which point the
-stalest-back fallback stops being a safety valve and becomes the mechanism. The number
-is sized for the 153 `LIBRARY_v3.md` §2 specifies, and closing that gap is the whole of
-slices 13 to 20.
+What runs out first is the **cooldown**, and it is sized by the scarcest mode tag rather
+than by the pool. A prompt drawn for a learner rests three months; eight a month against
+153 drawable blocks twenty-four, and the fresh pool never falls below 129 against the
+eight a draw needs. Five months was comfortable for the pool and not for
+`personal-voice`, which has eight members and spends one a month: by month six most of
+them were resting and 9% of months had nobody from the country speaking in them.
 
 **Five templates carry the family's Sabbath and Kingdom lens** — two in week 2,
 three in week 3 (DESIGN.md §13). A new one is written the same way the other

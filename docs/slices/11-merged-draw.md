@@ -124,15 +124,17 @@ country shuffle, and two files called deal is one too many.
 1. **Weight.** `fw = 1 + 2 * SUM(focus_tags.weight)` over the template's shared *topic*
    tags. Mode tags never contribute. The `1 +` floor is the no-zeros rule: a template with
    no overlap is still reachable.
-2. **Cooldown.** `recency = 0` if this person drew it within 5 months, else 1. Per person,
+2. **Cooldown.** `recency = 0` if this person drew it within 3 months, else 1. Per person,
    so a prompt rests for one child and stays available to a sibling. If it ever empties the
    pool, put the single stalest cooldown template back rather than erroring.
 3. **The eight.** Six by weighted selection without replacement, then two wildcards drawn
    uniformly from the bottom quarter by `fw` of what is left — the quarter recomputed
    after the first wildcard, so the second is not drawn from a set the first has left.
-   Two constraints inside the loop: no worksheet form may take more than two of the ten
-   seats (the pins count from the start, and a template with no binding counts as no
-   form), and no mode tag may appear twice in the month.
+   Two constraints inside the loop, both capped at two and both counting the pins from
+   the start: no worksheet form may take more than two of the ten seats (a template with
+   no binding counts as no form), and no mode tag may take more than two. The mode cap is
+   two rather than one because `cook-it` is pinned and carries `hands-on` — at one it
+   spent that tag before the draw began.
 4. **Mode balance, and it is the half the first draft of this slice dropped.** The ten must
    hold at least one `hands-on` and at least one `personal-voice` prompt. `LIBRARY_v3.md`
    §3 calls this the only mechanism guaranteeing a month is not one in which nobody from
@@ -190,42 +192,32 @@ repeat does.
 
 ## Exit criteria
 
-### Proved here
-
-All of these pass. They run against a synthetic fixture in `test/draw.test.js` that mirrors
-`LIBRARY_v3.md`'s shape — 153 drawable rows, the same twenty-seven forms in the same
-proportions, 50 topic and 7 mode tags — plus the real seeded library where the number does
-not depend on the library's size. The suite is 296 tests.
+All of these pass. They run against a synthetic fixture in `test/draw.test.js` that
+mirrors `LIBRARY_v3.md`'s shape — 153 drawable rows, the same twenty-seven forms in the
+same proportions, 50 topic and 7 mode tags — and against the real seeded library, which is
+the same 153 now that slice 20 has landed. The suite is 357 tests.
 
 - A drawn month has twenty tasks: 5 / 5 / 5 / 5.
 - Week 2 contains `wow-fact`, week 3 contains `cook-it`, and neither is swappable.
 - No worksheet form appears twice inside one week, and no form takes more than two of the
   ten, in a thousand consecutive drawn months.
-- No mode tag appears twice in one month's weeks 2–3.
+- No mode tag takes more than two of one month's ten. The cap counts the pins, and it is
+  two rather than one because `cook-it` carries `hands-on`: at one, the pin spent the tag
+  before the draw began and the library's other seven `hands-on` prompts were unreachable.
+- Every drawable prompt in the real library can actually be drawn — 2,250 months per
+  focus, no prompt left out.
 - Every month holds at least one `hands-on` and at least one `personal-voice` prompt.
-  Against the synthetic fixture, where both modes have members. The seeded library has no
-  `personal-voice` prompt to draw until slice 20, and the repair falls back rather than
-  failing the draw.
+  `hands-on` is structural, since `cook-it` carries it. `personal-voice` holds in all but
+  about one month in nine hundred over nine-month runs against the real library, where the
+  `lines-4` form cap leaves the repair no candidate; the draw falls back rather than
+  failing.
 - A template drawn by a person in month *m* is not drawn for that person again before
-  month *m+6*, and is still available to a sibling in month *m+1*.
+  month *m+4*, and is still available to a sibling in month *m+1*.
+- Nine months back to back never reach the stalest-back cooldown fallback: across 32,400
+  simulated months the fresh pool never fell below 129 against the eight a draw needs.
 - Swap on a week-2 task can return a template whose `week_theme` is 3.
 - The focus tab writes a tag weight, and the next draw reflects it with no deploy.
 - Erase everything, Apply pending, Run seed rebuilds the database and a month draws.
-
-### Proved in slice 20
-
-Not soft-pedalled versions of the above — the same assertions against the real library,
-which is 49 drawable prompts today and 153 once slices 12 to 20 have landed.
-
-- **Nine months back to back for one person.** Against 49 drawable, the five-month cooldown
-  blocks 40 by month six and leaves nine for a draw of eight: the stalest-back fallback
-  stops being a safety valve and becomes the mechanism, and swap runs dry. This is expected
-  and is **not** a reason to soften the cooldown, which is sized for 153 and is the reason
-  `DESIGN.md` §4 replaced slice 04's decay. It is a reason not to claim a nine-month run
-  works until there is a library to run it against.
-- On-theme coverage: nine months against one focus put an on-theme task in every week for
-  seven of the nine focuses.
-- The paper numbers: 8.3 sheets a month, a week spilling to a fourth sheet 3% of the time.
 
 ## Do not build
 

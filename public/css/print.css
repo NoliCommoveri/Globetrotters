@@ -180,7 +180,13 @@ body {
   border: 1px solid var(--rule);
   background: #f2f2f2;
 }
-.grid td { border: 1px solid var(--rule); }
+/* The height is a floor, and it is what keeps the rows writable. The table
+ * stretches to fill its segment and a CSS table hands the slack to rows in
+ * proportion to their natural height — so a `differences` sheet, whose SHARED
+ * row is the only one with real content in it, gave that row everything and
+ * left the three compare rows at a tenth of an inch. Every body row asking for
+ * the same height distributes the slack evenly. */
+.grid td { border: 1px solid var(--rule); height: .3in; }
 
 /* SHARED on `split`/`differences`: a row spanning every column for the one
  * rule that holds in both places, set off with a heavier top rule so it
@@ -273,25 +279,38 @@ body {
 
 /* Two overlapping circles, a label on each lobe and on the overlap, three
  * ruled zones so an answer lands where it belongs rather than in one shared
- * column. */
+ * column.
+ *
+ * The circles are sized off the diagram's HEIGHT, not its width, and the three
+ * write zones are placed inside the shapes they belong to rather than under
+ * them. Sized off the width the circles were shallow and barely overlapped: the
+ * third of each zone's three guides fell below the circle it belonged to, and
+ * the Both zone was wider than the lens, so its lines ran out into the
+ * single-country regions. A guide outside its own zone is the one thing this
+ * form exists to prevent.
+ *
+ * The numbers are geometry, not taste. Circles 88% of the height, inset 2%,
+ * overlap in a lens about 100px wide across the band the guides occupy —
+ * so the zones sit at 28% to 72% of the height, the lobes 25% wide clear of
+ * the lens, and Both 12% wide centred in it. */
 .venn { flex: 1 1 auto; min-height: 0; }
 .venn-diagram { position: relative; height: 100%; }
 .venn-circle {
-  position: absolute; top: 6%; width: 58%; aspect-ratio: 1 / 1;
+  position: absolute; top: 4%; height: 88%; aspect-ratio: 1 / 1;
   border: 1.5px solid var(--rule); border-radius: 50%;
 }
-.venn-circle.left { left: 0; }
-.venn-circle.right { right: 0; }
-.venn-label { position: absolute; top: 2%; font-size: .72rem; color: #444; }
+.venn-circle.left { left: 2%; }
+.venn-circle.right { right: 2%; }
+.venn-label { position: absolute; top: 0; font-size: .72rem; color: #444; }
 .venn-label.left { left: 4%; }
 .venn-label.right { right: 4%; }
 .venn-label.shared { left: 50%; transform: translateX(-50%); }
-.venn-zone { position: absolute; top: 36%; bottom: 4%; display: flex;
+.venn-zone { position: absolute; top: 28%; bottom: 28%; display: flex;
              flex-direction: column; justify-content: space-between; }
 .venn-zone i { border-bottom: 1px solid var(--rule); height: 1px; }
-.venn-zone.left { left: 6%; width: 24%; }
-.venn-zone.shared { left: 38%; width: 24%; }
-.venn-zone.right { right: 6%; width: 24%; }
+.venn-zone.left { left: 8.5%; width: 25%; }
+.venn-zone.shared { left: 44%; width: 12%; }
+.venn-zone.right { right: 8.5%; width: 25%; }
 
 /* Bars against a scale, or a single scale strip with write-in markers — one
  * renderer, two heights (kind `chart`). */
@@ -320,7 +339,18 @@ body {
 
 /* Column, not column-reverse: the first mark is the first thing the prompt
  * names — `highest-point` puts its highest mark first — so it belongs at the
- * top of a vertical strip, read top to bottom like the prompt above it. */
+ * top of a vertical strip, read top to bottom like the prompt above it.
+ *
+ * The strip itself is a spine the ticks meet, and it is what makes this a
+ * scale rather than MARKS floating dashes with a write-in line each. Every one
+ * of the four bindings says "mark it on the scale"; there has to be a scale to
+ * mark it on. */
+.chart-scale.chart-vertical .scale-marks {
+  border-left: 2px solid var(--rule); padding-left: .06in; margin-left: .14in;
+}
+.chart-scale.chart-horizontal .scale-marks {
+  border-bottom: 2px solid var(--rule); padding-bottom: .06in; margin-bottom: .14in;
+}
 .scale-marks { flex: 1 1 auto; margin: 0; padding: 0; list-style: none; min-height: 0;
                 display: flex; flex-direction: column; justify-content: space-between; }
 .chart-scale.chart-horizontal .scale-marks { flex-direction: row; }
@@ -400,12 +430,20 @@ body {
 
 /* Two empty clock faces — twelve ticks, no hands, the kid draws those — a
  * caption under each and a short line for the digits, plus LINES ruled lines
- * across the foot. */
+ * across the foot.
+ *
+ * The face is sized by what is left, not by a fixed 1.5in. `clock-pair` is a
+ * one-third form and its four bindings all set DIGITAL_LINE and two foot
+ * lines; a fixed face wanted half an inch more than a third holds, and the
+ * foot rules printed straight across the captions and the digit lines instead
+ * of under them. `aspect-ratio` keeps it a circle at whatever height it gets,
+ * and the ticks are positioned in per cent, so they follow it. */
 .clocks { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; }
-.clock-row { flex: 1 1 auto; display: flex; justify-content: center; align-items: flex-start;
+.clock-row { flex: 1 1 auto; display: flex; justify-content: center; align-items: stretch;
              gap: .3in; min-height: 0; }
-.clock { flex: 0 0 1.7in; display: flex; flex-direction: column; align-items: center; }
-.clock-face { position: relative; width: 1.5in; height: 1.5in; border: 1.5px solid var(--rule); border-radius: 50%; }
+.clock { flex: 0 1 auto; display: flex; flex-direction: column; align-items: center; min-height: 0; }
+.clock-face { flex: 1 1 auto; min-height: .8in; max-height: 1.5in; aspect-ratio: 1 / 1;
+              position: relative; border: 1.5px solid var(--rule); border-radius: 50%; }
 .clock-face i {
   position: absolute; width: .05in; height: .05in; margin: -.025in;
   border-radius: 50%; background: var(--rule);

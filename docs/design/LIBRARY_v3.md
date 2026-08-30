@@ -1881,9 +1881,11 @@ sd 0.89 (week 2) and 0.77 (week 3) against sd 1.52 under the old two-draws-of-fi
 does not pack a week onto fewer sheets, because it never reorders the five within a week.**
 Two segments at two thirds each cannot share a sheet (2 + 2 > 3), so a week that deals two
 or three of `table-3`, `box-note`, `specimen-boxes`, `hundred-people`, `label-small`,
-`bar-graph` or `then-now` into unlucky order spills onto a fourth sheet. Measured at 13.8%
-of week 2s and 12.6% of week 3s; week 1 and week 4 do not spill — week 1 carries at most one
-two-thirds form and week 4 is always exactly one sheet by construction.
+`bar-graph` or `then-now` into unlucky order spills onto a fourth sheet. Measured at 10.9%
+of week 2s and 15.1% of week 3s — week 3 more often, because `cook-it`'s three-thirds
+recipe takes a sheet on its own and leaves the other four a whole sheet short; week 1 and
+week 4 do not spill — week 1 carries at most one two-thirds form and week 4 is always
+exactly one sheet by construction.
 
 ### The tag system
 
@@ -1924,13 +1926,22 @@ one and two — so the rule is scoped to the month or it forces a repeat. A mont
 nobody from the country speaking in it is the failure this library is actually trying to
 avoid, and this is the only mechanism that guarantees against it.
 
-**Job two — anti-monotony.** *Never draw two prompts sharing a mode tag into one month's
-weeks 2–3.* Nineteen of week 2's prompts and eighteen of week 3's are `us-contrast`;
-without this rule a week can print three sheets that all say *and now write ours next to
-it*. The form counts will report no repeat. Scoped to the month rather than the week
-because the deal, not the draw, decides which week a prompt lands in — a week-scoped rule
-would have to be a fifth key on the deal instead of a constraint on the draw, and at seven
-mode tags against 153 prompts the month scope costs nothing it buys.
+**Job two — anti-monotony.** *Never draw more than two prompts sharing a mode tag into one
+month's weeks 2–3.* Nineteen of week 2's prompts and eighteen of week 3's are
+`us-contrast`; without this rule a week can print three sheets that all say *and now write
+ours next to it*. The form counts will report no repeat. Scoped to the month rather than
+the week because the deal, not the draw, decides which week a prompt lands in — a
+week-scoped rule would have to be a fifth key on the deal instead of a constraint on the
+draw, and at seven mode tags against 153 prompts the month scope costs nothing it buys.
+
+**Two rather than one, and the pins are the reason.** The cap counts the two pinned
+prompts from the start, and `cook-it` carries `hands-on`. At a cap of one it spent that
+tag before the draw began, and the other seven `hands-on` prompts in weeks 2–3 —
+`made-here`, `sound-of-the-country`, `game-kids-play`, `find-them-near-us`,
+`their-alphabet`, `ask-for-the-bathroom` and `how-they-make-it` — became unreachable
+for good, drawn zero times in eighteen thousand simulated months. A cap of two leaves a
+seat behind each pin. Two prompts sharing a mode tag is a pair; three is the monotony the
+rule is for.
 
 ### The focus table
 
@@ -2056,20 +2067,29 @@ in 22,500 simulated months. Without the rule a form repeats inside a week in abo
 weeks, which is not a library problem: five draws against twenty-seven forms floors at
 32.5% even if every form were the same size.
 
-**Never two prompts sharing a mode tag in the same week.** The hard rule, not the soft
-one — with seven mode tags against a 153-prompt pool it cannot deadlock, measured at zero
-fallbacks in 40,000 draws.
+**Never more than two prompts sharing a mode tag in the same month.** The hard rule, not
+the soft one — with seven mode tags against a 153-prompt pool it cannot deadlock, measured
+at zero fallbacks across 32,400 simulated months.
 
 **Recency.**
 
 ```
-recency_multiplier = 0  if drawn for this learner in the last 5 months, else 1
+recency_multiplier = 0  if drawn for this learner in the last 3 months, else 1
 ```
 
 Scoped per learner, so a prompt stays available to a sibling while it rests for one child.
-Five months of eight blocks forty of 153. If a cooldown would ever empty the eligible pool
-— impossible at these numbers — drop the single stalest cooldown prompt back in rather
+Three months of eight blocks twenty-four of 153. If a cooldown would ever empty the
+eligible pool — impossible at these numbers, where the fresh pool never fell below 129
+across 32,400 simulated months — drop the single stalest cooldown prompt back in rather
 than erroring.
+
+**The cooldown is sized by the scarcest tag, not by the pool.** At five months the whole
+pool is comfortable and `personal-voice` is not: eight prompts carry it, a month that
+satisfies the balance rule spends one, and by month six a learner has most of them
+resting. Measured at 9% of months from month six on with nobody from the country speaking
+in them. Three months holds it to about one month in nine hundred, and what is left is
+not the cooldown — it is the `lines-4` cap, which `wow-fact` half fills every month and
+four of the eight `personal-voice` prompts are bound to.
 
 ### The deal
 
