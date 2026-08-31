@@ -839,6 +839,13 @@ not: a mistyped fetch has to fail as a fetch rather than come back as HTML. The
 first two steps are not routes — a device with no passcode, or no person, gets
 that screen whatever the URL says.
 
+The header is the only persistent chrome and it carries three things: the
+**wordmark, which is the link back to This week**, the passport, and settings.
+Every screen but This week is a leaf — the passport, settings, setup, a plan —
+and an installed app has no address bar and no back button, so without the
+wordmark the only route home from a leaf is the one link that screen happens to
+render.
+
 The person switcher lives in **settings**, reached from the header, and it is
 the only control there. Nothing in the app renders a link to `/admin` (§3).
 
@@ -883,6 +890,11 @@ Used ~180 times per person. Everything else in the app is occasional.
 - **Progress, quietly:** the week ring in your ink, labelled with what's left rather
   than what's banked — **"3 left this week"**, not "2" — and "12 of 20" for the month.
   Same data, but one of them is an instruction.
+- **Print week**, at the far end of the progress row. The same `?week=N` document
+  Plan's per-week button opens, for the week the ring is counting (§16). It is on
+  both screens because they are asked at different moments: Plan is where a month
+  is printed the day it is drawn, and this is the screen that is open when
+  somebody standing at the table finds the week's sheets are not in the binder.
 
 ### Month setup
 
@@ -1907,7 +1919,9 @@ takes one query to rebuild.
 So "when the month's tasks are finalized" is a **place, not an event** — and the
 place is a week, not a month. **Print week** sits beside every week's heading on
 **Plan**, which is the reveal on the day the month is drawn and the page anyone
-opens for the shape of the month afterwards.
+opens for the shape of the month afterwards, and once more on **This week**,
+beside the ring, for the current week only. Two buttons, one document: Plan
+prints any week ahead of time, This week prints the week somebody is standing in.
 
 **The trigger is the week because the sheets break on the week.** Printing all
 four weeks the day the month is drawn puts weeks 2 and 3 on paper a fortnight

@@ -118,13 +118,20 @@ header {
   border-bottom: 1px solid var(--navy-line);
 }
 
+/* The wordmark is a link home, so it is a tap target as well as a mark: every
+ * screen but This week is a leaf, and an installed app has no back button. */
 .wordmark {
   font-family: var(--font-display);
   font-size: .875rem;
   text-transform: uppercase;
   letter-spacing: .18em;
   color: var(--paper-dim);
+  text-decoration: none;
+  min-height: var(--tap);
+  display: inline-flex;
+  align-items: center;
 }
+.wordmark:hover { color: var(--paper); }
 
 .chrome-link {
   color: var(--paper-dim);
@@ -716,6 +723,11 @@ button {
 }
 
 .progress-text { display: flex; flex-direction: column; gap: .125rem; }
+
+/* Print week sits at the far end of the progress row, against the ring that
+ * counts the week it prints. Both are about this week and nothing else on the
+ * screen is (§16). */
+.progress .week-print { margin-inline-start: auto; }
 
 /* Labelled with what is left rather than what is banked: same data, but one of
  * them is an instruction (§10). */

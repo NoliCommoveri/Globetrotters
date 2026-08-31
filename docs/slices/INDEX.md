@@ -73,7 +73,8 @@ reading as drift. It also carries the worksheet layout editor, the one tab slice
 
 **Q-12 is answered — anyone prints, from any device — and the buttons then went
 where the sheets break rather than where the device is.** **Print week** sits
-beside each week's heading on Plan, and there is no month-wide button: printing
+beside each week's heading on Plan and beside the ring on This week, which
+prints the current week, and there is no month-wide button: printing
 all four weeks the day the month is drawn puts weeks 2 and 3 on paper a swap
 away from being wrong, and reprinting the month to fix one week reprints two
 that nothing changed.

@@ -10,7 +10,7 @@
 // cache name changes, and a file that was renamed or deleted lives on in the
 // old cache until then. See CLAUDE.md.
 // ─────────────────────────────────────────────────────────────────────────────
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v3';
 const CACHE_NAME = `globetrotters-${CACHE_VERSION}`;
 
 // Listed rather than crawled: a worker cannot read its own directory, and the

@@ -97,6 +97,23 @@ export function weekScreen(ctx) {
 
   // ------------------------------------------------------------- progress --
 
+  // The sheets for the week the ring is counting (§16). A week is the unit that
+  // prints, so this is the same document Plan's per-week button opens — it is
+  // here as well because this is the screen that is open when somebody notices
+  // the sheets are not in the binder, and Plan is two taps away.
+  //
+  // Not a data-route link. It is a Worker-rendered document with its own
+  // stylesheet, so the router must let the browser have it.
+  function printWeek(body) {
+    return el('a', {
+      class: 'chrome-link week-print',
+      href: `/print/${body.plan.id}?week=${current()}`,
+      target: '_blank', rel: 'noopener',
+      text: 'Print week ↗',
+      title: `Week ${current()}'s sheets, ready for the binder`,
+    });
+  }
+
   function progress(body) {
     const week = weekTasks();
     const remaining = week.filter((t) => t.status === 'open').length;
@@ -106,6 +123,7 @@ export function weekScreen(ctx) {
         el('p', { class: 'progress-week', text: `${left(remaining)} this week` }),
         el('p', { class: 'note', text: `${body.done_count} of ${body.total} this month` }),
       ]),
+      printWeek(body),
     ]);
   }
 
