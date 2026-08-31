@@ -30,7 +30,8 @@ src/
   migrations/*.sql            append-only, zero-padded ids
   migrations/index.js         the ordered list; the only .sql imports
 test/                         node --test test/*.test.js, no dependencies
-public/                       static assets: fonts, css (app and print), js, wall
+public/                       static assets: fonts, css (app and print), js, wall,
+                              the two manifests, the icons, and sw.js
 wrangler.toml                 must sit at the repo root: the git-connected
                               build looks for it there
 ```
@@ -84,6 +85,28 @@ question moves to the answered list in `docs/other/OPEN-QUESTIONS.md`.
 
 A design section is `built` only when every slice implementing it is built.
 Until then it is `partial` and names what remains.
+
+---
+
+## Bump the service worker on every change under `public/`
+
+`public/sw.js` precaches the shell, and an installed device loads it from that
+cache rather than from the network. The browser rebuilds the cache only when the
+**bytes of `sw.js` itself change**.
+
+**So: any commit that touches a file under `public/` also bumps `VERSION` in
+`public/sw.js`.** Editing a stylesheet is a two-file edit. Adding a module is a
+three-file edit — the file, the `PRECACHE` list, and the version.
+
+Forget it and the deploy is silently invisible: the Worker serves the new file,
+every installed phone keeps serving the old one from its cache, and nothing
+anywhere reports a difference. `/admin/health` will show the new version id,
+because the Worker did update. This is the one failure mode in the repo that
+looks exactly like success.
+
+`test/pwa.test.js` catches the half of it a test can catch — a file added to
+`public/` and not precached fails there — but no test can tell that a version
+should have been bumped. That part is this paragraph.
 
 ---
 
