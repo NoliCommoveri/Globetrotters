@@ -43,6 +43,26 @@ export function longDate(date) {
   return `${WEEKDAYS[at.getUTCDay()]}, ${MONTHS[m - 1]} ${d}`;
 }
 
+// '2026-08-31' -> 'Aug 31'. The start-week chips: five Mondays across a 360px
+// screen do not fit as 'Monday, August 31'.
+export function shortDate(date) {
+  const [, m, d] = date.split('-').map(Number);
+  return `${MONTHS[m - 1].slice(0, 3)} ${d}`;
+}
+
+// The last day of week 4, 27 days on. A month is four seven-day windows from
+// its start week and week 4 absorbs the remainder (§15), so this is the date a
+// family planning around a trip is actually asking about.
+export function weeksEnd(start) {
+  const [y, m, d] = start.split('-').map(Number);
+  return new Date(Date.UTC(y, m - 1, d + 27)).toISOString().slice(0, 10);
+}
+
+// What a start week costs, said as the four weeks it buys: 'Aug 31 – Sep 27'.
+// A start week is a date on screen and a month on the calendar, and the date
+// alone does not say that starting a week earlier finishes a week earlier.
+export const weeksSpan = (start) => `${shortDate(start)} – ${shortDate(weeksEnd(start))}`;
+
 // research_depth as a promise about the month rather than a difficulty rating
 // (§9). It is the thing that prevents the worst month of the year, and it only
 // works if it says what it will feel like.

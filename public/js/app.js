@@ -264,6 +264,9 @@ function screenFor(person) {
   if (here === '/setup') {
     const node = setupScreen({
       month: state.me.month,
+      // The Mondays that month may start on, worked out on the Worker from
+      // FAMILY_TZ (Q-21). The client never derives it.
+      startWeeks: state.me.start_weeks || [],
       say,
       go: goWith,
       refresh: load,

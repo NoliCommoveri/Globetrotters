@@ -10,7 +10,7 @@ moved to the answered list at the bottom of this file.
 
 ## Open
 
-Nothing blocking slice 16. Every question raised against a slice has been answered
+Nothing blocking any slice. Every question raised against a slice has been answered
 and written into `../design/DESIGN.md` or `../design/LIBRARY_v3.md`.
 
 ---
@@ -19,6 +19,9 @@ and written into `../design/DESIGN.md` or `../design/LIBRARY_v3.md`.
 
 | # | Question | Answer |
 |---|---|---|
+| Q-22 | Can the start week move after the first check-off? | **Yes, any time**, refused only on a stamped month. It is free like the country and not gated like the focus, because it is not a draw: tasks carry no dates, so moving the anchor re-sorts the same twenty cards and destroys nothing. The gate exists to stop a month being rerolled into whatever looks easiest, and a trip landing in week 3 is the opposite case — the month it interrupts is the one already under way. `DESIGN.md` §7 Plan, §15. |
+| Q-21 | Which Mondays may a month start on? | **The week the month begins through the last Monday in it**, never one already over. The near end is what makes an early start possible at all — September 2026 begins on a Tuesday, so its window opens on August 31st and a family away from the 27th finishes before they go. The far end is where the month runs out of weeks. The window always holds the default, so a month opened after it is over holds one Monday and offers no choice. Computed on the Worker from `FAMILY_TZ` and carried on `GET /api/me` and the plan payload as `start_weeks`; the client never derives it. `DESIGN.md` §7 Month setup, §15. |
+| Q-20 | Where is the start week chosen? | **Both screens.** Setup picks it on its last stage, above the button that spends it; Plan moves it afterwards, as a fourth lever. Setup alone would mean a month drawn before a trip was known about could only be fixed by resetting it, and Plan alone would make every early start two steps. The default is unchanged either way — the later of the month's first Monday and this week's. `DESIGN.md` §7 Month setup, §7 Plan. |
 | Q-19 | Should `emblems` exist at all? | **Yes, it stays.** Four members — `flag-draw`, `currency-animal`, `national-symbol`, `anthem-listen` — all in week 1, none drawn against, since week 1 is a uniform draw from eight rather than a weighted one. Honest documentation of what the four share, kept even though no focus can ever reach it. `LIBRARY_v3.md` §2, §7. |
 | Q-18 | Does `storyboard` gain a CAPTION knob? | **Yes** — the one new knob v3 adds. Three week-3 storyboards are a legend, a Bible account and a process, and PANELS alone printed them as six identical panels; CAPTION names what the six are of, printed above them and skipped when empty, the same rule MIDDLE follows on `then-now`. `LIBRARY_v3.md` §1, §7. |
 | Q-17 | Does *who published this, and what do they want you to think* become a stretch line on the six hardest prompts, or stay a footer? | **Stays a footer.** No stretch-line mechanism is built. The sourcing footer already on every worksheet is judged sufficient for attribution on `the-group-that-gets-less`, `who-can-read`, `what-their-money-goes-to`, `is-the-law-kept`, `can-they-worship-freely` and `the-company-that-got-caught`. `LIBRARY_v3.md` §7. |

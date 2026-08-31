@@ -18,7 +18,7 @@ seeding, or deploy requires a terminal.
 | `CLAUDE.md` | Directives for every session. Read first. |
 | `docs/design/DESIGN.md` | The spec. Each section carries a completion marker. |
 | `docs/design/LIBRARY_v3.md` | Every form, every prompt, the tag/focus weights and the draw |
-| `docs/slices/INDEX.md` | The thirteen slices, in build order, with status |
+| `docs/slices/INDEX.md` | The twenty-four slices, in build order, with status |
 | `docs/slices/NN-name.md` | One slice: instructions, due-outs, questions, exit criteria |
 | `docs/other/DUE-OUTS.md` | What the owner must provide, by slice |
 | `docs/other/SEED-CONTENT.md` | Column rules and row forms for the hand-written seed lists |
@@ -80,9 +80,12 @@ fresh one and nothing is ever locked out.
 
 Everything on the reveal is free until the first check-off and fixed after it:
 redraw, change focus, change what you'll make. Country is free always, because no
-task is country-specific. `start_date` is always a Monday — the later of the
-month's first Monday and this week's — so a September 20th start lands in week 1
-rather than backdating a kid into week 3.
+task is country-specific, and so is the start week, because tasks carry no dates.
+`start_date` is always a Monday and defaults to the later of the month's first
+Monday and this week's, so a September 20th start lands in week 1 rather than
+backdating a kid into week 3. Setup and Plan both offer the Mondays the month may
+start on — the week it begins through the last Monday in it — which is how a month
+starts early when a trip is at the end of it.
 
 Three things on the setup screen were built inert in this slice and came alive
 with slice 09's content, no client change: the hook line on a country card, the

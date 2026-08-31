@@ -27,7 +27,9 @@ const { MIGRATIONS, SEEDS } = await import('../src/migrations/index.js');
 const { runSeed } = await import('../src/lib/seed.js');
 const { issueSessionCookie } = await import('../src/lib/auth.js');
 const { drawInputs } = await import('../src/api/plans.js');
-const { mondayOf, firstMondayOf, todayIn, monthOf, addMonths } = await import('../src/lib/dates.js');
+const {
+  mondayOf, firstMondayOf, todayIn, monthOf, addMonths, startWeeksFor, startDateFor,
+} = await import('../src/lib/dates.js');
 
 const ADMIN_TOKEN = 'test-token';
 const FAMILY_TZ = 'America/Chicago';
@@ -132,6 +134,112 @@ test('start_date is always a Monday, and never earlier than this week', async ()
   const { body: late } = await call(e, 2, '/api/plans', { method: 'POST', body: setup({ month: behind }) });
   assert.equal(late.plan.start_date, mondayOf(todayIn(FAMILY_TZ)));
   assert.ok(late.plan.start_date > firstMondayOf(behind));
+});
+
+test('the start week can be moved off the default at setup', async () => {
+  const e = await env();
+  const ahead = futureSeptember();
+  const today = todayIn(FAMILY_TZ);
+  const weeks = startWeeksFor(ahead, today);
+
+  // The window offers the week the month begins in, which is earlier than the
+  // month's first Monday whenever the 1st is not itself a Monday. Starting
+  // there is the whole point: a family away at the end of the month finishes
+  // before they go.
+  const early = weeks[0];
+  assert.ok(early <= firstMondayOf(ahead));
+
+  const { res, body } = await call(e, 1, '/api/plans', {
+    method: 'POST', body: setup({ month: ahead, start_date: early }),
+  });
+  assert.equal(res.status, 201);
+  assert.equal(body.plan.start_date, early);
+  assert.deepEqual(body.start_weeks, weeks);
+  // Nothing else moved: the twenty tasks are drawn the same way whatever week
+  // they are anchored to.
+  assert.equal(body.total, 20);
+  assert.equal(body.current_week, 1);
+});
+
+test('a start date outside the window is refused by the route', async () => {
+  const e = await env();
+  const ahead = futureSeptember();
+  const weeks = startWeeksFor(ahead, todayIn(FAMILY_TZ));
+
+  // A week before the earliest, which for a month set up ahead of time is a
+  // week that belongs to the month before it.
+  const [y, m, d] = weeks[0].split('-').map(Number);
+  const tooEarly = new Date(Date.UTC(y, m - 1, d - 7)).toISOString().slice(0, 10);
+
+  const { res, body } = await call(e, 1, '/api/plans', {
+    method: 'POST', body: setup({ month: ahead, start_date: tooEarly }),
+  });
+  assert.equal(res.status, 400);
+  assert.match(body.error, /not a week this month can start in/);
+
+  // A Tuesday inside the window's range is refused too — the anchor is a Monday
+  // and nothing else.
+  const tuesday = weeks[1].slice(0, 8) + String(Number(weeks[1].slice(8)) + 1).padStart(2, '0');
+  const { res: second } = await call(e, 1, '/api/plans', {
+    method: 'POST', body: setup({ month: ahead, start_date: tuesday }),
+  });
+  assert.equal(second.status, 400);
+
+  // And the plan that failed to draw did not leave a row behind.
+  const { body: after } = await call(e, 1, '/api/plans', { method: 'POST', body: setup({ month: ahead }) });
+  assert.equal(after.plan.start_date, startDateFor(ahead, todayIn(FAMILY_TZ)));
+});
+
+test('the start week moves after the first check-off, and the week follows it', async () => {
+  const e = await env();
+  const ahead = futureSeptember();
+  const weeks = startWeeksFor(ahead, todayIn(FAMILY_TZ));
+  const { body: created } = await call(e, 1, '/api/plans', { method: 'POST', body: setup({ month: ahead }) });
+  const id = created.plan.id;
+
+  // Check one off. The focus is closed from here and the start week is not
+  // (Q-22): moving it destroys nothing, because tasks carry no dates.
+  const first = created.weeks[0].tasks[0];
+  const { body: done } = await call(e, 1, `/api/tasks/${first.id}`, {
+    method: 'PATCH', body: { status: 'done' },
+  });
+  assert.equal(done.locked, true);
+
+  const { res, body } = await call(e, 1, `/api/plans/${id}`, {
+    method: 'PATCH', body: { start_date: weeks[0] },
+  });
+  assert.equal(res.status, 200);
+  assert.equal(body.plan.start_date, weeks[0]);
+  assert.equal(body.done_count, 1);
+  assert.equal(body.total, 20);
+
+  const { res: bad, body: badBody } = await call(e, 1, `/api/plans/${id}`, {
+    method: 'PATCH', body: { start_date: '2000-01-03' },
+  });
+  assert.equal(bad.status, 400);
+  assert.match(badBody.error, /not a week this month can start in/);
+  // The refusal wrote nothing.
+  const { body: still } = await call(e, 1, `/api/plans/${id}`);
+  assert.equal(still.plan.start_date, weeks[0]);
+});
+
+test('a stamped month will not move its start week', async () => {
+  const e = await env();
+  const ahead = futureSeptember();
+  const weeks = startWeeksFor(ahead, todayIn(FAMILY_TZ));
+  const { body: created } = await call(e, 1, '/api/plans', { method: 'POST', body: setup({ month: ahead }) });
+  const id = created.plan.id;
+
+  for (const task of created.weeks.flatMap((w) => w.tasks)) {
+    await call(e, 1, `/api/tasks/${task.id}`, { method: 'PATCH', body: { status: 'done' } });
+  }
+  await call(e, 1, `/api/plans/${id}/complete`, { method: 'POST' });
+
+  const { res, body } = await call(e, 1, `/api/plans/${id}`, {
+    method: 'PATCH', body: { start_date: weeks[0] },
+  });
+  assert.equal(res.status, 409);
+  assert.match(body.error, /stamped/);
 });
 
 test('setting up a month that already has a plan opens that plan', async () => {
@@ -519,6 +627,11 @@ test('/api/me carries the family’s own today and the month setup would open', 
   const month = monthOf(body.today);
   const summer = ['06', '07', '08'].includes(month.slice(5));
   assert.equal(body.month, summer ? `${month.slice(0, 4)}-09` : month);
+
+  // And the Mondays that month may start on, because setup has no plan to read
+  // them off yet and must not work them out from the device's clock.
+  assert.deepEqual(body.start_weeks, startWeeksFor(body.month, body.today));
+  assert.ok(body.start_weeks.includes(startDateFor(body.month, body.today)));
 });
 
 test('every route this slice adds is behind the passcode', async () => {
