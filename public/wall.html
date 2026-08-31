@@ -7,11 +7,13 @@
 <meta name="description" content="One country a month, ten minutes a day.">
 <meta name="theme-color" content="#0F1C2E">
 <meta name="robots" content="noindex">
-<!-- Added to the tablet's home screen and launched from there, this is the whole
-     screen: no browser chrome, no address bar, nothing to tap out of. -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Globetrotters">
+<!-- Installed on the tablet from Chrome, this is the whole screen: no browser
+     chrome, no address bar, nothing to tap out of. Its own manifest, not the
+     shell's — a second `id` is what makes it a second installable app, and it
+     launches fullscreen and landscape where the shell launches portrait
+     (DESIGN.md §2, §8). -->
+<link rel="manifest" href="/wall-manifest.json">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/css/app.css">
 </head>
 <!-- Its own document, not a route inside the shell. The shell's first act is to
@@ -38,5 +40,6 @@
 <p id="status" class="status" role="status" aria-live="polite"></p>
 
 <script type="module" src="/js/wall.js"></script>
+<script src="/js/sw-register.js"></script>
 </body>
 </html>

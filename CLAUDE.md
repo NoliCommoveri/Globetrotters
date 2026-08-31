@@ -30,7 +30,8 @@ src/
   migrations/*.sql            append-only, zero-padded ids
   migrations/index.js         the ordered list; the only .sql imports
 test/                         node --test test/*.test.js, no dependencies
-public/                       static assets: fonts, css (app and print), js, wall
+public/                       static assets: fonts, css (app and print), js, wall,
+                              the two manifests, the icons, and sw.js
 wrangler.toml                 must sit at the repo root: the git-connected
                               build looks for it there
 ```
@@ -84,6 +85,29 @@ question moves to the answered list in `docs/other/OPEN-QUESTIONS.md`.
 
 A design section is `built` only when every slice implementing it is built.
 Until then it is `partial` and names what remains.
+
+---
+
+## Bump the service worker on every change under `public/`
+
+`public/sw.js` keeps an offline copy of the shell, and the copy is only rebuilt
+whole when the **cache name changes** — which happens when `CACHE_VERSION` in
+that file changes and at no other time.
+
+**So: any commit that touches a file under `public/` also bumps
+`CACHE_VERSION`.** Editing a stylesheet is a two-file edit. Adding a module is a
+three-file edit — the file, the `PRECACHE` list, and the version.
+
+What a missed bump costs, precisely: an online device is unaffected, because the
+worker asks the network first and writes what comes back into the cache. An
+**offline** device keeps the old copy of anything that changed, and a file that
+was renamed or deleted stays in the cache until some later bump evicts it. That
+is a stale-when-offline bug, not a dead app — the worker is network-first
+exactly so that a forgotten bump cannot be worse than that.
+
+`test/pwa.test.js` catches the half a test can catch — a file added to `public/`
+and left out of `PRECACHE` fails there. No test can tell that a version should
+have been bumped. That part is this paragraph.
 
 ---
 

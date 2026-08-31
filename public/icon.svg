@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Globetrotters">
+  <!-- The mark: a globe in paper on navy, the shell's own two colors, the values
+       `public/css/app.css` sets on its two tokens (DESIGN.md §11).
+
+       This file is the browser-tab icon and the source the three PNGs beside it
+       were rasterized from. The manifests point at the PNGs rather than at this
+       file, because a PNG at a declared pixel size is what Chrome's install
+       offer is documented against. -->
+  <rect width="512" height="512" rx="96" fill="#0F1C2E"/>
+  <g fill="none" stroke="#F2EFE4" stroke-width="24" stroke-linecap="round">
+    <circle cx="256" cy="256" r="150"/>
+    <ellipse cx="256" cy="256" rx="68" ry="150"/>
+    <path d="M117 200h278M117 312h278"/>
+  </g>
+</svg>
