@@ -9,7 +9,7 @@
 
 import { json } from '../lib/html.js';
 import { issueSessionCookie } from '../lib/auth.js';
-import { todayIn, setupMonthFor } from '../lib/dates.js';
+import { todayIn, setupMonthFor, startWeeksFor } from '../lib/dates.js';
 
 // The whole family, not just the cookie's person. The picker needs three, and
 // so does every screen from slice 06 on — the passport is shared and the point
@@ -57,6 +57,7 @@ export async function apiMe(request, env, session) {
   // runs — and every screen from here on needs it: which month setup opens, and
   // from slice 05 which week the ring is counting.
   const today = todayIn(env.FAMILY_TZ);
+  const month = setupMonthFor(today);
 
   return json({
     ok: true,
@@ -64,7 +65,11 @@ export async function apiMe(request, env, session) {
     people: list,
     plans,
     today,
-    month: setupMonthFor(today),
+    month,
+    // The Mondays that month may start on (Q-21). Setup has no plan to read it
+    // off yet and must not work it out itself — the family's today comes from
+    // FAMILY_TZ and the window is one rule in one file (§5, §7).
+    start_weeks: startWeeksFor(month, today),
   });
 }
 

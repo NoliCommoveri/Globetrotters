@@ -749,8 +749,10 @@ month that ends in five blank cards. All six are filled, so the count is now a
 guard rather than a filter — a project type created in the editor is hidden until
 someone writes its five week-4 rows.
 
-**What `PATCH /api/plans/:id` allows, and when.** Country doesn't affect the draw at
-all — tasks are country-agnostic — so it can change any time, freely. Project type
+**What `PATCH /api/plans/:id` allows, and when.** The start week and the country don't
+affect the draw at all — tasks carry no dates and are country-agnostic — so both
+change any time, freely; a start week is refused only on a stamped month, whose weeks
+are a frozen record, and on a Monday outside the window §7 defines. Project type
 isn't used until week 4, so it can change until then; changing it regenerates the
 five week-4 rows, and is refused with a 409 if any of them is already done. Focus
 locks once any task is checked off, because it shaped the draw — but until that
@@ -842,7 +844,7 @@ Used ~180 times per person. Everything else in the app is occasional.
 
 ### Month setup
 
-**Status:** built · slice 04
+**Status:** built · slices 04, 23
 
 Runs 27 times total across the school year — the least-used screen and by far the
 highest-stakes, since it silently determines four weeks of work. It's a ceremony,
@@ -883,11 +885,21 @@ not a form.
   **change focus**, both unlimited until the first check-off. Redraw alone is the
   wrong lever: it re-rolls with the same weighting, and when twenty tasks look wrong
   the focus is usually why.
-- **Starting late is normal, and must not skip weeks.** `start_date` is the later of
-  the month's first Monday and today's week (§15). Backdating a September 20th setup
-  to the 1st would land the kid in week 3 with all ten Foundations and Deep Dive tasks
-  dumped onto a strip built for stragglers, having never seen the flag task. Plans are
-  keyed on `month`, not dates, so a plan running into October collides with nothing.
+- **Starting late is normal, and must not skip weeks.** `start_date` defaults to the
+  later of the month's first Monday and today's week (§15). Backdating a September 20th
+  setup to the 1st would land the kid in week 3 with all ten Foundations and Deep Dive
+  tasks dumped onto a strip built for stragglers, having never seen the flag task. Plans
+  are keyed on `month`, not dates, so a plan running into October collides with nothing.
+- **The start week is chosen, and the rule above is its default.** The last stage of
+  setup offers every Monday the month may start on, labelled with the four weeks it
+  buys — `Aug 31 – Sep 27` — because the reason to start early is that the month then
+  finishes early, and a bare date does not say that. The window runs from the Monday of
+  the week the month begins through the last Monday in it, and never reaches back into
+  a week that is already over. September 2026 begins on a Tuesday, so its window opens
+  on August 31st: a family away from the 27th starts week 1 the week before the month
+  and is finished before they go. A window holding one Monday — a month opened after it
+  is over — offers no control. The window is computed on the Worker from `FAMILY_TZ`
+  and carried on `GET /api/me` as `start_weeks`; the client never derives it.
 - **Setting up a month that already has a plan opens that plan.** Two devices, or a
   double-tap on a slow connection. The `409` carries the existing plan's id, so it is
   a route rather than an error screen.
@@ -956,7 +968,7 @@ September — so it has to work empty.
 
 ### Plan
 
-**Status:** built · slice 05
+**Status:** built · slices 05, 23
 
 Full four-week view for the current month — all twenty tasks grouped by week. This
 is where you look when you want the shape of the month rather than the shape of
@@ -975,9 +987,15 @@ of it:
   which is the week it's too late to be useful.
 - **Days worked**, the cumulative number from §10. It replaces the streak and it has
   no other home in the app.
-- **Plan-level edits**: change country (free, any time), change project type (until
-  week 4). Changing project type rewrites the five week-4 cards, so it confirms and
-  names what it is replacing, and it is refused once any of them is done.
+- **Plan-level edits**: move the start week (free, any time), change country (free,
+  any time), change project type (until week 4). Changing project type rewrites the
+  five week-4 cards, so it confirms and names what it is replacing, and it is refused
+  once any of them is done. Moving the start week rewrites nothing — the same twenty
+  cards re-sort into four new weeks — which is why it is the one lever that survives
+  the first check-off alongside country: it is the control for a month interrupted by
+  a trip, and the month it interrupts is usually already under way. It offers the same
+  window setup does, is not offered on a stamped month, and says which week is on
+  paper: a week already printed is printed again from where the sheets break (§16).
 - **Swap is owner-only; checking off is not.** A swap is a reroll of one slot
   against a budget, so a sibling on a shared phone can spend somebody else's month
   the same way a redraw would — `POST /api/tasks/:id/swap` answers `403` alongside
@@ -1528,14 +1546,26 @@ Resolved:
 - **Does the parent need an override to edit a kid's plan?** No mechanism needed —
   there are no roles, so everyone can already edit everything. The parent's real
   override is the library editor and Reset month, both behind `ADMIN_TOKEN`.
-- **Where the month boundary sits.** `month_plans.start_date`, set at setup, is
-  **always a Monday**: the later of the month's first Monday and the Monday of the
-  week setup happens in. Weeks are 7-day windows from there, week 4 absorbing the
-  remainder. A Monday anchor is what keeps `week_no` and the calendar week ring in
-  agreement and makes five tasks map to five weekdays; taking the later of the two
-  keeps a late start from dumping ten unseen tasks onto the carry-forward strip. Plans
-  are keyed on `month`, so one running past the end of its month collides with
-  nothing.
+- **Where the month boundary sits.** `month_plans.start_date`, chosen at setup, is
+  **always a Monday**, and defaults to the later of the month's first Monday and the
+  Monday of the week setup happens in. Weeks are 7-day windows from there, week 4
+  absorbing the remainder. A Monday anchor is what keeps `week_no` and the calendar
+  week ring in agreement and makes five tasks map to five weekdays; defaulting to the
+  later of the two keeps a late start from dumping ten unseen tasks onto the
+  carry-forward strip. Plans are keyed on `month`, so one running past the end of its
+  month — or finishing before it — collides with nothing.
+- **Which Mondays a month may start on.** Every Monday from the week the month begins
+  through the last Monday in it, never one already over. The near end is what makes an
+  early start possible at all: September 2026 begins on a Tuesday and the family that
+  needs it starts on August 31st. The far end is where the month runs out. The window
+  always holds the default, so a month opened after it is over has exactly one Monday
+  in it and no choice to make. See §7 Month setup.
+- **When the start week can move.** Any time, including after the first check-off, and
+  refused only on a stamped month. It is not behind the draw's gate because it is not
+  a draw: tasks carry no dates, so moving the anchor re-sorts the same twenty cards
+  and destroys nothing. The gate exists to stop a month being rerolled into whatever
+  looks easiest; a trip in week 3 is the opposite case, and the month it interrupts is
+  the one already under way. See §7 Plan.
 - **Redraw and the swap budget.** No `redraws_used` column and no `swaps_used`
   column. Redraw is unlimited until the first check-off and refused after it, the
   same gate change-focus already sits behind; a redraw resets the derived swap
@@ -1613,9 +1643,10 @@ Resolved:
   endpoint has to exist for §7's passport screen regardless, so this builds it
   rather than duplicating it. See §6, §7.
 - **What decides which day it is.** `FAMILY_TZ`, read server-side and returned by
-  `GET /api/me` as `today` and as the month setup would open. The client never
-  computes it: the device's clock is wrong on a trip and the Worker answers from
-  wherever it runs. See §5, §7.
+  `GET /api/me` as `today`, as the month setup would open, and as the Mondays that
+  month may start on. The client never computes any of the three: the device's clock
+  is wrong on a trip, the Worker answers from wherever it runs, and a calendar rule
+  written twice is two calendar rules. See §5, §7.
 - **Who can reroll a plan.** Its owner only. This is the one exception to "there
   are no roles" and it is not one: reading a plan is open to the family, and what
   is refused is a sibling on a shared phone redrawing someone else's month. See

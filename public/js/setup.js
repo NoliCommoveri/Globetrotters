@@ -12,7 +12,7 @@
 // materials because September 1st is when a parent needs to know about the foam
 // board.
 
-import { el, monthName, adventure } from './dom.js';
+import { el, monthName, adventure, shortDate, weeksSpan } from './dom.js';
 import { getCatalog, getPassport, getFocusSamples, createPlan, SignedOut } from './api.js';
 import { dealCandidates, dealThree, hooksByCountry, stampedInk } from './deal.js';
 
@@ -38,10 +38,24 @@ export function setupScreen(ctx) {
     highlight: null,
     samples: new Map(),
     project: null,
+    // Which Monday the month starts on. The window comes from the Worker on
+    // /api/me (Q-21) and the default is its first entry that is not earlier
+    // than the old rule's answer — which is the entry the Worker would pick
+    // for itself if this were left null.
+    start: ctx.startWeeks?.length ? defaultStart(ctx.startWeeks) : null,
     submitting: false,
   };
 
   const set = (patch) => { Object.assign(local, patch); paint(); };
+
+  // The old rule, read off the window rather than recomputed: the first Monday
+  // in it that falls inside the month. The window's earlier entries are the week
+  // the month begins in, which is the whole point of the control but never the
+  // default — a month starts in its own first full week unless somebody says
+  // otherwise.
+  function defaultStart(weeks) {
+    return weeks.find((date) => date.slice(0, 7) === ctx.month) || weeks[weeks.length - 1];
+  }
 
   // ------------------------------------------------------------------ data --
 
@@ -361,6 +375,7 @@ export function setupScreen(ctx) {
       usable.length < local.data.project_types.length
         ? el('p', { class: 'note', text: 'More kinds of project are coming.' })
         : null,
+      startWeek(),
       el('button', {
         class: 'primary', type: 'button',
         disabled: !local.project || local.submitting,
@@ -370,11 +385,35 @@ export function setupScreen(ctx) {
     ]);
   }
 
+  // The start week, on the last stage and above the button that spends it. It is
+  // offered only where there is a choice: a month opened after it is over has
+  // one Monday in its window and no question to ask.
+  //
+  // Labelled with the four weeks it buys rather than with the Monday alone. The
+  // reason to start early is that the month then finishes early, and 'Aug 31'
+  // does not say that (§7).
+  function startWeek() {
+    const weeks = ctx.startWeeks || [];
+    if (weeks.length < 2 || !local.start) return null;
+    return el('div', { class: 'stack' }, [
+      el('h2', { text: 'When does it start?' }),
+      el('p', { class: 'lede', text: 'Four weeks from the Monday you pick. Move it if a trip is in the way.' }),
+      el('div', { class: 'chips' }, weeks.map((date) => el('button', {
+        class: 'chip', type: 'button',
+        'aria-current': local.start === date ? 'true' : null,
+        text: shortDate(date),
+        on: { click: () => set({ start: date }) },
+      }))),
+      el('p', { class: 'note', text: `Weeks run ${weeksSpan(local.start)}.` }),
+    ]);
+  }
+
   async function draw() {
     set({ submitting: true, error: null });
     try {
       const body = await createPlan({
         month: ctx.month,
+        start_date: local.start,
         country_id: local.country.id,
         focus_id: local.focus.id,
         project_type_id: local.project.id,

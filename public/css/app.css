@@ -666,6 +666,22 @@ button {
 .focus-pick[disabled] { opacity: .55; cursor: default; }
 .focus-pick[aria-current=true] { border-color: var(--ink); opacity: 1; }
 
+/* The start week: five Mondays, which is a row of dates rather than a stack of
+ * cards. It wraps at 360px rather than scrolling — a Monday off the edge of the
+ * screen is a Monday nobody picks. */
+.chips { display: flex; flex-wrap: wrap; gap: .5rem; }
+.chip {
+  background: var(--navy-raised);
+  border: 1px solid var(--navy-line);
+  color: var(--paper);
+  padding: .5rem .75rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.chip:hover:not([disabled]) { border-color: var(--paper-dim); }
+.chip[disabled] { opacity: .55; cursor: default; }
+.chip[aria-current=true] { border-color: var(--ink); opacity: 1; }
+
 /* ============================================================== slice 05 ==
  * This week, and the month-scale state on Plan (DESIGN.md §7 This week,
  * §7 Plan, §10).

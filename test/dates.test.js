@@ -5,7 +5,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
-  todayIn, mondayOf, firstMondayOf, startDateFor, monthsBetween, addMonths,
+  todayIn, mondayOf, firstMondayOf, lastMondayOf, startDateFor, startWeeksFor,
+  earliestStartFor, monthsBetween, addMonths,
   inSchoolYear, schoolYearStart, schoolYearMonths, setupMonthFor, isMonth, monthOf,
   daysBetween, weekOf,
 } from '../src/lib/dates.js';
@@ -40,6 +41,47 @@ test('start_date is the later of the first Monday and this week, and always a Mo
     const start = startDateFor(month, today);
     assert.equal(mondayOf(start), start, `${start} is not a Monday`);
   }
+});
+
+test('the start window runs from the week the month begins to its last Monday', () => {
+  // September 2026 begins on a Tuesday, so the week it begins in starts on
+  // August 31st — the case the whole control exists for. Five Mondays, the
+  // default in the middle of them rather than at the front.
+  assert.deepEqual(startWeeksFor('2026-09', '2026-08-31'), [
+    '2026-08-31', '2026-09-07', '2026-09-14', '2026-09-21', '2026-09-28',
+  ]);
+  assert.ok(startWeeksFor('2026-09', '2026-08-31').includes(startDateFor('2026-09', '2026-08-31')));
+
+  // A month that begins on a Monday has nothing earlier to offer.
+  assert.equal(earliestStartFor('2027-02', '2027-01-15'), '2027-02-01');
+  assert.equal(firstMondayOf('2027-02'), '2027-02-01');
+
+  assert.equal(lastMondayOf('2026-09'), '2026-09-28');
+  assert.equal(lastMondayOf('2027-02'), '2027-02-22');
+});
+
+test('the window never reaches back into a week that is over', () => {
+  // Set up on the 20th: the earliest offered is the Monday of that week, not
+  // the Monday the month began in. Backdating is what the default already
+  // refused and the window keeps refusing.
+  assert.deepEqual(startWeeksFor('2026-09', '2026-09-20'),
+    ['2026-09-14', '2026-09-21', '2026-09-28']);
+
+  for (const today of ['2026-08-31', '2026-09-13', '2026-09-20', '2026-09-30', '2027-02-01']) {
+    const month = today.slice(0, 7) === '2027-02' ? '2027-02' : '2026-09';
+    for (const week of startWeeksFor(month, today)) {
+      assert.equal(mondayOf(week), week, `${week} is not a Monday`);
+      assert.ok(week >= mondayOf(today), `${week} is behind ${today}`);
+    }
+  }
+});
+
+test('a month opened after it is over has one Monday and no choice', () => {
+  // A September looked at in November. The window holds the default and nothing
+  // else, which is what the old rule already did on its own.
+  const weeks = startWeeksFor('2026-09', '2026-11-10');
+  assert.deepEqual(weeks, ['2026-11-09']);
+  assert.equal(weeks[0], startDateFor('2026-09', '2026-11-10'));
 });
 
 test('monthsBetween counts calendar months across a year boundary', () => {

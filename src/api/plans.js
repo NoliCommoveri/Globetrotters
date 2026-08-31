@@ -10,7 +10,9 @@
 
 import { json } from '../lib/html.js';
 import { drawPlan, drawDeepWeeks, week4Rows, ShortPoolError } from '../lib/draw.js';
-import { isMonth, inSchoolYear, monthsBetween, startDateFor, todayIn, weekOf } from '../lib/dates.js';
+import {
+  isMonth, inSchoolYear, monthsBetween, startDateFor, startWeeksFor, todayIn, weekOf,
+} from '../lib/dates.js';
 
 const WEEK_THEMES = { 1: 'Foundations', 2: 'Deep Dive', 3: 'Deep Dive', 4: 'Make & Present' };
 
@@ -18,6 +20,12 @@ const WEEK_THEMES = { 1: 'Foundations', 2: 'Deep Dive', 3: 'Deep Dive', 4: 'Make
 // into whatever looks easiest (§4). Derived from the rows, never stored — a
 // redraw replaces all twenty and the budget goes with the tasks it bought.
 export const SWAP_BUDGET = 3;
+
+// The one refusal both routes share. The window is every Monday from the week
+// the month begins through the last Monday in it, and a date outside it is
+// either a backdate into a week that is over or a month with no weeks left to
+// run (§7, Q-21).
+const BAD_START = 'That is not a week this month can start in.';
 
 // Week 1's fifth slot and weeks 2-3. Not the four week-1 `core` tasks, which
 // anchor workbook pages and are meant to repeat — swapping one leaves a physical
@@ -120,6 +128,8 @@ export async function planPayload(env, id) {
   ]);
   if (!plan) return null;
 
+  const today = todayIn(env.FAMILY_TZ);
+
   const weeks = [1, 2, 3, 4].map((week) => ({
     week_no: week,
     theme: WEEK_THEMES[week],
@@ -137,7 +147,13 @@ export async function planPayload(env, id) {
     // Which week This week is showing. Computed here rather than on the client
     // because the only clock that decides what day it is belongs to FAMILY_TZ —
     // a phone on a trip is in the wrong timezone (§5, §7).
-    current_week: weekOf(plan.start_date, todayIn(env.FAMILY_TZ)),
+    current_week: weekOf(plan.start_date, today),
+    // The Mondays this month may still start on (Q-21). Computed here for the
+    // same reason `current_week` is: the only clock that decides what day it is
+    // belongs to FAMILY_TZ, and a second copy of a calendar rule on the client
+    // is a second calendar rule. Empty when the month is behind us, which is
+    // how Plan knows not to offer the lever at all.
+    start_weeks: startWeeksFor(plan.month, today),
     // The single gate. Named on the payload so the reveal does not have to
     // re-derive it from twenty rows to decide whether to offer Redraw.
     locked: done > 0,
@@ -283,7 +299,13 @@ export async function apiCreatePlan(request, env, session) {
   const invalid = await validSetup(env, body);
   if (invalid) return json({ ok: false, error: invalid }, { status: 400 });
 
-  const startDate = startDateFor(month, todayIn(env.FAMILY_TZ));
+  const today = todayIn(env.FAMILY_TZ);
+  const startDate = body.start_date === undefined || body.start_date === null
+    ? startDateFor(month, today)
+    : String(body.start_date);
+  if (!startWeeksFor(month, today).includes(startDate)) {
+    return json({ ok: false, error: BAD_START }, { status: 400 });
+  }
 
   let planId;
   try {
@@ -370,9 +392,11 @@ export async function apiRedrawPlan(request, env, session, params) {
   return json({ ok: true, ...(await planPayload(env, id)) });
 }
 
-// Country any time, project type until week 4 starts being done, focus until the
-// first check-off anywhere (§6). Three different gates because the three fields
-// reach three different parts of the plan.
+// Start week and country any time, project type until week 4 starts being done,
+// focus until the first check-off anywhere (§6). Four fields and three gates,
+// because they reach three different parts of the plan: the start week and the
+// country touch nothing that was drawn, week 4 is a sequence, and the focus is
+// the draw itself.
 export async function apiPatchPlan(request, env, session, params) {
   const id = Number(params.id);
   const { plan, error } = await owned(env, session, id);
@@ -381,6 +405,25 @@ export async function apiPatchPlan(request, env, session, params) {
   const body = await request.json().catch(() => ({}));
   const payload = await planPayload(env, id);
   const statements = [];
+
+  if (body.start_date !== undefined) {
+    // Free after the first check-off, deliberately (Q-22). Tasks carry no dates
+    // — the twenty rows are the same twenty rows, re-anchored — so a trip that
+    // eats week 3 is fixed by moving the anchor, and there is nothing here to
+    // destroy the way changing the focus destroys two weeks of draw.
+    if (payload.stamp) {
+      return json({
+        ok: false,
+        error: 'This month is stamped. Its weeks are what they were.',
+      }, { status: 409 });
+    }
+    const today = todayIn(env.FAMILY_TZ);
+    if (!startWeeksFor(plan.month, today).includes(String(body.start_date))) {
+      return json({ ok: false, error: BAD_START }, { status: 400 });
+    }
+    statements.push(env.DB.prepare('UPDATE month_plans SET start_date = ? WHERE id = ?')
+      .bind(String(body.start_date), id));
+  }
 
   if (body.country_id !== undefined) {
     const country = await env.DB.prepare('SELECT id FROM countries WHERE id = ?')

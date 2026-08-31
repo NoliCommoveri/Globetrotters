@@ -15,7 +15,7 @@
 // it: swap and its remaining budget, the month's notes accumulating down the
 // page, the materials for week 4 from week 1, and days worked.
 
-import { el, monthName, adventure, longDate, left } from './dom.js';
+import { el, monthName, adventure, longDate, shortDate, weeksSpan, weeksEnd, left } from './dom.js';
 import {
   getPlan, redrawPlan, patchPlan, swapTask, getStats, getFocusSamples, getCatalog, SignedOut,
 } from './api.js';
@@ -80,6 +80,7 @@ export function planScreen(ctx) {
     focus: 'New focus. Weeks 2 and 3 are new too.',
     country: 'Country changed. Your tasks are the same — they always work anywhere.',
     project: 'Week 4 is new.',
+    start: 'Moved. The same twenty tasks, on new weeks — print again if a week is already on paper.',
   };
 
   // A swap names its week, because the sheets for that week are already in the
@@ -103,7 +104,11 @@ export function planScreen(ctx) {
         el('span', { class: 'pill', text: plan.focus_name }),
         el('span', { class: 'pill', text: adventure(plan.research_depth) }),
       ]),
-      el('p', { class: 'note', text: `Starts ${longDate(plan.start_date)}. ${plan.project_type_name} in week 4.` }),
+      el('p', {
+        class: 'note',
+        text: `Starts ${longDate(plan.start_date)}, ends ${shortDate(weeksEnd(plan.start_date))}. `
+          + `${plan.project_type_name} in week 4.`,
+      }),
       // Materials stay visible because nobody reopens setup, and the foam board
       // has to be bought before week 4 rather than during it.
       plan.project_type_materials
@@ -292,6 +297,28 @@ export function planScreen(ctx) {
     };
   }
 
+  // Free at any time, like the country and unlike the focus (Q-22). Nothing is
+  // redrawn: tasks carry no dates, so this moves the anchor and the same twenty
+  // cards re-sort themselves into four new weeks. It is the control for a month
+  // interrupted rather than a month mis-drawn.
+  function startChanger(plan) {
+    return () => [
+      el('p', { class: 'note', text: 'Four weeks from the Monday you pick.' }),
+      el('div', { class: 'chips' }, local.body.start_weeks.map((date) => {
+        const current = date === plan.start_date;
+        return el('button', {
+          class: 'chip', type: 'button',
+          'aria-current': current ? 'true' : null,
+          disabled: current || local.busy != null,
+          text: shortDate(date),
+          title: weeksSpan(date),
+          on: { click: () => change('start', () => patchPlan(ctx.id, { start_date: date })) },
+        });
+      })),
+      el('p', { class: 'note', text: `Now: ${weeksSpan(plan.start_date)}.` }),
+    ];
+  }
+
   function projectChanger(plan) {
     return () => local.catalog.project_types
       .filter((p) => p.week4_templates > 0)
@@ -327,12 +354,18 @@ export function planScreen(ctx) {
       ]);
     }
 
+    // A month that is over has one Monday in its window — this week's — and no
+    // choice to make, so the lever is not offered on it.
+    const movable = body.start_weeks.length > 1;
+
     if (body.locked) {
       // The first check-off is the only gate, and it is on both doors: redraw and
       // change focus reroll the same weeks under the same condition, so a limit
-      // on one and not the other is two doors onto one room.
+      // on one and not the other is two doors onto one room. The start week is
+      // behind neither door: it destroys nothing.
       return el('div', { class: 'stack' }, [
         el('p', { class: 'note', text: 'You have started this month. The draw is set now.' }),
+        movable ? disclosure('start', 'Move the start week', startChanger(plan)) : null,
         !body.week4_locked ? disclosure('project', 'Change what you’ll make', projectChanger(plan)) : null,
         disclosure('country', 'Change country', countryChanger(plan)),
       ]);
@@ -349,6 +382,7 @@ export function planScreen(ctx) {
       disclosure('focus', 'Change focus', focusChanger(plan)),
       disclosure('project', 'Change what you’ll make', projectChanger(plan)),
       disclosure('country', 'Change country', countryChanger(plan)),
+      movable ? disclosure('start', 'Move the start week', startChanger(plan)) : null,
     ]);
   }
 

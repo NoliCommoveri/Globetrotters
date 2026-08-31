@@ -48,6 +48,14 @@ function parse(date) {
 
 const format = (dt) => dt.toISOString().slice(0, 10);
 
+const maxOf = (a, b) => (a > b ? a : b);
+
+function addDays(date, n) {
+  const dt = parse(date);
+  dt.setUTCDate(dt.getUTCDate() + n);
+  return format(dt);
+}
+
 // The Monday on or before this date. getUTCDay() is 0 for Sunday, so Sunday
 // walks back six days rather than one — the case that makes a September 30th
 // Sunday setup land in the right week.
@@ -65,13 +73,54 @@ export function firstMondayOf(month) {
   return format(first);
 }
 
-// The later of the month's first Monday and the Monday of the week setup happens
-// in (§7, §15). Always a Monday, so plan weeks and calendar weeks agree and the
-// week ring in §10 resets when the calendar does.
+// The last Monday of the month. Past it there is no month left to run, so it is
+// the far end of the window a month may start in.
+export function lastMondayOf(month) {
+  const [y, m] = month.split('-').map(Number);
+  const end = new Date(Date.UTC(y, m, 0));   // day 0 of the next month is the last of this
+  return mondayOf(format(end));
+}
+
+// The earliest Monday a month may start on: the Monday of the week the month
+// begins, and never a week that is already over.
 //
-// Backdating a September 20th setup to the 1st would land the kid in week 3 with
-// all ten Foundations and Deep Dive tasks dumped onto the carry-forward strip,
-// having never seen the flag task.
+// The first half is what lets a month start early — September 2026 begins on a
+// Tuesday, so the week it begins in starts on August 31st. The second half is
+// the no-backdating rule: a start date in a week that has passed lands the kid
+// in week 3 on day one with ten unseen tasks already on the carry-forward strip.
+export function earliestStartFor(month, today) {
+  return maxOf(mondayOf(`${month}-01`), mondayOf(today));
+}
+
+// Every Monday this month may start on, in order (§7, Q-21).
+//
+// It always holds the default, which is what keeps a month set up after it is
+// over from having nowhere to start: a September opened in November has exactly
+// one Monday in its window — this week's — and no choice to make. Everywhere
+// else the far end is the last Monday of the month, past which there is no month
+// left to run.
+export function startWeeksFor(month, today) {
+  const last = maxOf(lastMondayOf(month), startDateFor(month, today));
+  const weeks = [];
+  for (let date = earliestStartFor(month, today); date <= last; date = addDays(date, 7)) {
+    weeks.push(date);
+  }
+  return weeks;
+}
+
+export function isStartWeek(month, today, date) {
+  return isDate(date) && startWeeksFor(month, today).includes(date);
+}
+
+// What the start week defaults to: the later of the month's first Monday and the
+// Monday of the week setup happens in (§7, §15). Always a Monday, so plan weeks
+// and calendar weeks agree and the week ring in §10 resets when the calendar
+// does, and always inside the window above.
+//
+// It is the default and not the rule (Q-20). A family away from the 27th needs
+// September to start on the 31st of August, and the first Monday of the month is
+// the right answer to a question nobody asked that month. `startWeeksFor` is
+// written around it: whatever else the window holds, it holds this.
 export function startDateFor(month, today) {
   const first = firstMondayOf(month);
   const current = mondayOf(today);

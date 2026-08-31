@@ -1,6 +1,6 @@
 # Slice index
 
-Twenty-three slices against `../design/DESIGN.md`. Each ends at a state you can open in a
+Twenty-four slices against `../design/DESIGN.md`. Each ends at a state you can open in a
 browser and judge.
 
 A build session takes the first slice not marked `built` and reads its file.
@@ -9,7 +9,8 @@ all exist, every one of the sixty-one seeded week 1–3 prompts says and prints 
 it does, slices 16–20 landed the 106-prompt library the draw engine was measured against,
 and slice 21 wrote the twelve owed to Ancient World and Conflict and Change. The pool is
 **179 prompts, 165 of them drawable**. Slice 22 finished the country data: all nine focuses
-are recommended somewhere and every adorned country carries three affinities.
+are recommended somewhere and every adorned country carries three affinities. Slice 23
+made the start week a choice rather than a calculation.
 **No slice is outstanding.** Due-outs D-10 (the fonts) and D-14 (the wall tablet) remain,
 neither of them code.
 
@@ -38,6 +39,7 @@ neither of them code.
 | 20 | [Prompts: craft, food, voices](20-prompts-craft-food-voices.md) | built | L | 19 | §13, §16 |
 | 21 | [The twelve owed](21-the-twelve-owed.md) | built | M | 20 | §13 |
 | 22 | [The affinities](22-affinities.md) | built | S | 11 | §9 |
+| 23 | [The start week](23-month-start.md) | built | M | 05 | §7 Month setup, §7 Plan, §6, §15 |
 
 Statuses: `not started` · `in progress` · `built`.
 
@@ -240,6 +242,15 @@ next piece of country work: a recommendation is only visible where the shuffle c
 the country, and "Deal me three" needs two hooks. Qatar and Bangladesh are the best Who
 Gets What months in the library and neither could take a row, because neither has hooks.
 
+**Slice 23 is the first slice written after the build, and it changes one column's rule.**
+`month_plans.start_date` was computed — the later of the month's first Monday and this
+week's — and is now chosen, with that computation as its default. The window is every
+Monday from the week the month begins through the last Monday in it: September 2026 begins
+on a Tuesday, so a family away from the 27th starts week 1 on August 31st and is finished
+before they go. It needed no migration, because the column already held an arbitrary date,
+and it redraws nothing, because tasks carry no dates — which is why it is the one lever
+besides country that survives the first check-off.
+
 **A partial library is a working library, and that is what makes this splittable at all.**
 The draw does not care how big the pool is: 61 prompts draws a month, 100 draws a better
 one, 167 draws the one that was measured. Nothing breaks at an intermediate size and no
@@ -315,9 +326,9 @@ Every section of `DESIGN.md` and the slice that finishes it.
 | §5 Schema | 11 — built |
 | §6 API | 11 — built |
 | §7 This week | 05 — built |
-| §7 Month setup | 04 — built |
+| §7 Month setup | 04, 23 — built |
 | §7 Passport | 06 — built |
-| §7 Plan | 05 — built |
+| §7 Plan | 05, 23 — built |
 | §8 The wall tablet | 07 — built |
 | §9 Country data | 09, 22 — built |
 | §10 Progress | 05 — built |
