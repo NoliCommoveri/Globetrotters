@@ -18,14 +18,14 @@ seeding, or deploy requires a terminal.
 | `CLAUDE.md` | Directives for every session. Read first. |
 | `docs/design/DESIGN.md` | The spec. Each section carries a completion marker. |
 | `docs/design/LIBRARY_v3.md` | Every form, every prompt, the tag/focus weights and the draw |
-| `docs/slices/INDEX.md` | The twenty-four slices, in build order, with status |
+| `docs/slices/INDEX.md` | The twenty-five slices, in build order, with status |
 | `docs/slices/NN-name.md` | One slice: instructions, due-outs, questions, exit criteria |
 | `docs/other/DUE-OUTS.md` | What the owner must provide, by slice |
 | `docs/other/SEED-CONTENT.md` | Column rules and row forms for the hand-written seed lists |
 | `docs/other/OPEN-QUESTIONS.md` | Questions blocking build, and answered ones |
 | `docs/other/FOCUS-AUDIT.md` | Which focus each prompt actually serves, judged by hand |
 | `src/` | The Worker: entry and routing, `/api/*`, `/admin`, `/print`, `lib/`, `migrations/` |
-| `public/` | Two static documents — the family app and the wall — the app stylesheet and the print stylesheet, eleven JS modules |
+| `public/` | Two static documents — the family app and the wall — the app stylesheet and the print stylesheet, twelve JS modules, two manifests, the icons and `sw.js` |
 | `test/` | `node --test test/*.test.js` — no dependencies, no install |
 
 ## Where things stand
@@ -261,8 +261,30 @@ feature-detected either way and what is unresolved is whether the owner has to
 set display sleep by hand. D-15 was the third and is done: twenty countries of
 affinity apiece for the three focuses that had none, landed by slice 22.
 
-Three questions are open: two in slice 15, which builds the renderers they
-change, and one in slice 16.
+No questions are open. Every one raised against a slice is answered and written
+into `docs/design/DESIGN.md` or `docs/design/LIBRARY_v3.md`.
+
+**Both documents install.** Chrome on Android offers **Install app** on `/` and
+on `/wall`, and the two install as two apps — the shell portrait and standalone,
+the wall fullscreen and landscape, off one drawn icon. `public/sw.js` keeps an
+offline copy of the shell so an installed phone opens with no signal; nothing
+under `/api/` is ever cached, so an app opened offline shows its own screens and
+says it cannot reach Globetrotters where the data goes, rather than a plan that
+may be a week old.
+
+The worker is **network-first**. Every request it handles goes to the network,
+and the cache answers only when that fails. An online phone therefore never gets
+an app that is deploys behind, and `/api/`, `/admin` and `/print/` are not
+intercepted at all.
+
+> **Any commit that touches a file under `public/` bumps `CACHE_VERSION` in
+> `public/sw.js`.** The offline copy is rebuilt only when the cache name
+> changes. Miss it and an online device is fine — it is reading from the network
+> — while an offline one keeps the old copy of whatever changed, and a renamed
+> file lingers in the cache until some later bump. Editing a stylesheet is a
+> two-file edit; adding a module is three — the file, the `PRECACHE` list, and
+> the version. `test/pwa.test.js` catches the missing precache entry. Nothing
+> can catch the missing bump.
 
 The Worker's own tests run with `node --test test/*.test.js` and need nothing
 installed. They are a build-session tool, not something the owner ever runs —

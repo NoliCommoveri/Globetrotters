@@ -35,8 +35,9 @@ Everyone has their own device. There is also a tablet on the kitchen wall.
 
 **Status:** partial · everything but the fonts. The Worker, the D1 binding and
 the deploy are built (slice 00); the auth path, the person cookie and the
-frontend shell are built (slice 03). The two self-hosted faces are outstanding
-on D-10 and the shell runs on a system stack until they land.
+frontend shell are built (slice 03); the install, the manifests and the offline
+copy are built (slice 24). The two self-hosted faces are outstanding on D-10 and
+the shell runs on a system stack until they land.
 
 - Cloudflare Worker serving both the API (`/api/*`) and static assets
 - **D1** for all relational data
@@ -58,11 +59,52 @@ on D-10 and the shell runs on a system stack until they land.
   client route with no file behind it, and 404s for a path it does not know.
   `/admin` stays Worker-rendered, and the two have nothing to do with each
   other.
+- **Installed, not bookmarked.** Both documents carry a manifest and are
+  installed from Chrome's own **Install app**, which is what gives them a
+  launcher icon, a splash screen and no address bar. See *The install* below.
 - **Self-host the two fonts** in the Worker's assets. Buildless doesn't have to
   mean a third-party dependency on every page load. Until the licensed files
   arrive the stylesheet points `--font-display` and `--font-body` at the system
   stack; swapping them is an `@font-face` pair and two values, and a re-tune of
   the type scale.
+
+**The install.** Every device in this family is Android, so this is written
+against Chrome and there are no `apple-*` fallbacks anywhere in it — the two
+documents each carry a `<link rel="manifest">` and nothing else.
+
+- **Two manifests, two apps.** `public/manifest.json` launches the shell at `/`
+  in `standalone`, portrait; `public/wall-manifest.json` launches the wall at
+  `/wall` in `fullscreen`, landscape. Distinct `id` values are what make them
+  two installable apps rather than one — the wall tablet and a kid's phone are
+  not the same app, and the wall wants to come back after a reboot pointing at
+  the kitchen screen (§8).
+- **The icon is drawn here.** `public/icon.svg` is the mark, in the shell's own
+  two colors, and it is the browser-tab icon; the three PNGs beside it are
+  rasterized from it, at 192 and 512 and once more inside the safe circle
+  Android crops a maskable icon to. The manifests point at the PNGs, because a
+  PNG at a declared pixel size is what Chrome's install offer is documented
+  against.
+- **The service worker is network-first, always.** `public/sw.js` asks the
+  network for every request it handles and writes what comes back into its
+  cache; the cache answers only when the network could not. So an online device
+  can never be served an old shell, and an offline one opens the app on its own
+  screens instead of the browser's error page. **Nothing under `/api/` is
+  cached, ever** (Q-23) — the app is online-only for data, and it says so where
+  the data would be.
+- **It intercepts nothing it has no offline answer for.** `/api/`, `/admin` and
+  `/print/:planId` pass straight through, exactly as they would with no worker
+  installed. Navigations are answered for the routes `src/index.js` serves the
+  shell for, plus `/wall`, and for nothing else.
+- **A change under `public/` bumps `CACHE_VERSION` in `sw.js`.** The offline
+  copy is rebuilt whole only when the cache name changes. Miss the bump and an
+  online device is unaffected — it is reading from the network — while an
+  offline one keeps the old copy of whatever changed. See `CLAUDE.md`.
+- **The client arranges nothing.** `public/js/sw-register.js` registers the
+  worker and stops there; the worker skips waiting on install and claims its
+  clients on activate, so the new version is in place on the next launch. There
+  is no update banner and no reload: a page that reloads itself under a kid
+  mid-tap is a worse defect than a screen one launch behind, and with the
+  network answering first there is nothing stale on screen to correct.
 
 **Auth:** one shared family passcode held as a Worker secret, checked once,
 stored in a signed cookie (`HttpOnly; Secure; SameSite=Lax`, max-age one year).
@@ -1617,8 +1659,34 @@ Resolved:
   retrofit: a service worker precaches a static file, where a Worker-rendered
   page means caching a navigation response instead, and the shell already has
   nothing server-side to render. It carries no session state and no person's
-  name; every screen on it comes from `GET /api/me`. Neither choice precludes a
-  service worker, and this one makes it a shorter file. See §2, §7.
+  name; every screen on it comes from `GET /api/me`. The service worker built in
+  slice 24 keeps its offline copy of exactly that file, which is what the choice
+  bought. See §2, §7.
+- **What the app does with no signal: nothing but open (Q-23).** The service
+  worker keeps an offline copy of the shell and never a response under `/api/`.
+  A cached `GET /api/me` would put a plan on screen that a check-off on the
+  other phone already contradicts, and a passport showing a stamped month as
+  unstamped. An app that opens instantly and says it cannot reach Globetrotters
+  is honest; one that shows last Tuesday's tasks without saying so is not.
+  Queued offline check-offs were rejected with it: a write queue needs a
+  conflict story against §2's several-devices rule, for a family whose wifi
+  reaches the kitchen table.
+- **Network first, not cache first.** The worker asks the network for every
+  request it handles and falls back to the cache only when that fails. A
+  cache-first shell opens faster and can serve an online device an app that is
+  deploys behind, and — if anything about the cache is wrong — can leave a
+  phone unable to reach a site that is up. Neither failure is worth the
+  milliseconds: the shell is a small document on a fast edge, and the offline
+  copy exists for a driveway and a car, not for speed. See §2.
+- **The home-screen icon is drawn here (Q-24).** `public/icon.svg` in `--navy`
+  and `--paper`, with three PNGs rasterized from it for the manifests, rather
+  than artwork the owner has to produce in a tool they do not have. The install
+  offer needs no due-out and the repo needs no build step. See §2.
+- **A service worker version bump is part of the commit that changes an asset.**
+  There is no build step to compute a hash and no bundler to do it — buildless
+  is the trade, and this is what it costs. `test/pwa.test.js` catches a file
+  added and not precached; the bump itself is a directive in `CLAUDE.md`,
+  because nothing can test for it. See §2.
 - **Which route sets the person.** `PATCH /api/me`, not a second field on
   `POST /api/auth`. Identity is a property of "me", and keeping it off the auth
   route is what keeps §8's wall exemption a whole-route exemption rather than a

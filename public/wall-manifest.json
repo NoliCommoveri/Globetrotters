@@ -1,0 +1,17 @@
+{
+  "name": "Globetrotters — the wall",
+  "short_name": "The wall",
+  "description": "The kitchen screen: all three people, all month.",
+  "id": "/wall",
+  "start_url": "/wall",
+  "scope": "/wall",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#0F1C2E",
+  "theme_color": "#0F1C2E",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
