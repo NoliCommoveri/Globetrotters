@@ -35,8 +35,9 @@ Everyone has their own device. There is also a tablet on the kitchen wall.
 
 **Status:** partial · everything but the fonts. The Worker, the D1 binding and
 the deploy are built (slice 00); the auth path, the person cookie and the
-frontend shell are built (slice 03). The two self-hosted faces are outstanding
-on D-10 and the shell runs on a system stack until they land.
+frontend shell are built (slice 03); the install, the manifests and the shell
+cache are built (slice 24). The two self-hosted faces are outstanding on D-10
+and the shell runs on a system stack until they land.
 
 - Cloudflare Worker serving both the API (`/api/*`) and static assets
 - **D1** for all relational data
@@ -58,11 +59,51 @@ on D-10 and the shell runs on a system stack until they land.
   client route with no file behind it, and 404s for a path it does not know.
   `/admin` stays Worker-rendered, and the two have nothing to do with each
   other.
+- **Installed, not bookmarked.** Both documents carry a manifest and are
+  installed from Chrome's own **Install app**, which is what gives them a
+  launcher icon, a splash screen and no address bar. See *The install* below.
 - **Self-host the two fonts** in the Worker's assets. Buildless doesn't have to
   mean a third-party dependency on every page load. Until the licensed files
   arrive the stylesheet points `--font-display` and `--font-body` at the system
   stack; swapping them is an `@font-face` pair and two values, and a re-tune of
   the type scale.
+
+**The install.** Every device in this family is Android, so this is written
+against Chrome and there are no `apple-*` fallbacks anywhere in it — the two
+documents each carry a `<link rel="manifest">` and nothing else.
+
+- **Two manifests, two apps.** `public/manifest.webmanifest` launches the shell
+  at `/` in `standalone`, portrait; `public/wall.webmanifest` launches the wall
+  at `/wall` in `fullscreen`, landscape. Distinct `id` values are what make them
+  two installable apps rather than one — the wall tablet and a kid's phone are
+  not the same app, and the wall wants to come back after a reboot pointing at
+  the kitchen screen (§8).
+- **The icon is drawn, not exported.** `public/icon.svg` and its maskable pair
+  are hand-written SVG in the shell's own two colors. A vector icon is a text
+  file the repo can hold with no build step and no binary asset, and Chrome
+  takes it at any size. Replacing it with PNGs later changes two manifest
+  entries.
+- **The service worker caches the shell and nothing else.** `public/sw.js`
+  precaches the two documents, the stylesheet, the modules and the icons, and
+  serves them cache-first. **Nothing under `/api/` is cached, ever** — the app
+  is online-only for data, and it says so where the data would be. So it opens
+  from the home screen with no signal, on the same screens it always opens on,
+  and then tells you it cannot reach Globetrotters rather than showing a plan
+  that may be a week old.
+- **It answers navigations only for the routes the shell owns** — the same list
+  `src/index.js` serves the document for, plus `/wall`. `/admin` and
+  `/print/:planId` are Worker-rendered and pass straight through, because a
+  cached shell served over either one replaces the page with the family app.
+- **A change under `public/` is not deployed until `VERSION` in `sw.js` moves.**
+  An installed device reads the shell from its cache, and the browser rebuilds
+  that cache only when the bytes of `sw.js` change. Forgetting the bump means
+  the Worker serves the new file and every installed phone keeps the old one,
+  with `/admin/health` reporting the new version id all the while — the one
+  failure mode in this repo that looks exactly like success. See `CLAUDE.md`.
+- **A new worker activates out of sight.** The page asks for the swap, the
+  worker never takes it: the shell hands it over when the document is hidden and
+  reloads behind the user, so nothing reloads mid-tap. The wall, which is never
+  hidden and has nothing to lose, takes it immediately.
 
 **Auth:** one shared family passcode held as a Worker secret, checked once,
 stored in a signed cookie (`HttpOnly; Secure; SameSite=Lax`, max-age one year).
@@ -1617,8 +1658,31 @@ Resolved:
   retrofit: a service worker precaches a static file, where a Worker-rendered
   page means caching a navigation response instead, and the shell already has
   nothing server-side to render. It carries no session state and no person's
-  name; every screen on it comes from `GET /api/me`. Neither choice precludes a
-  service worker, and this one makes it a shorter file. See §2, §7.
+  name; every screen on it comes from `GET /api/me`. The service worker built in
+  slice 24 precaches exactly that file, which is what the choice bought. See §2,
+  §7.
+- **What the app does with no signal: nothing but open (Q-23).** The service
+  worker caches the shell and never a response under `/api/`. Caching the last
+  `GET /api/me` would put a plan on screen that a check-off on the other phone
+  already contradicts, and the app's one destructive-looking screen — the
+  passport — would show a month as unstamped that is stamped. An app that opens
+  instantly and says it cannot reach Globetrotters is honest; one that shows
+  last Tuesday's tasks without saying so is not. Queued offline check-offs were
+  rejected with it: a write queue needs a conflict story against §2's
+  several-devices rule, for a family whose wifi reaches the kitchen table.
+- **The home-screen icon is drawn in SVG (Q-24).** `public/icon.svg` and
+  `public/icon-maskable.svg`, hand-written in `--navy` and `--paper`, rather
+  than PNGs exported from a tool the owner does not have. Chrome on Android
+  accepts an SVG manifest icon at any size, so the install offer needs no binary
+  asset and no build step — and PNGs can replace it later by changing two
+  manifest entries. See §2.
+- **A service worker version bump is part of the commit that changes an asset.**
+  There is no build step to compute a hash and no bundler to do it — buildless
+  is the trade, and this is what it costs. An installed device is served from
+  the cache, so a deploy that forgets the bump reaches nobody while every
+  dashboard reports success. `test/pwa.test.js` catches a file added and not
+  precached; the bump itself is a directive in `CLAUDE.md`, because nothing can
+  test for it. See §2.
 - **Which route sets the person.** `PATCH /api/me`, not a second field on
   `POST /api/auth`. Identity is a property of "me", and keeping it off the auth
   route is what keeps §8's wall exemption a whole-route exemption rather than a

@@ -1,6 +1,6 @@
 # Slice index
 
-Twenty-four slices against `../design/DESIGN.md`. Each ends at a state you can open in a
+Twenty-five slices against `../design/DESIGN.md`. Each ends at a state you can open in a
 browser and judge.
 
 A build session takes the first slice not marked `built` and reads its file.
@@ -11,6 +11,8 @@ and slice 21 wrote the twelve owed to Ancient World and Conflict and Change. The
 **179 prompts, 165 of them drawable**. Slice 22 finished the country data: all nine focuses
 are recommended somewhere and every adorned country carries three affinities. Slice 23
 made the start week a choice rather than a calculation.
+Slice 24 made the two documents installable: they are apps on a home screen now, and they
+open with no signal.
 **No slice is outstanding.** Due-outs D-10 (the fonts) and D-14 (the wall tablet) remain,
 neither of them code.
 
@@ -40,6 +42,7 @@ neither of them code.
 | 21 | [The twelve owed](21-the-twelve-owed.md) | built | M | 20 | §13 |
 | 22 | [The affinities](22-affinities.md) | built | S | 11 | §9 |
 | 23 | [The start week](23-month-start.md) | built | M | 05 | §7 Month setup, §7 Plan, §6, §15 |
+| 24 | [The install](24-pwa.md) | built | M | 07 | §2 (the install and the shell cache), §15 |
 
 Statuses: `not started` · `in progress` · `built`.
 
@@ -242,6 +245,15 @@ next piece of country work: a recommendation is only visible where the shuffle c
 the country, and "Deal me three" needs two hooks. Qatar and Bangladesh are the best Who
 Gets What months in the library and neither could take a row, because neither has hooks.
 
+**Slice 24 is the other slice written after the build, and it is the only one that can
+break every installed device at once.** The shell is cached and served cache-first, so
+**a commit touching anything under `public/` bumps `VERSION` in `public/sw.js` or it does
+not reach a phone** — the deploy succeeds, `/admin/health` reports the new version id, and
+three home screens keep running last week's code. `test/pwa.test.js` catches a file added
+and not precached; the bump is a directive in `CLAUDE.md`, because nothing can test for it.
+Two questions were answered before the code: the app caches the shell and never `/api/`
+(Q-23), and the icon is drawn in SVG rather than owed by the owner (Q-24).
+
 **Slice 23 is the first slice written after the build, and it changes one column's rule.**
 `month_plans.start_date` was computed — the later of the month's first Monday and this
 week's — and is now chosen, with that computation as its default. The window is every
@@ -320,7 +332,7 @@ Every section of `DESIGN.md` and the slice that finishes it.
 | Design section | Finished by |
 |---|---|
 | §1 Scope | — (scope statement, nothing to build) |
-| §2 Stack | 03 — built but for the fonts (D-10) |
+| §2 Stack | 03, 24 — built but for the fonts (D-10) |
 | §3 Migrations | 02 — built |
 | §4 The task model | 11 — built |
 | §5 Schema | 11 — built |
