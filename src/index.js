@@ -305,14 +305,11 @@ async function print(request, env, url) {
 //
 // An explicit list, not a catch-all: a typo in a fetch URL should 404, not
 // return HTML that the client then fails to parse as JSON.
-// Exported because the service worker answers these same paths from its cache
-// and a route in one list and not the other works online and 404s offline
-// (public/sw.js). A test holds the two together.
-export const SHELL_PATHS = new Set(['/', '/settings', '/setup', '/passport']);
+const SHELL_PATHS = new Set(['/', '/settings', '/setup', '/passport']);
 
 // The one client route carrying an id. `/plan/12` is a screen; `/plan/twelve` is
 // a typo and 404s like any other.
-export const SHELL_PATTERNS = [/^\/plan\/\d+$/];
+const SHELL_PATTERNS = [/^\/plan\/\d+$/];
 
 const isShellPath = (pathname) =>
   SHELL_PATHS.has(pathname) || SHELL_PATTERNS.some((p) => p.test(pathname));
