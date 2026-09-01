@@ -266,7 +266,7 @@ into `docs/design/DESIGN.md` or `docs/design/LIBRARY_v3.md`.
 
 **Both documents install.** Chrome on Android offers **Install app** on `/` and
 on `/wall`, and the two install as two apps — the shell portrait and standalone,
-the wall fullscreen and landscape, off one drawn icon. `public/sw.js` keeps an
+the wall fullscreen and landscape, off one icon. `public/sw.js` keeps an
 offline copy of the shell so an installed phone opens with no signal; nothing
 under `/api/` is ever cached, so an app opened offline shows its own screens and
 says it cannot reach Globetrotters where the data goes, rather than a plan that

@@ -78,12 +78,15 @@ documents each carry a `<link rel="manifest">` and nothing else.
   two installable apps rather than one — the wall tablet and a kid's phone are
   not the same app, and the wall wants to come back after a reboot pointing at
   the kitchen screen (§8).
-- **The icon is drawn here.** `public/icon.svg` is the mark, in the shell's own
-  two colors, and it is the browser-tab icon; the three PNGs beside it are
-  rasterized from it, at 192 and 512 and once more inside the safe circle
-  Android crops a maskable icon to. The manifests point at the PNGs, because a
-  PNG at a declared pixel size is what Chrome's install offer is documented
-  against.
+- **The icon is the owner's mark.** A rounded-square badge — a globe with GT
+  across it — supplied as artwork rather than drawn in the repo. It ships as
+  three PNGs and no SVG: `icon-512.png` is the master, `icon-192.png` is
+  resampled from it and is also the browser-tab icon, and
+  `icon-maskable-512.png` sets the badge at 82% on a field of `--navy`, which is
+  the `background_color` both manifests declare, so a launcher can crop it to a
+  circle or a squircle and the splash screen stays one colour. All three are
+  256-colour palette PNGs: the badge is a rendered illustration, truecolour costs
+  430KB for the 512 alone, and the service worker precaches all three.
 - **The service worker is network-first, always.** `public/sw.js` asks the
   network for every request it handles and writes what comes back into its
   cache; the cache answers only when the network could not. So an online device
@@ -1690,10 +1693,11 @@ Resolved:
   phone unable to reach a site that is up. Neither failure is worth the
   milliseconds: the shell is a small document on a fast edge, and the offline
   copy exists for a driveway and a car, not for speed. See §2.
-- **The home-screen icon is drawn here (Q-24).** `public/icon.svg` in `--navy`
-  and `--paper`, with three PNGs rasterized from it for the manifests, rather
-  than artwork the owner has to produce in a tool they do not have. The install
-  offer needs no due-out and the repo needs no build step. See §2.
+- **The home-screen icon is the owner's artwork (Q-24).** Three PNGs, no SVG and
+  no build step: `icon-512.png` is the master and the other two are derived from
+  it. A supplied badge is a due-out that has been met rather than one that is
+  outstanding, and nothing about it needs a tool the owner does not have — the
+  files are in the repo. See §2.
 - **A service worker version bump is part of the commit that changes an asset.**
   There is no build step to compute a hash and no bundler to do it — buildless
   is the trade, and this is what it costs. `test/pwa.test.js` catches a file

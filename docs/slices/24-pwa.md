@@ -20,8 +20,8 @@ page.
 ## Due-outs
 
 None. D-10 (the fonts) and D-14 (the wall tablet) are outstanding and neither
-touches this: the icon is drawn in the shell's own two colors and carries no
-type, and the install works on whatever Android tablet D-14 turns out to name.
+touches this: the icon is artwork the owner supplied and is in the repo, and the
+install works on whatever Android tablet D-14 turns out to name.
 
 ## Open questions
 
@@ -29,8 +29,8 @@ Both answered before the code. See `../other/OPEN-QUESTIONS.md` Q-23, Q-24.
 
 - **Q-23 — what the app does with no signal.** It opens, and nothing more. The
   shell is kept; nothing under `/api/` ever is.
-- **Q-24 — where the icon comes from.** Drawn here: one SVG, three PNGs
-  rasterized from it. No due-out, no build step.
+- **Q-24 — where the icon comes from.** The owner's artwork, committed as three
+  PNGs. No build step.
 
 ## The rule
 
@@ -82,8 +82,9 @@ itself under a kid mid-tap is worse than a screen one launch behind.
 4. **`public/wall-manifest.json`** — the wall at `/wall`, fullscreen, landscape,
    a distinct `id`, so the tablet installs a second app rather than reopening
    the first.
-5. **`public/icon.svg`** and the three PNGs rasterized from it —
-   `icon-192.png`, `icon-512.png`, `icon-maskable-512.png`.
+5. **The three PNGs** — `icon-512.png`, the master; `icon-192.png`, resampled
+   from it and also the browser-tab icon; `icon-maskable-512.png`, the badge at
+   82% on `--navy` for a launcher that crops.
 6. **`public/index.html`, `public/wall.html`** — the manifest link, the icon
    link, the registration script; the three `apple-*` meta tags deleted.
 7. **`test/pwa.test.js`** — the precache list against the directory, the shell
