@@ -78,12 +78,15 @@ documents each carry a `<link rel="manifest">` and nothing else.
   two installable apps rather than one — the wall tablet and a kid's phone are
   not the same app, and the wall wants to come back after a reboot pointing at
   the kitchen screen (§8).
-- **The icon is drawn here.** `public/icon.svg` is the mark, in the shell's own
-  two colors, and it is the browser-tab icon; the three PNGs beside it are
-  rasterized from it, at 192 and 512 and once more inside the safe circle
-  Android crops a maskable icon to. The manifests point at the PNGs, because a
-  PNG at a declared pixel size is what Chrome's install offer is documented
-  against.
+- **The icon is the owner's mark.** A rounded-square badge — a globe with GT
+  across it — supplied as artwork rather than drawn in the repo. It ships as
+  three PNGs and no SVG: `icon-512.png` is the master, `icon-192.png` is
+  resampled from it and is also the browser-tab icon, and
+  `icon-maskable-512.png` sets the badge at 82% on a field of `--navy`, which is
+  the `background_color` both manifests declare, so a launcher can crop it to a
+  circle or a squircle and the splash screen stays one colour. All three are
+  256-colour palette PNGs: the badge is a rendered illustration, truecolour costs
+  430KB for the 512 alone, and the service worker precaches all three.
 - **The service worker is network-first, always.** `public/sw.js` asks the
   network for every request it handles and writes what comes back into its
   cache; the cache answers only when the network could not. So an online device
@@ -839,6 +842,13 @@ not: a mistyped fetch has to fail as a fetch rather than come back as HTML. The
 first two steps are not routes — a device with no passcode, or no person, gets
 that screen whatever the URL says.
 
+The header is the only persistent chrome and it carries three things: the
+**wordmark, which is the link back to This week**, the passport, and settings.
+Every screen but This week is a leaf — the passport, settings, setup, a plan —
+and an installed app has no address bar and no back button, so without the
+wordmark the only route home from a leaf is the one link that screen happens to
+render.
+
 The person switcher lives in **settings**, reached from the header, and it is
 the only control there. Nothing in the app renders a link to `/admin` (§3).
 
@@ -883,6 +893,11 @@ Used ~180 times per person. Everything else in the app is occasional.
 - **Progress, quietly:** the week ring in your ink, labelled with what's left rather
   than what's banked — **"3 left this week"**, not "2" — and "12 of 20" for the month.
   Same data, but one of them is an instruction.
+- **Print week**, at the far end of the progress row. The same `?week=N` document
+  Plan's per-week button opens, for the week the ring is counting (§16). It is on
+  both screens because they are asked at different moments: Plan is where a month
+  is printed the day it is drawn, and this is the screen that is open when
+  somebody standing at the table finds the week's sheets are not in the binder.
 
 ### Month setup
 
@@ -1678,10 +1693,11 @@ Resolved:
   phone unable to reach a site that is up. Neither failure is worth the
   milliseconds: the shell is a small document on a fast edge, and the offline
   copy exists for a driveway and a car, not for speed. See §2.
-- **The home-screen icon is drawn here (Q-24).** `public/icon.svg` in `--navy`
-  and `--paper`, with three PNGs rasterized from it for the manifests, rather
-  than artwork the owner has to produce in a tool they do not have. The install
-  offer needs no due-out and the repo needs no build step. See §2.
+- **The home-screen icon is the owner's artwork (Q-24).** Three PNGs, no SVG and
+  no build step: `icon-512.png` is the master and the other two are derived from
+  it. A supplied badge is a due-out that has been met rather than one that is
+  outstanding, and nothing about it needs a tool the owner does not have — the
+  files are in the repo. See §2.
 - **A service worker version bump is part of the commit that changes an asset.**
   There is no build step to compute a hash and no bundler to do it — buildless
   is the trade, and this is what it costs. `test/pwa.test.js` catches a file
@@ -1907,7 +1923,9 @@ takes one query to rebuild.
 So "when the month's tasks are finalized" is a **place, not an event** — and the
 place is a week, not a month. **Print week** sits beside every week's heading on
 **Plan**, which is the reveal on the day the month is drawn and the page anyone
-opens for the shape of the month afterwards.
+opens for the shape of the month afterwards, and once more on **This week**,
+beside the ring, for the current week only. Two buttons, one document: Plan
+prints any week ahead of time, This week prints the week somebody is standing in.
 
 **The trigger is the week because the sheets break on the week.** Printing all
 four weeks the day the month is drawn puts weeks 2 and 3 on paper a fortnight

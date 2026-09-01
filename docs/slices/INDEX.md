@@ -73,7 +73,8 @@ reading as drift. It also carries the worksheet layout editor, the one tab slice
 
 **Q-12 is answered — anyone prints, from any device — and the buttons then went
 where the sheets break rather than where the device is.** **Print week** sits
-beside each week's heading on Plan, and there is no month-wide button: printing
+beside each week's heading on Plan and beside the ring on This week, which
+prints the current week, and there is no month-wide button: printing
 all four weeks the day the month is drawn puts weeks 2 and 3 on paper a swap
 away from being wrong, and reprinting the month to fix one week reprints two
 that nothing changed.
@@ -256,8 +257,8 @@ miss it and an offline device keeps the old copy of what changed. `test/pwa.test
 catches a file added and not precached, and runs the worker in a stub scope to prove it
 leaves the Worker-rendered paths alone; the bump is a directive in `CLAUDE.md`, because
 nothing can test for it. Two questions were answered before the code: the app keeps the
-shell and never `/api/` (Q-23), and the icon is drawn here rather than owed by the owner
-(Q-24). The slice touches nothing under `src/`.
+shell and never `/api/` (Q-23), and the icon is the owner's artwork, committed as three
+PNGs with no SVG and no build step (Q-24). The slice touches nothing under `src/`.
 
 **Slice 23 is the first slice written after the build, and it changes one column's rule.**
 `month_plans.start_date` was computed — the later of the month's first Monday and this

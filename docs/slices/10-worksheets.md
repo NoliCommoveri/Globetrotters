@@ -114,7 +114,8 @@ sixteen.
 
 ### The buttons
 
-- **Print week ↗** beside every week's heading on **Plan**, opening
+- **Print week ↗** beside every week's heading on **Plan**, and once more on
+  **This week** at the end of the progress row for the current week, both opening
   `/print/:planId?week=N` in a new tab. There is no month-wide button: printing
   four weeks the day the month is drawn puts weeks 2 and 3 on paper a swap away
   from being wrong.
